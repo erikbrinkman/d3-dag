@@ -1,0 +1,29 @@
+{
+  "name": "d3-dag",
+  "version": "0.0.1",
+  "description": "Layout algorithms for visualizing directed acylic graphs.",
+  "keywords": [
+    "d3",
+    "d3-module",
+    "layout",
+    "dag",
+    "infovis"
+  ],
+  "author": "Erik Brinkman <erik.brinkman@gmail.com>",
+  "license": "MIT",
+  "main": "dist/d3-dag.js",
+  "module": "index",
+  "jsnext:main": "index",
+  "scripts": {
+    "pretest": "rm -rf dist && mkdir dist && rollup --banner \"$(preamble)\" -f umd -n d3 -o dist/d3-dag.js -- index.js",
+    "test": "tape 'test/**/*-test.js' && eslint index.js src",
+    "publish": "npm run test && uglifyjs -b beautify=false,preamble=\"'$(preamble)'\" dist/d3-dag.js -c -m -o dist/d3-dag.min.js"
+  },
+  "devDependencies": {
+    "eslint": "^5.0.1",
+    "package-preamble": "^0.1.0",
+    "rollup": "^0.62.0",
+    "tape": "^4.9.1",
+    "uglify-js": "^3.4.2"
+  }
+}

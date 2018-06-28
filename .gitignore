@@ -1,0 +1,9 @@
+# Node #
+########
+/dist/
+/node_modules
+
+# Vim #
+#######
+.*.swp
+.*.un~
