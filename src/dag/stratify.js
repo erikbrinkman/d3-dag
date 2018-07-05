@@ -1,3 +1,4 @@
+import {Dag} from "./index";
 import {Node} from "./node";
 import {default as verify} from "./verify";
 
@@ -30,7 +31,7 @@ export default function() {
 
     const msg = verify(nodes);
     if (msg) throw new Error(msg);
-    return nodes;
+    return new Dag(nodes);
   }
 
   dagStratify.id = function(x) {

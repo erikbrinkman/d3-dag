@@ -9,19 +9,19 @@ const [square, en, ex] = [
 ].map(file => d3_dag.dagStratify()(JSON.parse(fs.readFileSync(file))));
 
 tape("depth() is correct for square", test => {
-  const dag = d3_dag.dagDepth(square);
-  test.deepEquals(dag.map(n => n.depth), [0, 1, 1, 2]);
+  const dag = square.computeDepth();
+  test.deepEquals(dag.nodes().map(n => n.depth), [0, 1, 1, 2]);
   test.end()
 });
 
 tape("depth() is correct for N", test => {
-  const dag = d3_dag.dagDepth(en);
-  test.deepEquals(dag.map(n => n.depth), [0, 0, 1, 1]);
+  const dag = en.computeDepth();
+  test.deepEquals(dag.nodes().map(n => n.depth), [0, 0, 1, 1]);
   test.end()
 });
 
 tape("depth() is correct for X", test => {
-  const dag = d3_dag.dagDepth(ex);
-  test.deepEquals(dag.map(n => n.depth), [0, 1, 0, 2, 3, 3, 4]);
+  const dag = ex.computeDepth();
+  test.deepEquals(dag.nodes().map(n => n.depth), [0, 1, 0, 2, 3, 3, 4]);
   test.end()
 });

@@ -21,7 +21,7 @@ const squaresRoot = squares.filter(s => s.id === "3")[0];
 
 tape("dagHierarchy() parses a simple square", test => {
   const dag = d3_dag.dagHierarchy()(square);
-  const root = dag.filter(n => !n.parents.length)[0];
+  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "a");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);
@@ -30,7 +30,7 @@ tape("dagHierarchy() parses a simple square", test => {
 
 tape("dagHierarchy() parses multiple roots", test => {
   const dag = d3_dag.dagHierarchy()(...square.children);
-  const roots = dag.filter(n => !n.parents.length);
+  const roots = dag.nodes().filter(n => !n.parents.length);
   test.equal(roots[0].children[0], roots[1].children[0]);
   test.end();
 });
@@ -39,7 +39,7 @@ tape("dagHierarchy() parses the stratify square", test => {
   const dag = d3_dag.dagHierarchy()
     .children(d => d.parentIds.map(i => squares[parseInt(i)]))
     (squaresRoot);
-  const root = dag.filter(n => !n.parents.length)[0];
+  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "3");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);
@@ -51,7 +51,7 @@ tape("dagHierarchy() parses a square with reversed ids", test => {
     .id(d => 3 - parseInt(d.id))
     .children(d => d.parentIds.map(i => squares[parseInt(i)]))
     (squaresRoot);
-  const root = dag.filter(n => !n.parents.length)[0];
+  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "0");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);

@@ -1,6 +1,4 @@
-import {eachBefore} from "./dag/each";
-
-export default function topologicalSort(nodes) {
+export default function topologicalSort(dag) {
   let index = 0;
-  return eachBefore(nodes, n => n.value = index++);
+  return dag.eachBefore(n => n.value = index++);
 }

@@ -3,16 +3,16 @@ function equal(a, b) {
     Object.keys(a).every(k => a[k] === b[k]);
 }
 
-export default function(dag, other) {
-  if (dag.length !== other.length) return false;
+export default function(that) {
+  if (this.nodes().length !== that.nodes().length) return false;
   const info = {};
-  dag.forEach(node => {
+  this.nodes().forEach(node => {
     info[node.id] = [
       node.data,
       node.parents.reduce((m, p) => { m[p.id] = true; return m; }, {}),
       node.children.reduce((m, c) => { m[c.id] = true; return m; }, {})];
   });
-  return other.every(node => {
+  return that.nodes().every(node => {
     const [ddat, dparent, dchild] = info[node.id],
       parents = node.parents.reduce((m, p) => { m[p.id] = true; return m; }, {}),
       children = node.children.reduce((m, c) => { m[c.id] = true; return m; }, {});

@@ -1,3 +1,4 @@
+// FIXME Split up these definitions
 function relatives(ancestors, node) {
   const queue = [node],
     relatives = [],

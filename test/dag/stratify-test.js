@@ -6,7 +6,7 @@ const square = JSON.parse(fs.readFileSync("test/data/square.json"))
 
 tape("dagStratify() parses a square", test => {
   const dag = d3_dag.dagStratify()(square);
-  const root = dag.filter(n => !n.parents.length)[0];
+  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "0");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);
@@ -22,7 +22,7 @@ tape("dagStratify() parses a square with reversed ids", test => {
     .id(d => inv(d.id))
     .parentIds(d => d.parentIds.map(inv))
     (square);
-  const root = dag.filter(n => !n.parents.length)[0];
+  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "3");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);

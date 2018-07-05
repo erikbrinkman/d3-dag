@@ -1,3 +1,4 @@
+import {Dag} from "./index";
 import {Node} from "./node";
 import {default as verify} from "./verify";
 
@@ -34,7 +35,7 @@ export default function() {
     const nodes = Object.keys(mapping).map(did => mapping[did]);
     const msg = verify(nodes);
     if (msg) throw new Error(msg);
-    return nodes;
+    return new Dag(nodes);
   }
 
   dagHierarchy.id = function(x) {
