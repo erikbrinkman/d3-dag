@@ -28,5 +28,9 @@ export default function() {
     return dag;
   }
 
+  layout.size = function(x) {
+    return arguments.length ? ([width, height] = x, layout) : [width, height];
+  }
+
   return layout;
 }

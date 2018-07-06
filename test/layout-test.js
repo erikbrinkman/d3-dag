@@ -24,7 +24,7 @@ tape("dagLayout() works for X", test => {
   test.end();
 });
 
-tape("dagLayout() works for genealogy", test => {
-  d3_dag.dagLayout()(genealogy);
+tape("dagLayout() works for genealogy with size", test => {
+  d3_dag.dagLayout().size([100, 100])(genealogy);
   test.end();
 });
