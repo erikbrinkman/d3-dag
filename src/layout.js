@@ -13,14 +13,19 @@ export default function() {
     dagre.layout(g);
 
     // Rescale
-    dag.links().forEach(({source, target, points}) => {
-      // XXX This seems to be a bug in dagre
-      points[0].y = source.y;
-      points[points.length - 1].y = target.y;
-      points.forEach(p => {
-        p.x *= width / info.width;
-        p.y *= height / info.height;
-      });
+    dag.links().forEach(link => {
+      const { source, target, points } = link;
+      // XXX These are because of perceived bugs in dagre
+      if (points) {
+        points[0].y = source.y;
+        points[points.length - 1].y = target.y;
+        points.forEach(p => {
+          p.x *= width / info.width;
+          p.y *= height / info.height;
+        });
+      } else {
+        link.points = [{x: source.x, y: source.y}, {x: target.x, y: target.y}];
+      }
     });
     dag.nodes().forEach(node => {
       node.x *= width / info.width;
