@@ -21,6 +21,7 @@ Things that haven't been decided include:
    One possible alternative would be to implement the methods on the backend as always taking an array of root nodes.
    Each individual node's method can just call those with itself, and there can be a multi-node object that's returned at dag creation that functions much the way the DAG object does now, only it would only store the roots and delegate methods appropriately.
 3) This currently wraps `dagre`, but I'd prefer to reimplement a DAG layout to not require it as a dependency, and to allow more options about the different phases of DAG layout.
+   [This](http://www.it.usyd.edu.au/~shhong/fab.pdf) would be a good place to start.
    Ideally each phase will just be a callback, similar to the way other `d3` layouts are done.
 4) The general API and method names might change as better options make sense.
 
