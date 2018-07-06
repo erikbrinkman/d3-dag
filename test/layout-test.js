@@ -26,5 +26,6 @@ tape("dagLayout() works for X", test => {
 
 tape("dagLayout() works for genealogy with size", test => {
   d3_dag.dagLayout().size([100, 100])(genealogy);
+  test.ok(genealogy.links().every(link => link.points.every(({x, y}) => !Object.is(x, NaN) && !Object.is(y, NaN))))
   test.end();
 });
