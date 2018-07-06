@@ -1,6 +1,6 @@
 {
   "name": "d3-dag",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Layout algorithms for visualizing directed acylic graphs.",
   "keywords": [
     "d3",
@@ -9,9 +9,9 @@
     "dag",
     "infovis"
   ],
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/erikbrinkman/d3-dag.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erikbrinkman/d3-dag.git"
   },
   "author": "Erik Brinkman <erik.brinkman@gmail.com>",
   "license": "MIT",
