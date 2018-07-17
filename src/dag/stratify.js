@@ -1,10 +1,10 @@
-import Dag from "./index";
+import Dag from "./dag";
 import Node from "./node";
 import verify from "./verify";
 
 export default function() {
-  let id = defaultId,
-    parentIds = defaultParentIds;
+  let id = defaultId;
+  let parentIds = defaultParentIds;
 
   function dagStratify(data) {
     const nodes = data.map((datum, i) => {

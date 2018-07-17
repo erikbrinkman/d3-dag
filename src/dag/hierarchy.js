@@ -1,10 +1,10 @@
-import Dag from "./index";
+import Dag from "./dag";
 import Node from "./node";
 import verify from "./verify";
 
 export default function() {
-  let id = defaultId,
-    children = defaultChildren;
+  let id = defaultId;
+  let children = defaultChildren;
 
   function dagHierarchy(...data) {
     const mapping = {};

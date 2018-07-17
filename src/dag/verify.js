@@ -14,6 +14,8 @@ export default function(roots) {
   while (node = queue.pop()) {
     if (!explored[node.id]) {
       if (!node.parents.length && !root_ids[node.id]) throw new Error("dag contained other roots");
+      if (node.id.indexOf('\0') >= 0) throw new Error("node id contained null character");
+      if (!node.data) throw new Error("node contained falsy data");
       explored[node.id] = true;
       queue.push(...node.children, ...node.parents);
     }
