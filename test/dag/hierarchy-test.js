@@ -72,12 +72,12 @@ tape("dagHierarchy() fails without unique ids", test => {
   test.end();
 });
 
-tape("dagHierarchy() fails without root", test => {
+tape("dagHierarchy() fails with invalid root", test => {
   const one = {id: "1"},
     two = {id: "2"};
   one.children = [two];
   two.children = [one];
-  test.throws(() => d3_dag.dagHierarchy()(one), /no roots/);
+  test.throws(() => d3_dag.dagHierarchy()(one), /a root had a parent/);
   test.end();
 });
 

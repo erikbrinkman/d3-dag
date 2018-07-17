@@ -7,17 +7,19 @@ const [square, en, ex] = [
 ].map(file => d3_dag.dagStratify()(JSON.parse(fs.readFileSync(file))));
 
 tape("descendants() works on square", test => {
-  test.deepEquals(square.nodes()[0].descendants().map(n => n.id).sort(), square.nodes().map(n => n.id).sort());
-  test.deepEquals(square.nodes()[1].descendants().map(n => n.id).sort(), ["1", "3"]);
-  test.deepEquals(square.nodes()[2].descendants().map(n => n.id).sort(), ["2", "3"]);
-  test.deepEquals(square.nodes()[3].descendants().map(n => n.id).sort(), ["3"]);
+  const [zero, one, two, three] = square.nodes().sort((a, b) => a.id - b.id);
+  test.deepEquals(zero.descendants().map(n => n.id).sort(), square.nodes().map(n => n.id).sort());
+  test.deepEquals(one.descendants().map(n => n.id).sort(), ["1", "3"]);
+  test.deepEquals(two.descendants().map(n => n.id).sort(), ["2", "3"]);
+  test.deepEquals(three.descendants().map(n => n.id).sort(), ["3"]);
   test.end();
 });
 
 tape("ancestors() works on square", test => {
-  test.deepEquals(square.nodes()[0].ancestors().map(n => n.id).sort(), ["0"]);
-  test.deepEquals(square.nodes()[1].ancestors().map(n => n.id).sort(), ["0", "1"]);
-  test.deepEquals(square.nodes()[2].ancestors().map(n => n.id).sort(), ["0", "2"]);
-  test.deepEquals(square.nodes()[3].ancestors().map(n => n.id).sort(), square.nodes().map(n => n.id).sort());
+  const [zero, one, two, three] = square.nodes().sort((a, b) => a.id - b.id);
+  test.deepEquals(zero.ancestors().map(n => n.id).sort(), ["0"]);
+  test.deepEquals(one.ancestors().map(n => n.id).sort(), ["0", "1"]);
+  test.deepEquals(two.ancestors().map(n => n.id).sort(), ["0", "2"]);
+  test.deepEquals(three.ancestors().map(n => n.id).sort(), square.nodes().map(n => n.id).sort());
   test.end();
 });

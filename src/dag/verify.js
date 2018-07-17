@@ -1,27 +1,28 @@
-export default function(nodes) {
-  // Pass through empty
-  if (!nodes.length) return "";
+// FIXME Check all of these are thrown
+export default function(roots) {
+  // Verify dag is nonempty
+  if (!roots.length) throw new Error("dag contained no roots");
 
-  // Identify roots
-  const roots = nodes.filter(n => !n.parents.length),
-    seen = {},
-    past = {};
-  if (!roots.length) return "dag contained no roots";
+  // Check that roots are roots
+  if (roots.some(n => n.parents.length)) throw new Error("a root had a parent");
 
   // Test that dag is connected
-  const explored = {},
-    queue = nodes.slice(0, 1);
+  const explored = {};
+  const root_ids = roots.reduce((r, n) => { r[n.id] = true; return r; }, {});
+  const queue = roots.slice(0, 1);
   let node;
   while (node = queue.pop()) {
     if (!explored[node.id]) {
+      if (!node.parents.length && !root_ids[node.id]) throw new Error("dag contained other roots");
       explored[node.id] = true;
-      node.children.forEach(n => queue.push(n));
-      node.parents.forEach(n => queue.push(n));
+      queue.push(...node.children, ...node.parents);
     }
   }
-  if (Object.keys(explored).length !== nodes.length) return "dag was not connected";
+  if (roots.some(r => !explored[r.id])) throw new Error("dag was not connected");
 
   // Test that dag is free of cycles
+  const seen = {};
+  const past = {};
   let rec = undefined;
   function visit(node) {
     if (seen[node.id]) {
@@ -40,5 +41,5 @@ export default function(nodes) {
     }
   }
   const msg = roots.reduce((msg, r) => msg || visit(r), false);
-  return msg ? "dag contained a cycle: " + msg.reverse().join(" -> ") : "";
+  if (msg) throw new Error("dag contained a cycle: " + msg.reverse().join(" -> "));
 }

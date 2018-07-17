@@ -1,7 +1,23 @@
+// FIXME Test that reverse preserves data
 export default function() {
-  this.nodes().forEach(node => [node.parents, node.children] = [node.children, node.parents]);
-  if (this._links) {
-    this._links.forEach(link => [link.source, link.target] = [link.target, link.source]);
-  }
+  const newRoots = [];
+  this.eachDepth(node => {
+    [node.parents, node.children] = [node.children, node.parents];
+    node._newChildLinkData = {};
+    node.children.forEach(child => {
+      const datum = child._childLinkData[node.id];
+      if (datum) {
+        node._newChildLinkData[child.id] = datum;
+      }
+    });
+    if (!node.parents.length) {
+      newRoots.push(node);
+    }
+  });
+  this.roots = newRoots;
+  this.eachDepth(node => {
+    node._childLinkData = node._newChildLinkData;
+    delete node._newChildLinkData;
+  });
   return this;
 }

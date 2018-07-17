@@ -9,19 +9,25 @@ const [square, en, ex] = [
 ].map(file => d3_dag.dagStratify()(JSON.parse(fs.readFileSync(file))));
 
 tape("height() is correct for square", test => {
-  const dag = square.computeHeight();
-  test.deepEquals(dag.nodes().map(n => n.height), [2, 1, 1, 0]);
+  const dag = square.height();
+  test.deepEquals(
+    dag.nodes().sort((a, b) => a.id - b.id).map(n => n.height),
+    [2, 1, 1, 0]);
   test.end()
 });
 
 tape("height() is correct for N", test => {
-  const dag = en.computeHeight();
-  test.deepEquals(dag.nodes().map(n => n.height), [1, 1, 0, 0]);
+  const dag = en.height();
+  test.deepEquals(
+    dag.nodes().sort((a, b) => a.id - b.id).map(n => n.height),
+    [1, 1, 0, 0]);
   test.end()
 });
 
 tape("height() is correct for X", test => {
-  const dag = ex.computeHeight();
-  test.deepEquals(dag.nodes().map(n => n.height), [4, 3, 3, 2, 0, 1, 0]);
+  const dag = ex.height();
+  test.deepEquals(
+    dag.nodes().sort((a, b) => a.id - b.id).map(n => n.height),
+    [4, 3, 3, 2, 0, 1, 0]);
   test.end()
 });

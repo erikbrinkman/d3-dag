@@ -1,14 +1,14 @@
-import {Dag} from "./index";
-import {Node} from "./node";
-import {default as verify} from "./verify";
+import Dag from "./index";
+import Node from "./node";
+import verify from "./verify";
 
 export default function() {
   let id = defaultId,
     children = defaultChildren;
 
   function dagHierarchy(...data) {
-    const mapping = {},
-      queue = [];
+    const mapping = {};
+    const queue = [];
 
     function nodify(datum) {
       const did = id(datum).toString();
@@ -24,18 +24,15 @@ export default function() {
       return res;
     }
 
-    data.forEach(nodify);
-
+    const roots = data.map(nodify);
     let node;
     while (node = queue.pop()) {
       node.children = (children(node.data) || []).map(nodify);
       node.children.forEach(child => child.parents.push(node));
     }
 
-    const nodes = Object.keys(mapping).map(did => mapping[did]);
-    const msg = verify(nodes);
-    if (msg) throw new Error(msg);
-    return new Dag(nodes);
+    verify(roots);
+    return new Dag(roots);
   }
 
   dagHierarchy.id = function(x) {

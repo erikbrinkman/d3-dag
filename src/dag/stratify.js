@@ -1,6 +1,6 @@
-import {Dag} from "./index";
-import {Node} from "./node";
-import {default as verify} from "./verify";
+import Dag from "./index";
+import Node from "./node";
+import verify from "./verify";
 
 export default function() {
   let id = defaultId,
@@ -12,6 +12,7 @@ export default function() {
       node.children = [];
       return node;
     });
+
     const mapping = {};
     nodes.forEach(node => {
       if (mapping[node.id]) {
@@ -20,6 +21,8 @@ export default function() {
         mapping[node.id] = node;
       }
     });
+
+    const roots = [];
     nodes.forEach(node => {
       node.parents = (parentIds(node.data) || []).map(pid => {
         const parent = mapping[pid];
@@ -27,11 +30,13 @@ export default function() {
         parent.children.push(node);
         return parent;
       });
+      if (!node.parents.length) {
+        roots.push(node);
+      }
     });
 
-    const msg = verify(nodes);
-    if (msg) throw new Error(msg);
-    return new Dag(nodes);
+    verify(roots);
+    return new Dag(roots);
   }
 
   dagStratify.id = function(x) {
