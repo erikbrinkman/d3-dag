@@ -7,8 +7,10 @@ import eachBefore from "./eachBefore";
 import eachBreadth from "./eachBreadth";
 import eachDepth from "./eachDepth";
 import equals from "./equals";
+import every from "./every";
 import height from "./height";
 import links from "./links";
+import some from "./some";
 import sum from "./sum";
 
 export default function Node(id, data) {
@@ -47,7 +49,9 @@ Node.prototype = {
   eachBreadth: nodeEachBreadth,
   eachDepth: nodeEachDepth,
   equals: equals,
+  every: every,
   height: height,
   links: links,
+  some: some,
   sum: sum,
 };

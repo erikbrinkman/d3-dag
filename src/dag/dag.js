@@ -6,10 +6,12 @@ import eachBefore from "./eachBefore";
 import eachBreadth from "./eachBreadth";
 import eachDepth from "./eachDepth";
 import equals from "./equals";
+import every from "./every";
 import height from "./height";
 import links from "./links";
 import nodes from "./descendants";
 import reverse from "./reverse";
+import some from "./some";
 import sum from "./sum";
 
 export default function Dag(roots) {
@@ -59,9 +61,11 @@ Dag.prototype = {
   eachBreadth: dagEachBreadth,
   eachDepth: dagEachDepth,
   equals: equals,
+  every: every,
   height: height,
   links: links,
   nodes: nodes,
   reverse: reverse,
+  some: some,
   sum: sum,
 };
