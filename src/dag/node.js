@@ -1,3 +1,6 @@
+// FIXME Change eachDepth to each as its the best default if you don't care
+// FIXME Add other arraylike methods, map, reduce, or just say you should use nodes?
+// FIXME Same for links?
 import ancestors from "./ancestors";
 import count from "./count";
 import depth from "./depth";

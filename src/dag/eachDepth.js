@@ -1,3 +1,5 @@
+// FIXME Add integers to function for eaches
+// FIXME Do something about guarantees for queuing children vs calling function, seems like function should be called first
 export default function(nodes, func) {
   const queue = nodes.slice();
   const seen = {};

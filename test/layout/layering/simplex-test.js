@@ -14,7 +14,7 @@ function toLayers(dag) {
   return layers;
 }
 
-tape("longestPath() works for square", test => {
+tape("simplex() works for square", test => {
   d3_dag.dagLayerLongestPath(square);
   const layers = toLayers(square);
   test.equals(layers.length, 3);
@@ -22,12 +22,15 @@ tape("longestPath() works for square", test => {
   test.end();
 });
 
-tape("longestPath() works for grafo", test => {
-  d3_dag.dagLayerLongestPath(grafo);
+tape("simplex() works for grafo", test => {
+  d3_dag.dagLayerSimplex(grafo);
   const layers = toLayers(grafo);
-  test.equals(layers.length, 6);
+  test.equals(layers.length, 8);
+  const cost = grafo.links().reduce((s, l) => s + l.target.layer - l.source.layer, 0);
+  test.equals(cost, 30);
+  // XXX There are two possible configurations
   test.deepEquals(
     layers,
-    [[21], [12], [2, 4, 8], [0, 9, 11, 13, 19], [1, 3, 15, 16, 17, 18, 20], [5, 6, 7, 10, 14]]);
+    [[1, 8], [0, 14], [16, 21], [10, 12], [2, 4, 19], [9, 11, 13, 15, 17], [3, 6, 18, 20], [5, 7]]);
   test.end();
 });

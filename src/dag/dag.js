@@ -1,3 +1,4 @@
+// FIXME Change each depth to each as its the best default if you don't care
 import Node from "./node";
 import count from "./count";
 import depth from "./depth";
