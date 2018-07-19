@@ -1,3 +1,4 @@
+// FIXME Decide on name / prefix of layering, decross, cord or w/e
 import Node from "../dag/node";
 import longestPath from "./layering/longestPath";
 import spread from "./coords/spread";
@@ -68,6 +69,7 @@ export default function() {
     decross(layers);
     // Assign coordinates
     coords(layers, width, height);
+    // FIXME Maybe have coords be 1, 1 and do ratio here? / * width, height, yeah, do this
     // Remove dummy nodes and update edge data
     removeDummies(dag);
     return dag;

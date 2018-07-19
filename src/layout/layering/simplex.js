@@ -8,11 +8,7 @@ export default function(dag) {
   dag.eachDepth(node => {
     const nid = `\0${node.id}`;
     ints[nid] = 1;
-    constraints[nid] = {"min": 0};
-    const variable = variables[nid] = {
-      opt: node.parents.length - node.children.length,
-      [nid]: 1,
-    };
+    const variable = variables[nid] = {opt: node.parents.length - node.children.length};
     node.parents.forEach(parent => {
       variable[`${parent.id}\0${node.id}`] = 1;
     });
