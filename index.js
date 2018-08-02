@@ -1,4 +1,5 @@
 export { default as dagCoordsSpread } from "./src/layout/coords/spread";
+export { default as dagCoordsMinDist } from "./src/layout/coords/minDist";
 export { default as dagHierarchy } from "./src/dag/hierarchy";
 export { default as dagLayerLongestPath } from "./src/layout/layering/longestPath";
 export { default as dagLayerSimplex } from "./src/layout/layering/simplex";

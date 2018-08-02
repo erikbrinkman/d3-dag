@@ -65,12 +65,20 @@ export default function() {
     if (!dag.every(node => node.children.every(c => c.layer > node.layer))) throw new Error("layering wasn't proper");
     // Create layers
     const layers = createLayers(dag);
+    // Assign y
+    if (layers.length === 1) {
+      const [layer] = layers;
+      layer.forEach(n => n.y = height / 2);
+    } else {
+      layers.forEach((layer, i) => layer.forEach(n => n.y = height * i / (layers.length - 1)));
+    }
     // Minimize edge crossings
     decross(layers);
     // Assign coordinates
     coords(layers);
+    // Scale x
+    layers.forEach(layer => layer.forEach(n => n.x *= width));
     // Remove dummy nodes and update edge data
-    dag.eachDepth(n => { n.x *= width; n.y *= height; });
     removeDummies(dag);
     return dag;
   }
