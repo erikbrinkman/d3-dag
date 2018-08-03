@@ -1,7 +1,7 @@
-// FIXME Decide on name / prefix of layering, decross, cord or w/e
 import Node from "../dag/node";
-import longestPath from "./layering/longestPath";
-import spread from "./coords/spread";
+import simplex from "./layering/simplex";
+import opt from "./decross/opt";
+import minDist from "./coord/minDist";
 
 function createLayers(dag) {
   const layers = [];
@@ -49,12 +49,10 @@ function removeDummies(dag) {
   });
 }
 
-function noop() {}
-
 export default function() {
-  let layering = longestPath;
-  let decross = noop;
-  let coords = spread;
+  let layering = simplex;
+  let decross = opt;
+  let coord = minDist;
   let width = 1;
   let height = 1;
 
@@ -75,7 +73,7 @@ export default function() {
     // Minimize edge crossings
     decross(layers);
     // Assign coordinates
-    coords(layers);
+    coord(layers);
     // Scale x
     layers.forEach(layer => layer.forEach(n => n.x *= width));
     // Remove dummy nodes and update edge data
@@ -99,8 +97,8 @@ export default function() {
     return arguments.length ? (decross = x, layout) : decross;
   }
 
-  layout.coords = function(x) {
-    return arguments.length ? (coords = x, layout) : coords;
+  layout.coord = function(x) {
+    return arguments.length ? (coord = x, layout) : coord;
   }
 
   return layout;

@@ -4,6 +4,6 @@ export default function(func) {
     node._descendants = Object.assign({[node.id]: val}, ...node.children.map(c => c._descendants));
     node.value = Object.values(node._descendants).reduce((a, b) => a + b);
   });
-  this.eachDepth(n => delete n._descendants);
+  this.each(n => delete n._descendants);
   return this;
 }

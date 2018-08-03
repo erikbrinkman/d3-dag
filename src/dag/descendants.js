@@ -1,5 +1,5 @@
 export default function() {
   const descs = [];
-  this.eachDepth(n => descs.push(n));
+  this.each(n => descs.push(n));
   return descs;
 }

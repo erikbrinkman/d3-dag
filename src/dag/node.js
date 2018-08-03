@@ -1,4 +1,3 @@
-// FIXME Change eachDepth to each as its the best default if you don't care
 // FIXME Add other arraylike methods, map, reduce, or just say you should use nodes?
 // FIXME Same for links?
 import ancestors from "./ancestors";
@@ -47,10 +46,10 @@ Node.prototype = {
   count: count,
   depth: depth,
   descendants: descendants,
+  each: nodeEachDepth,
   eachAfter: eachAfter,
   eachBefore: eachBefore,
   eachBreadth: nodeEachBreadth,
-  eachDepth: nodeEachDepth,
   equals: equals,
   every: every,
   height: height,

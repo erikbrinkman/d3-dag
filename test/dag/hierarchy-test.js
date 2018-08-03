@@ -19,8 +19,8 @@ const square = {
 const squares = JSON.parse(fs.readFileSync("test/data/square.json"))
 const squaresRoot = squares.filter(s => s.id === "3")[0];
 
-tape("dagHierarchy() parses a simple square", test => {
-  const dag = d3_dag.dagHierarchy()(square);
+tape("dierarchy() parses a simple square", test => {
+  const dag = d3_dag.dierarchy()(square);
   const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "a");
   test.equal(root.children.length, 2);
@@ -28,15 +28,15 @@ tape("dagHierarchy() parses a simple square", test => {
   test.end();
 });
 
-tape("dagHierarchy() parses multiple roots", test => {
-  const dag = d3_dag.dagHierarchy()(...square.children);
+tape("dierarchy() parses multiple roots", test => {
+  const dag = d3_dag.dierarchy()(...square.children);
   const roots = dag.nodes().filter(n => !n.parents.length);
   test.equal(roots[0].children[0], roots[1].children[0]);
   test.end();
 });
 
-tape("dagHierarchy() parses the stratify square", test => {
-  const dag = d3_dag.dagHierarchy()
+tape("dierarchy() parses the stratify square", test => {
+  const dag = d3_dag.dierarchy()
     .children(d => d.parentIds.map(i => squares[parseInt(i)]))
     (squaresRoot);
   const root = dag.nodes().filter(n => !n.parents.length)[0];
@@ -46,8 +46,8 @@ tape("dagHierarchy() parses the stratify square", test => {
   test.end();
 });
 
-tape("dagHierarchy() parses a square with reversed ids", test => {
-  const dag = d3_dag.dagHierarchy()
+tape("dierarchy() parses a square with reversed ids", test => {
+  const dag = d3_dag.dierarchy()
     .id(d => 3 - parseInt(d.id))
     .children(d => d.parentIds.map(i => squares[parseInt(i)]))
     (squaresRoot);
@@ -58,7 +58,7 @@ tape("dagHierarchy() parses a square with reversed ids", test => {
   test.end();
 });
 
-tape("dagHierarchy() fails without unique ids", test => {
+tape("dierarchy() fails without unique ids", test => {
   const line = {
     id: "1",
     children: [{
@@ -68,20 +68,20 @@ tape("dagHierarchy() fails without unique ids", test => {
       }],
     }],
   };
-  test.throws(() => d3_dag.dagHierarchy()(line), /duplicate id/);
+  test.throws(() => d3_dag.dierarchy()(line), /duplicate id/);
   test.end();
 });
 
-tape("dagHierarchy() fails with invalid root", test => {
+tape("dierarchy() fails with invalid root", test => {
   const one = {id: "1"},
     two = {id: "2"};
   one.children = [two];
   two.children = [one];
-  test.throws(() => d3_dag.dagHierarchy()(one), /a root had a parent/);
+  test.throws(() => d3_dag.dierarchy()(one), /a root had a parent/);
   test.end();
 });
 
-tape("dagHierarchy() fails with disconnected", test => {
+tape("dierarchy() fails with disconnected", test => {
   const data = [
     {
       id: "1",
@@ -90,22 +90,22 @@ tape("dagHierarchy() fails with disconnected", test => {
       id: "2",
     },
   ];
-  test.throws(() => d3_dag.dagHierarchy()(...data), /not connected/);
+  test.throws(() => d3_dag.dierarchy()(...data), /not connected/);
   test.end();
 });
 
-tape("dagHierarchy() fails with cycle", test => {
+tape("dierarchy() fails with cycle", test => {
   const selfLoop = {id: "2"};
   selfLoop.children = [selfLoop];
   const line = {
     id: "1",
     children: [selfLoop],
   };
-  test.throws(() => d3_dag.dagHierarchy()(line), /cycle: 2 -> 2$/);
+  test.throws(() => d3_dag.dierarchy()(line), /cycle: 2 -> 2$/);
   test.end();
 });
 
-tape("dagHierarchy() fails with hard cycle", test => {
+tape("dierarchy() fails with hard cycle", test => {
   const loop = {
     id: "3",
     children: [{
@@ -121,6 +121,6 @@ tape("dagHierarchy() fails with hard cycle", test => {
       children: [loop],
     };
   loop.children[0].children = [loop];
-  test.throws(() => d3_dag.dagHierarchy()(roota, rootb), /cycle: 4 -> 3 -> 4$/);
+  test.throws(() => d3_dag.dierarchy()(roota, rootb), /cycle: 4 -> 3 -> 4$/);
   test.end();
 });

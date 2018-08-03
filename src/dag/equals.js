@@ -4,7 +4,7 @@ function intersect(obj, keys) {
 
 function info(dag_like) {
   const info = {};
-  dag_like.eachDepth(node => info[node.id] = [
+  dag_like.each(node => info[node.id] = [
     node.data,
     node.children.map(n => n.id),
     node.parents.map(n => n.id),

@@ -1,4 +1,3 @@
-// FIXME Change each depth to each as its the best default if you don't care
 import Node from "./node";
 import count from "./count";
 import depth from "./depth";
@@ -32,7 +31,7 @@ function dagEachBreadth(func) {
 function copy() {  // FIXME Also work for nodes
   const nodes = [];
   const cnodes = [];
-  this.eachDepth(node => {
+  this.each(node => {
     nodes.push(node);
     const cnode = new Node(node.id, node.data);
     cnodes.push(cnode);
@@ -57,10 +56,10 @@ Dag.prototype = {
   copy: copy,
   count: count,
   depth: depth,
+  each: dagEachDepth,
   eachAfter: eachAfter,
   eachBefore: eachBefore,
   eachBreadth: dagEachBreadth,
-  eachDepth: dagEachDepth,
   equals: equals,
   every: every,
   height: height,

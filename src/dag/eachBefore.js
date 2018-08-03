@@ -2,7 +2,7 @@ export default function(func) {
   // Cache this to save time on iteration
   const all = [];
   const seen = {};
-  this.eachDepth(node => {
+  this.each(node => {
     seen[node.id] = true;
     all.push(node);
   });

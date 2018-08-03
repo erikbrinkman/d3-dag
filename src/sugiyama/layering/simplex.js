@@ -5,7 +5,7 @@ export default function(dag) {
   const variables = {};
   const ints = {};
   const constraints = {};
-  dag.eachDepth(node => {
+  dag.each(node => {
     const nid = `\0${node.id}`;
     ints[nid] = 1;
     const variable = variables[nid] = {opt: node.parents.length - node.children.length};
@@ -26,5 +26,5 @@ export default function(dag) {
     ints: ints,
   });
   // lp solver doesn't assign some zeros
-  dag.eachDepth(n => n.layer = assignment[`\0${n.id}`] || 0);
+  dag.each(n => n.layer = assignment[`\0${n.id}`] || 0);
 }

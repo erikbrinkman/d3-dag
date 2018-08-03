@@ -8,6 +8,6 @@ export default function() {
       node.value = 1;
     }
   });
-  this.eachDepth(n => delete n._leaves);
+  this.each(n => delete n._leaves);
   return this;
 }

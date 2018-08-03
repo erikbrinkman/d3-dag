@@ -1,8 +1,8 @@
 const tape = require("tape"),
-  fs = require("fs"),
+  load = require("../load"),
   d3_dag = require("../../");
 
-const square = d3_dag.dagStratify()(JSON.parse(fs.readFileSync("test/data/square.json")));
+const square = load("square");
 
 tape("equals() works on square", test => {
   test.ok(square.equals(square));
@@ -10,7 +10,7 @@ tape("equals() works on square", test => {
 });
 
 tape("equals() fails on same sized line", test => {
-  const line = d3_dag.dagStratify()(square.nodes().map((_, i) => ({ id: i.toString(), parentIds: i ? [ (i - 1).toString() ] : [] })));
+  const line = d3_dag.dratify()(square.nodes().map((_, i) => ({ id: i.toString(), parentIds: i ? [ (i - 1).toString() ] : [] })));
   test.notOk(square.equals(line));
   test.end();
 });
