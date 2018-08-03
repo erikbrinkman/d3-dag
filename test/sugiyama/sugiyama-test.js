@@ -6,7 +6,7 @@ const tape = require("tape"),
 tape("sugiyama() works for grafo", test => {
   const dag = load("grafo");
   const nodesBefore = dag.nodes().length;
-  const layout = d3_dag.sugiyama().width(2).height(2);
+  const layout = d3_dag.sugiyama().size([2, 2]);;
   layout(dag);
   test.equals(dag.nodes().length, nodesBefore);
 

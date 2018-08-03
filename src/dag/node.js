@@ -1,5 +1,4 @@
-// FIXME Add other arraylike methods, map, reduce, or just say you should use nodes?
-// FIXME Same for links?
+// TODO Add reduce and eachLinks
 import ancestors from "./ancestors";
 import count from "./count";
 import depth from "./depth";

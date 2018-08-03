@@ -1,3 +1,4 @@
+// This function gets all of the ancestors of a node
 export default function() {
   const queue = [this];
   const ancests = [];

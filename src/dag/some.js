@@ -1,3 +1,4 @@
+// Return true if function returns true on at least one node
 const sentinel = {};
 
 export default function(func) {
@@ -8,7 +9,7 @@ export default function(func) {
       }
     });
   } catch (err) {
-    if (err == sentinel) {
+    if (err === sentinel) {
       return true;
     } else {
       throw err;

@@ -1,3 +1,4 @@
+// Assign nodes in each layer an x coordinate in [0, 1] that minimizes link distances
 import { default as qp } from "quadprog-js";
 
 function computeIndices(layers) {

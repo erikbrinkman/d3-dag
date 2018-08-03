@@ -1,3 +1,4 @@
+// Assign a layer value for each node that minimizes the number of dummy nodes that need to be added
 import solver from "javascript-lp-solver";
 
 export default function(dag) {

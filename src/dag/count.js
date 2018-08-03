@@ -1,3 +1,4 @@
+// This function sets the value of each descendant to be the number of its descendants including itself
 export default function() {
   this.eachAfter(node => {
     if (node.children.length) {

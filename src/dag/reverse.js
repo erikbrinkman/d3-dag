@@ -1,7 +1,10 @@
-// FIXME Test that reverse preserves data
+// Reverse a dag
 export default function() {
-  const newRoots = [];
-  this.each(node => {
+  const nodes = [];
+  this.each(n => nodes.push(n));
+  const newRoots = nodes.filter(n => !n.children.length);
+
+  nodes.forEach(node => {
     [node.parents, node.children] = [node.children, node.parents];
     node._newChildLinkData = {};
     node.children.forEach(child => {
@@ -10,12 +13,9 @@ export default function() {
         node._newChildLinkData[child.id] = datum;
       }
     });
-    if (!node.parents.length) {
-      newRoots.push(node);
-    }
   });
   this.roots = newRoots;
-  this.each(node => {
+  nodes.forEach(node => {
     node._childLinkData = node._newChildLinkData;
     delete node._newChildLinkData;
   });

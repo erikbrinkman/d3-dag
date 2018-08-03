@@ -1,3 +1,4 @@
+// Create a dag with stratified data
 import Dag from "./dag";
 import Node from "./node";
 import verify from "./verify";

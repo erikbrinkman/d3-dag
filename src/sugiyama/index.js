@@ -1,8 +1,13 @@
+// Compute a sugiyama layout for a dag assigning each node an x and y
+// coordinate, and optionally assigning each link a points field with the x and
+// y coordinates for intermediary stops on the edge.
 import Node from "../dag/node";
 import simplex from "./layering/simplex";
 import opt from "./decross/opt";
 import minDist from "./coord/minDist";
 
+// Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
+// layer is adjacent, and returns an array of each layer of nodes.
 function createLayers(dag) {
   const layers = [];
   dag.nodes().forEach(node => {
@@ -50,11 +55,11 @@ function removeDummies(dag) {
 }
 
 export default function() {
+  let width = 1;
+  let height = 1;
   let layering = simplex;
   let decross = opt;
   let coord = minDist;
-  let width = 1;
-  let height = 1;
 
   function layout(dag) {
     // Compute layers
@@ -81,12 +86,8 @@ export default function() {
     return dag;
   }
 
-  layout.width = function(x) {
-    return arguments.length ? (width = x, layout) : width;
-  }
-
-  layout.height = function(x) {
-    return arguments.length ? (height = x, layout) : height;
+  layout.size = function(x) {
+    return arguments.length ? ([width, height] = x, layout) : [width, height];
   }
 
   layout.layering = function(x) {

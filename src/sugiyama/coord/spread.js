@@ -1,3 +1,4 @@
+// Compute x coordinates for nodes that maximizes the spread of nodes in [0, 1]
 export default function(layers) {
   layers.forEach(layer => {
     if (layer.length === 1) {

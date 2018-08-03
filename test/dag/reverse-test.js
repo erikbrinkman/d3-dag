@@ -20,3 +20,15 @@ tape("reverse() inverse parent/child loading", test => {
   test.ok(strat.equals(rhier));
   test.end();
 });
+
+tape("reverse() preserves link data", test => {
+  const dag = d3_dag.dierarchy()({
+    id: "0",
+    children: [{id: "1"}],
+  });
+  const [{data}] = dag.links();
+  data.test = true;
+  dag.reverse();
+  test.ok(dag.links()[0].data.test);
+  test.end();
+});

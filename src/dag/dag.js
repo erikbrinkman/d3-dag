@@ -1,3 +1,4 @@
+// This contains the generic dag structure which holds the root nodes
 import Node from "./node";
 import count from "./count";
 import depth from "./depth";
@@ -28,7 +29,7 @@ function dagEachBreadth(func) {
   return this;
 }
 
-function copy() {  // FIXME Also work for nodes
+function copy() {  // FIXME Also work for nodes?
   const nodes = [];
   const cnodes = [];
   this.each(node => {

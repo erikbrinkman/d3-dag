@@ -1,3 +1,4 @@
+// Create a dag from a hierarchy representation
 import Dag from "./dag";
 import Node from "./node";
 import verify from "./verify";
@@ -6,7 +7,7 @@ export default function() {
   let id = defaultId;
   let children = defaultChildren;
 
-  function dagHierarchy(...data) {
+  function dierarchy(...data) {
     const mapping = {};
     const queue = [];
 
@@ -35,15 +36,15 @@ export default function() {
     return new Dag(roots);
   }
 
-  dagHierarchy.id = function(x) {
-    return arguments.length ? (id = x, dagHierarchy) : id;
+  dierarchy.id = function(x) {
+    return arguments.length ? (id = x, dierarchy) : id;
   }
 
-  dagHierarchy.children = function(x) {
-    return arguments.length ? (children = x, dagHierarchy) : children;
+  dierarchy.children = function(x) {
+    return arguments.length ? (children = x, dierarchy) : children;
   }
 
-  return dagHierarchy;
+  return dierarchy;
 }
 
 function defaultId(d) {

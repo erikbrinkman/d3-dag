@@ -1,3 +1,5 @@
+// Compare two dag_like objects for equality
+// For dags to be equal, the data the nodes contain must be identical (===)
 function intersect(obj, keys) {
   return keys.filter(k => obj[k]).reduce((o, k) => { o[k] = true; return o; }, {});
 }

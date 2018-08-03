@@ -1,3 +1,4 @@
+// Order nodes such that the total number of crossings is minimized
 import solver from "javascript-lp-solver";
 
 const crossings = "crossings";

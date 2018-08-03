@@ -1,4 +1,5 @@
 // FIXME Check all of these are thrown
+// Verify that a dag meets all criteria for validity
 export default function(roots) {
   // Verify dag is nonempty
   if (!roots.length) throw new Error("dag contained no roots");
@@ -14,7 +15,7 @@ export default function(roots) {
   while (node = queue.pop()) {
     if (!explored[node.id]) {
       if (!node.parents.length && !root_ids[node.id]) throw new Error("dag contained other roots");
-      if (node.id.indexOf('\0') >= 0) throw new Error("node id contained null character");
+      if (node.id.indexOf("\0") >= 0) throw new Error("node id contained null character");
       if (!node.data) throw new Error("node contained falsy data");
       explored[node.id] = true;
       queue.push(...node.children, ...node.parents);
