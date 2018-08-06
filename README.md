@@ -418,9 +418,13 @@ Several built-in coord accessors are provided for use with [*sugiyama*](#sugiyam
 Positions nodes in each layer so that they are the most spread out.
 This coordinate assignment is not particularly pleasing, but it is fast.
 
-<a name="coordminDist" href="#coordMinDist">#</a> d3.**coordMinDist**(*layers*)
+<a name="coordMinDist" href="#coordMinDist">#</a> d3.**coordMinDist**(*layers*)
 
 Positions nodes in each layer so that the total distance of edges is minimized.
+
+<a name="coordMinCurve" href="#coordMinCurve">#</a> d3.**coordMinCurve**(*layers*)
+
+Positions nodes in each layer so that the curves between nodes is minimized, and ties are broken by minimum distance.
 
 
 ## To Do

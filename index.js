@@ -1,5 +1,6 @@
 export { default as coordSpread } from "./src/sugiyama/coord/spread";
 export { default as coordMinDist } from "./src/sugiyama/coord/minDist";
+export { default as coordMinCurve } from "./src/sugiyama/coord/minCurve";
 export { default as dierarchy } from "./src/dag/hierarchy";
 export { default as layeringLongestPath } from "./src/sugiyama/layering/longestPath";
 export { default as layeringSimplex } from "./src/sugiyama/layering/simplex";

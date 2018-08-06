@@ -54,6 +54,9 @@ function removeDummies(dag) {
   });
 }
 
+// FIXME Is the API for the decross and coord functions?
+// Maybe next pointers would be better to define layer ordering?
+
 export default function() {
   let width = 1;
   let height = 1;
@@ -75,12 +78,17 @@ export default function() {
     } else {
       layers.forEach((layer, i) => layer.forEach(n => n.y = height * i / (layers.length - 1)));
     }
-    // Minimize edge crossings
-    decross(layers);
-    // Assign coordinates
-    coord(layers);
-    // Scale x
-    layers.forEach(layer => layer.forEach(n => n.x *= width));
+    if (layers.every(l => l.length === 1)) {
+      // Next steps aren't necessary
+      layers.forEach(([n]) => n.x = width / 2);
+    } else {
+      // Minimize edge crossings
+      decross(layers);
+      // Assign coordinates
+      coord(layers);
+      // Scale x
+      layers.forEach(layer => layer.forEach(n => n.x *= width));
+    }
     // Remove dummy nodes and update edge data
     removeDummies(dag);
     return dag;
