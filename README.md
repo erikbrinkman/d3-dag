@@ -393,15 +393,21 @@ Several built-in layering accessors are provided for use with [*sugiyama*](#sugi
 Assigns every node a layer such that the longest path (the height) is minimized.
 This often results in very wide graphs, but is fast.
 
+![longest path example](examples/longestPath.png)
+
 <a name="layeringCoffmanGraham" href="#layeringCoffmanGraham">#</a> d3.**layeringCoffmanGraham**(*dag*)
 
 Assigns every node a layer such that the width, not counting dummy nodes, is less than the square root of the total number of nodes.
 This can result in tall graphs, but is also reasonably fast.
 
+![Coffman-Graham example](examples/coffmanGraham.png)
+
 <a name="layeringSimplex" href="#layeringSimplex">#</a> d3.**layeringSimplex**(*dag*)
 
 Assigns every node a layer such that the number of dummy nodes, nodes inserted on edges that span more than one layer, is minimized.
 This is often known as the network simplex layering from [Gansner et al. [1993]](https://www.graphviz.org/Documentation/TSE93.pdf).
+
+![simplex example](examples/simplex.png)
 
 
 ### Sugiyama Decross Accessors
@@ -423,9 +429,13 @@ Several built-in coord accessors are provided for use with [*sugiyama*](#sugiyam
 Positions nodes in each layer so that they are the most spread out.
 This coordinate assignment is not particularly pleasing, but it is fast.
 
+![spread example](examples/spread.png)
+
 <a name="coordMinDist" href="#coordMinDist">#</a> d3.**coordMinDist**(*layers*)
 
 Positions nodes in each layer so that the total distance of edges is minimized.
+
+![min dist example](examples/simplex.png)
 
 <a name="coordMinCurve" href="#coordMinCurve">#</a> d3.**coordMinCurve**(*layers*)
 
@@ -455,6 +465,9 @@ These sections are organized by type.
   - Optimal, version of layer opt, but only for bottom in two layer
 - Add greedy coordinate assignment method, and remove spread assignment.
   First, position nodes at mean of neighbors, then shift nodes to have spacing according to priority.
+- Fix min curve to make sure that matrix is positive definite.
+  This requires the same fix that dummy angle does, which is tie breaking when problem is underspecified.
+  This might be better fixed by just optimizing both curves and distance, but downweighting distance by some amount enough to make the change somewhat insignificant.
 - Add min dummy angle for coord assign.
   Problem is underspecified if only minimizing dummy angle, so also need to minimize some other relevant proxy on undefined nodes, e.g. distance.
 
