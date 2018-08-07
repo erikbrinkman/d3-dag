@@ -391,7 +391,12 @@ Several built-in layering accessors are provided for use with [*sugiyama*](#sugi
 <a name="layeringLongestPath" href="#layeringLongestPath">#</a> d3.**layeringLongestPath**(*dag*)
 
 Assigns every node a layer such that the longest path (the height) is minimized.
-This often results in very wide graphs.
+This often results in very wide graphs, but is fast.
+
+<a name="layeringCoffmanGraham" href="#layeringCoffmanGraham">#</a> d3.**layeringCoffmanGraham**(*dag*)
+
+Assigns every node a layer such that the width, not counting dummy nodes, is less than the square root of the total number of nodes.
+This can result in tall graphs, but is also reasonably fast.
 
 <a name="layeringSimplex" href="#layeringSimplex">#</a> d3.**layeringSimplex**(*dag*)
 
@@ -437,9 +442,10 @@ Positions nodes in each layer so that the curves between nodes is minimized, and
   See [this](http://www.it.usyd.edu.au/~shhong/fab.pdf) for potential options.
 - Decide if special dag structure is better, or enshrined dummy nodes are better.
   Enshrined dummy nodes might allow a structure that doesn't include parent references, and instead only uses children, which will allow for more interesting dag overlaps / manipulation of the structure on the fly.
-- Add min manhattan dist instead of min euclidian dist for coord (using linprog)
 - Add min dummy angle for coord assign?
-  Should work to minimize the squared x difference between neighboring dummy links.
-  Also could min abs distance?
+  Problem is underspecified if only minimizing dummy angle, so also need to minimize some other relevant proxy on undefined nodes, e.g. distance.
 - Topological sort layout, that allows minimizing the number of crossings, and gives edges points (along diagonal?).
   Could similarly just do a topological layering for sugiyama.
+- DAG Size?
+- Coffman-Graham with width specificity, or potential one that trys to binary search area?
+  Specifying width would probably require changing the API to make d3.layeringX be a function call that can be fluently chained to add parameters in d3 fashion.
