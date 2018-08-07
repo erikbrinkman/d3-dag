@@ -434,18 +434,45 @@ Positions nodes in each layer so that the curves between nodes is minimized, and
 
 ## To Do
 
-- Add source code links.
-- Should coords take a separation function?
-- Are names good? Polluting namespace? More complex names?
-- Make functions mimic hierarchy more, like adding a distance between nodes at the same height?
-- Implement less accurate methods that will run in faster time.
-  See [this](http://www.it.usyd.edu.au/~shhong/fab.pdf) for potential options.
-- Decide if special dag structure is better, or enshrined dummy nodes are better.
-  Enshrined dummy nodes might allow a structure that doesn't include parent references, and instead only uses children, which will allow for more interesting dag overlaps / manipulation of the structure on the fly.
-- Add min dummy angle for coord assign?
-  Problem is underspecified if only minimizing dummy angle, so also need to minimize some other relevant proxy on undefined nodes, e.g. distance.
-- Topological sort layout, that allows minimizing the number of crossings, and gives edges points (along diagonal?).
-  Could similarly just do a topological layering for sugiyama.
-- DAG Size?
-- Coffman-Graham with width specificity, or potential one that trys to binary search area?
+There are many things that could be done.
+These sections are organized by type.
+
+
+### Sugiyama Additions
+
+- Modify Coffman-Graham to have width specificity, or potentially one that tries to binary search by area?
   Specifying width would probably require changing the API to make d3.layeringX be a function call that can be fluently chained to add parameters in d3 fashion.
+- Add topological sort layering.
+  This would have poor height, but minimum width not including dummy nodes.
+  Layout might work if crossings are minimized.
+- Add layer sweep algorithm for crossing minimization.
+  This algorithm has many possible implementations or parameters.
+  First, there could be a flag to do greedy swaps to reduce crossing count at each layer.
+  Second, there are several possible methods for how to do the layer optimization:
+  - None
+  - Mean (Barycenter)
+  - Median
+  - Optimal, version of layer opt, but only for bottom in two layer
+- Add greedy coordinate assignment method, and remove spread assignment.
+  First, position nodes at mean of neighbors, then shift nodes to have spacing according to priority.
+- Add min dummy angle for coord assign.
+  Problem is underspecified if only minimizing dummy angle, so also need to minimize some other relevant proxy on undefined nodes, e.g. distance.
+
+
+### General Additions
+
+- Add source code links.
+- Coords should take separation function, that should be a parameter to sugiyama to match d3.hierarchy.
+
+
+### Design Additions
+
+- Should names / prefixes be changed?
+  Some seem like they'd be hard to discover or are too abbreviated.
+- Decide if special dag structure is better, or enshrined dummy nodes, or manditory single root node is better.
+  Enshrined dummy nodes would be like a root node, but that algorithms knew to ignore.
+  They might allow a structure that doesn't include parent references, and instead only uses children, which will allow for more interesting dag overlaps / manipulation of the structure on the fly.
+- More generally, should DAGs simply be local objects, i.e. fit the node interface and only have a children.
+  A dag would then be defined as the whole structure achieved by continually calling children without having a duplicate id.
+  The duplicate id could be checked by then verifying that the node objects compare with strict equality and throwing an exception otherwise.
+- Should DAG also have a size method?
