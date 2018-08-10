@@ -5,13 +5,12 @@ const tape = require("tape"),
 
 tape("sugiyama() works for grafo", test => {
   const dag = load("grafo");
-  const nodesBefore = dag.nodes().length;
-  const layout = d3_dag.sugiyama().size([2, 2]);;
-  layout(dag);
-  test.equals(dag.nodes().length, nodesBefore);
+  const nodesBefore = dag.descendants().length;
+  d3_dag.sugiyama().size([2, 2])(dag);
+  test.equals(dag.descendants().length, nodesBefore);
 
   d3_dag.layeringLongestPath(dag);
-  const maxLayer = dag.nodes().reduce((l, n) => Math.max(l, n.layer), 0);
+  const maxLayer = dag.descendants().reduce((l, n) => Math.max(l, n.layer), 0);
   test.equals(maxLayer, 5);
   const layers = new Array(6).fill(null).map(() => []);
   dag.each(n => layers[n.layer].push(parseInt(n.id)));

@@ -28,7 +28,7 @@ tape("reverse() preserves link data", test => {
   });
   const [{data}] = dag.links();
   data.test = true;
-  dag.reverse();
-  test.ok(dag.links()[0].data.test);
+  const rev = dag.reverse();
+  test.ok(rev.links()[0].data.test);
   test.end();
 });

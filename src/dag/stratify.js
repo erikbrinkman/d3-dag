@@ -1,16 +1,15 @@
 // Create a dag with stratified data
-import Dag from "./dag";
-import Node from "./node";
+import Node from ".";
 import verify from "./verify";
 
 export default function() {
   let id = defaultId;
   let parentIds = defaultParentIds;
 
-  function dagStratify(data) {
+  function dratify(data) {
+    if (!data.length) throw new Error("can't stratify empty data");
     const nodes = data.map((datum, i) => {
       const node = new Node(id(datum, i).toString(), datum);
-      node.children = [];
       return node;
     });
 
@@ -23,32 +22,33 @@ export default function() {
       }
     });
 
-    const roots = [];
+    const root = new Node(undefined, undefined);
     nodes.forEach(node => {
-      node.parents = (parentIds(node.data) || []).map(pid => {
+      const pids = parentIds(node.data) || [];
+      pids.forEach(pid => {
         const parent = mapping[pid];
         if (!parent) throw new Error("missing id: " + pid);
         parent.children.push(node);
         return parent;
       });
-      if (!node.parents.length) {
-        roots.push(node);
+      if (!pids.length) {
+        root.children.push(node);
       }
     });
 
-    verify(roots);
-    return new Dag(roots);
+    verify(root);
+    return root.children.length > 1 ? root : root.children[0];
   }
 
-  dagStratify.id = function(x) {
-    return arguments.length ? (id = x, dagStratify) : id;
+  dratify.id = function(x) {
+    return arguments.length ? (id = x, dratify) : id;
   }
 
-  dagStratify.parentIds = function(x) {
-    return arguments.length ? (parentIds = x, dagStratify) : parentIds;
+  dratify.parentIds = function(x) {
+    return arguments.length ? (parentIds = x, dratify) : parentIds;
   }
 
-  return dagStratify;
+  return dratify;
 }
 
 function defaultId(d) {

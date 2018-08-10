@@ -7,17 +7,17 @@ tape("topologicalSort() works for line", test => {
   const dag = d3_dag.dratify()(data);
   const res = d3_dag.topologicalSort(dag);
   test.equal(dag, res);
-  test.ok(dag.nodes().every(n => n.id === n.value.toString()));
+  test.ok(dag.descendants().every(n => n.id === n.value.toString()));
   test.end();
 });
 
 tape("topologicalSort() works for square", test => {
   const dag = d3_dag.topologicalSort(load("square"));
   const values = new Array(4);
-  dag.nodes().forEach(n => values[n.value] = true);
+  dag.descendants().forEach(n => values[n.value] = true);
   test.ok(values.every(v => v));
 
-  const [zero, one, two, three] = dag.nodes().sort((a, b) => a.id - b.id);
+  const [zero, one, two, three] = dag.descendants().sort((a, b) => a.id - b.id);
   test.equal(zero.value, 0);
   test.deepEqual([one, two].map(d => d.value).sort(), [1, 2]);
   test.equal(three.value, 3);
@@ -28,10 +28,10 @@ tape("topologicalSort() works for N", test => {
   const dag = d3_dag.topologicalSort(load("en"));
 
   const values = new Array(4);
-  dag.nodes().forEach(n => values[n.value] = true)
+  dag.descendants().forEach(n => values[n.value] = true)
   test.ok(values.every(v => v));
 
-  const [zero, one, two, three] = dag.nodes().sort((a, b) => a.id - b.id);
+  const [zero, one, two, three] = dag.descendants().sort((a, b) => a.id - b.id);
   test.notEqual(-1, [0, 1, 2].indexOf(zero.value));
   test.notEqual(-1, [0, 1].indexOf(one.value));
   test.notEqual(-1, [2, 3].indexOf(two.value));

@@ -1,6 +1,5 @@
 // Create a dag from a hierarchy representation
-import Dag from "./dag";
-import Node from "./node";
+import Node from ".";
 import verify from "./verify";
 
 export default function() {
@@ -8,6 +7,7 @@ export default function() {
   let children = defaultChildren;
 
   function dierarchy(...data) {
+    if (!data.length) throw new Error("must pass at least one node");
     const mapping = {};
     const queue = [];
 
@@ -16,7 +16,6 @@ export default function() {
       let res;
       if (!(res = mapping[did])) {
         res = new Node(did, datum);
-        res.parents = [];
         queue.push(res);
         mapping[did] = res;
       } else if (datum !== res.data) {
@@ -25,15 +24,15 @@ export default function() {
       return res;
     }
 
-    const roots = data.map(nodify);
+    const root = new Node(undefined, undefined);
     let node;
+    root.children = data.map(nodify);
     while (node = queue.pop()) {
       node.children = (children(node.data) || []).map(nodify);
-      node.children.forEach(child => child.parents.push(node));
     }
 
-    verify(roots);
-    return new Dag(roots);
+    verify(root);
+    return root.children.length > 1 ? root : root.children[0];
   }
 
   dierarchy.id = function(x) {

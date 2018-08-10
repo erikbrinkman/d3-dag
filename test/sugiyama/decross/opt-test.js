@@ -9,7 +9,7 @@ tape("decrossOpt() works for grafo", test => {
     .coord(d3_dag.coordSpread)
     .size([140, 5]);
   const dag = layout(load("grafo"));
-  const ordered = dag.nodes().sort((a, b) => a.id - b.id);
+  const ordered = dag.descendants().sort((a, b) => a.id - b.id);
   test.deepEquals(
     ordered.map(n => n.y),
     [3, 4, 2, 4, 2, 5, 5, 5, 2, 3, 5, 3, 1, 3, 5, 4, 4, 4, 4, 3, 4, 0]);

@@ -183,13 +183,25 @@ function parentIds(d) {
 
 ### DAG
 
-The returned DAG has many useful methods.
+A DAG is simply a collection of nodes, defined by every reachable child node from the current returned node.
+If a DAG contains multiple roots, then the returned node will be special in that it will have an `undefined` `id` and `data` and will be ignored when calling normal mewthods.
+Each child of this special returned node will be one of the roots of the graph.
+Each child node on its own will function as a valid DAG with a single root.
+Each node has the following properties:
 
-<a name="d_nodes" href="#d_nodes">#</a> dag.**nodes**()
+* *node*.id - a unique string identification for each node.
+  This is necessary in order to check if two nodes are identical.
+  For internal purposes, ids may not contain the null character (`'\0'`).
+* *node*.data - the associated data as specified in the constructor.
+* *node*.children - an array of all child nodes. Empty if this is a leaf.
 
-Returns a array of every [node](#node) in the DAG.
+Each node also has the following methods.
 
-<a name="d_links" href="#d_links">#</a> dag.**links**()
+<a name="descendants" href="#descendants">#</a> node.**descendants**()
+
+Return an array of all descendant nodes of this node.
+
+<a name="links" href="#links">#</a> node.**links**()
 
 Returns an array of every link in the DAG.
 Each link has the following properties:
@@ -199,138 +211,61 @@ Each link has the following properties:
 * *link*.data - an object with data attached to the link.
   Modifying this object will preserve the data for that link.
 
-<a name="d_copy" href="#d_copy">#</a> dag.**copy**()
+<a name="copy" href="#copy">#</a> node.**copy**()
 
 Copies the dag structure and returns it.
 The data associated with every node is not copied.
 
-<a name="d_reverse" href="#d_reverse">#</a> dag.**reverse**()
+<a name="reverse" href="#reverse">#</a> node.**reverse**()
 
-Reverse the dag in place.
+Copy and reverse the DAG, returning a new root or pseudo root depending on if there are multiple roots.
 This is particularly useful if you want to use the opposite accessor in DAG creation.
 For example, if your data set has childIds, you can use *dratify* with parentIds and simply reverse the DAG post creation.
 
-<a name="d_count" href="#d_count">#</a> dag.**count**()
+<a name="count" href="#count">#</a> node.**count**()
 
 Set the *value* of each node to be the number of descendants including itself.
 
-<a name="d_depth" href="#d_depth">#</a> dag.**depth**()
+<a name="depth" href="#depth">#</a> node.**depth**()
 
 Set the *value* of each node to be zero if its a root node, or the greatest distance to any root node for other nodes.
 
-<a name="d_height" href="#d_height">#</a> dag.**height**()
+<a name="height" href="#height">#</a> node.**height**()
 
 Set the *value* of each node to be zero if its a leaf node, or the greatest distance to any leaf node for other nodes.
 
-<a name="d_each" href="#d_each">#</a> dag.**each**(*function*)
+<a name="each" href="#each">#</a> node.**each**(*function*)
 
 Invoke the specified *function* on each node in an arbitrary order.
 
-<a name="d_eacha" href="#d_eacha">#</a> dag.**eachAfter**(*function*)
+<a name="eacha" href="#eacha">#</a> node.**eachAfter**(*function*)
 
 Invoke the specified *function* on each node such a node is called before any of its parents.
 
-<a name="d_eachb" href="#d_eachb">#</a> dag.**eachBefore**(*function*)
+<a name="eachb" href="#eachb">#</a> node.**eachBefore**(*function*)
 
 Invoke the specified *function* on each node such a node is called before any of its children.
 
-<a name="d_eachbr" href="#d_eachbr">#</a> dag.**eachBreadth**(*function*)
+<a name="eachbr" href="#eachbr">#</a> node.**eachBreadth**(*function*)
 
 Invoke the specified *function* on each node in breadth first order.
 
-<a name="d_equals" href="#d_equals">#</a> dag.**equals**(*that*)
+<a name="equals" href="#equals">#</a> node.**equals**(*that*)
 
 Return `true` if *this* dag is equal to *that* dag.
 For two dags to be equal the data must be strictly (`===`) equal.
 
-<a name="d_every" href="#d_every">#</a> dag.**every**(*function*)
+<a name="every" href="#every">#</a> node.**every**(*function*)
 
 Return `true` if *function* returns true for every node in the DAG.
 
-<a name="d_some" href="#d_some">#</a> dag.**some**(*function*)
+<a name="some" href="#some">#</a> node.**some**(*function*)
 
 Return `true` if *function* returns true for at least one node in the DAG.
 
-<a name="d_sum" href="#d_sum">#</a> dag.**sum**(*function*)
+<a name="sum" href="#sum">#</a> node.**sum**(*function*)
 
 Set the *value* of every node to be the sum of this *functions* return value on the current node's data and the value of every descendant's return value.
-
-
-### Node
-
-DAGs are collection of nodes.
-Many DAG methods either return or operate on these individual node objects.
-Each node has the following properties:
-
-* *node*.id - a unique string identification for each node.
-  This is necessary in order to check if two nodes are identical.
-  For internal purposes, ids may not contain the null character (`'\0'`).
-* *node*.data - the associated data as specified in the constructor.
-* *node*.parents - an array of all parent nodes. Empty if this is a root.
-* *node*.children - an array of all child nodes. Empty if this is a leaf.
-
-Each node also has the following methods.
-Functions that are identical to DAG functions operate as if this node were the single root of the DAG.
-
-<a name="n_ancestors" href="#n_ancestors">#</a> node.**ancestors**()
-
-Return an array of all ancestor nodes of this node.
-
-<a name="n_descendants" href="#n_descendants">#</a> node.**descendants**()
-
-Return an array of all descendant nodes of this node.
-
-<a name="n_childLinks" href="#n_childLinks">#</a> node.**childLinks**()
-
-Return an array of all *links* to this node's children.
-
-<a name="n_links" href="#n_links">#</a> node.**links**()
-
-See <a href="d_links">DAG</a>.
-
-<a name="n_count" href="#n_count">#</a> node.**count**()
-
-See <a href="d_count">DAG</a>.
-
-<a name="n_depth" href="#n_depth">#</a> node.**depth**()
-
-See <a href="d_depth">DAG</a>.
-
-<a name="n_height" href="#n_height">#</a> node.**height**()
-
-See <a href="d_height">DAG</a>.
-
-<a name="n_each" href="#n_each">#</a> node.**each**(*function*)
-
-See <a href="d_each">DAG</a>.
-
-<a name="n_eacha" href="#n_eacha">#</a> node.**eachAfter**(*function*)
-
-See <a href="d_eacha">DAG</a>.
-
-<a name="n_eachb" href="#n_eachb">#</a> node.**eachBefore**(*function*)
-
-See <a href="d_eachb">DAG</a>.
-
-<a name="n_eachbr" href="#n_eachbr">#</a> node.**eachBreadth**(*function*)
-
-See <a href="d_eachbr">DAG</a>.
-
-<a name="n_equals" href="#n_equals">#</a> node.**equals**(*that*)
-
-See <a href="d_equals">DAG</a>.
-
-<a name="n_every" href="#n_every">#</a> node.**every**(*function*)
-
-See <a href="d_every">DAG</a>.
-
-<a name="n_some" href="#n_some">#</a> node.**some**(*function*)
-
-See <a href="d_some">DAG</a>.
-
-<a name="n_sum" href="#n_sum">#</a> node.**sum**(*function*)
-
-See <a href="d_sum">DAG</a>.
 
 
 ### Topological Sort
@@ -339,7 +274,7 @@ This function allows getting a topological ordering of the nodes.
 
 <a name="topologicalSort" href="#topologicalSort">#</a> d3.**topologicalSort**()
 
-Assigns each node a `value` from `0` to `dag.nodes().length - 1` corresponding to a valid topological sort.
+Assigns each node a `value` from `0` to `node.descendants().length - 1` corresponding to a valid topological sort.
 
 
 ### Sugiyama

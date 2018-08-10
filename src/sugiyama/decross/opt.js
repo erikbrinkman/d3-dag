@@ -83,4 +83,6 @@ export default function(layers) {
 
   // Sort layers
   layers.forEach(layer => layer.sort((n1, n2) => ((n1.id > n2.id) || -1) * (ordering[key(n1, n2)] || -1)));
+
+  return layers;
 }

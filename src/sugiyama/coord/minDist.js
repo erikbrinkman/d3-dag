@@ -1,22 +1,13 @@
 // Assign nodes in each layer an x coordinate in [0, 1] that minimizes link distances
-import { init, solve, layout } from "./minQp";
-
-export function minDistQ(layers, indices, Q) {
-  layers.forEach(layer => layer.forEach(parent => {
-    const pind = indices[parent.id];
-    parent.children.forEach(child => {
-      const cind = indices[child.id];
-      Q[pind][pind] += 1;
-      Q[cind][cind] += 1;
-      Q[pind][cind] -= 1;
-      Q[cind][pind] -= 1;
-    });
-  }));
-}
+import { indices, sep, minDist, solve, layout } from "./minQp";
 
 export default function(layers) {
-  const [indices, , Q, c, A, b] = init(layers);
-  minDistQ(layers, indices, Q);  
+  const inds = indices(layers);
+  const n = Object.keys(inds).length;
+  const Q = minDist(layers, inds);
+  const c = new Array(n).fill(0);
+  const [A, b] = sep(layers, inds);
   const solution = solve(Q, c, A, b);
-  layout(layers, indices, solution);
+  layout(layers, inds, solution);
+  return layers;
 }

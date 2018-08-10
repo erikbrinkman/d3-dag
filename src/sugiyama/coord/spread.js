@@ -8,4 +8,5 @@ export default function(layers) {
       layer.forEach((n, j) => n.x = j / (layer.length - 1));
     }
   });
+  return layers;
 }

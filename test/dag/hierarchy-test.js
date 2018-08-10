@@ -20,8 +20,7 @@ const squares = JSON.parse(fs.readFileSync("test/data/square.json"))
 const squaresRoot = squares.filter(s => s.id === "3")[0];
 
 tape("dierarchy() parses a simple square", test => {
-  const dag = d3_dag.dierarchy()(square);
-  const root = dag.nodes().filter(n => !n.parents.length)[0];
+  const root = d3_dag.dierarchy()(square);
   test.equal(root.id, "a");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);
@@ -29,17 +28,16 @@ tape("dierarchy() parses a simple square", test => {
 });
 
 tape("dierarchy() parses multiple roots", test => {
-  const dag = d3_dag.dierarchy()(...square.children);
-  const roots = dag.nodes().filter(n => !n.parents.length);
+  const root = d3_dag.dierarchy()(...square.children);
+  const roots = root.children;
   test.equal(roots[0].children[0], roots[1].children[0]);
   test.end();
 });
 
 tape("dierarchy() parses the stratify square", test => {
-  const dag = d3_dag.dierarchy()
+  const root = d3_dag.dierarchy()
     .children(d => d.parentIds.map(i => squares[parseInt(i)]))
     (squaresRoot);
-  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "3");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);
@@ -47,11 +45,10 @@ tape("dierarchy() parses the stratify square", test => {
 });
 
 tape("dierarchy() parses a square with reversed ids", test => {
-  const dag = d3_dag.dierarchy()
+  const root = d3_dag.dierarchy()
     .id(d => 3 - parseInt(d.id))
     .children(d => d.parentIds.map(i => squares[parseInt(i)]))
     (squaresRoot);
-  const root = dag.nodes().filter(n => !n.parents.length)[0];
   test.equal(root.id, "0");
   test.equal(root.children.length, 2);
   test.equal(root.children[0].children[0], root.children[1].children[0]);
@@ -77,7 +74,7 @@ tape("dierarchy() fails with invalid root", test => {
     two = {id: "2"};
   one.children = [two];
   two.children = [one];
-  test.throws(() => d3_dag.dierarchy()(one), /a root had a parent/);
+  test.throws(() => d3_dag.dierarchy()(one), /dag contained a cycle: 1 -> 2 -> 1/);
   test.end();
 });
 
@@ -122,5 +119,20 @@ tape("dierarchy() fails with hard cycle", test => {
     };
   loop.children[0].children = [loop];
   test.throws(() => d3_dag.dierarchy()(roota, rootb), /cycle: 4 -> 3 -> 4$/);
+  test.end();
+});
+
+tape("dierarchy() fails with null id", test => {
+  test.throws(() => d3_dag.dierarchy()({id: "\0"}), /id contained null character/);
+  test.end();
+});
+
+tape("dierarchy() fails with null data", test => {
+  test.throws(() => d3_dag.dierarchy().id(() => "0").children(() => [])(null), /falsy data/);
+  test.end();
+});
+
+tape("dierarchy() fails with false data", test => {
+  test.throws(() => d3_dag.dierarchy().id(() => "0").children(() => [])(false), /falsy data/);
   test.end();
 });

@@ -1,27 +1,11 @@
-// FIXME Check all of these are thrown
 // Verify that a dag meets all criteria for validity
-export default function(roots) {
-  // Verify dag is nonempty
-  if (!roots.length) throw new Error("dag contained no roots");
+// Note, this is written such that root must be a dummy node, i.e. have an undefined id
+export default function(root) {
+  // Test that dummy criteria is met
+  if (root.id !== undefined) throw new Error("invalid format for verification");
 
-  // Check that roots are roots
-  if (roots.some(n => n.parents.length)) throw new Error("a root had a parent");
-
-  // Test that dag is connected
-  const explored = {};
-  const root_ids = roots.reduce((r, n) => { r[n.id] = true; return r; }, {});
-  const queue = roots.slice(0, 1);
-  let node;
-  while (node = queue.pop()) {
-    if (!explored[node.id]) {
-      if (!node.parents.length && !root_ids[node.id]) throw new Error("dag contained other roots");
-      if (node.id.indexOf("\0") >= 0) throw new Error("node id contained null character");
-      if (!node.data) throw new Error("node contained falsy data");
-      explored[node.id] = true;
-      queue.push(...node.children, ...node.parents);
-    }
-  }
-  if (roots.some(r => !explored[r.id])) throw new Error("dag was not connected");
+  // Test that there are roots
+  if (!root.children.length) throw new Error("no roots");
 
   // Test that dag is free of cycles
   const seen = {};
@@ -43,6 +27,21 @@ export default function(roots) {
       return result;
     }
   }
-  const msg = roots.reduce((msg, r) => msg || visit(r), false);
+  const msg = root.id === undefined ? root.children.reduce((msg, r) => msg || visit(r), false) : visit(root);
   if (msg) throw new Error("dag contained a cycle: " + msg.reverse().join(" -> "));
+
+  // Test that all nodes are valid
+  root.each(node => {
+      if (node.id.indexOf("\0") >= 0) throw new Error("node id contained null character");
+      if (!node.data) throw new Error("node contained falsy data");
+  });
+
+  // Test that dag is connected
+  const rootsSpan = root.children.map(r => r.descendants().map(n => n.id));
+  const connected = root.children.length === 1 || rootsSpan.every((rootSpan, i) => {
+    const otherSpan = {};
+    rootsSpan.slice(0, i).concat(rootsSpan.slice(i + 1)).forEach(span => span.forEach(n => otherSpan[n] = true));
+    return rootSpan.some(n => otherSpan[n]);
+  });
+  if (!connected) throw new Error("dag was not connected");
 }

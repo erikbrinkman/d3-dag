@@ -1,21 +1,23 @@
 // Assign coords to layers by solving a QP
-import { default as qp } from "quadprog-js";
+import qp from "quadprog-js";
 
-export function init(layers) {
-  const indices = {};
+// Compute indices used to index arrays
+export function indices(layers) {
+  const inds = {};
   let i = 0;
-  layers.forEach(layer => layer.forEach(n => indices[n.id] = i++));
-  const n = i;
+  layers.forEach(layer => layer.forEach(n => inds[n.id] = i++));
+  return inds;
+}
 
-  const Q = new Array(n).fill(null).map(() => new Array(n).fill(0));
-  const c = new Array(n).fill(0);
+// Compute constraint arrays for layer separation
+export function sep(layers, inds) {
+  const n = Object.keys(inds).length;
   const A = [];
   const b = [];
 
-  // Make sure elements on the same row are at least one apart
   layers.forEach(layer => layer.slice(0, layer.length - 1).forEach((first, i) => {
-    const find = indices[first.id];
-    const sind = indices[layer[i + 1].id];
+    const find = inds[first.id];
+    const sind = inds[layer[i + 1].id];
     const cons = new Array(n).fill(0);
     cons[find] = 1;
     cons[sind] = -1;
@@ -24,9 +26,56 @@ export function init(layers) {
     b.push(-1);
   }));
 
-  return [indices, n, Q, c, A, b];
+  return [A, b];
 }
 
+// Compute Q that minimizes edge distance squared
+export function minDist(layers, inds) {
+  const n = Object.keys(inds).length;
+  const Q = new Array(n).fill(null).map(() => new Array(n).fill(0));
+  layers.forEach(layer => layer.forEach(parent => {
+    const pind = inds[parent.id];
+    parent.children.forEach(child => {
+      const cind = inds[child.id];
+      Q[pind][pind] += 1;
+      Q[cind][cind] += 1;
+      Q[pind][cind] -= 1;
+      Q[cind][pind] -= 1;
+    });
+  }));
+  return Q;
+}
+
+// Compute Q that minimizes curve of edges through a node
+// This Q will be singular, so it's necessary to combine with another Q
+export function minBend(layers, inds, filter = () => true) {
+  const n = Object.keys(inds).length;
+  const Q = new Array(n).fill(null).map(() => new Array(n).fill(0));
+  layers.forEach(layer => layer.forEach(parent => {
+    const pind = inds[parent.id];
+    parent.children.forEach(node => {
+      if (filter(node)) {
+        const nind = inds[node.id];
+        node.children.forEach(child => {
+          const cind = inds[child.id];
+          Q[nind][nind] += 4;
+          Q[pind][pind] += 1;
+          Q[cind][cind] += 1;
+
+          Q[pind][cind] += 1;
+          Q[cind][pind] += 1;
+          Q[nind][pind] -= 2;
+          Q[pind][nind] -= 2;
+          Q[nind][cind] -= 2;
+          Q[cind][nind] -= 2;
+        });
+      }
+    });
+  }));
+  return Q;
+}
+
+// Solve for node positions
 export function solve(Q, c, A, b, meq = 0) {
   // Arbitrarily set the last coordinate to 0, which makes the formula valid
   // This is simpler than special casing the last element
@@ -43,9 +92,10 @@ export function solve(Q, c, A, b, meq = 0) {
   return solution
 }
 
-export function layout(layers, indices, solution) {
+// Assign nodes x in [0, 1] based on solution
+export function layout(layers, inds, solution) {
   // Rescale to be in [0, 1]
   const min = Math.min(...solution);
   const span = Math.max(...solution) - min;
-  layers.forEach(layer => layer.forEach(n => n.x = (solution[indices[n.id]] - min) / span));
+  layers.forEach(layer => layer.forEach(n => n.x = (solution[inds[n.id]] - min) / span));
 }

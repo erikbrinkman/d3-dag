@@ -1,7 +1,7 @@
 // Compute a sugiyama layout for a dag assigning each node an x and y
 // coordinate, and optionally assigning each link a points field with the x and
 // y coordinates for intermediary stops on the edge.
-import Node from "../dag/node";
+import Node from "../dag";
 import simplex from "./layering/simplex";
 import opt from "./decross/opt";
 import minDist from "./coord/minDist";
@@ -10,22 +10,18 @@ import minDist from "./coord/minDist";
 // layer is adjacent, and returns an array of each layer of nodes.
 function createLayers(dag) {
   const layers = [];
-  dag.nodes().forEach(node => {
+  dag.descendants().forEach(node => {
     const layer = layers[node.layer] || (layers[node.layer] = []);
     layer.push(node);
     node.children = node.children.map(child => {
       if (child.layer > node.layer + 1) {
-        child.parents.splice(child.parents.indexOf(node), 1);
         let last = child;
         for (let l = child.layer - 1; l > node.layer; l--) {
           const dummy = new Node(`${node.id}\0${child.id}\0${l}`, undefined);
           dummy.children = [last];
-          dummy.parents = [];
           (layers[l] || (layers[l] = [])).push(dummy);
-          last.parents.push(dummy);
           last = dummy;
         }
-        last.parents.push(node);
         return last;
       } else {
         return child;
@@ -36,25 +32,22 @@ function createLayers(dag) {
 }
 
 function removeDummies(dag) {
-  dag.nodes().forEach(node => {
-    if (!node.data) {
-      const [parent] = node.parents;
-      const [child] = node.children;
-
-      parent.children[parent.children.indexOf(node)] = child;
-      child.parents[child.parents.indexOf(node)] = parent;
-
-      const edgeData = parent._childLinkData[node.id] || {};
-      delete parent._childLinkData[node.id];
-      const points = edgeData.points || (edgeData.points = []);
-      points.push({x: node.x, y: node.y}, ...((node._childLinkData[child.id] || {}).points || []));
-      const oldData = parent._childLinkData[child.id] || (parent._childLinkData[child.id] = {});
-      Object.assign(oldData, edgeData);
+  dag.each(node => {
+    if (node.data) {
+      node.children = node.children.map(child => {
+        const points = [];
+        while (!child.data) {
+          points.push({x: child.x, y: child.y});
+          [child] = child.children;
+        }
+        (node._childLinkData[child.id] || (node._childLinkData[child.id] = {})).points = points;
+        return child
+      });
     }
   });
 }
 
-// FIXME Is the API for the decross and coord functions?
+// TODO Is the best API for the decross and coord functions?
 // Maybe next pointers would be better to define layer ordering?
 
 export default function() {

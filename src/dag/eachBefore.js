@@ -1,16 +1,9 @@
 // Call a function on each node such that a node is called before any of its children
 export default function(func) {
-  // Cache this to save time on iteration
-  const all = [];
-  const seen = {};
-  this.each(node => {
-    seen[node.id] = true;
-    all.push(node);
-  });
+  this.each(n => n._num_before = 0);
+  this.each(n => n.children.forEach(c => ++c._num_before));
 
-  const queue = [];
-  all.forEach(n => n._num_before = n.parents.reduce((t, p) => t + seen[p.id], 0) || queue.push(n));
-
+  const queue = this.roots();
   let node;
   let i = 0;
   while (node = queue.pop()) {
@@ -18,6 +11,6 @@ export default function(func) {
     node.children.forEach(n => --n._num_before || queue.push(n));
   }
 
-  all.forEach(n => delete n._num_before);
+  this.each(n => delete n._num_before);
   return this;
 }

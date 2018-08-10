@@ -1,3 +1,4 @@
+export { default as coordMinBend } from "./src/sugiyama/coord/minBend";
 export { default as coordMinCurve } from "./src/sugiyama/coord/minCurve";
 export { default as coordMinDist } from "./src/sugiyama/coord/minDist";
 export { default as coordSpread } from "./src/sugiyama/coord/spread";

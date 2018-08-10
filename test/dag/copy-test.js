@@ -4,11 +4,10 @@ const tape = require("tape"),
 
 
 tape("copy() works on square", test => {
-  const dag = load("square");
-  const copy = dag.copy();
-  test.ok(dag.equals(copy));
-  test.ok(dag.nodes().every((n, i) => n !== copy.nodes()[i]));
-  test.ok(dag.nodes().every((n, i) => n.children !== copy.nodes()[i].children));
-  test.ok(dag.nodes().every((n, i) => n.parents !== copy.nodes()[i].parents));
+  const root = load("square");
+  const copy = root.copy();
+  test.ok(root.equals(copy));
+  test.ok(root.descendants().every((n, i) => n !== copy.descendants()[i]));
+  test.ok(root.descendants().every((n, i) => n.children !== copy.descendants()[i].children));
   test.end();
 });
