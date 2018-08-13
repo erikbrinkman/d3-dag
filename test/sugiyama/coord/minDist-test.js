@@ -5,9 +5,9 @@ const tape = require("tape"),
 
 tape("coordMinDist() works for square", test => {
   const layout = d3_dag.sugiyama()
-    .layering(d3_dag.layeringSimplex)
-    .decross(d3_dag.decrossOpt)
-    .coord(d3_dag.coordMinDist)
+    .layering(d3_dag.layeringSimplex())
+    .decross(d3_dag.decrossOpt())
+    .coord(d3_dag.coordMinDist())
     .size([2, 2]);
   const dag = layout(load("square"));
   const [zero, one, two, three] = dag.descendants().sort((a, b) => a.id - b.id);
@@ -20,9 +20,9 @@ tape("coordMinDist() works for square", test => {
 
 tape("coordMinDist() works for ex", test => {
   const layout = d3_dag.sugiyama()
-    .layering(d3_dag.layeringSimplex)
-    .decross(d3_dag.decrossOpt)
-    .coord(d3_dag.coordMinDist)
+    .layering(d3_dag.layeringSimplex())
+    .decross(d3_dag.decrossOpt())
+    .coord(d3_dag.coordMinDist())
     .size([2, 4]);
   const dag = layout(load("ex"));
   const ordered = dag.descendants().sort((a, b) => a.id - b.id);

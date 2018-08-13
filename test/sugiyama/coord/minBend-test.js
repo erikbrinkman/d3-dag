@@ -8,9 +8,9 @@ const eps = 0.001;
 
 tape("coordMinBend() works for triangle", test => {
   const layout = d3_dag.sugiyama()
-    .layering(d3_dag.layeringSimplex)
-    .decross(d3_dag.decrossOpt)
-    .coord(d3_dag.coordMinBend)
+    .layering(d3_dag.layeringSimplex())
+    .decross(d3_dag.decrossOpt())
+    .coord(d3_dag.coordMinBend())
     .size([1, 2]);
   const dag = layout(load("triangle"));
   const [zero, one, two] = dag.descendants().sort((a, b) => a.id - b.id).map(n => n.x);

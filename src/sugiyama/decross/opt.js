@@ -62,27 +62,32 @@ function cross(model, layer) {
   }));
 }
 
-export default function(layers) {
-  // Initialize model
-  const model = {
-    optimize: crossings,
-    optType: "min",
-    constraints: {},
-    variables: {},
-    ints: {},
-  };
+export default function() {
+  
+  function decrossOpt(layers) {
+    // Initialize model
+    const model = {
+      optimize: crossings,
+      optType: "min",
+      constraints: {},
+      variables: {},
+      ints: {},
+    };
 
-  // Add variables and permutation invariants
-  layers.forEach(lay => perms(model, lay));
+    // Add variables and permutation invariants
+    layers.forEach(lay => perms(model, lay));
 
-  // Add crossing minimization
-  layers.slice(0, layers.length - 1).forEach(lay => cross(model, lay));
+    // Add crossing minimization
+    layers.slice(0, layers.length - 1).forEach(lay => cross(model, lay));
 
-  // Solve objective
-  const ordering = solver.Solve(model);
+    // Solve objective
+    const ordering = solver.Solve(model);
 
-  // Sort layers
-  layers.forEach(layer => layer.sort((n1, n2) => ((n1.id > n2.id) || -1) * (ordering[key(n1, n2)] || -1)));
+    // Sort layers
+    layers.forEach(layer => layer.sort((n1, n2) => ((n1.id > n2.id) || -1) * (ordering[key(n1, n2)] || -1)));
 
-  return layers;
+    return layers;
+  }
+
+  return decrossOpt;
 }

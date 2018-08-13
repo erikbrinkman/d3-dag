@@ -5,7 +5,16 @@ const tape = require("tape"),
 
 tape("layeringSimplex() works for square", test => {
   const dag = load("square");
-  d3_dag.layeringSimplex(dag);
+  d3_dag.layeringSimplex()(dag);
+  const layers = toLayers(dag);
+  test.equals(layers.length, 3);
+  test.deepEquals(layers, [[0], [1, 2], [3]]);
+  test.end();
+});
+
+tape("layeringSimplex() works for square in debug", test => {
+  const dag = load("square");
+  d3_dag.layeringSimplex().debug(true)(dag);
   const layers = toLayers(dag);
   test.equals(layers.length, 3);
   test.deepEquals(layers, [[0], [1, 2], [3]]);
@@ -14,7 +23,7 @@ tape("layeringSimplex() works for square", test => {
 
 tape("layeringSimplex() works for grafo", test => {
   const dag = load("grafo");
-  d3_dag.layeringSimplex(dag);
+  d3_dag.layeringSimplex()(dag);
   const layers = toLayers(dag);
   test.equals(layers.length, 8);
   const cost = dag.links().reduce((s, l) => s + l.target.layer - l.source.layer, 0);

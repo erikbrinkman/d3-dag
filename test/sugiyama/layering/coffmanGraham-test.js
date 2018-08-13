@@ -5,7 +5,7 @@ const tape = require("tape"),
   d3_dag = require("../../../");
 
 tape("layeringCoffmanGraham() works for square", test => {
-  const dag = d3_dag.layeringCoffmanGraham(load("square"));
+  const dag = d3_dag.layeringCoffmanGraham()(load("square"));
   const layers = toLayers(dag);
   test.equals(layers.length, 3);
   test.deepEquals(layers, [[0], [1, 2], [3]]);
@@ -13,7 +13,7 @@ tape("layeringCoffmanGraham() works for square", test => {
 });
 
 tape("layeringCoffmanGraham() works for grafo", test => {
-  const dag = d3_dag.layeringCoffmanGraham(load("grafo"));
+  const dag = d3_dag.layeringCoffmanGraham()(load("grafo"));
   const layers = toLayers(dag);
   test.equals(layers.length, 6);
   test.deepEquals(

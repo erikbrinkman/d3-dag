@@ -4,9 +4,9 @@ const tape = require("tape"),
 
 tape("decrossOpt() works for grafo", test => {
   const layout = d3_dag.sugiyama()
-    .layering(d3_dag.layeringLongestPath)
-    .decross(d3_dag.decrossOpt)
-    .coord(d3_dag.coordSpread)
+    .layering(d3_dag.layeringLongestPath())
+    .decross(d3_dag.decrossOpt())
+    .coord(d3_dag.coordSpread())
     .size([140, 5]);
   const dag = layout(load("grafo"));
   const ordered = dag.descendants().sort((a, b) => a.id - b.id);

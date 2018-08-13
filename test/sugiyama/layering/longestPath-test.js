@@ -6,7 +6,7 @@ const tape = require("tape"),
 
 tape("layeringLongestPath() works for square", test => {
   const dag = load("square");
-  d3_dag.layeringLongestPath(dag);
+  d3_dag.layeringLongestPath()(dag);
   const layers = toLayers(dag);
   test.equals(layers.length, 3);
   test.deepEquals(layers, [[0], [1, 2], [3]]);
@@ -15,7 +15,7 @@ tape("layeringLongestPath() works for square", test => {
 
 tape("layeringLongestPath() works for grafo", test => {
   const dag = load("grafo");
-  d3_dag.layeringLongestPath(dag);
+  d3_dag.layeringLongestPath()(dag);
   const layers = toLayers(dag);
   test.equals(layers.length, 6);
   test.deepEquals(

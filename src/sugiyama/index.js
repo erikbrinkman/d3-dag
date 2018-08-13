@@ -53,9 +53,9 @@ function removeDummies(dag) {
 export default function() {
   let width = 1;
   let height = 1;
-  let layering = simplex;
-  let decross = opt;
-  let coord = minDist;
+  let layering = simplex();
+  let decross = opt();
+  let coord = minDist();
 
   function layout(dag) {
     // Compute layers
