@@ -45,29 +45,14 @@ export default function() {
 
   function cross(model, layer) {
     layer.slice(0, layer.length - 1).forEach((p1, i) => layer.slice(i + 1).forEach(p2 => {
-      const pairp = key(p1, p2);
       p1.children.forEach(c1 => p2.children.filter(c => c !== c1).forEach(c2 => {
-        const pairc = key(c1, c2);
-        const slack = [pairp, pairc].join("\0\0\0");
-        const slackUp = slack + "\0\0\0+";
-        const slackDown = slack + "\0\0\0-";
-        model.variables[slack] = {[slackUp]: 1, [slackDown]: 1, [crossings]: 1};
-
-        const flip = +(c1.id > c2.id);
-        const sign = flip || -1;
-
-        model.constraints[slackUp] = {min: flip};
-        model.variables[pairp][slackUp] = 1;
-        model.variables[pairc][slackUp] = sign;
-
-        model.constraints[slackDown] = {min: -flip};
-        model.variables[pairp][slackDown] = -1;
-        model.variables[pairc][slackDown] = -sign;
+        const pair = key(c1, c2);
+        model.variables[pair][crossings] = +(c1.id > c2.id) || -1;
       }));
     }));
   }
 
-  function decrossOpt(layers) {
+  function twolayerOpt(topLayer, bottomLayer) {
     // Initialize model
     const model = {
       optimize: crossings,
@@ -75,22 +60,24 @@ export default function() {
       constraints: {},
       variables: {},
       ints: {},
-    };
+    }; 
 
     // Add variables and permutation invariants
-    layers.forEach(lay => perms(model, lay));
+    perms(model, bottomLayer);
 
     // Add crossing minimization
-    layers.slice(0, layers.length - 1).forEach(lay => cross(model, lay));
+    cross(model, topLayer);
 
     // Solve objective
     const ordering = solver.Solve(model);
 
     // Sort layers
-    layers.forEach(layer => layer.sort((n1, n2) => ((n1.id > n2.id) || -1) * (ordering[key(n1, n2)] || -1)));
-
-    return layers;
+    bottomLayer.sort((n1, n2) => ((n1.id > n2.id) || -1) * (ordering[key(n1, n2)] || -1));
   }
 
-  return decrossOpt;
+  twolayerOpt.debug = function(x) {
+    return arguments.length ? (debug = x, twolayerOpt) : debug;
+  }
+
+  return twolayerOpt;
 }

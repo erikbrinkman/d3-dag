@@ -11,7 +11,7 @@ function layout(dag) {
     .selectAll('path').data(dag.links()).enter().append('path')
     .attr('d', ({ source, target, data }) => line([{x: source.x, y: source.y}].concat(data.points || [], [{x: target.x, y: target.y}])));
   const nodes = svg.append('g').classed('node', true)
-    .selectAll('g').data(dag.nodes()).enter().append('g')
+    .selectAll('g').data(dag.descendants()).enter().append('g')
     .attr('transform', ({x, y}) => `translate(${x}, ${y})`);
   nodes.append('circle');
 

@@ -10,7 +10,7 @@ tape("coordMinCurve() works for square", test => {
   const layout = d3_dag.sugiyama()
     .layering(d3_dag.layeringSimplex())
     .decross(d3_dag.decrossOpt())
-    .coord(d3_dag.coordMinCurve())
+    .coord(d3_dag.coordMinCurve().weight(0.9999))
     .size([2, 2]);
   const dag = layout(load("square"));
   const [zero, one, two, three] = dag.descendants().sort((a, b) => a.id - b.id).map(n => n.x);
@@ -25,7 +25,7 @@ tape("coordMinCurve() works for ex", test => {
   const layout = d3_dag.sugiyama()
     .layering(d3_dag.layeringSimplex())
     .decross(d3_dag.decrossOpt())
-    .coord(d3_dag.coordMinCurve())
+    .coord(d3_dag.coordMinCurve().weight(0.9999))
     .size([4, 4]);
   const dag = layout(load("ex"));
   // TODO This test is brittle if there's a different ordering of nodes

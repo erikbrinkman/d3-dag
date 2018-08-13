@@ -4,60 +4,58 @@
 import Node from "../dag";
 import simplex from "./layering/simplex";
 import opt from "./decross/opt";
-import minDist from "./coord/minDist";
-
-// Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
-// layer is adjacent, and returns an array of each layer of nodes.
-function createLayers(dag) {
-  const layers = [];
-  dag.descendants().forEach(node => {
-    const layer = layers[node.layer] || (layers[node.layer] = []);
-    layer.push(node);
-    node.children = node.children.map(child => {
-      if (child.layer > node.layer + 1) {
-        let last = child;
-        for (let l = child.layer - 1; l > node.layer; l--) {
-          const dummy = new Node(`${node.id}\0${child.id}\0${l}`, undefined);
-          dummy.children = [last];
-          (layers[l] || (layers[l] = [])).push(dummy);
-          last = dummy;
-        }
-        return last;
-      } else {
-        return child;
-      }
-    }); 
-  });
-  return layers;
-}
-
-function removeDummies(dag) {
-  dag.each(node => {
-    if (node.data) {
-      node.children = node.children.map(child => {
-        const points = [];
-        while (!child.data) {
-          points.push({x: child.x, y: child.y});
-          [child] = child.children;
-        }
-        (node._childLinkData[child.id] || (node._childLinkData[child.id] = {})).points = points;
-        return child
-      });
-    }
-  });
-}
-
-// TODO Is the best API for the decross and coord functions?
-// Maybe next pointers would be better to define layer ordering?
+import minCurve from "./coord/minCurve";
 
 export default function() {
+  let debug = false;
   let width = 1;
   let height = 1;
   let layering = simplex();
   let decross = opt();
-  let coord = minDist();
+  let coord = minCurve();
 
-  function layout(dag) {
+  // Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
+  // layer is adjacent, and returns an array of each layer of nodes.
+  function createLayers(dag) {
+    const layers = [];
+    dag.descendants().forEach(node => {
+      const layer = layers[node.layer] || (layers[node.layer] = []);
+      layer.push(node);
+      node.children = node.children.map(child => {
+        if (child.layer > node.layer + 1) {
+          let last = child;
+          for (let l = child.layer - 1; l > node.layer; l--) {
+            const dummy = new Node(`${node.id}${debug ? "->" : "\0"}${child.id}${debug ? " (" : "\0"}${l}${debug ? ")" : ""}`, undefined);
+            dummy.children = [last];
+            (layers[l] || (layers[l] = [])).push(dummy);
+            last = dummy;
+          }
+          return last;
+        } else {
+          return child;
+        }
+      }); 
+    });
+    return layers;
+  }
+
+  function removeDummies(dag) {
+    dag.each(node => {
+      if (node.data) {
+        node.children = node.children.map(child => {
+          const points = [];
+          while (!child.data) {
+            points.push({x: child.x, y: child.y});
+            [child] = child.children;
+          }
+          (node._childLinkData[child.id] || (node._childLinkData[child.id] = {})).points = points;
+          return child
+        });
+      }
+    });
+  }
+
+  function sugiyama(dag) {
     // Compute layers
     layering(dag);
     // Verify layering
@@ -73,6 +71,7 @@ export default function() {
     }
     if (layers.every(l => l.length === 1)) {
       // Next steps aren't necessary
+      // This will also be true if layers.length === 1
       layers.forEach(([n]) => n.x = width / 2);
     } else {
       // Minimize edge crossings
@@ -87,21 +86,25 @@ export default function() {
     return dag;
   }
 
-  layout.size = function(x) {
-    return arguments.length ? ([width, height] = x, layout) : [width, height];
+  sugiyama.debug = function(x) {
+    return arguments.length ? (debug = x, sugiyama) : debug;
   }
 
-  layout.layering = function(x) {
-    return arguments.length ? (layering = x, layout) : layering;
+  sugiyama.size = function(x) {
+    return arguments.length ? ([width, height] = x, sugiyama) : [width, height];
   }
 
-  layout.decross = function(x) {
-    return arguments.length ? (decross = x, layout) : decross;
+  sugiyama.layering = function(x) {
+    return arguments.length ? (layering = x, sugiyama) : layering;
   }
 
-  layout.coord = function(x) {
-    return arguments.length ? (coord = x, layout) : coord;
+  sugiyama.decross = function(x) {
+    return arguments.length ? (decross = x, sugiyama) : decross;
   }
 
-  return layout;
+  sugiyama.coord = function(x) {
+    return arguments.length ? (coord = x, sugiyama) : coord;
+  }
+
+  return sugiyama;
 }

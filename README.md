@@ -400,6 +400,8 @@ These sections are organized by type.
   - Optimal, version of layer opt, but only for bottom in two layer
 - Add greedy coordinate assignment method, and remove spread assignment.
   First, position nodes at mean of neighbors, then shift nodes to have spacing according to priority.
+  Greedy probably won't really work.
+  Should be able to assign to mediam mean or other initial coordinate, then solve lp to respect layer assignment so that highest priority moves the least.
 - Fix min curve to make sure that matrix is positive definite.
   This requires the same fix that dummy angle does, which is tie breaking when problem is underspecified.
   This might be better fixed by just optimizing both curves and distance, but downweighting distance by some amount enough to make the change somewhat insignificant.

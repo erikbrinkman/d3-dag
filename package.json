@@ -24,10 +24,11 @@
     "test": "tape 'test/**/*-test.js' && eslint index.js src",
     "publish": "npm run test && uglifyjs -b beautify=false,preamble=\"'$(preamble)'\" dist/d3-dag.js -c -m -o dist/d3-dag.min.js",
     "preexamples": "npm run pretest && kill $(lsof -t -i:7777); http-server -p 7777 &",
-    "examples": "while ! lsof -t -i:7777 > /dev/null; do sleep 1; done && for EX in examples/*.html; do chromium-browser --headless --screenshot --window-size=256,256 \"http://localhost:7777/${EX}\" && mv screenshot.png \"${EX%.html}.png\"; done",
+    "examples": "while ! lsof -t -i:7777 > /dev/null; do sleep 1; done && for EX in examples/*.html; do google-chrome --headless --disable-gpu --screenshot --window-size=256,256 \"http://localhost:7777/${EX}\" && mv screenshot.png \"${EX%.html}.png\"; done",
     "postexamples": "kill $(lsof -t -i:7777)"
   },
   "devDependencies": {
+    "d3-array": "^1.2.1",
     "eslint": "^5.0.1",
     "fastpriorityqueue": "^0.5.0",
     "http-server": "^0.11.1",

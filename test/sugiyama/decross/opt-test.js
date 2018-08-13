@@ -16,7 +16,7 @@ tape("decrossOpt() works for grafo", test => {
   // This is brittle as there are many orientations that remove all crossings
   test.deepEquals(
     ordered.map(n => n.x),
-    [120, 112, 28, 14, 84, 70, 35, 0, 112, 80, 140, 20, 70, 40, 105, 70, 126, 42, 84, 60, 28, 70]);
+    [120, 98, 28, 14, 84, 70, 35, 0, 112, 80, 140, 20, 70, 40, 105, 70, 126, 42, 84, 60, 28, 70]);
   test.end();
 });
 
