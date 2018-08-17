@@ -12,6 +12,14 @@ tape("layeringCoffmanGraham() works for square", test => {
   test.end();
 });
 
+tape("layeringCoffmanGraham() works with width", test => {
+  const dag = d3_dag.layeringCoffmanGraham().width(1)(load("square"));
+  const layers = toLayers(dag);
+  test.equals(layers.length, 4);
+  test.deepEquals(layers, [[0], [2], [1], [3]]);
+  test.end();
+});
+
 tape("layeringCoffmanGraham() works for grafo", test => {
   const dag = d3_dag.layeringCoffmanGraham()(load("grafo"));
   const layers = toLayers(dag);

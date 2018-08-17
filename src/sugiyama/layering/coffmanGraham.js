@@ -41,7 +41,7 @@ export default function() {
         width++;
       } else {
         node.layer = ++layer;
-        width = 0;
+        width = 1;
       }
       node.children.forEach(child => {
         child._before.push(i);
@@ -59,6 +59,10 @@ export default function() {
       delete node._parents;
     });
     return dag;
+  }
+
+  layeringCoffmanGraham.width = function(x) {
+    return arguments.length ? (maxWidth = x, layeringCoffmanGraham) : maxWidth;
   }
 
   return layeringCoffmanGraham;

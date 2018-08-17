@@ -385,11 +385,9 @@ These sections are organized by type.
 
 ### Sugiyama Additions
 
-- Modify Coffman-Graham to have width specificity, or potentially one that tries to binary search by area?
-  Specifying width would probably require changing the API to make d3.layeringX be a function call that can be fluently chained to add parameters in d3 fashion.
-- Add topological sort layering.
-  This would have poor height, but minimum width not including dummy nodes.
-  Layout might work if crossings are minimized.
+- Add topological coordinate assignment that minimized curves if every node is at 0.
+- Add hybrid approach that minimizes dist for real nodes and curves for dummy nodes.
+  This might benefit from chanign opt so that you pass in nodes and it adds the proper constraints.
 - Add layer sweep algorithm for crossing minimization.
   This algorithm has many possible implementations or parameters.
   First, there could be a flag to do greedy swaps to reduce crossing count at each layer.
@@ -402,11 +400,6 @@ These sections are organized by type.
   First, position nodes at mean of neighbors, then shift nodes to have spacing according to priority.
   Greedy probably won't really work.
   Should be able to assign to mediam mean or other initial coordinate, then solve lp to respect layer assignment so that highest priority moves the least.
-- Fix min curve to make sure that matrix is positive definite.
-  This requires the same fix that dummy angle does, which is tie breaking when problem is underspecified.
-  This might be better fixed by just optimizing both curves and distance, but downweighting distance by some amount enough to make the change somewhat insignificant.
-- Add min dummy angle for coord assign.
-  Problem is underspecified if only minimizing dummy angle, so also need to minimize some other relevant proxy on undefined nodes, e.g. distance.
 
 
 ### General Additions
@@ -417,12 +410,4 @@ These sections are organized by type.
 
 ### Design Additions
 
-- Should names / prefixes be changed?
-  Some seem like they'd be hard to discover or are too abbreviated.
-- Decide if special dag structure is better, or enshrined dummy nodes, or manditory single root node is better.
-  Enshrined dummy nodes would be like a root node, but that algorithms knew to ignore.
-  They might allow a structure that doesn't include parent references, and instead only uses children, which will allow for more interesting dag overlaps / manipulation of the structure on the fly.
-- More generally, should DAGs simply be local objects, i.e. fit the node interface and only have a children.
-  A dag would then be defined as the whole structure achieved by continually calling children without having a duplicate id.
-  The duplicate id could be checked by then verifying that the node objects compare with strict equality and throwing an exception otherwise.
 - Should DAG also have a size method?
