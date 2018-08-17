@@ -14,6 +14,7 @@ import height from "./height";
 import links from "./links";
 import reduce from "./reduce";
 import roots from "./roots";
+import size from "./size";
 import some from "./some";
 import sum from "./sum";
 
@@ -100,6 +101,7 @@ Node.prototype = {
   reduce: reduce,
   reverse: reverse,
   roots: roots,
+  size: size,
   some: some,
   sum: sum,
 };

@@ -406,8 +406,3 @@ These sections are organized by type.
 
 - Add source code links.
 - Coords should take separation function, that should be a parameter to sugiyama to match d3.hierarchy.
-
-
-### Design Additions
-
-- Should DAG also have a size method?
