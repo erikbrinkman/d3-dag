@@ -10,3 +10,11 @@ tape("sugiyama() works for grafo", test => {
   test.equals(dag.descendants().length, nodesBefore);
   test.end();
 });
+
+tape("sugiyama() works with separation", test => {
+  const dag = load("grafo");
+  const nodesBefore = dag.descendants().length;
+  d3_dag.sugiyama().size([2, 2])(dag);
+  test.equals(dag.descendants().length, nodesBefore);
+  test.end();
+});

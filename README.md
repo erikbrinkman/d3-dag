@@ -385,17 +385,10 @@ These sections are organized by type.
 
 ### Sugiyama Additions
 
-- Add topological coordinate assignment that minimized curves if every node is at 0.
-- Add hybrid approach that minimizes dist for real nodes and curves for dummy nodes.
-  This might benefit from chanign opt so that you pass in nodes and it adds the proper constraints.
-- Add layer sweep algorithm for crossing minimization.
-  This algorithm has many possible implementations or parameters.
-  First, there could be a flag to do greedy swaps to reduce crossing count at each layer.
-  Second, there are several possible methods for how to do the layer optimization:
-  - None
-  - Mean (Barycenter)
-  - Median
-  - Optimal, version of layer opt, but only for bottom in two layer
+- Update two layer to
+  - Allow greedy swaps after each layer to minimize crossings.
+  - Allow no two layer change so just greedy minimization is run.
+  - Allow doing sweep up and down potentially several times.
 - Add greedy coordinate assignment method, and remove spread assignment.
   First, position nodes at mean of neighbors, then shift nodes to have spacing according to priority.
   Greedy probably won't really work.
@@ -405,4 +398,3 @@ These sections are organized by type.
 ### General Additions
 
 - Add source code links.
-- Coords should take separation function, that should be a parameter to sugiyama to match d3.hierarchy.

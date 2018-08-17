@@ -1,6 +1,7 @@
-export { default as coordMinBend } from "./src/sugiyama/coord/minBend";
 export { default as coordMinCurve } from "./src/sugiyama/coord/minCurve";
 export { default as coordSpread } from "./src/sugiyama/coord/spread";
+export { default as coordTopological } from "./src/sugiyama/coord/topological";
+export { default as coordVert } from "./src/sugiyama/coord/vert";
 export { default as decrossOpt } from "./src/sugiyama/decross/opt";
 export { default as decrossTwoLayer } from "./src/sugiyama/decross/twoLayer";
 export { default as dierarchy } from "./src/dag/hierarchy";

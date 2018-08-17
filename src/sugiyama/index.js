@@ -4,7 +4,7 @@
 import Node from "../dag";
 import simplex from "./layering/simplex";
 import opt from "./decross/opt";
-import minCurve from "./coord/minCurve";
+import vert from "./coord/vert";
 
 export default function() {
   let debug = false;
@@ -12,7 +12,8 @@ export default function() {
   let height = 1;
   let layering = simplex();
   let decross = opt();
-  let coord = minCurve();
+  let coord = vert();
+  let separation = defaultSeparation;
 
   // Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
   // layer is adjacent, and returns an array of each layer of nodes.
@@ -77,7 +78,7 @@ export default function() {
       // Minimize edge crossings
       decross(layers);
       // Assign coordinates
-      coord(layers);
+      coord(layers, separation);
       // Scale x
       layers.forEach(layer => layer.forEach(n => n.x *= width));
     }
@@ -106,5 +107,13 @@ export default function() {
     return arguments.length ? (coord = x, sugiyama) : coord;
   }
 
+  sugiyama.separation = function(x) {
+    return arguments.length ? (separation = x, sugiyama) : separation;
+  }
+
   return sugiyama;
+}
+
+function defaultSeparation() {
+  return 1;
 }

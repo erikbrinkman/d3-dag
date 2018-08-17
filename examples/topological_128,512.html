@@ -11,7 +11,9 @@
         const grafo = await fetch('/test/data/grafo.json', { mode: 'no-cors' }).then(r => r.json());
         const dag = d3.dratify()(grafo);
         d3.sugiyama()
-          .coord(d3.coordMinBend())
+          .layering(d3.layeringTopological())
+          .coord(d3.coordTopological())
+          .size([0.5, 2])
           (dag);
         layout(dag);
       })();

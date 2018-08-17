@@ -10,69 +10,44 @@ export function indices(layers) {
 }
 
 // Compute constraint arrays for layer separation
-export function sep(layers, inds) {
-  const n = Object.keys(inds).length;
+export function sep(layers, inds, separation) {
+  const n = 1 + Math.max(...Object.values(inds));
   const A = [];
   const b = [];
 
   layers.forEach(layer => layer.slice(0, layer.length - 1).forEach((first, i) => {
+    const second = layer[i + 1];
     const find = inds[first.id];
-    const sind = inds[layer[i + 1].id];
+    const sind = inds[second.id];
     const cons = new Array(n).fill(0);
     cons[find] = 1;
     cons[sind] = -1;
     A.push(cons);
-    // TODO This could be tweaked to space different pairs different relative amounts apart
-    b.push(-1);
+    b.push(-separation(first, second));
   }));
 
   return [A, b];
 }
 
-// Compute Q that minimizes edge distance squared
-export function minDist(layers, inds) {
-  const n = Object.keys(inds).length;
-  const Q = new Array(n).fill(null).map(() => new Array(n).fill(0));
-  layers.forEach(layer => layer.forEach(parent => {
-    const pind = inds[parent.id];
-    parent.children.forEach(child => {
-      const cind = inds[child.id];
-      Q[pind][pind] += 1;
-      Q[cind][cind] += 1;
-      Q[pind][cind] -= 1;
-      Q[cind][pind] -= 1;
-    });
-  }));
-  return Q;
+// Update Q that minimizes edge distance squared
+export function minDist(Q, pind, cind, coef) {
+  Q[cind][cind] += coef;
+  Q[cind][pind] -= coef;
+  Q[pind][cind] -= coef;
+  Q[pind][pind] += coef;
 }
 
-// Compute Q that minimizes curve of edges through a node
-// This Q will be singular, so it's necessary to combine with another Q
-export function minBend(layers, inds, filter = () => true) {
-  const n = Object.keys(inds).length;
-  const Q = new Array(n).fill(null).map(() => new Array(n).fill(0));
-  layers.forEach(layer => layer.forEach(parent => {
-    const pind = inds[parent.id];
-    parent.children.forEach(node => {
-      if (filter(node)) {
-        const nind = inds[node.id];
-        node.children.forEach(child => {
-          const cind = inds[child.id];
-          Q[nind][nind] += 4;
-          Q[pind][pind] += 1;
-          Q[cind][cind] += 1;
-
-          Q[pind][cind] += 1;
-          Q[cind][pind] += 1;
-          Q[nind][pind] -= 2;
-          Q[pind][nind] -= 2;
-          Q[nind][cind] -= 2;
-          Q[cind][nind] -= 2;
-        });
-      }
-    });
-  }));
-  return Q;
+// Update Q that minimizes curve of edges through a node
+export function minBend(Q, pind, nind, cind, coef) {
+  Q[cind][cind] += coef;
+  Q[cind][nind] -= 2 * coef;
+  Q[cind][pind] += coef;
+  Q[nind][cind] -= 2 * coef;
+  Q[nind][nind] += 4 * coef;
+  Q[nind][pind] -= 2 * coef;
+  Q[pind][cind] += coef;
+  Q[pind][nind] -= 2 * coef;
+  Q[pind][pind] += coef;
 }
 
 // Solve for node positions
