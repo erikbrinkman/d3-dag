@@ -379,22 +379,8 @@ Positions nodes in each layer so that the curves between nodes is minimized, and
 
 ## To Do
 
-There are many things that could be done.
-These sections are organized by type.
-
-
-### Sugiyama Additions
-
 - Update two layer to
   - Allow greedy swaps after each layer to minimize crossings.
   - Allow no two layer change so just greedy minimization is run.
   - Allow doing sweep up and down potentially several times.
-- Add greedy coordinate assignment method, and remove spread assignment.
-  First, position nodes at mean of neighbors, then shift nodes to have spacing according to priority.
-  Greedy probably won't really work.
-  Should be able to assign to mediam mean or other initial coordinate, then solve lp to respect layer assignment so that highest priority moves the least.
-
-
-### General Additions
-
-- Add source code links.
+- Add source code links. / Update documentation.

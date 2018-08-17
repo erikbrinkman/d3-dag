@@ -1,3 +1,4 @@
+export { default as coordGreedy } from "./src/sugiyama/coord/greedy";
 export { default as coordMinCurve } from "./src/sugiyama/coord/minCurve";
 export { default as coordSpread } from "./src/sugiyama/coord/spread";
 export { default as coordTopological } from "./src/sugiyama/coord/topological";
