@@ -26,7 +26,6 @@ var dag = d3.sugiyama();
 * [Hierarchy](#hierarchy)
 * [Stratify](#stratify)
 * [DAG](#dag) ([Node](#node))
-* [Topological Sort](#topological-sort)
 * [Sugiyama](#sugiyama)
 
 
@@ -268,15 +267,6 @@ Return `true` if *function* returns true for at least one node in the DAG.
 Set the *value* of every node to be the sum of this *functions* return value on the current node's data and the value of every descendant's return value.
 
 
-### Topological Sort
-
-This function allows getting a topological ordering of the nodes.
-
-<a name="topologicalSort" href="#topologicalSort">#</a> d3.**topologicalSort**()
-
-Assigns each node a `value` from `0` to `node.descendants().length - 1` corresponding to a valid topological sort.
-
-
 ### Sugiyama
 
 This constructs a layered representation of the DAG meant for visualization.
@@ -375,12 +365,3 @@ Positions nodes in each layer so that the total distance of edges is minimized.
 <a name="coordMinCurve" href="#coordMinCurve">#</a> d3.**coordMinCurve**(*layers*)
 
 Positions nodes in each layer so that the curves between nodes is minimized, and ties are broken by minimum distance.
-
-
-## To Do
-
-- Update two layer to
-  - Allow greedy swaps after each layer to minimize crossings.
-  - Allow no two layer change so just greedy minimization is run.
-  - Allow doing sweep up and down potentially several times.
-- Add source code links. / Update documentation.
