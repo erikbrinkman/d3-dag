@@ -4,12 +4,12 @@
 
 export default function() {
 
-
   let assignment = mean;
   
   function coordGreedy(layers, separation) {
     // Assign degrees
-    layers.forEach(layer => layer.forEach(n => n.degree = n.children.length));
+    // The 3 at the end ensures that dummy nodes have the lowest priority
+    layers.forEach(layer => layer.forEach(n => n.degree = n.children.length + (n.data ? 0 : -3)));
     layers.forEach(layer => layer.forEach(n => n.children.forEach(c => ++c.degree)));
 
     // Set first nodes
@@ -22,7 +22,7 @@ export default function() {
     layers.slice(0, layers.length - 1).forEach((top, i) => {
       const bottom = layers[i + 1];
       assignment(top, bottom);
-      bottom.map((n, j) => [n, j]).sort(([an, aj], [bn, bj]) => an.x === bn.x ? aj - bj : an.x - bn.x).forEach(([n, j]) => {
+      bottom.map((n, j) => [n, j]).sort(([an, aj], [bn, bj]) => an.degree === bn.degree ? aj - bj : bn.degree - an.degree).forEach(([n, j]) => {
         bottom.slice(j + 1).reduce((last, node) => {
           node.x = Math.max(node.x, last.x + separation(last, node));
           return node;
@@ -37,6 +37,7 @@ export default function() {
     const min = Math.min(...layers.map(layer => Math.min(...layer.map(n => n.x))));
     const span = Math.max(...layers.map(layer => Math.max(...layer.map(n => n.x)))) - min;
     layers.forEach(layer => layer.forEach(n => n.x = (n.x - min) / span));
+    layers.forEach(layer => layer.forEach(n => delete n.degree));
     return layers;
   }
 

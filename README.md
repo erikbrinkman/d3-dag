@@ -483,7 +483,7 @@ Since minimizing only curves is not well defined, weight can not be 1.
 
 Construct a greedy coordinate accessor.
 This accessor assigns coordinates as the mean of their parents and then spaces them out to respect their separation.
-The spacing out is performed by solving a linear program, which for most graphs of reasonable width should be fast enough, but is not free.
+Nodes with higher degree that aren't dummy nodes are given higher priority for shifting order, i.e. are less likely to be moved from the mean of their parents.
 This solution results in a layout that is more pleaseoing than spread, but much faster to compute than vert or minCurve.
 
 ![greedy example](examples/greedy.png)
