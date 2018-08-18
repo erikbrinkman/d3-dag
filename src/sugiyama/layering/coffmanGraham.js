@@ -1,8 +1,9 @@
 // Assign layer to each node that constrains width
+
 // TODO switch to d3 priority queue when it exists
+
 import FastPriorityQueue from 'fastpriorityqueue';
 
-// TODO Coffman graham that has parametrized width
 export default function() {
   let maxWidth = 0;
   

@@ -1,4 +1,5 @@
 const tape = require("tape"),
+  close = require("../../close"),
   load = require("../../load"),
   d3_dag = require("../../../");
 
@@ -17,6 +18,17 @@ tape("decrossOpt() works for grafo", test => {
   test.deepEquals(
     ordered.map(n => n.x),
     [120, 98, 28, 14, 84, 70, 35, 0, 112, 80, 140, 20, 70, 40, 105, 70, 126, 42, 84, 60, 28, 70]);
+  test.end();
+});
+
+tape("decrossOpt() debug works for well behaved node names", test => {
+  const layout = d3_dag.sugiyama()
+    .decross(d3_dag.decrossOpt());
+  const dag = layout(load("grafo"));
+  const normal = dag.descendants().sort((a, b) => a.id - b.id).map(n => n.x);
+  layout.decross(d3_dag.decrossOpt().debug(true))(dag);
+  const debug = dag.descendants().sort((a, b) => a.id - b.id).map(n => n.x);
+  test.ok(normal.every((v, i) => close(v, debug[i])));
   test.end();
 });
 

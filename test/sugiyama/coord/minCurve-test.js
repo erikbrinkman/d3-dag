@@ -28,14 +28,8 @@ tape("coordMinCurve() works for ex", test => {
     .coord(d3_dag.coordMinCurve().weight(0.9999))
     .size([4, 4]);
   const dag = layout(load("ex"));
-  // TODO This test is brittle if there's a different ordering of nodes
-  const [zero, one, two, three, four, five, six] = dag.descendants().sort((a, b) => a.id - b.id).map(n => n.x);
-  test.ok(close(zero, 4, eps));
-  test.ok(close(one, 3, eps));
-  test.ok(close(two, 0, eps));
-  test.ok(close(three, 2, eps));
-  test.ok(close(four, 4, eps));
-  test.ok(close(five, 1, eps));
-  test.ok(close(six, 0, eps));
+  const ordered = dag.descendants().sort((a, b) => a.id - b.id).map(n => n.x);
+  const expected = [4, 3, 0, 2, 4, 1, 0];
+  test.ok(ordered.every((v, i) => close(v, expected[i], eps)));
   test.end();
 });

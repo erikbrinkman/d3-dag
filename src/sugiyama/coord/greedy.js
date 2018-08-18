@@ -1,6 +1,10 @@
 // Compute x coordinates for nodes that greedily assigns coordinates and then spaces them out
+
+// TODO Implement other methods for initial greedy assignment
+
 export default function() {
-  // FIXME Implement others
+
+
   let assignment = mean;
   
   function coordGreedy(layers, separation) {

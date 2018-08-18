@@ -4,7 +4,6 @@ import solver from "javascript-lp-solver";
 const crossings = "crossings";
 
 export default function() {
-  // TODO Use debug for delims
   let debug = false;
   
   function key(...nodes) {
@@ -48,9 +47,9 @@ export default function() {
       const pairp = key(p1, p2);
       p1.children.forEach(c1 => p2.children.filter(c => c !== c1).forEach(c2 => {
         const pairc = key(c1, c2);
-        const slack = [pairp, pairc].join("\0\0\0");
-        const slackUp = slack + "\0\0\0+";
-        const slackDown = slack + "\0\0\0-";
+        const slack = debug ? `slack (${pairp}) (${pairc})` : `${pairp}\0\0\0${pairc}`;
+        const slackUp = `${slack}${debug ? " " : "\0\0\0"}+`;
+        const slackDown = `${slack}${debug ? " " : "\0\0\0"}-`;
         model.variables[slack] = {[slackUp]: 1, [slackDown]: 1, [crossings]: 1};
 
         const flip = +(c1.id > c2.id);
@@ -90,6 +89,10 @@ export default function() {
     layers.forEach(layer => layer.sort((n1, n2) => ((n1.id > n2.id) || -1) * (ordering[key(n1, n2)] || -1)));
 
     return layers;
+  }
+
+  decrossOpt.debug = function(x) {
+    return arguments.length ? (debug = x, decrossOpt) : debug;
   }
 
   return decrossOpt;

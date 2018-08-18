@@ -4,7 +4,6 @@ import solver from "javascript-lp-solver";
 const crossings = "crossings";
 
 export default function() {
-  // TODO Use debug for delims
   let debug = false;
   
   function key(...nodes) {

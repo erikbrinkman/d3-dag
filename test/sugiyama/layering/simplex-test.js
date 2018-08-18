@@ -28,7 +28,6 @@ tape("layeringSimplex() works for grafo", test => {
   test.equals(layers.length, 8);
   const cost = dag.links().reduce((s, l) => s + l.target.layer - l.source.layer, 0);
   test.equals(cost, 30);
-  // XXX There are two possible configurations
   test.deepEquals(
     layers,
     [[1, 8], [0, 14], [16, 21], [10, 12], [2, 4, 19], [9, 11, 13, 15, 17], [3, 6, 18, 20], [5, 7]]);
