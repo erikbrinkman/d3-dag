@@ -28,14 +28,16 @@
     "postexamples": "kill $(lsof -t -i:7777)",
     "todo": "grep -nrEI 'FIXME|TODO|XXX' index.js src test"
   },
-  "devDependencies": {
+  "dependencies": {
     "d3-array": "^1.2.1",
-    "eslint": "^5.0.1",
     "fastpriorityqueue": "^0.5.0",
-    "http-server": "^0.11.1",
     "javascript-lp-solver": "^0.4.5",
+    "quadprog-js": "^0.1.3"
+  },
+  "devDependencies": {
+    "eslint": "^5.0.1",
+    "http-server": "^0.11.1",
     "package-preamble": "^0.1.0",
-    "quadprog-js": "^0.1.3",
     "rollup": "^0.62.0",
     "rollup-plugin-commonjs": "^9.1.3",
     "rollup-plugin-node-resolve": "^3.3.0",
