@@ -20,7 +20,9 @@ var dag = d3.sugiyama();
 ```
 
 - [Try d3-dag in your browser](https://tonicdev.com/npm/d3-dag)
-- [Some examples](https://beta.observablehq.com/collection/@bumbeishvili/d3-dag)
+- [Some examples](https://beta.observablehq.com/collection/@bumbeishvili/d3-dag)  
+- [JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/12/)
+
 
 ## API Reference
 
