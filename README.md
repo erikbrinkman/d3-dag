@@ -21,7 +21,9 @@ var dag = d3.sugiyama();
 
 - [Try d3-dag in your browser](https://tonicdev.com/npm/d3-dag)
 - [Some examples](https://beta.observablehq.com/collection/@bumbeishvili/d3-dag)  
-- [JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/12/)
+- [Pretty JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/77/) - By default, the sugiyama layout uses very expensive algorithms to compute a pretty layout.
+  For complicated graphs, this can be very expensive to render.
+- [Fast JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/75/) - Setting less pretty but faster layout algorithms can drastically speed up rendering if you find sugiyama is taking too long.
 
 
 ## API Reference
