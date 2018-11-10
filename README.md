@@ -24,6 +24,7 @@ var dag = d3.sugiyama();
 - [Pretty JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/77/) - By default, the sugiyama layout uses very expensive algorithms to compute a pretty layout.
   For complicated graphs, this can be very expensive to render.
 - [Fast JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/75/) - Setting less pretty but faster layout algorithms can drastically speed up rendering if you find sugiyama is taking too long.
+- [Example with Arrows](https://jsfiddle.net/2pL836sc/) - This example shows a simple, if inexact, way to render edge arrows with d3.
 
 
 ## API Reference
