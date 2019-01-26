@@ -38,13 +38,13 @@ var dag = d3.sugiyama();
 ### Hierarchy
 
 Before you can compute a DAG layout, you need a DAG structure.
-If your data is already in a DAG structure, you can pass it directly to [`d3.dierarchy`](#dierarchy); otherwise, you can rearrange tabular data into a DAG using [`d3.dratify`](#dratify)
+If your data is already in a DAG structure, you can pass it directly to [`d3.dagHierarchy`](#dagHierarchy); otherwise, you can rearrange tabular data into a DAG using [`d3.dagStratify`](#dagStratify)
 
-<a name="dierarchy" href="#dierarchy">#</a> d3.**dierarchy**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L5 "Source")
+<a name="dagHierarchy" href="#dagHierarchy">#</a> d3.**dagHierarchy**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L5 "Source")
 
 Constructs a new hierarchy operator with the default settings.
 
-<a name="_dierarchy" href="#_dierarchy">#</a> dierarchy(...*roots*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L9 "Source")
+<a name="_dagHierarchy" href="#_dagHierarchy">#</a> dagHierarchy(...*roots*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L9 "Source")
 
 Construct a DAG from the specified root nodes.
 Each root node must be an object representing a root node.
@@ -89,9 +89,9 @@ For example:
 The DAG must be connected, i.e. each roots descendants must overlap.
 Node ids must be unique, and can't contain the null character `'\0'`.
 
-<a name="dh_id" href="#dh_id">#</a> dierarchy.**id**([*id*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L38 "Source")
+<a name="dh_id" href="#dh_id">#</a> dagHierarchy.**id**([*id*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L38 "Source")
 
-If *id* is specified, sets the id accessor to the given function and returns this dierarchy operator.
+If *id* is specified, sets the id accessor to the given function and returns this dagHierarchy operator.
 Otherwise, returns the current id accessor, which defaults to:
 
 ```js
@@ -100,9 +100,9 @@ function id(d) {
 }
 ```
 
-<a name="children" href="#children">#</a> dierarchy.**children**([*children*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L42 "Source")
+<a name="children" href="#children">#</a> dagHierarchy.**children**([*children*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L42 "Source")
 
-If *children* is specified, sets the children accessor to the given function and returns this dierarchy operator.
+If *children* is specified, sets the children accessor to the given function and returns this dagHierarchy operator.
 Otherwise, returns the current children accessor, which defaults to:
 
 ```js
@@ -114,13 +114,13 @@ function children(d) {
 
 ### Stratify
 
-You can rearrange tabularesque data into a DAG using [`d3.dratify`](#dratify).
+You can rearrange tabularesque data into a DAG using [`d3.dagStratify`](#dagStratify).
 
-<a name="dratify" href="#dratify">#</a> d3.**dratify**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L5 "Source")
+<a name="dagStratify" href="#dagStratify">#</a> d3.**dagStratify**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L5 "Source")
 
 Constructs a new stratify operator with the default settings.
 
-<a name="_dratify" href="#_dratify">#</a> dratify(data) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L9 "Source")
+<a name="_dagStratify" href="#_dagStratify">#</a> dagStratify(data) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L9 "Source")
 
 Construct a dag from the specified *data*.
 The data should be an array of data elements that contain info about their parents' ids.
@@ -166,9 +166,9 @@ For example:
 ]
 ```
 
-<a name="ds_id" href="#ds_id">#</a> dratify.**id**([*id*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L43 "Source")
+<a name="ds_id" href="#ds_id">#</a> dagStratify.**id**([*id*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L43 "Source")
 
-If *id* is specified, sets the id accessor to the given function and returns this dratify operator.
+If *id* is specified, sets the id accessor to the given function and returns this dagStratify operator.
 Otherwise, returns the current id accessor, which defaults to:
 
 ```js
@@ -177,9 +177,9 @@ function id(d) {
 }
 ```
 
-<a name="parentIds" href="#parentIds">#</a> dratify.**parentIds**([*parentIds*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L47 "Source")
+<a name="parentIds" href="#parentIds">#</a> dagStratify.**parentIds**([*parentIds*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L47 "Source")
 
-If *parentIds* is specified, sets the parentIds accessor to the given function and returns this dratify operator.
+If *parentIds* is specified, sets the parentIds accessor to the given function and returns this dagStratify operator.
 Otherwise, returns the current parentIds accessor, which defaults to:
 
 ```js
@@ -228,7 +228,7 @@ The data associated with every node is not copied.
 
 Copy and reverse the DAG, returning a new root or pseudo root depending on if there are multiple roots.
 This is particularly useful if you want to use the opposite accessor in DAG creation.
-For example, if your data set has childIds, you can use *dratify* with parentIds and simply reverse the DAG post creation.
+For example, if your data set has childIds, you can use *dagStratify* with parentIds and simply reverse the DAG post creation.
 
 <a name="count" href="#count">#</a> node.**count**( [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/count.js#L2 "Source"))
 

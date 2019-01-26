@@ -6,7 +6,7 @@ export default function() {
   let id = defaultId;
   let children = defaultChildren;
 
-  function dierarchy(...data) {
+  function dagHierarchy(...data) {
     if (!data.length) throw new Error("must pass at least one node");
     const mapping = {};
     const queue = [];
@@ -35,15 +35,15 @@ export default function() {
     return root.children.length > 1 ? root : root.children[0];
   }
 
-  dierarchy.id = function(x) {
-    return arguments.length ? (id = x, dierarchy) : id;
+  dagHierarchy.id = function(x) {
+    return arguments.length ? (id = x, dagHierarchy) : id;
   }
 
-  dierarchy.children = function(x) {
-    return arguments.length ? (children = x, dierarchy) : children;
+  dagHierarchy.children = function(x) {
+    return arguments.length ? (children = x, dagHierarchy) : children;
   }
 
-  return dierarchy;
+  return dagHierarchy;
 }
 
 function defaultId(d) {

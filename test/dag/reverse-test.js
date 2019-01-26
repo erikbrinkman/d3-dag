@@ -5,7 +5,7 @@ const tape = require("tape"),
 const square = JSON.parse(fs.readFileSync("test/data/square.json"));
 
 tape("reverse() invariant is true for square", test => {
-  const dag = d3_dag.dratify()(square);
+  const dag = d3_dag.dagStratify()(square);
   const copy = dag.copy().reverse();
   test.notOk(dag.equals(copy));
   test.ok(dag.equals(copy.reverse()));
@@ -13,8 +13,8 @@ tape("reverse() invariant is true for square", test => {
 });
 
 tape("reverse() inverse parent/child loading", test => {
-  const strat = d3_dag.dratify()(square);
-  const rhier = d3_dag.dierarchy()
+  const strat = d3_dag.dagStratify()(square);
+  const rhier = d3_dag.dagHierarchy()
     .children(d => d.parentIds.map(i => square[parseInt(i)]))
     (...square.filter(d => d.id === "3")).reverse();
   test.ok(strat.equals(rhier));
@@ -22,7 +22,7 @@ tape("reverse() inverse parent/child loading", test => {
 });
 
 tape("reverse() preserves link data", test => {
-  const dag = d3_dag.dierarchy()({
+  const dag = d3_dag.dagHierarchy()({
     id: "0",
     children: [{id: "1"}],
   });

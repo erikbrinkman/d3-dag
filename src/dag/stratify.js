@@ -6,7 +6,7 @@ export default function() {
   let id = defaultId;
   let parentIds = defaultParentIds;
 
-  function dratify(data) {
+  function dagStratify(data) {
     if (!data.length) throw new Error("can't stratify empty data");
     const nodes = data.map((datum, i) => {
       const node = new Node(id(datum, i).toString(), datum);
@@ -40,15 +40,15 @@ export default function() {
     return root.children.length > 1 ? root : root.children[0];
   }
 
-  dratify.id = function(x) {
-    return arguments.length ? (id = x, dratify) : id;
+  dagStratify.id = function(x) {
+    return arguments.length ? (id = x, dagStratify) : id;
   }
 
-  dratify.parentIds = function(x) {
-    return arguments.length ? (parentIds = x, dratify) : parentIds;
+  dagStratify.parentIds = function(x) {
+    return arguments.length ? (parentIds = x, dagStratify) : parentIds;
   }
 
-  return dratify;
+  return dagStratify;
 }
 
 function defaultId(d) {
