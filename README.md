@@ -291,9 +291,9 @@ Lays out the specified DAG, assigning the following properties:
 
 * *node*.x - the x-coordinate of the node.
 * *node*.y - the y-coordinate of the node.
-* *link*.points - an array of points for how to draw the edge.
+* *link*.data.points - an array of points for how to draw the edge.
+  The first point will always be the same as *source* and the last point will always be the same as *target*.
   Each point has an x and a y property.
-  This might be undefined if nodes are adjacent in the hierarchy.
 
 <a name="sugi_debug" href="#sugi_debug">#</a> sugiyama.**debug**([*debug*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L90 "Source")
 

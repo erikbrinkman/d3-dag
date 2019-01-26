@@ -44,11 +44,12 @@ export default function() {
     dag.each(node => {
       if (node.data) {
         node.children = node.children.map(child => {
-          const points = [];
+          const points = [{x: node.x, y: node.y}];
           while (!child.data) {
             points.push({x: child.x, y: child.y});
             [child] = child.children;
           }
+          points.push({x: child.x, y: child.y});
           (node._childLinkData[child.id] || (node._childLinkData[child.id] = {})).points = points;
           return child
         });
