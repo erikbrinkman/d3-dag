@@ -31,6 +31,7 @@ var dag = d3.sugiyama();
 
 * [Hierarchy](#hierarchy)
 * [Stratify](#stratify)
+* [Connect](#connect)
 * [DAG](#dag)
 * [Sugiyama](#sugiyama)
 
@@ -186,6 +187,32 @@ Otherwise, returns the current parentIds accessor, which defaults to:
 function parentIds(d) {
   return d.parentIds;
 }
+```
+
+
+### Connect
+
+You can rearrange raw edge data into a DAG using [`d3.dagConnect`](#dagConnect).
+
+<a name="dagConnect" href="#dagConnect">#</a> d3.**dagConnect**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/connect.js#L4 "Source")
+
+Constructs a new connect operator with the default settings.
+
+<a name="_dagConnect" href="#_dagconnect">#</a> dagConnect(data) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L8 "Source")
+
+Construct a dag from the specified *data*.
+The data should be an array of data elements that contain info about links in the graph.
+For example:
+
+```json
+[
+  ["Eve", "Cain"],
+  ["Eve", "Seth"],
+  ["Seth", "Enos"],
+  ["Seth", "Noam"],
+  ["Eve", "Abel"],
+  ["Eve", "Awan"]
+]
 ```
 
 
