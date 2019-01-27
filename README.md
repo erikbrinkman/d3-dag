@@ -480,13 +480,13 @@ If debug is true, the optimization formulation will be given more human readable
 
 Several built-in coord accessors are provided for use with [*sugiyama*](#sugiyama).
 
-<a name="coordSpread" href="#coordSpread">#</a> d3.**coordSpread**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/spread.js#L2 "Source")
+<a name="coordCenter" href="#coordCenter">#</a> d3.**coordCenter**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/center.js#L2 "Source")
 
-Construct a spread coordinate accessor.
-This accessor positions nodes in each layer so that they are the most spread out.
-This coordinate assignment is not particularly pleasing, but it is very fast.
+Construct a center coordinate accessor.
+This accessor keeps spread every node apart by separation and then centers each layer.
+The result isn't a particularly great distribution of nodes, but it doesn't require any type of optimization, and so is very fast.
 
-![spread example](examples/spread.png)
+![center example](examples/spread.png)
 
 <a name="coordVert" href="#coordVert">#</a> d3.**coordVert**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/vert.js#L4 "Source")
 

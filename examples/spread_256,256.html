@@ -9,9 +9,9 @@
       'use strict';
       (async function() {
         const grafo = await fetch('/test/data/grafo.json', { mode: 'no-cors' }).then(r => r.json());
-        const dag = d3.dratify()(grafo);
+        const dag = d3.dagStratify()(grafo);
         d3.sugiyama()
-          .coord(d3.coordSpread())
+          .coord(d3.coordCenter())
           (dag);
         layout(dag);
       })();

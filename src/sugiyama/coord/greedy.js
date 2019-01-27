@@ -13,15 +13,17 @@ export default function() {
     layers.forEach(layer => layer.forEach(n => n.children.forEach(c => ++c.degree)));
 
     // Set first nodes
-    layers[0].reduce((last, node) => {
-      node.x = last === undefined ? 0 : last.x + separation(last, node);
-      return node;
-    }, undefined);
+    layers[0][0].x = 0;
+    layers[0].slice(1).forEach((node, i) => {
+      const last = layers[0][i];
+      node.x = last.x + separation(last, node);
+    });
 
     // Set remaining nodes
     layers.slice(0, layers.length - 1).forEach((top, i) => {
       const bottom = layers[i + 1];
       assignment(top, bottom);
+      // FIXME This order is import, i.e. we right and then left. We should actually do both, and then take the average
       bottom.map((n, j) => [n, j]).sort(([an, aj], [bn, bj]) => an.degree === bn.degree ? aj - bj : bn.degree - an.degree).forEach(([n, j]) => {
         bottom.slice(j + 1).reduce((last, node) => {
           node.x = Math.max(node.x, last.x + separation(last, node));
