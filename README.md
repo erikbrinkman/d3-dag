@@ -378,6 +378,11 @@ This often results in very wide graphs, but is fast.
 
 ![longest path example](examples/longestPath.png)
 
+<a name="lp_topDown" href="#lp_topDown">#</a> layeringLongestPath.**topDown**(*topDown*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/layering/longestPath.js#L17 "Source")
+
+Set whether longest path should go top down or not.
+If set to true (the default), longest path will start at the top, putting only nodes that need to be at hte top layer, otherwise it will put as many nodes as possible in the top layer.
+
 <a name="layeringCoffmanGraham" href="#layeringCoffmanGraham">#</a> d3.**layeringCoffmanGraham**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/layering/coffmanGraham.js#L7 "Source")
 
 Constructs a Coffman-Graham layering accessor with default options.
