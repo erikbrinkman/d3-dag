@@ -12,7 +12,8 @@ export { default as layeringCoffmanGraham } from "./src/sugiyama/layering/coffma
 export { default as layeringLongestPath } from "./src/sugiyama/layering/longestPath";
 export { default as layeringSimplex } from "./src/sugiyama/layering/simplex";
 export { default as layeringTopological } from "./src/sugiyama/layering/topological";
-export { default as sugiyama } from "./src/sugiyama/index";
+export { default as sugiyama } from "./src/sugiyama";
 export { default as twolayerMean } from "./src/sugiyama/twolayer/mean";
 export { default as twolayerMedian } from "./src/sugiyama/twolayer/median";
 export { default as twolayerOpt } from "./src/sugiyama/twolayer/opt";
+export { default as zherebko } from "./src/zherebko";

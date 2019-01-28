@@ -34,6 +34,7 @@ var dag = d3.sugiyama();
 * [Connect](#connect)
 * [DAG](#dag)
 * [Sugiyama](#sugiyama)
+* [Zherebko](#zherebko)
 
 
 ### Hierarchy
@@ -531,3 +532,29 @@ This solution results in a layout that is more pleaseoing than spread, but much 
 Construct a topological coordinate accessor.
 This accessor only works with a topological layering, and minimizes the curve of edges such that all nodes are positioned vertically.
 See [*layeringTopological*](#layeringTopological) for an example of what this coordinate assignment looks like.
+
+
+### Zherebko
+
+This constructs a topological representation of the DAG meant for visualization.
+The algorithm is based off a PR by D. Zherebko.
+The nodes are topologically ordered, and edges are positioned into "lanes" to the left and right of the nodes.
+
+<a name="c_zherebko" href="#c_zherebko">#</a> d3.**zherebko**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/zherebko/index.js#L6 "Source")
+
+Construct a new Zherebko layout operator with the default settings.
+
+<a name="f_zherebko" href="#f_zherebko">#</a> zherebko(*dag*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/zherebko/index.js#L11 "Source")
+
+Lays out the specified DAG, assigning the following properties:
+
+* *node*.x - the x-coordinate of the node.
+* *node*.y - the y-coordinate of the node.
+* *link*.data.points - an array of points for how to draw the edge.
+  The first point will always be the same as *source* and the last point will always be the same as *target*.
+  Each point has an x and a y property.
+
+<a name="sugi_size" href="#sugi_size">#</a> zherebko.**size**([*size*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/zherebko/index.js#L52 "Source")
+
+If *size* is specified, sets this zherebko layout's size to the specified two-element array of numbers [*width*, *height*] and returns this zherebko layout.
+If *size* is not specified, returns the current layout size, which defaults to [1, 1].
