@@ -16,7 +16,7 @@ const square = {
     },
   ],
 }
-const squares = JSON.parse(fs.readFileSync("test/data/square.json"))
+const squares = JSON.parse(fs.readFileSync("examples/square.json"))
 const [squaresRoot] = squares.filter(s => s.id === "3");
 
 tape("dagHierarchy() parses a simple square", test => {

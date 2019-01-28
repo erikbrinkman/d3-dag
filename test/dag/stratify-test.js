@@ -2,7 +2,7 @@ const tape = require("tape"),
   fs = require("fs"),
   d3_dag = require("../../");
 
-const square = JSON.parse(fs.readFileSync("test/data/square.json"))
+const square = JSON.parse(fs.readFileSync("examples/square.json"))
 
 tape("dagStratify() parses a square", test => {
   const dag = d3_dag.dagStratify()(square);

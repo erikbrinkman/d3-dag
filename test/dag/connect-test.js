@@ -2,7 +2,7 @@ const tape = require("tape"),
   fs = require("fs"),
   d3_dag = require("../../");
 
-const topo = JSON.parse(fs.readFileSync("test/data/topo.json"))
+const topo = JSON.parse(fs.readFileSync("examples/zherebko.json"))
 const square = [
   ["a", "b"],
   ["a", "c"],
