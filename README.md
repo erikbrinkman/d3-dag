@@ -343,14 +343,14 @@ See [Sugiyama Layering Acessors](#sugiyama-layering-accessors).
 <a name="decross" href="#decross">#</a> sugiyama.**decross**([*decross*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L102 "Source")
 
 If *decross* is specified, sets the decross accessor to the specified function and returns this sugiyama layout.
-If *decross* is not specified, returns the current decross accessor, which defaults to [*d3.decrossOpt()*](#decrossOpt).
+If *decross* is not specified, returns the current decross accessor, which defaults to [*d3.decrossTwoLayer()*](#decrossTwoLayer).
 A decross accessor takes a dag as an array of layers where each layer is an array of nodes, and modifies the order of nodes in each layer to reduce the number of link crossings.
 See [Sugiyama Decross Acessors](#sugiyama-decross-accessors).
 
 <a name="coord" href="#coord">#</a> sugiyama.**coord**([*coord*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L106 "Source")
 
 If *coord* is specified, sets the coord accessor to the specified function and returns this sugiyama layout.
-If *coord* is not specified, returns the current coord accessor, which defaults to [*d3.coordVert()*](#coordVert).
+If *coord* is not specified, returns the current coord accessor, which defaults to [*d3.coordGreedy()*](#coordGreedy).
 A coord accessor takes a dag as an array of layers where each layer is an array of nodes and a separation function, which takes adjacent nodes and specifies their relative separation.
 The coord accessor assigns every node an x property in [0, 1] to specify the actual layout.
 See [Sugiyama Coord Acessors](#sugiyama-coord-accessors).

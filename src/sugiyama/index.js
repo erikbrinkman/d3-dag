@@ -3,16 +3,16 @@
 // y coordinates for intermediary stops on the edge.
 import Node from "../dag";
 import simplex from "./layering/simplex";
-import opt from "./decross/opt";
-import vert from "./coord/vert";
+import twoLayer from "./decross/twoLayer";
+import greedy from "./coord/greedy";
 
 export default function() {
   let debug = false;
   let width = 1;
   let height = 1;
   let layering = simplex();
-  let decross = opt();
-  let coord = vert();
+  let decross = twoLayer();
+  let coord = greedy();
   let separation = defaultSeparation;
 
   // Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
