@@ -5,6 +5,7 @@ import verify from "./verify";
 export default function() {
   let id = defaultId;
   let parentIds = defaultParentIds;
+  let linkData = defaultLinkData;
 
   function dagStratify(data) {
     if (!data.length) throw new Error("can't stratify empty data");
@@ -29,6 +30,7 @@ export default function() {
         const parent = mapping[pid];
         if (!parent) throw new Error("missing id: " + pid);
         parent.children.push(node);
+        parent._childLinkData.push(linkData(parent.data, node.data));
         return parent;
       });
       if (!pids.length) {
@@ -48,6 +50,10 @@ export default function() {
     return arguments.length ? ((parentIds = x), dagStratify) : parentIds;
   };
 
+  dagStratify.linkData = function(x) {
+    return arguments.length ? ((linkData = x), dagStratify) : linkData;
+  };
+
   return dagStratify;
 }
 
@@ -57,4 +63,8 @@ function defaultId(d) {
 
 function defaultParentIds(d) {
   return d.parentIds;
+}
+
+function defaultLinkData() {
+  return {};
 }

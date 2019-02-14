@@ -22,7 +22,7 @@ export default function Node(id, data) {
   this.id = id;
   this.data = data;
   this.children = [];
-  this._childLinkData = {};
+  this._childLinkData = [];
 }
 
 // Must be internal for new Node creation
@@ -68,13 +68,10 @@ function reverse() {
   });
   cnodes.forEach((cnode, i) => {
     const node = nodes[i];
-    node.children.map((c) => {
+    node.children.map((c, j) => {
       const cc = mapping[c.id];
       cc.children.push(cnode);
-      const dat = node._childLinkData[c.id];
-      if (dat) {
-        cc._childLinkData[node.id] = dat;
-      }
+      cc._childLinkData.push(node._childLinkData[j]);
     });
   });
 

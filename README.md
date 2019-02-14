@@ -113,6 +113,18 @@ function children(d) {
 }
 ```
 
+<a name="dh_linkData" href="#dh_linkData">#</a> dagHierarchy.**linkData**([*linkData*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L50 "Source")
+
+If *linkData* is specified, sets the linkData accessor to the given function and returns this dagHierarchy operator.
+The link data accessor takes the source and target data objects associated with a link and returns an object with data on the link.
+Otherwise, returns the current linkData accessor, which defaults to:
+
+```js
+function linkData(source, target) {
+  return {};
+}
+```
+
 
 ### Stratify
 
@@ -190,6 +202,18 @@ function parentIds(d) {
 }
 ```
 
+<a name="ds_linkData" href="#ds_linkData">#</a> dagStratify.**linkData**([*linkData*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/stratify.js#L53 "Source")
+
+If *linkData* is specified, sets the linkData accessor to the given function and returns this dagStratify operator.
+The linkData accessor takes the source and target data and returns an object with data for the link between them.
+Otherwise, returns the current linkData accessor, which defaults to:
+
+```js
+function linkData(source, target) {
+  return {};
+}
+```
+
 
 ### Connect
 
@@ -214,6 +238,42 @@ For example:
   ["Eve", "Abel"],
   ["Eve", "Awan"]
 ]
+```
+
+<a name="dc_sourceAccessor" href="#ds_sourceAccessor">#</a> dagConnect.**sourceAccessor**([*sourceAccessor*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/connect.js#L31 "Source")
+
+If *sourceAccessor* is specified, sets the source accessor to the given function and returns this dagConnect operator.
+The source accessor takes the link data and returns the source id for the link.
+Otherwise, returns the current source accessor, which defaults to:
+
+```js
+function sourceAccessor(link) {
+  return link[0];
+}
+```
+
+<a name="dc_targetAccessor" href="#ds_targetAccessor">#</a> dagConnect.**targetAccessor**([*targetAccessor*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/connect.js#L37 "Source")
+
+If *targetAccessor* is specified, sets the target accessor to the given function and returns this dagConnect operator.
+The target accessor takes the link data and returns the target id for the link.
+Otherwise, returns the current target accessor, which defaults to:
+
+```js
+function targetAccessor(link) {
+  return link[1];
+}
+```
+
+<a name="dc_linkData" href="#ds_linkData">#</a> dagConnect.**linkData**([*linkData*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/connect.js#L43 "Source")
+
+If *liknData* is specified, sets the linkData accessor to the given function and returns this dagConnect operator.
+The linkData accessor takes the link data and returns a data object to use for the link data.
+Otherwise, returns the current target accessor, which defaults to:
+
+```js
+function targetAccessor(link) {
+  return link;
+}
 ```
 
 

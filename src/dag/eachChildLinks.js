@@ -2,12 +2,12 @@
 export default function(func) {
   if (this.id !== undefined) {
     let i = 0;
-    this.children.forEach((c) =>
+    this.children.forEach((c, j) =>
       func(
         {
           source: this,
           target: c,
-          data: this._childLinkData[c.id] || (this._childLinkData[c.id] = {}),
+          data: this._childLinkData[j],
         },
         i++,
       ),

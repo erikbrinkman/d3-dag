@@ -5,6 +5,7 @@ import verify from "./verify";
 export default function() {
   let id = defaultId;
   let children = defaultChildren;
+  let linkData = defaultLinkData;
 
   function dagHierarchy(...data) {
     if (!data.length) throw new Error("must pass at least one node");
@@ -29,6 +30,9 @@ export default function() {
     root.children = data.map(nodify);
     while ((node = queue.pop())) {
       node.children = (children(node.data) || []).map(nodify);
+      node._childLinkData = node.children.map((c) =>
+        linkData(node.data, c.data),
+      );
     }
 
     verify(root);
@@ -43,6 +47,10 @@ export default function() {
     return arguments.length ? ((children = x), dagHierarchy) : children;
   };
 
+  dagHierarchy.linkData = function(x) {
+    return arguments.length ? ((linkData = x), dagHierarchy) : linkData;
+  };
+
   return dagHierarchy;
 }
 
@@ -52,4 +60,8 @@ function defaultId(d) {
 
 function defaultChildren(d) {
   return d.children;
+}
+
+function defaultLinkData() {
+  return {};
 }
