@@ -3,7 +3,7 @@ const sentinel = {};
 
 export default function(func) {
   try {
-    this.each(n => {
+    this.each((n) => {
       if (func(n)) {
         throw sentinel;
       }

@@ -27,21 +27,31 @@ export default function(root) {
       return result;
     }
   }
-  const msg = root.id === undefined ? root.children.reduce((msg, r) => msg || visit(r), false) : visit(root);
-  if (msg) throw new Error("dag contained a cycle: " + msg.reverse().join(" -> "));
+  const msg =
+    root.id === undefined
+      ? root.children.reduce((msg, r) => msg || visit(r), false)
+      : visit(root);
+  if (msg)
+    throw new Error("dag contained a cycle: " + msg.reverse().join(" -> "));
 
   // Test that all nodes are valid
-  root.each(node => {
-      if (node.id.indexOf("\0") >= 0) throw new Error("node id contained null character");
-      if (!node.data) throw new Error("node contained falsy data");
+  root.each((node) => {
+    if (node.id.indexOf("\0") >= 0)
+      throw new Error("node id contained null character");
+    if (!node.data) throw new Error("node contained falsy data");
   });
 
   // Test that dag is connected
-  const rootsSpan = root.children.map(r => r.descendants().map(n => n.id));
-  const connected = root.children.length === 1 || rootsSpan.every((rootSpan, i) => {
-    const otherSpan = {};
-    rootsSpan.slice(0, i).concat(rootsSpan.slice(i + 1)).forEach(span => span.forEach(n => otherSpan[n] = true));
-    return rootSpan.some(n => otherSpan[n]);
-  });
+  const rootsSpan = root.children.map((r) => r.descendants().map((n) => n.id));
+  const connected =
+    root.children.length === 1 ||
+    rootsSpan.every((rootSpan, i) => {
+      const otherSpan = {};
+      rootsSpan
+        .slice(0, i)
+        .concat(rootsSpan.slice(i + 1))
+        .forEach((span) => span.forEach((n) => (otherSpan[n] = true)));
+      return rootSpan.some((n) => otherSpan[n]);
+    });
   if (!connected) throw new Error("dag was not connected");
 }

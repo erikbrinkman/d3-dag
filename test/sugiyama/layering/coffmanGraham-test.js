@@ -1,10 +1,9 @@
 const tape = require("tape"),
   load = require("../../load"),
   toLayers = require("./toLayers"),
-  fs = require("fs"),
   d3_dag = require("../../../");
 
-tape("layeringCoffmanGraham() works for square", test => {
+tape("layeringCoffmanGraham() works for square", (test) => {
   const dag = d3_dag.layeringCoffmanGraham()(load("square"));
   const layers = toLayers(dag);
   test.equals(layers.length, 3);
@@ -12,7 +11,7 @@ tape("layeringCoffmanGraham() works for square", test => {
   test.end();
 });
 
-tape("layeringCoffmanGraham() works with width", test => {
+tape("layeringCoffmanGraham() works with width", (test) => {
   const dag = d3_dag.layeringCoffmanGraham().width(1)(load("square"));
   const layers = toLayers(dag);
   test.equals(layers.length, 4);
@@ -20,12 +19,17 @@ tape("layeringCoffmanGraham() works with width", test => {
   test.end();
 });
 
-tape("layeringCoffmanGraham() works for grafo", test => {
+tape("layeringCoffmanGraham() works for grafo", (test) => {
   const dag = d3_dag.layeringCoffmanGraham()(load("grafo"));
   const layers = toLayers(dag);
   test.equals(layers.length, 6);
-  test.deepEquals(
-    layers,
-    [[2, 8, 15, 19, 21], [0, 1, 11, 12, 17], [3, 4, 14, 16], [9, 10, 13], [6, 18, 20], [5, 7]]);
+  test.deepEquals(layers, [
+    [2, 8, 15, 19, 21],
+    [0, 1, 11, 12, 17],
+    [3, 4, 14, 16],
+    [9, 10, 13],
+    [6, 18, 20],
+    [5, 7],
+  ]);
   test.end();
 });

@@ -5,7 +5,7 @@ import qp from "quadprog-js";
 export function indices(layers) {
   const inds = {};
   let i = 0;
-  layers.forEach(layer => layer.forEach(n => inds[n.id] = i++));
+  layers.forEach((layer) => layer.forEach((n) => (inds[n.id] = i++)));
   return inds;
 }
 
@@ -15,16 +15,18 @@ export function sep(layers, inds, separation) {
   const A = [];
   const b = [];
 
-  layers.forEach(layer => layer.slice(0, layer.length - 1).forEach((first, i) => {
-    const second = layer[i + 1];
-    const find = inds[first.id];
-    const sind = inds[second.id];
-    const cons = new Array(n).fill(0);
-    cons[find] = 1;
-    cons[sind] = -1;
-    A.push(cons);
-    b.push(-separation(first, second));
-  }));
+  layers.forEach((layer) =>
+    layer.slice(0, layer.length - 1).forEach((first, i) => {
+      const second = layer[i + 1];
+      const find = inds[first.id];
+      const sind = inds[second.id];
+      const cons = new Array(n).fill(0);
+      cons[find] = 1;
+      cons[sind] = -1;
+      A.push(cons);
+      b.push(-separation(first, second));
+    }),
+  );
 
   return [A, b];
 }
@@ -56,15 +58,15 @@ export function solve(Q, c, A, b, meq = 0) {
   // This is simpler than special casing the last element
   c.pop();
   Q.pop();
-  Q.forEach(row => row.pop());
-  A.forEach(row => row.pop());
+  Q.forEach((row) => row.pop());
+  A.forEach((row) => row.pop());
 
   // Solve
   const { solution } = qp(Q, c, A, b, meq);
 
   // Undo last coordinate removal
   solution.push(0);
-  return solution
+  return solution;
 }
 
 // Assign nodes x in [0, 1] based on solution
@@ -72,5 +74,7 @@ export function layout(layers, inds, solution) {
   // Rescale to be in [0, 1]
   const min = Math.min(...solution);
   const span = Math.max(...solution) - min;
-  layers.forEach(layer => layer.forEach(n => n.x = (solution[inds[n.id]] - min) / span));
+  layers.forEach((layer) =>
+    layer.forEach((n) => (n.x = (solution[inds[n.id]] - min) / span)),
+  );
 }

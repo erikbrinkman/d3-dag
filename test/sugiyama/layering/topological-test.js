@@ -1,10 +1,9 @@
 const tape = require("tape"),
   load = require("../../load"),
   toLayers = require("./toLayers"),
-  fs = require("fs"),
   d3_dag = require("../../../");
 
-tape("layeringTopological() works for square", test => {
+tape("layeringTopological() works for square", (test) => {
   const dag = d3_dag.layeringTopological()(load("square"));
   const layers = toLayers(dag);
   test.equals(layers.length, 4);

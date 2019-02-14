@@ -10,7 +10,7 @@ export default function(func) {
     current = next.reverse();
     next = [];
     let node;
-    while (node = current.pop()) {
+    while ((node = current.pop())) {
       if (!seen[node.id]) {
         seen[node.id] = true;
         func(node, i++);

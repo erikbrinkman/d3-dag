@@ -2,8 +2,9 @@ const tape = require("tape"),
   load = require("../../load"),
   d3_dag = require("../../../");
 
-tape("coordCenter() works for square", test => {
-  const layout = d3_dag.sugiyama()
+tape("coordCenter() works for square", (test) => {
+  const layout = d3_dag
+    .sugiyama()
     .layering(d3_dag.layeringSimplex())
     .decross(d3_dag.decrossOpt())
     .coord(d3_dag.coordCenter())

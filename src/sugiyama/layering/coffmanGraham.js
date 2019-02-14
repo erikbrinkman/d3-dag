@@ -2,19 +2,22 @@
 
 // TODO switch to d3 priority queue when it exists
 
-import FastPriorityQueue from 'fastpriorityqueue';
+import FastPriorityQueue from "fastpriorityqueue";
 
 export default function() {
   let maxWidth = 0;
-  
+
   function layeringCoffmanGraham(dag) {
-    maxWidth = maxWidth || Math.floor(Math.sqrt(dag.reduce(a => a + 1, 0)) + 0.5);
+    maxWidth =
+      maxWidth || Math.floor(Math.sqrt(dag.reduce((a) => a + 1, 0)) + 0.5);
 
     // Initialize node data
-    dag.each(node => {
-      node._before = [];
-      node._parents = [];
-    }).each(n => n.children.forEach(c => c._parents.push(n)));
+    dag
+      .each((node) => {
+        node._before = [];
+        node._parents = [];
+      })
+      .each((n) => n.children.forEach((c) => c._parents.push(n)));
 
     // Create queue
     const queue = FastPriorityQueue((a, b) => {
@@ -31,20 +34,20 @@ export default function() {
     });
 
     // Start with root nodes
-    dag.roots().forEach(n => queue.add(n));
+    dag.roots().forEach((n) => queue.add(n));
     let i = 0;
     let layer = 0;
     let width = 0;
     let node;
-    while (node = queue.poll()) {
-      if (width < maxWidth && node._parents.every(p => p.layer < layer)) {
+    while ((node = queue.poll())) {
+      if (width < maxWidth && node._parents.every((p) => p.layer < layer)) {
         node.layer = layer;
         width++;
       } else {
         node.layer = ++layer;
         width = 1;
       }
-      node.children.forEach(child => {
+      node.children.forEach((child) => {
         child._before.push(i);
         if (child._before.length === child._parents.length) {
           child._before.sort((a, b) => b - a);
@@ -55,7 +58,7 @@ export default function() {
     }
 
     // Remove bookkeeping
-    dag.each(node => {
+    dag.each((node) => {
       delete node._before;
       delete node._parents;
     });
@@ -63,8 +66,10 @@ export default function() {
   }
 
   layeringCoffmanGraham.width = function(x) {
-    return arguments.length ? (maxWidth = x, layeringCoffmanGraham) : maxWidth;
-  }
+    return arguments.length
+      ? ((maxWidth = x), layeringCoffmanGraham)
+      : maxWidth;
+  };
 
   return layeringCoffmanGraham;
 }

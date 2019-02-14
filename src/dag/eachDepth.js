@@ -7,7 +7,7 @@ export default function(func) {
   const seen = {};
   let node;
   let i = 0;
-  while (node = queue.pop()) {
+  while ((node = queue.pop())) {
     if (!seen[node.id]) {
       seen[node.id] = true;
       func(node, i++);

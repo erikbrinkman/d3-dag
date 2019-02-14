@@ -14,7 +14,7 @@ export default function() {
     });
 
     const mapping = {};
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (mapping[node.id]) {
         throw new Error("found a duplicate id: " + node.id);
       } else {
@@ -23,9 +23,9 @@ export default function() {
     });
 
     const root = new Node(undefined, undefined);
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       const pids = parentIds(node.data) || [];
-      pids.forEach(pid => {
+      pids.forEach((pid) => {
         const parent = mapping[pid];
         if (!parent) throw new Error("missing id: " + pid);
         parent.children.push(node);
@@ -41,12 +41,12 @@ export default function() {
   }
 
   dagStratify.id = function(x) {
-    return arguments.length ? (id = x, dagStratify) : id;
-  }
+    return arguments.length ? ((id = x), dagStratify) : id;
+  };
 
   dagStratify.parentIds = function(x) {
-    return arguments.length ? (parentIds = x, dagStratify) : parentIds;
-  }
+    return arguments.length ? ((parentIds = x), dagStratify) : parentIds;
+  };
 
   return dagStratify;
 }

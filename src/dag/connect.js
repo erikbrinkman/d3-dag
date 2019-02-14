@@ -11,8 +11,10 @@ export default function() {
     data.forEach((datum) => {
       const source = sourceAccessor(datum);
       const target = targetAccessor(datum);
-      keyedData[source] || (keyedData[source] = {id: source, parentIds: []});
-      const node = keyedData[target] || (keyedData[target] = {id: target, parentIds: []});
+      keyedData[source] || (keyedData[source] = { id: source, parentIds: [] });
+      const node =
+        keyedData[target] ||
+        (keyedData[target] = { id: target, parentIds: [] });
       node.parentIds.push(source);
     });
     return dagStratify()(Object.values(keyedData));

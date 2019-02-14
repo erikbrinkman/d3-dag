@@ -31,7 +31,7 @@ function copy() {
   const nodes = [];
   const cnodes = [];
   const mapping = {};
-  this.each(node => {
+  this.each((node) => {
     nodes.push(node);
     const cnode = new Node(node.id, node.data);
     cnodes.push(cnode);
@@ -40,12 +40,12 @@ function copy() {
 
   cnodes.forEach((cnode, i) => {
     const node = nodes[i];
-    cnode.children = node.children.map(c => mapping[c.id]);
+    cnode.children = node.children.map((c) => mapping[c.id]);
   });
 
   if (this.id === undefined) {
     const root = new Node(undefined, undefined);
-    root.children = this.children.map(c => mapping[c.id]);
+    root.children = this.children.map((c) => mapping[c.id]);
   } else {
     return mapping[this.id];
   }
@@ -57,7 +57,7 @@ function reverse() {
   const cnodes = [];
   const mapping = {};
   const root = new Node(undefined, undefined);
-  this.each(node => {
+  this.each((node) => {
     nodes.push(node);
     const cnode = new Node(node.id, node.data);
     cnodes.push(cnode);
@@ -68,7 +68,7 @@ function reverse() {
   });
   cnodes.forEach((cnode, i) => {
     const node = nodes[i];
-    node.children.map(c => {
+    node.children.map((c) => {
       const cc = mapping[c.id];
       cc.children.push(cnode);
       const dat = node._childLinkData[c.id];
@@ -77,7 +77,7 @@ function reverse() {
       }
     });
   });
-  
+
   return root.children.length > 1 ? root : root.children[0];
 }
 

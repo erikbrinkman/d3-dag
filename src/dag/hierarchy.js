@@ -27,7 +27,7 @@ export default function() {
     const root = new Node(undefined, undefined);
     let node;
     root.children = data.map(nodify);
-    while (node = queue.pop()) {
+    while ((node = queue.pop())) {
       node.children = (children(node.data) || []).map(nodify);
     }
 
@@ -36,12 +36,12 @@ export default function() {
   }
 
   dagHierarchy.id = function(x) {
-    return arguments.length ? (id = x, dagHierarchy) : id;
-  }
+    return arguments.length ? ((id = x), dagHierarchy) : id;
+  };
 
   dagHierarchy.children = function(x) {
-    return arguments.length ? (children = x, dagHierarchy) : children;
-  }
+    return arguments.length ? ((children = x), dagHierarchy) : children;
+  };
 
   return dagHierarchy;
 }

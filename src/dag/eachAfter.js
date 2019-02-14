@@ -2,7 +2,7 @@
 export default function(func) {
   // TODO Better way to do this?
   const all = [];
-  this.eachBefore(n => all.push(n));
+  this.eachBefore((n) => all.push(n));
   all.reverse().forEach(func);
   return this;
 }

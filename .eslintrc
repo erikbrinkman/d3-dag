@@ -1,3 +1,5 @@
+parser: babel-eslint
+
 parserOptions:
   sourceType: module
 
@@ -7,3 +9,7 @@ extends:
 rules:
   no-cond-assign: 0
   no-constant-condition: 0
+
+env:
+  amd: true
+  node: true
