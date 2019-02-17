@@ -54,4 +54,8 @@ export default function(root) {
       return rootSpan.some((n) => otherSpan[n]);
     });
   if (!connected) throw new Error("dag was not connected");
+
+  // Test that all link data is valid
+  if (root.links().some(({ data }) => !data))
+    throw new Error("dag had falsy link data");
 }

@@ -22,7 +22,7 @@ export default function() {
         keyedData[target] ||
         (keyedData[target] = { id: target, parentIds: [], linkData: {} });
       node.parentIds.push(source);
-      node.linkData[target] = datum;
+      node.linkData[source] = datum;
     });
 
     return dagStratify().linkData(stratifyLinkData)(Object.values(keyedData));
