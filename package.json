@@ -24,7 +24,7 @@
     "lint": "eslint index.js src test",
     "build": "rm -rf dist && mkdir dist && rollup --banner \"$(preamble)\" --config",
     "test": "npm run build && tape 'test/**/*-test.js' && npm run lint",
-    "publish": "npm run test && uglifyjs -b beautify=false,preamble=\"'$(preamble)'\" dist/d3-dag.js -c -m -o dist/d3-dag.min.js",
+    "prepare": "npm run test && uglifyjs -b beautify=false,preamble=\"'$(preamble)'\" dist/d3-dag.js -c -m -o dist/d3-dag.min.js",
     "todo": "grep -nrEI 'FIXME|TODO|XXX' index.js src test"
   },
   "dependencies": {
