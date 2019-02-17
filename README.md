@@ -1,30 +1,44 @@
 # d3-dag
 
+![npm](https://img.shields.io/npm/v/d3-dag.svg?style=flat-square)
+![travis](https://img.shields.io/travis/erikbrinkman/d3-dag.svg?style=flat-square)
+
 Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 In these instances `d3-hierarchy` may not suit your needs, which is why `d3-dag` (Directed Acyclic Graph) exists.
-This module implements a data structures for manipulating DAGs that mimics the API of `d3-hierarchy` as much as possible.
+This module implements a data structure for manipulating DAGs that mimics the API of `d3-hierarchy` as much as possible, while allowing layouts of acylic DAGs.
+
+
+## Updating from 0.1 to 0.2
+
+The update from 0.1 to 0.2 includes a few small backwards incompatible changes.
+
+- `dratify` was renamed to `dagStratify` and `dierarchy` was renamed to `dagHierarchy` in order to pollute the d3 namespace less.
+- After running a `sugiyama` layout, the `points` attribute will always exist for every links data, and it now also contains the start and end points.
+- `coordSpread` was removed in favor of `coordCenter` which produces a slightly better layout in the same amount of time.
+- `test/data` was moved to `examples`. This isn't technically part of the api, but it may break examples that required the old file location.
+- Link data is created at dag creation time. This also isn't technically backwards compatible but might increase memory consumption.
+
+
+## Examples
+
+- [Examples with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout.
+- [Examples with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
+- [Example with Arrows](https://jsfiddle.net/2pL836sc/) - This example shows a simple, if inexact, way to render edge arrows with d3.
 
 
 ## Installing
 
-If you use NPM, `npm i d3-dag`.
+If you use NPM, `npm i d3-dag@0.2.3`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag"></script>
+<script src="https://unpkg.com/d3-dag@0.2.3"></script>
 <script>
 
 var dag = d3.sugiyama();
 
 </script>
 ```
-
-- [Try d3-dag in your browser](https://tonicdev.com/npm/d3-dag)
-- [Some examples](https://beta.observablehq.com/collection/@bumbeishvili/d3-dag)  
-- [Pretty JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/77/) - By default, the sugiyama layout uses very expensive algorithms to compute a pretty layout.
-  For complicated graphs, this can be very expensive to render.
-- [Fast JS Fiddle Demo](https://jsfiddle.net/ye2xanf9/75/) - Setting less pretty but faster layout algorithms can drastically speed up rendering if you find sugiyama is taking too long.
-- [Example with Arrows](https://jsfiddle.net/2pL836sc/) - This example shows a simple, if inexact, way to render edge arrows with d3.
 
 
 ## API Reference
@@ -368,6 +382,8 @@ Set the *value* of every node to be the sum of this *functions* return value on 
 
 This constructs a layered representation of the DAG meant for visualization.
 The algorithm is based off ideas presented in K. Sugiyama et al. [1979], but described by [S. Hong](http://www.it.usyd.edu.au/~shhong/fab.pdf).
+The sugiyama layout can be configured with different algorithms for different stages of the layout.
+For each stage there should be adecuate choices for methods that balance speed and quality for your desired layout, but any function that meets the interface for that stage is valid.
 
 <a name="c_sugiyama" href="#c_sugiyama">#</a> d3.**sugiyama**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L9 "Source")
 
@@ -437,7 +453,7 @@ Construct a longest path layering accessor.
 This layering accessor assigns every node a layer such that the longest path (the height) is minimized.
 This often results in very wide graphs, but is fast.
 
-![longest path example](examples/longestPath.png)
+<img alt="longest path example" src="resources/longest_path.png" width=400>
 
 <a name="lp_topDown" href="#lp_topDown">#</a> layeringLongestPath.**topDown**(*topDown*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/layering/longestPath.js#L17 "Source")
 
@@ -450,7 +466,7 @@ Constructs a Coffman-Graham layering accessor with default options.
 Assigns every node a layer such that the width, not counting dummy nodes, is always less than some constant.
 This can result in tall graphs, but is also reasonably fast.
 
-![Coffman-Graham example](examples/coffmanGraham.png)
+<img alt="Coffman-Graham example" src="resources/coffman_graham.png" width=400>
 
 <a name="cg_width" href="#cg_width">#</a> layeringCoffmanGraham.**width**(*width*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/layering/coffmanGraham.js#L65 "Source")
 
@@ -464,7 +480,7 @@ Assigns every node a layer such that the number of dummy nodes, nodes inserted o
 This is often known as the network simplex layering from [Gansner et al. [1993]](https://www.graphviz.org/Documentation/TSE93.pdf).
 This is the most expensive built-in layering assignment accessor.
 
-![simplex example](examples/simplex.png)
+<img alt="simplex example" src="resources/simplex.png" width=400>
 
 <a name="simp_debug" href="#simp_debug">#</a> layeringSimplex.**debug**(*debug*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/layering/simplex.js#L44 "Source")
 
@@ -478,7 +494,7 @@ This layering accessor assigns every node a unique layer resulting is extremely 
 However, when combined with the [*coordTopological*](#coordTopological) coordinate assignment accessor, this can produce pleasing dag layouts.
 This is a very fast layering assignment method, but may cause other steps to take lponger due to the introduction of many dummy nodes.
 
-![topological example](examples/topological.png)
+<img alt="topological example" src="resources/topological.png" width=1000>
 
 
 ### Sugiyama Decross Accessors
@@ -491,7 +507,7 @@ This step is entirely optional, so a noop function can be used to save time, but
 Construct a an optimal decross accessor with default arguments.
 This operator minimized the number of crossings, but does so by solving a mixed-integer linear program (MILP), and may therefore be very slow.
 
-![optimal decross example](examples/opt.png)
+<img alt="optimal decross example" src="resources/simplex.png" width=400>
 
 <a name="do_debug" href="#do_debug">#</a> decrossOpt.**debug**(*debug*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/decross/opt.js#L94 "Source")
 
@@ -519,14 +535,12 @@ Several built-in twolayer accessors are provided for use with [*decrossTwoLayer*
 Construct a twolayer median accessor.
 This accessor orders the bottom layer by the medians of their parents.
 
-![twolayer median decross example](examples/twolayerMedian.png)
+<img alt="twolayer median decross example" src="resources/two_layer_greedy.png" width=400>
 
 <a name="twolayerMean" href="#twolayerMean">#</a> d3.**twolayerMean**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/twolayer/mean.js#L1 "Source")
 
 Construct a twolayer mean accessor.
 This accessor orders the bottom layer by the means of their parents.
-
-![twolayer mean decross example](examples/twolayerMean.png)
 
 <a name="twolayerOpt" href="#twolayerOpt">#</a> d3.**twolayerOpt**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/twolayer/opt.js#L6 "Source")
 
@@ -534,7 +548,7 @@ Construct a twolayer optimal accessor.
 This accessor orders the bottom layer to minimize the number of crossings.
 This is done using a MILP, and so will be much slower than the other two layer accessors, but generally faster than the full optimal corssing minimiztion.
 
-![twolayer optimal decross example](examples/twolayerOpt.png)
+<img alt="twolayer optimal decross example" src="resources/two_layer_opt.png" width=400>
 
 <a name="tlo_debug" href="#tlo_debug">#</a> twolayerOpt.**debug**(*debug*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/twolayer/opt.js#L77 "Source")
 
@@ -552,7 +566,7 @@ Construct a center coordinate accessor.
 This accessor keeps spread every node apart by separation and then centers each layer.
 The result isn't a particularly great distribution of nodes, but it doesn't require any type of optimization, and so is very fast.
 
-![center example](examples/spread.png)
+<img alt="center example" src="resources/center_coordinate.png" width=400>
 
 <a name="coordVert" href="#coordVert">#</a> d3.**coordVert**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/vert.js#L4 "Source")
 
@@ -560,7 +574,7 @@ Construct a vertical coordinate accessor.
 This accessor positions nodes so that the distance between nodes and the their neightbors is minimized, while the curve through dummy nodes is minimized.
 This accessor solves a quadratic program (QP) and so may take significant time, especially as the number of nodes grows.
 
-![coord vert example](examples/vert.png)
+<img alt="coord vert example" src="resources/simplex.png" width=400>
 
 <a name="coordMinCurve" href="#coordMinCurve">#</a> d3.**coordMinCurve**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/minCurve.js#L12 "Source")
 
@@ -568,7 +582,7 @@ Construct a minimum curve accessor.
 This accessor weights between minimizing all curves through nodes, and the distance between a node and it's neightbor, including dummy nodes.
 This also solves a QP and so is about as performant as [*coordVert*](#coordVert).
 
-![coord min curve example](examples/minCurve.png)
+<img alt="coord min curve example" src="resources/min_curve.png" width=400>
 
 <a name="mc_weight" href="#mc_weight">#</a> coordMinCurve.**weight**(*weight*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/minCurve.js#L46 "Source")
 
@@ -585,7 +599,7 @@ This accessor assigns coordinates as the mean of their parents and then spaces t
 Nodes with higher degree that aren't dummy nodes are given higher priority for shifting order, i.e. are less likely to be moved from the mean of their parents.
 This solution results in a layout that is more pleaseoing than spread, but much faster to compute than vert or minCurve.
 
-![greedy example](examples/greedy.png)
+<img alt="greedy example" src="resources/greedy_coordinate.png" width=400>
 
 <a name="coordTopological" href="#coordTopological">#</a> d3.**coordTopological**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/coord/topological.js#L4 "Source")
 
@@ -613,6 +627,8 @@ Lays out the specified DAG, assigning the following properties:
 * *link*.data.points - an array of points for how to draw the edge.
   The first point will always be the same as *source* and the last point will always be the same as *target*.
   Each point has an x and a y property.
+  
+<img alt="zherebko example" src="resources/zherebko.png" width=1000>
 
 <a name="sugi_size" href="#sugi_size">#</a> zherebko.**size**([*size*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/zherebko/index.js#L52 "Source")
 
