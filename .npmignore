@@ -1,3 +1,4 @@
 /dist/*.zip
 /test/
 /examples/
+.*.un~
