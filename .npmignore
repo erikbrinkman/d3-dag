@@ -1,4 +1,5 @@
 /dist/*.zip
 /test/
 /examples/
+/resources/
 .*.un~
