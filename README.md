@@ -443,6 +443,26 @@ function separation(a, b) {
 }
 ```
 
+The separation accessor function takes two adjacent dag nodes and sets their relative separation, thus any constant function will produce the same results.
+Two other common settings are:
+
+```js
+function separation(a, b) {
+  return (a.data !== undefined) + (b.data !== undefined);
+}
+```
+
+which will wrap edges around nodes, but give them no spaceing themselves, and
+
+```js
+function separation(a, b) {
+  return +(a.data !== undefined and b.data !== undefined);
+}
+```
+
+which ignores dummy nodes.
+
+
 ### Sugiyama Layering Accessors
 
 Several built-in layering accessors are provided for use with [*sugiyama*](#sugiyama).
