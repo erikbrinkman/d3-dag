@@ -3,6 +3,13 @@ import Node from ".";
 import verify from "./verify";
 
 export default function() {
+  if (arguments.length) {
+    throw Error(
+      `got arguments to dagStratify(${arguments}), but constructor takes no aruguments. ` +
+        `These were probably meant as data which should be called as dagStratify()(...)`,
+    );
+  }
+
   let id = defaultId;
   let parentIds = defaultParentIds;
   let linkData = defaultLinkData;
@@ -10,8 +17,12 @@ export default function() {
   function dagStratify(data) {
     if (!data.length) throw new Error("can't stratify empty data");
     const nodes = data.map((datum, i) => {
-      const node = new Node(id(datum, i).toString(), datum);
-      return node;
+      const nid = id(datum, i);
+      try {
+        return new Node(nid.toString(), datum);
+      } catch (TypeError) {
+        throw Error(`node ids must have toString but got ${nid} from ${datum}`);
+      }
     });
 
     const mapping = {};

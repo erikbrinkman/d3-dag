@@ -2,6 +2,13 @@
 import { default as dagStratify } from "./stratify";
 
 export default function() {
+  if (arguments.length) {
+    throw Error(
+      `got arguments to dagConnect(${arguments}), but constructor takes no aruguments. ` +
+        `These were probably meant as data which should be called as dagConnect()(...)`,
+    );
+  }
+
   let sourceAccessor = defaultSource;
   let targetAccessor = defaultTarget;
   let linkData = defaultLinkData;

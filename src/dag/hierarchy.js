@@ -3,6 +3,12 @@ import Node from ".";
 import verify from "./verify";
 
 export default function() {
+  if (arguments.length) {
+    throw Error(
+      `got arguments to dagHierarchy(${arguments}), but constructor takes no aruguments. ` +
+        `These were probably meant as data which should be called as dagHierarchy()(...)`,
+    );
+  }
   let id = defaultId;
   let children = defaultChildren;
   let linkData = defaultLinkData;
@@ -13,7 +19,14 @@ export default function() {
     const queue = [];
 
     function nodify(datum) {
-      const did = id(datum).toString();
+      let did;
+      try {
+        did = id(datum).toString();
+      } catch (TypeError) {
+        throw Error(
+          `node ids must have toString but got ${id(datum)} from ${datum}`,
+        );
+      }
       let res;
       if (!(res = mapping[did])) {
         res = new Node(did, datum);

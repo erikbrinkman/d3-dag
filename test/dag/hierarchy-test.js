@@ -19,6 +19,27 @@ const square = {
 const squares = JSON.parse(fs.readFileSync("examples/square.json"));
 const [squaresRoot] = squares.filter((s) => s.id === "3");
 
+tape("dagHierarchy() throws for nonempty input", (test) => {
+  test.throws(() => {
+    d3_dag.dagHierarchy([]);
+  }, /got arguments to dagHierarchy/);
+  test.end();
+});
+
+tape("dagHierarchy() parses minimal dag", (test) => {
+  const root = d3_dag.dagHierarchy()({ id: "a" });
+  test.equal(root.id, "a");
+  test.equal(root.children.length, 0);
+  test.end();
+});
+
+tape("dagHierarchy() throws for undefined id", (test) => {
+  test.throws(() => {
+    d3_dag.dagHierarchy()({});
+  }, /node ids must have toString/);
+  test.end();
+});
+
 tape("dagHierarchy() parses a simple square", (test) => {
   const root = d3_dag.dagHierarchy()(square);
   test.equal(root.id, "a");
