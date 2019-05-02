@@ -23,7 +23,7 @@ tape("layeringLongestPath() works for grafo", (test) => {
     [2, 4, 8],
     [0, 9, 11, 13, 19],
     [1, 3, 15, 16, 17, 18, 20],
-    [5, 6, 7, 10, 14],
+    [5, 6, 7, 10, 14]
   ]);
   test.end();
 });

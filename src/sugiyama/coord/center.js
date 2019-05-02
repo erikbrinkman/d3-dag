@@ -9,7 +9,7 @@ export default function() {
           node.x = prev.x + separation(prev, node);
         });
         return layer[layer.length - 1].x;
-      }),
+      })
     );
     layers.forEach((layer) => {
       const halfWidth = layer[layer.length - 1].x / 2;

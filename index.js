@@ -9,14 +9,14 @@ export { default as dagStratify } from "./src/dag/stratify";
 export { default as decrossOpt } from "./src/sugiyama/decross/opt";
 export { default as decrossTwoLayer } from "./src/sugiyama/decross/twoLayer";
 export {
-  default as layeringCoffmanGraham,
+  default as layeringCoffmanGraham
 } from "./src/sugiyama/layering/coffmanGraham";
 export {
-  default as layeringLongestPath,
+  default as layeringLongestPath
 } from "./src/sugiyama/layering/longestPath";
 export { default as layeringSimplex } from "./src/sugiyama/layering/simplex";
 export {
-  default as layeringTopological,
+  default as layeringTopological
 } from "./src/sugiyama/layering/topological";
 export { default as sugiyama } from "./src/sugiyama";
 export { default as twolayerMean } from "./src/sugiyama/twolayer/mean";

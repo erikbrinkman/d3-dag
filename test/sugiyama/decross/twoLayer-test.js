@@ -36,7 +36,7 @@ tape("decrossTwoLayer() default works for grafo", (test) => {
     140,
     35,
     112,
-    70,
+    70
   ]);
   test.end();
 });
@@ -72,7 +72,7 @@ tape("decrossTwoLayer() median works for grafo", (test) => {
     140,
     35,
     112,
-    70,
+    70
   ]);
   test.end();
 });
@@ -108,7 +108,7 @@ tape("decrossTwoLayer() mean works for grafo", (test) => {
     140,
     35,
     112,
-    70,
+    70
   ]);
   test.end();
 });
@@ -144,7 +144,7 @@ tape("decrossTwoLayer() opt works for grafo", (test) => {
     70,
     91,
     112,
-    70,
+    70
   ]);
   test.end();
 });
@@ -159,7 +159,7 @@ tape("decrossTwoLayer() opt debug is identical", (test) => {
     .sort((a, b) => a.id - b.id)
     .map((n) => n.x);
   layout.decross(
-    d3_dag.decrossTwoLayer().order(d3_dag.twolayerOpt().debug(true)),
+    d3_dag.decrossTwoLayer().order(d3_dag.twolayerOpt().debug(true))
   )(dag);
   const debug = dag
     .descendants()

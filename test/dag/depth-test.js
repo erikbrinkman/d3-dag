@@ -8,7 +8,7 @@ tape("depth() is correct for square", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [0, 1, 1, 2],
+    [0, 1, 1, 2]
   );
   test.end();
 });
@@ -26,7 +26,7 @@ tape("depth() is correct for N", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [0, 0, 1, 1],
+    [0, 0, 1, 1]
   );
 
   test.end();
@@ -39,7 +39,7 @@ tape("depth() is correct for X", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [0, 1, 0, 2, 3, 3, 4],
+    [0, 1, 0, 2, 3, 3, 4]
   );
   test.end();
 });

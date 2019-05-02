@@ -22,7 +22,7 @@ export default function() {
         model.ints[pair] = 1;
         model.constraints[pair] = { max: 1 };
         model.variables[pair] = { [pair]: 1 };
-      }),
+      })
     );
 
     layer.slice(0, layer.length - 1).forEach((n1, i) =>
@@ -45,7 +45,7 @@ export default function() {
           model.variables[pair2][triangleDown] = -1;
           model.variables[pair3][triangleDown] = 1;
         });
-      }),
+      })
     );
   }
 
@@ -58,9 +58,9 @@ export default function() {
             .forEach((c2) => {
               const pair = key(c1, c2);
               model.variables[pair][crossings] = +(c1.id > c2.id) || -1;
-            }),
+            })
         );
-      }),
+      })
     );
   }
 
@@ -71,7 +71,7 @@ export default function() {
       optType: "min",
       constraints: {},
       variables: {},
-      ints: {},
+      ints: {}
     };
 
     // Add variables and permutation invariants
@@ -85,7 +85,7 @@ export default function() {
 
     // Sort layers
     bottomLayer.sort(
-      (n1, n2) => (n1.id > n2.id || -1) * (ordering[key(n1, n2)] || -1),
+      (n1, n2) => (n1.id > n2.id || -1) * (ordering[key(n1, n2)] || -1)
     );
   }
 

@@ -25,7 +25,7 @@ export function sep(layers, inds, separation) {
       cons[sind] = -1;
       A.push(cons);
       b.push(-separation(first, second));
-    }),
+    })
   );
 
   return [A, b];
@@ -75,6 +75,6 @@ export function layout(layers, inds, solution) {
   const min = Math.min(...solution);
   const span = Math.max(...solution) - min;
   layers.forEach((layer) =>
-    layer.forEach((n) => (n.x = (solution[inds[n.id]] - min) / span)),
+    layer.forEach((n) => (n.x = (solution[inds[n.id]] - min) / span))
   );
 }

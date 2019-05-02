@@ -8,7 +8,7 @@ export default function() {
         ...dag
           .height()
           .roots()
-          .map((d) => d.value),
+          .map((d) => d.value)
       );
       dag.each((n) => {
         n.layer = maxHeight - n.value;

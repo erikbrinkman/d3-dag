@@ -19,7 +19,7 @@ tape.Test.prototype.allClose = function(actual, expected, message) {
     message: message || "should all be close",
     operator: "allClose",
     actual: actual,
-    expected: expected,
+    expected: expected
   });
 };
 

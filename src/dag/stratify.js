@@ -6,7 +6,7 @@ export default function() {
   if (arguments.length) {
     throw Error(
       `got arguments to dagStratify(${arguments}), but constructor takes no aruguments. ` +
-        `These were probably meant as data which should be called as dagStratify()(...)`,
+        `These were probably meant as data which should be called as dagStratify()(...)`
     );
   }
 

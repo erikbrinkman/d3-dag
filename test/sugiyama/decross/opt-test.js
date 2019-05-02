@@ -33,7 +33,7 @@ tape("decrossOpt() works for grafo", (test) => {
     4,
     3,
     4,
-    0,
+    0
   ]);
   // This is brittle as there are many orientations that remove all crossings
   test.allClose(ordered.map((n) => n.x), [
@@ -58,7 +58,7 @@ tape("decrossOpt() works for grafo", (test) => {
     84,
     63,
     28,
-    70,
+    70
   ]),
     test.end();
 });

@@ -26,7 +26,7 @@ export default function() {
           const cind = inds[child.id];
           minDist(Q, pind, cind, 1 - weight);
         });
-      }),
+      })
     );
 
     layers.forEach((layer) =>
@@ -39,7 +39,7 @@ export default function() {
             minBend(Q, pind, nind, cind, weight);
           });
         });
-      }),
+      })
     );
 
     const solution = solve(Q, c, A, b);

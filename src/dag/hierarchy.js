@@ -6,7 +6,7 @@ export default function() {
   if (arguments.length) {
     throw Error(
       `got arguments to dagHierarchy(${arguments}), but constructor takes no aruguments. ` +
-        `These were probably meant as data which should be called as dagHierarchy()(...)`,
+        `These were probably meant as data which should be called as dagHierarchy()(...)`
     );
   }
   let id = defaultId;
@@ -24,7 +24,7 @@ export default function() {
         did = id(datum).toString();
       } catch (TypeError) {
         throw Error(
-          `node ids must have toString but got ${id(datum)} from ${datum}`,
+          `node ids must have toString but got ${id(datum)} from ${datum}`
         );
       }
       let res;
@@ -44,7 +44,7 @@ export default function() {
     while ((node = queue.pop())) {
       node.children = (children(node.data) || []).map(nodify);
       node._childLinkData = node.children.map((c) =>
-        linkData(node.data, c.data),
+        linkData(node.data, c.data)
       );
     }
 

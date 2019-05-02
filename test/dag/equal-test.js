@@ -13,8 +13,8 @@ tape("equals() fails on same sized line", (test) => {
   const line = d3_dag.dagStratify()(
     square.descendants().map((_, i) => ({
       id: i.toString(),
-      parentIds: i ? [(i - 1).toString()] : [],
-    })),
+      parentIds: i ? [(i - 1).toString()] : []
+    }))
   );
   test.notOk(square.equals(line));
   test.end();

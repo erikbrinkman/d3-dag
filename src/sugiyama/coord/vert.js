@@ -21,7 +21,7 @@ export default function() {
             minDist(Q, pind, cind, 1);
           }
         });
-      }),
+      })
     );
 
     layers.forEach((layer) =>
@@ -36,7 +36,7 @@ export default function() {
             });
           }
         });
-      }),
+      })
     );
 
     const solution = solve(Q, c, A, b);

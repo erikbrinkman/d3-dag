@@ -7,7 +7,7 @@ export default function() {
       !layers.every((layer) => 1 === layer.reduce((c, n) => c + !!n.data, 0))
     ) {
       throw new Error(
-        "coordTopological() only works with a topological ordering",
+        "coordTopological() only works with a topological ordering"
       );
     }
 
@@ -15,10 +15,10 @@ export default function() {
     const inds = {};
     let i = 0;
     layers.forEach((layer) =>
-      layer.forEach((n) => n.data || (inds[n.id] = i++)),
+      layer.forEach((n) => n.data || (inds[n.id] = i++))
     );
     layers.forEach((layer) =>
-      layer.forEach((n) => inds[n.id] === undefined && (inds[n.id] = i)),
+      layer.forEach((n) => inds[n.id] === undefined && (inds[n.id] = i))
     );
 
     const n = ++i;
@@ -38,7 +38,7 @@ export default function() {
             });
           }
         });
-      }),
+      })
     );
 
     const solution = solve(Q, c, A, b);

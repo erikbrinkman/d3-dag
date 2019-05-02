@@ -8,7 +8,7 @@ tape("height() is correct for square", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [2, 1, 1, 0],
+    [2, 1, 1, 0]
   );
   test.end();
 });
@@ -20,7 +20,7 @@ tape("height() is correct for N", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [1, 1, 0, 0],
+    [1, 1, 0, 0]
   );
   test.end();
 });
@@ -32,7 +32,7 @@ tape("height() is correct for X", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [4, 3, 3, 2, 0, 1, 0],
+    [4, 3, 3, 2, 0, 1, 0]
   );
   test.end();
 });

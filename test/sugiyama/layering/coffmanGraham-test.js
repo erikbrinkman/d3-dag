@@ -29,7 +29,7 @@ tape("layeringCoffmanGraham() works for grafo", (test) => {
     [3, 4, 14, 16],
     [9, 10, 13],
     [6, 18, 20],
-    [5, 7],
+    [5, 7]
   ]);
   test.end();
 });

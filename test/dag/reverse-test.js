@@ -17,7 +17,7 @@ tape("reverse() inverse parent/child loading", (test) => {
   const rhier = d3_dag
     .dagHierarchy()
     .children((d) => d.parentIds.map((i) => square[parseInt(i)]))(
-      ...square.filter((d) => d.id === "3"),
+      ...square.filter((d) => d.id === "3")
     )
     .reverse();
   test.ok(strat.equals(rhier));
@@ -27,7 +27,7 @@ tape("reverse() inverse parent/child loading", (test) => {
 tape("reverse() preserves link data", (test) => {
   const dag = d3_dag.dagHierarchy()({
     id: "0",
-    children: [{ id: "1" }],
+    children: [{ id: "1" }]
   });
   const [{ data }] = dag.links();
   data.test = true;

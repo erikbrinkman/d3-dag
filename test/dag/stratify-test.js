@@ -66,12 +66,12 @@ tape("dagStratify() fails without root", (test) => {
   const data = [
     {
       id: "1",
-      parentIds: ["2"],
+      parentIds: ["2"]
     },
     {
       id: "2",
-      parentIds: ["1"],
-    },
+      parentIds: ["1"]
+    }
   ];
   test.throws(() => d3_dag.dagStratify()(data), /no roots/);
   test.end();
@@ -80,11 +80,11 @@ tape("dagStratify() fails without root", (test) => {
 tape("dagStratify() fails with disconnected", (test) => {
   const data = [
     {
-      id: "1",
+      id: "1"
     },
     {
-      id: "2",
-    },
+      id: "2"
+    }
   ];
   test.throws(() => d3_dag.dagStratify()(data), /not connected/);
   test.end();
@@ -93,12 +93,12 @@ tape("dagStratify() fails with disconnected", (test) => {
 tape("dagStratify() fails with cycle", (test) => {
   const data = [
     {
-      id: "1",
+      id: "1"
     },
     {
       id: "2",
-      parentIds: ["1", "2"],
-    },
+      parentIds: ["1", "2"]
+    }
   ];
   test.throws(() => d3_dag.dagStratify()(data), /cycle: 2 -> 2$/);
   test.end();
@@ -107,19 +107,19 @@ tape("dagStratify() fails with cycle", (test) => {
 tape("dagStratify() fails with hard cycle", (test) => {
   const data = [
     {
-      id: "1",
+      id: "1"
     },
     {
-      id: "2",
+      id: "2"
     },
     {
       id: "3",
-      parentIds: ["4", "2"],
+      parentIds: ["4", "2"]
     },
     {
       id: "4",
-      parentIds: ["1", "3"],
-    },
+      parentIds: ["1", "3"]
+    }
   ];
   test.throws(() => d3_dag.dagStratify()(data), /cycle: 4 -> 3 -> 4$/);
   test.end();
