@@ -7,10 +7,10 @@ export default function(func) {
         {
           source: this,
           target: c,
-          data: this._childLinkData[j],
+          data: this._childLinkData[j]
         },
-        i++,
-      ),
+        i++
+      )
     );
   }
   return this;

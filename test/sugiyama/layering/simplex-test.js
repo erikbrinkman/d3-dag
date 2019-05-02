@@ -38,7 +38,7 @@ tape("layeringSimplex() works for grafo", (test) => {
     [2, 4, 19],
     [9, 11, 13, 15, 17],
     [3, 6, 18, 20],
-    [5, 7],
+    [5, 7]
   ]);
   test.end();
 });

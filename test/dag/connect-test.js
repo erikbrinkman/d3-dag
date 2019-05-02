@@ -8,7 +8,7 @@ const square2 = [
   { source: "a", target: "b" },
   { source: "a", target: "c" },
   { source: "b", target: "d" },
-  { source: "c", target: "d" },
+  { source: "c", target: "d" }
 ];
 
 tape("dagConnect() fails passing an arg to dagConnect", (test) => {

@@ -9,7 +9,7 @@ function info(root) {
   const info = {};
   root.each(
     (node) =>
-      (info[node.id] = [node.data, toSet(node.children.map((n) => n.id))]),
+      (info[node.id] = [node.data, toSet(node.children.map((n) => n.id))])
   );
   return info;
 }

@@ -30,7 +30,7 @@ export default function() {
               `${node.id}${debug ? "->" : "\0"}${child.id}${
                 debug ? " (" : "\0"
               }${l}${debug ? ")" : ""}`,
-              undefined,
+              undefined
             );
             dummy.children = [last];
             (layers[l] || (layers[l] = [])).push(dummy);
@@ -76,7 +76,7 @@ export default function() {
       layer.forEach((n) => (n.y = height / 2));
     } else {
       layers.forEach((layer, i) =>
-        layer.forEach((n) => (n.y = (height * i) / (layers.length - 1))),
+        layer.forEach((n) => (n.y = (height * i) / (layers.length - 1)))
       );
     }
     if (layers.every((l) => l.length === 1)) {

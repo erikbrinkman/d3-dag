@@ -9,10 +9,10 @@ export default function() {
     // Assign degrees
     // The 3 at the end ensures that dummy nodes have the lowest priority
     layers.forEach((layer) =>
-      layer.forEach((n) => (n.degree = n.children.length + (n.data ? 0 : -3))),
+      layer.forEach((n) => (n.degree = n.children.length + (n.data ? 0 : -3)))
     );
     layers.forEach((layer) =>
-      layer.forEach((n) => n.children.forEach((c) => ++c.degree)),
+      layer.forEach((n) => n.children.forEach((c) => ++c.degree))
     );
 
     // Set first nodes
@@ -30,7 +30,7 @@ export default function() {
       bottom
         .map((n, j) => [n, j])
         .sort(([an, aj], [bn, bj]) =>
-          an.degree === bn.degree ? aj - bj : bn.degree - an.degree,
+          an.degree === bn.degree ? aj - bj : bn.degree - an.degree
         )
         .forEach(([n, j]) => {
           bottom.slice(j + 1).reduce((last, node) => {
@@ -48,7 +48,7 @@ export default function() {
     });
 
     const min = Math.min(
-      ...layers.map((layer) => Math.min(...layer.map((n) => n.x))),
+      ...layers.map((layer) => Math.min(...layer.map((n) => n.x)))
     );
     const span =
       Math.max(...layers.map((layer) => Math.max(...layer.map((n) => n.x)))) -
@@ -67,7 +67,7 @@ function mean(topLayer, bottomLayer) {
     node._count = 0.0;
   });
   topLayer.forEach((n) =>
-    n.children.forEach((c) => (c.x += (n.x - c.x) / ++c._count)),
+    n.children.forEach((c) => (c.x += (n.x - c.x) / ++c._count))
   );
   bottomLayer.forEach((n) => delete n._count);
 }

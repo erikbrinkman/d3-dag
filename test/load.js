@@ -3,6 +3,6 @@ const fs = require("fs"),
 
 module.exports = function(name) {
   return d3_dag.dagStratify()(
-    JSON.parse(fs.readFileSync(`examples/${name}.json`)),
+    JSON.parse(fs.readFileSync(`examples/${name}.json`))
   );
 };

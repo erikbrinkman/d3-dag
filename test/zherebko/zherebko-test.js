@@ -28,11 +28,11 @@ tape("zherebko() works for square", (test) => {
     });
   test.allClose(
     orderedLinks.flatMap(({ data }) => data.points.map((p) => p.x)),
-    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0]
   ); // Fragile, flip sets of 0s and 1s
   test.allClose(
     orderedLinks.flatMap(({ data }) => data.points.map((p) => p.y)),
-    [0, 1, 2, 0, 1, 2, 3, 1, 2, 3],
+    [0, 1, 2, 0, 1, 2, 3, 1, 2, 3]
   ); // Fragile, flip sets of 0s and 1s
   test.end();
 });

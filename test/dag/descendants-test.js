@@ -12,28 +12,28 @@ tape("descendants() works on square", (test) => {
     dag
       .descendants()
       .map((n) => n.id)
-      .sort(),
+      .sort()
   );
   test.deepEquals(
     one
       .descendants()
       .map((n) => n.id)
       .sort(),
-    ["1", "3"],
+    ["1", "3"]
   );
   test.deepEquals(
     two
       .descendants()
       .map((n) => n.id)
       .sort(),
-    ["2", "3"],
+    ["2", "3"]
   );
   test.deepEquals(
     three
       .descendants()
       .map((n) => n.id)
       .sort(),
-    ["3"],
+    ["3"]
   );
   test.end();
 });

@@ -100,5 +100,5 @@ Node.prototype = {
   roots: roots,
   size: size,
   some: some,
-  sum: sum,
+  sum: sum
 };

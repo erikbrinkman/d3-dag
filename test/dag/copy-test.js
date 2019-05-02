@@ -9,7 +9,7 @@ tape("copy() works on square", (test) => {
   test.ok(
     root
       .descendants()
-      .every((n, i) => n.children !== copy.descendants()[i].children),
+      .every((n, i) => n.children !== copy.descendants()[i].children)
   );
   test.end();
 });

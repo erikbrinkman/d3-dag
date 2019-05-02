@@ -34,7 +34,7 @@ export default function() {
       opType: "max",
       constraints: constraints,
       variables: variables,
-      ints: ints,
+      ints: ints
     });
     // lp solver doesn't assign some zeros
     dag.each((n) => (n.layer = assignment[`${prefix}${n.id}`] || 0));

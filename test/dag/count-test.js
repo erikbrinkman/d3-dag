@@ -8,7 +8,7 @@ tape("count() is correct for square", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [1, 1, 1, 1],
+    [1, 1, 1, 1]
   );
   test.end();
 });
@@ -20,7 +20,7 @@ tape("count() is correct for N", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [1, 2, 1, 1],
+    [1, 2, 1, 1]
   );
   test.end();
 });
@@ -32,7 +32,7 @@ tape("count() is correct for X", (test) => {
       .descendants()
       .sort((a, b) => a.id - b.id)
       .map((n) => n.value),
-    [2, 2, 2, 2, 1, 1, 1],
+    [2, 2, 2, 2, 1, 1, 1]
   );
   test.end();
 });

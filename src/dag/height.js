@@ -2,6 +2,6 @@
 // any root for other nodes
 export default function() {
   return this.eachAfter(
-    (n) => (n.value = Math.max(0, ...n.children.map((c) => 1 + c.value))),
+    (n) => (n.value = Math.max(0, ...n.children.map((c) => 1 + c.value)))
   );
 }
