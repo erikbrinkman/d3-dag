@@ -21,7 +21,7 @@
   "unpkg": "dist/d3-dag.min.js",
   "scripts": {
     "format": "prettier --write index.js 'src/**/*.js' 'test/**/*.js'",
-    "lint": "eslint index.js src test",
+    "lint": "eslint index.js src test && prettier --check index.js 'src/**/*.js' 'test/**/*.js'",
     "build": "rm -rf dist && mkdir dist && rollup --banner \"$(preamble)\" --config",
     "test": "npm run build && tape 'test/**/*-test.js' && npm run lint",
     "prepare": "npm run test && uglifyjs -b beautify=false,preamble=\"'$(preamble)'\" dist/d3-dag.js -c -m -o dist/d3-dag.min.js",
