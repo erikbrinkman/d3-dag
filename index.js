@@ -23,3 +23,4 @@ export { default as twolayerMean } from "./src/sugiyama/twolayer/mean";
 export { default as twolayerMedian } from "./src/sugiyama/twolayer/median";
 export { default as twolayerOpt } from "./src/sugiyama/twolayer/opt";
 export { default as zherebko } from "./src/zherebko";
+export { default as arquint } from "./src/arquint";
