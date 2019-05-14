@@ -1,7 +1,7 @@
 import Node from "../dag";
 import layeringLongestPath from "../sugiyama/layering/longestPath";
 import twoLayer from "../sugiyama/decross/twoLayer";
-import greedy from "../sugiyama/coord/greedy";
+import center from "../sugiyama/coord/center";
 
 export default function() {
     let debug = false;
@@ -9,7 +9,7 @@ export default function() {
     let height = 1;
     let layering = layeringLongestPath();
     let decross = twoLayer();
-    let coord = greedy();
+    let coord = center();
     let intraLayerSeparation = defaultSeparation;
     let interLayerSeparation = defaultSeparation;
 
