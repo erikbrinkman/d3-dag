@@ -52,7 +52,8 @@ export interface PointNode<T> extends Node<T> {
 }
 
 export interface RectangleNode<T> extends Node<T> {
-    x: number;
+    x0: number;
+    x1: number;
     y0: number;
     y1: number;
     links(): RectangleLink<T>[];

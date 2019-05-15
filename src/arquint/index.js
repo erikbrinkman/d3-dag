@@ -1,7 +1,7 @@
 import Node from "../dag";
 import layeringLongestPath from "../sugiyama/layering/longestPath";
 import twoLayer from "../sugiyama/decross/twoLayer";
-import center from "../sugiyama/coord/center";
+import center from "./coord/centerRect";
 
 export default function() {
     let debug = false;
@@ -83,8 +83,8 @@ export default function() {
         if (layers.length === 1) {
           const [layer] = layers;
           layer.forEach((n) => {
-              n.y0 = height / 4;
-              n.y1 = 3 * height / 4;
+              n.y0 = 0;
+              n.y1 = 1;
           });
         } else {
             let totalLayerSeparation = layers.reduce((prevVal, layer, i) => (prevVal + (i == 0 ? 0 : interLayerSeparation(layer))), 0);
@@ -94,25 +94,30 @@ export default function() {
                 cummulativeLayerSeparation += (i == 0 ? 0 : interLayerSeparation(layer, i));
                 return layer.forEach((n) => {
                     let subDagPathValue = getLongestPathSubDag(n);
-                    n.y0 = (cummulativeLayerSeparation + longestPathValue - subDagPathValue) / pathLength * height;
-                    n.y1 = n.y0 + n.heightRatio / pathLength * height;
+                    n.y0 = (cummulativeLayerSeparation + longestPathValue - subDagPathValue) / pathLength;
+                    n.y1 = n.y0 + n.heightRatio / pathLength;
                     // n.y0 = cummulativeLayerSeparation + (longestPathValue - subDagPathValue) / longestPathValue * (height - totalLayerSeparation);
                     // n.y1 = n.y0 + n.heightRatio / longestPathValue * (height - totalLayerSeparation);
                 });
             });
         }
-        if (layers.every((l) => l.length === 1)) {
+        // if (layers.every((l) => l.length === 1)) {
           // Next steps aren't necessary
           // This will also be true if layers.length === 1
-          layers.forEach(([n]) => (n.x = width / 2));
-        } else {
+          // layers.forEach(([n]) => (n.x = width / 2));
+        // } else {
           // Minimize edge crossings
           decross(layers);
           // Assign coordinates
           coord(layers, intraLayerSeparation);
-          // Scale x
-          layers.forEach((layer) => layer.forEach((n) => (n.x *= width)));
-        }
+          // Scale x and y
+          layers.forEach((layer) => layer.forEach((n) => {
+            n.x0 *= width;
+            n.x1 *= width;
+            n.y0 *= height;
+            n.y1 *= height;
+          }));
+        // }
         // Remove dummy nodes and update edge data
         removeDummies(dag);
         return dag;
