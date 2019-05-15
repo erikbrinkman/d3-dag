@@ -7,7 +7,7 @@ export default function() {
   let debug = false;
   let width = 1;
   let height = 1;
-  let layering = layeringLongestPath();
+  let layering = layeringLongestPath().topDown(false);
   let decross = twoLayer();
   let coord = center();
   let intraLayerSeparation = defaultSeparation;
@@ -17,11 +17,13 @@ export default function() {
   // layer is adjacent, and returns an array of each layer of nodes.
   function createLayers(dag) {
     const layers = [];
+    const maxLayer = Math.max(0, ...dag.descendants().map((node) => node.layer));
     dag.descendants().forEach((node) => {
       const layer = layers[node.layer] || (layers[node.layer] = []);
       layer.push(node);
       node.children = node.children.map((child) => {
         if (child.layer > node.layer + 1) {
+          // child is not in the next layer of node => insert nodes in the intermediate layers
           let last = child;
           for (let l = child.layer - 1; l > node.layer; l--) {
             const dummy = new Node(
@@ -39,25 +41,71 @@ export default function() {
           return child;
         }
       });
+      if (node.children.length === 0 && node.layer < maxLayer) {
+        // insert a dummy node per layer
+        let highestLayerNode = new Node(
+          `${node.id}${debug ? "->" : "\0"}${
+            debug ? " (" : "\0"
+          }${maxLayer}${debug ? ")" : ""}`,
+          undefined
+        );
+        (layers[maxLayer] || (layers[maxLayer] = [])).push(highestLayerNode);
+        let last = highestLayerNode;
+        for (let l = maxLayer - 1; l > node.layer; l--) {
+          const dummy = new Node(
+            `${node.id}${debug ? "->" : "\0"}${highestLayerNode.id}${
+              debug ? " (" : "\0"
+            }${l}${debug ? ")" : ""}`,
+            undefined
+          );
+          dummy.children = [last];
+          (layers[l] || (layers[l] = [])).push(dummy);
+          last = dummy;
+        }
+        node.children = [last];
+      }
     });
     return layers;
   }
 
   function removeDummies(dag) {
-    dag.each((node) => {
-      if (node.data) {
-        node.children = node.children.map((child, i) => {
-          const points = [{ x: node.x, y: node.y1 }];
-          while (!child.data) {
-            points.push({ x: child.x, y: child.y0 });
-            [child] = child.children;
-          }
-          points.push({ x: child.x, y: child.y0 });
-          node._childLinkData[i].points = points;
-          return child;
-        });
-      }
+    dag.eachAfter((node) => {
+      node.children = filterChildren(node.children);
     });
+
+    function filterChildren(children) {
+      let filteredChildren = children;
+      let i = 0;
+      while (i < filteredChildren.length) {
+        if (filteredChildren[i].data) {
+          i++;
+          continue;
+        }
+        let grandchildren = filteredChildren[i].children;
+        if (grandchildren.length === 0) {
+          filteredChildren.splice(i, 1);
+        } else {
+          filteredChildren.splice(i, 1, ...grandchildren);
+          i += grandchildren.length;
+        }
+      }
+      return filteredChildren;
+    }
+  }
+
+  function updateEdgeData(dag) {
+    dag.each((node) => {
+      node._childLinkData = node.children.map((child) => {
+        return [{ x: node.x0 + (node.x1 - node.x0) / 2,
+                  y: node.y1}, 
+                { x: child.x0 + (child.x1 - child.x0) /2,
+                  y: child.y0}];
+      });
+    });
+  }
+
+  function createParentsRelation(dag) {
+    dag.each((node) => node.children.forEach((child) => (child.parents || (child.parents = [])).push(node)));
   }
 
   function getLongestPathValue(dag) {
@@ -68,6 +116,12 @@ export default function() {
   function getLongestPathSubDag(node) {
     let childPaths = node.children.map(getLongestPathSubDag);
     return (node.heightRatio || 0) + Math.max(0, ...childPaths);
+  }
+
+  // includes heightRatio of node
+  function getLongestPathValueToRoot(node) {
+    let parentPaths = node.parents ? node.parents.map(getLongestPathValueToRoot) : [];
+    return (node.heightRatio || 0) + Math.max(0, ...parentPaths);
   }
 
   function arquint(dag) {
@@ -88,15 +142,16 @@ export default function() {
         n.y1 = 1;
       });
     } else {
+      createParentsRelation(dag);
       let totalLayerSeparation = layers.reduce((prevVal, layer, i) => (prevVal + (i == 0 ? 0 : interLayerSeparation(layer))), 0);
       let pathLength = longestPathValue + totalLayerSeparation;
       let cummulativeLayerSeparation = 0;
       layers.forEach((layer, i) => {
         cummulativeLayerSeparation += (i == 0 ? 0 : interLayerSeparation(layer, i));
         return layer.forEach((n) => {
-          let subDagPathValue = getLongestPathSubDag(n);
-          n.y0 = (cummulativeLayerSeparation + longestPathValue - subDagPathValue) / pathLength;
-          n.y1 = n.y0 + n.heightRatio / pathLength;
+          let pathValueToRoot = getLongestPathValueToRoot(n);
+          n.y1 = (cummulativeLayerSeparation + pathValueToRoot) / pathLength;
+          n.y0 = n.y1 - n.heightRatio / pathLength;
         });
       });
     }
@@ -114,6 +169,7 @@ export default function() {
     }));
     // Remove dummy nodes and update edge data
     removeDummies(dag);
+    updateEdgeData(dag);
     return dag;
   }
 
