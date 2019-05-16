@@ -1,7 +1,7 @@
 import Node from "../dag";
 import layeringLongestPath from "../sugiyama/layering/longestPath";
 import twoLayer from "../sugiyama/decross/twoLayer";
-import center from "./coord/centerRect";
+import centerRect from "./coord/centerRect";
 
 export default function() {
   let debug = false;
@@ -9,9 +9,10 @@ export default function() {
   let height = 1;
   let layering = layeringLongestPath().topDown(false);
   let decross = twoLayer();
-  let coord = center();
-  let intraLayerSeparation = defaultSeparation;
-  let interLayerSeparation = defaultSeparation;
+  let coord = centerRect();
+  let interLayerSeparation = defaultLayerSeparation;
+  let columnWidthFunction = defaultColumnWidth;
+  let columnSeparationFunction = defaultColumnSeparation;
 
   // Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
   // layer is adjacent, and returns an array of each layer of nodes.
@@ -159,7 +160,7 @@ export default function() {
     // Minimize edge crossings
     decross(layers);
     // Assign coordinates
-    coord(layers, intraLayerSeparation);
+    coord(layers, columnWidthFunction, columnSeparationFunction);
     // Scale x and y
     layers.forEach((layer) => layer.forEach((n) => {
       n.x0 *= width;
@@ -179,17 +180,29 @@ export default function() {
       : [width, height];
   };
 
-  arquint.intraLayerSeparation = function(x) {
-    return arguments.length ? ((intraLayerSeparation = x), arquint) : intraLayerSeparation;
-  };
-
   arquint.interLayerSeparation = function(x) {
     return arguments.length ? ((interLayerSeparation = x), arquint) : interLayerSeparation;
+  };
+
+  arquint.columnWidthFunction = function(x) {
+    return arguments.length ? ((columnWidthFunction = x), arquint) : columnWidthFunction;
+  };
+
+  arquint.columnSeparationFunction = function(x) {
+    return arguments.length ? ((columnSeparationFunction = x), arquint) : columnSeparationFunction;
   };
 
   return arquint;
 }
 
-function defaultSeparation() {
+function defaultLayerSeparation() {
+  return 1;
+}
+
+function defaultColumnWidth() {
+  return 10;
+}
+
+function defaultColumnSeparation() {
   return 1;
 }

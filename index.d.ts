@@ -33,7 +33,7 @@ export interface ZherebkoLayout<Datum> {
 export interface ArquintLayout<Datum> {
     (node: Node<Datum>): RectangleNode<Datum>;
     size(size: [number, number]): this;
-    intraLayerSeparation(separationFunction: (a: Node<Datum>, b: Node<Datum>) => number): this;
+    intraLayerSeparation(columnSeparationFunction: (columnIndex: number) => number): this;
     interLayerSeparation(separationFunction: (layer: Node<Datum>[], index: number) => number): this;
 }
 
