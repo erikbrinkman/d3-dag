@@ -149,7 +149,7 @@ export default function() {
       let cummulativeLayerSeparation = 0;
       layers.forEach((layer, i) => {
         cummulativeLayerSeparation += (i == 0 ? 0 : interLayerSeparation(layer, i));
-        return layer.forEach((n) => {
+        layer.forEach((n) => {
           let pathValueToRoot = getLongestPathValueToRoot(n);
           n.y1 = (cummulativeLayerSeparation + pathValueToRoot) / pathLength;
           n.y0 = n.y1 - n.heightRatio / pathLength;
