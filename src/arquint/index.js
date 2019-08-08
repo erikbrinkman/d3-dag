@@ -18,7 +18,10 @@ export default function() {
   // layer is adjacent, and returns an array of each layer of nodes.
   function createLayers(dag) {
     const layers = [];
-    const maxLayer = Math.max(0, ...dag.descendants().map((node) => node.layer));
+    const maxLayer = Math.max(
+      0,
+      ...dag.descendants().map((node) => node.layer)
+    );
     dag.descendants().forEach((node) => {
       const layer = layers[node.layer] || (layers[node.layer] = []);
       layer.push(node);
@@ -45,9 +48,9 @@ export default function() {
       if (node.children.length === 0 && node.layer < maxLayer) {
         // insert a dummy node per layer
         let highestLayerNode = new Node(
-          `${node.id}${debug ? "->" : "\0"}${
-            debug ? " (" : "\0"
-          }${maxLayer}${debug ? ")" : ""}`,
+          `${node.id}${debug ? "->" : "\0"}${debug ? " (" : "\0"}${maxLayer}${
+            debug ? ")" : ""
+          }`,
           undefined
         );
         (layers[maxLayer] || (layers[maxLayer] = [])).push(highestLayerNode);
@@ -97,16 +100,20 @@ export default function() {
   function updateEdgeData(dag) {
     dag.each((node) => {
       node._childLinkData = node.children.map((child) => {
-        return [{ x: node.x0 + (node.x1 - node.x0) / 2,
-                  y: node.y1}, 
-                { x: child.x0 + (child.x1 - child.x0) /2,
-                  y: child.y0}];
+        return [
+          { x: node.x0 + (node.x1 - node.x0) / 2, y: node.y1 },
+          { x: child.x0 + (child.x1 - child.x0) / 2, y: child.y0 }
+        ];
       });
     });
   }
 
   function createParentsRelation(dag) {
-    dag.each((node) => node.children.forEach((child) => (child.parents || (child.parents = [])).push(node)));
+    dag.each((node) =>
+      node.children.forEach((child) =>
+        (child.parents || (child.parents = [])).push(node)
+      )
+    );
   }
 
   function getLongestPathValue(dag) {
@@ -121,7 +128,9 @@ export default function() {
 
   // includes heightRatio of node
   function getLongestPathValueToRoot(node) {
-    let parentPaths = node.parents ? node.parents.map(getLongestPathValueToRoot) : [];
+    let parentPaths = node.parents
+      ? node.parents.map(getLongestPathValueToRoot)
+      : [];
     return (node.heightRatio || 0) + Math.max(0, ...parentPaths);
   }
 
@@ -130,7 +139,9 @@ export default function() {
     // Compute layers
     layering(dag);
     // Verify layering
-    if (!dag.every((node) => node.children.every((c) => c.layer > node.layer))) {
+    if (
+      !dag.every((node) => node.children.every((c) => c.layer > node.layer))
+    ) {
       throw new Error("layering wasn't proper");
     }
     // Create layers
@@ -144,11 +155,16 @@ export default function() {
       });
     } else {
       createParentsRelation(dag);
-      let totalLayerSeparation = layers.reduce((prevVal, layer, i) => (prevVal + (i == 0 ? 0 : interLayerSeparation(layer))), 0);
+      let totalLayerSeparation = layers.reduce(
+        (prevVal, layer, i) =>
+          prevVal + (i == 0 ? 0 : interLayerSeparation(layer)),
+        0
+      );
       let pathLength = longestPathValue + totalLayerSeparation;
       let cummulativeLayerSeparation = 0;
       layers.forEach((layer, i) => {
-        cummulativeLayerSeparation += (i == 0 ? 0 : interLayerSeparation(layer, i));
+        cummulativeLayerSeparation +=
+          i == 0 ? 0 : interLayerSeparation(layer, i);
         layer.forEach((n) => {
           let pathValueToRoot = getLongestPathValueToRoot(n);
           n.y1 = (cummulativeLayerSeparation + pathValueToRoot) / pathLength;
@@ -156,18 +172,20 @@ export default function() {
         });
       });
     }
-        
+
     // Minimize edge crossings
     decross(layers);
     // Assign coordinates
     coord(layers, columnWidthFunction, columnSeparationFunction);
     // Scale x and y
-    layers.forEach((layer) => layer.forEach((n) => {
-      n.x0 *= width;
-      n.x1 *= width;
-      n.y0 *= height;
-      n.y1 *= height;
-    }));
+    layers.forEach((layer) =>
+      layer.forEach((n) => {
+        n.x0 *= width;
+        n.x1 *= width;
+        n.y0 *= height;
+        n.y1 *= height;
+      })
+    );
     // Remove dummy nodes and update edge data
     removeDummies(dag);
     updateEdgeData(dag);
@@ -181,15 +199,21 @@ export default function() {
   };
 
   arquint.interLayerSeparation = function(x) {
-    return arguments.length ? ((interLayerSeparation = x), arquint) : interLayerSeparation;
+    return arguments.length
+      ? ((interLayerSeparation = x), arquint)
+      : interLayerSeparation;
   };
 
   arquint.columnWidthFunction = function(x) {
-    return arguments.length ? ((columnWidthFunction = x), arquint) : columnWidthFunction;
+    return arguments.length
+      ? ((columnWidthFunction = x), arquint)
+      : columnWidthFunction;
   };
 
   arquint.columnSeparationFunction = function(x) {
-    return arguments.length ? ((columnSeparationFunction = x), arquint) : columnSeparationFunction;
+    return arguments.length
+      ? ((columnSeparationFunction = x), arquint)
+      : columnSeparationFunction;
   };
 
   return arquint;
