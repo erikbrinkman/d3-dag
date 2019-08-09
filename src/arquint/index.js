@@ -10,7 +10,7 @@ export default function() {
   let height = 1;
   let layering = layeringLongestPath().topDown(false);
   let decross = twoLayer();
-  let columnAssignment = complex().center(true);
+  let columnAssignment = complex();
   let coord = coordRect();
   let interLayerSeparation = defaultLayerSeparation;
   let columnWidth = defaultColumnWidth;
