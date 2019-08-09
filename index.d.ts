@@ -90,7 +90,7 @@ export interface LayeringAccessor<T> {
 }
 
 export interface DecrossAccessor<T> {
-    (layers: Node<Datum>[][]): void;
+    (layers: Node<T>[][]): void;
 }
 
 export interface CoordAccessor<T> {
@@ -99,7 +99,7 @@ export interface CoordAccessor<T> {
 }
 
 export interface ArquintCoordAccessor<T> {
-    (layers: Node<Datum>[][], 
+    (layers: Node<T>[][], 
         columnWidth: (columnIndex: number) => number, 
         columnSeparation: (columnIndex: number) => number): void;
 }
@@ -113,7 +113,7 @@ export interface ColumnComplexAccessor<T> extends ColumnAccessor<T> {
 }
 
 export interface InterLayerAccessor<T> {
-    (layer: Node<Datum>[], index: number): number;
+    (layer: Node<T>[], index: number): number;
 }
 
 export interface ColumnWidthAccessor<T> {
