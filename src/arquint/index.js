@@ -38,6 +38,7 @@ export default function() {
               }${l}${debug ? ")" : ""}`,
               undefined
             );
+            dummy.heightRatio = 0;
             dummy.children = [last];
             (layers[l] || (layers[l] = [])).push(dummy);
             last = dummy;
@@ -64,6 +65,7 @@ export default function() {
             }${l}${debug ? ")" : ""}`,
             undefined
           );
+          dummy.heightRatio = 0;
           dummy.children = [last];
           (layers[l] || (layers[l] = [])).push(dummy);
           last = dummy;
@@ -75,39 +77,34 @@ export default function() {
   }
 
   function removeDummies(dag) {
-    dag.eachAfter((node) => {
-      node.children = filterChildren(node.children);
-    });
-
-    function filterChildren(children) {
-      let filteredChildren = children;
-      let i = 0;
-      while (i < filteredChildren.length) {
-        if (filteredChildren[i].data) {
-          i++;
-          continue;
-        }
-        let grandchildren = filteredChildren[i].children;
-        if (grandchildren.length === 0) {
-          filteredChildren.splice(i, 1);
-        } else {
-          filteredChildren.splice(i, 1, ...grandchildren);
-          i += grandchildren.length;
-        }
+    dag.each((node) => {
+      if (node.data) {
+        let childLinkDataIndex = 0;
+        node.children = node.children.map((child, i) => {
+          const points = [ getCenterBottom(node) ];
+          while (child && !child.data) {
+            // dummies have height 0, so it should not matter whether 
+            // getCenterTop or getCenterBottom is used
+            points.push(getCenterTop(child));
+            [child] = child.children === [] ? [null] : child.children;
+          }
+          if (child != null) {
+            points.push(getCenterTop(child));
+            node._childLinkData[childLinkDataIndex].points = points;
+            childLinkDataIndex++;
+          }
+          return child;
+        }).filter((child) => child != null);
       }
-      return filteredChildren;
-    }
+    });
   }
 
-  function updateEdgeData(dag) {
-    dag.each((node) => {
-      node._childLinkData = node.children.map((child) => {
-        return [
-          { x: node.x0 + (node.x1 - node.x0) / 2, y: node.y1 },
-          { x: child.x0 + (child.x1 - child.x0) / 2, y: child.y0 }
-        ];
-      });
-    });
+  function getCenterTop(node) {
+    return { x: node.x0 + (node.x1 - node.x0) / 2, y: node.y0 };
+  }
+
+  function getCenterBottom(node) {
+    return { x: node.x0 + (node.x1 - node.x0) / 2, y: node.y1 };
   }
 
   function createParentsRelation(dag) {
@@ -192,7 +189,6 @@ export default function() {
     );
     // Remove dummy nodes and update edge data
     removeDummies(dag);
-    updateEdgeData(dag);
     return dag;
   }
 
