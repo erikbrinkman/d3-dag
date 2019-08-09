@@ -81,7 +81,7 @@ export default function() {
       if (node.data) {
         let childLinkDataIndex = 0;
         node.children = node.children
-          .map((child, i) => {
+          .map((child) => {
             const points = [getCenterBottom(node)];
             while (child && !child.data) {
               // dummies have height 0, so it should not matter whether
