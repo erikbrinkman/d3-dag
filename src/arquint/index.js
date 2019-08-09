@@ -203,28 +203,22 @@ export default function() {
   };
 
   arquint.layering = function(x) {
-    return arguments.length
-      ? ((layering = x), arquint)
-      : layering;
-  }
+    return arguments.length ? ((layering = x), arquint) : layering;
+  };
 
   arquint.decross = function(x) {
-    return arguments.length
-      ? ((decross = x), arquint)
-      : decross;
-  }
+    return arguments.length ? ((decross = x), arquint) : decross;
+  };
 
   arquint.columnAssignment = function(x) {
     return arguments.length
       ? ((columnAssignment = x), arquint)
       : columnAssignment;
-  }
+  };
 
   arquint.coord = function(x) {
-    return arguments.length
-      ? ((coord = x), arquint)
-      : coord;
-  }
+    return arguments.length ? ((coord = x), arquint) : coord;
+  };
 
   arquint.interLayerSeparation = function(x) {
     return arguments.length
@@ -233,9 +227,7 @@ export default function() {
   };
 
   arquint.columnWidth = function(x) {
-    return arguments.length
-      ? ((columnWidth = x), arquint)
-      : columnWidth;
+    return arguments.length ? ((columnWidth = x), arquint) : columnWidth;
   };
 
   arquint.columnSeparation = function(x) {

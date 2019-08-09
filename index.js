@@ -5,7 +5,9 @@ export { default as coordTopological } from "./src/sugiyama/coord/topological";
 export { default as coordVert } from "./src/sugiyama/coord/vert";
 export { default as coordRect } from "./src/arquint/coord/coordRect";
 export { default as columnSimpleLeft } from "./src/arquint/column/simpleLeft";
-export { default as columnSimpleCenter } from "./src/arquint/column/simpleCenter";
+export {
+  default as columnSimpleCenter
+} from "./src/arquint/column/simpleCenter";
 export { default as columnComplex } from "./src/arquint/column/complex";
 export { default as dagConnect } from "./src/dag/connect";
 export { default as dagHierarchy } from "./src/dag/hierarchy";
