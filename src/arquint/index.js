@@ -1,7 +1,7 @@
 import Node from "../dag";
 import layeringLongestPath from "../sugiyama/layering/longestPath";
 import twoLayer from "../sugiyama/decross/twoLayer";
-import centerRect from "./coord/centerRect";
+import coordRect from "./coord/coordRect";
 import complex from "./column/complex";
 
 export default function() {
@@ -11,10 +11,10 @@ export default function() {
   let layering = layeringLongestPath().topDown(false);
   let decross = twoLayer();
   let columnAssignment = complex().center(true);
-  let coord = centerRect();
+  let coord = coordRect();
   let interLayerSeparation = defaultLayerSeparation;
-  let columnWidthFunction = defaultColumnWidth;
-  let columnSeparationFunction = defaultColumnSeparation;
+  let columnWidth = defaultColumnWidth;
+  let columnSeparation = defaultColumnSeparation;
 
   // Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
   // layer is adjacent, and returns an array of each layer of nodes.
@@ -159,7 +159,7 @@ export default function() {
       createParentsRelation(dag);
       let totalLayerSeparation = layers.reduce(
         (prevVal, layer, i) =>
-          prevVal + (i == 0 ? 0 : interLayerSeparation(layer)),
+          prevVal + (i == 0 ? 0 : interLayerSeparation(layer, i)),
         0
       );
       let pathLength = longestPathValue + totalLayerSeparation;
@@ -180,7 +180,7 @@ export default function() {
     // assign an index to each node indicating the "column" in which it should be placed
     columnAssignment(layers);
     // Assign coordinates
-    coord(layers, columnWidthFunction, columnSeparationFunction);
+    coord(layers, columnWidth, columnSeparation);
     // Scale x and y
     layers.forEach((layer) =>
       layer.forEach((n) => {
@@ -232,16 +232,16 @@ export default function() {
       : interLayerSeparation;
   };
 
-  arquint.columnWidthFunction = function(x) {
+  arquint.columnWidth = function(x) {
     return arguments.length
-      ? ((columnWidthFunction = x), arquint)
-      : columnWidthFunction;
+      ? ((columnWidth = x), arquint)
+      : columnWidth;
   };
 
-  arquint.columnSeparationFunction = function(x) {
+  arquint.columnSeparation = function(x) {
     return arguments.length
-      ? ((columnSeparationFunction = x), arquint)
-      : columnSeparationFunction;
+      ? ((columnSeparation = x), arquint)
+      : columnSeparation;
   };
 
   return arquint;

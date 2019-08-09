@@ -49,6 +49,7 @@ var dag = d3.sugiyama();
 * [DAG](#dag)
 * [Sugiyama](#sugiyama)
 * [Zherebko](#zherebko)
+* [Arquint](#arquint)
 
 
 ### Hierarchy
@@ -646,3 +647,117 @@ Lays out the specified DAG, assigning the following properties:
 
 If *size* is specified, sets this zherebko layout's size to the specified two-element array of numbers [*width*, *height*] and returns this zherebko layout.
 If *size* is not specified, returns the current layout size, which defaults to [1, 1].
+
+
+### Arquint
+
+This treats nodes not as points (i.e. producing x & y coordinates) but as rectangles.
+Each node has a property *heightRatio* specifying its height in comparison to other nodes.
+The algorithm is based off a PR by L. Arquint.
+
+<a name="c_arquint" href="#c_arquint">#</a> d3.**arquint**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L7 "Source")
+
+Construct a new Arquint layout operator with the default settings.
+
+<a name="f_arquint" href="#f_arquint">#</a> arquint(*dag*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L139 "Source")
+
+Lays out the specified DAG while respecting (vertical) *node*.heightRatio together with (vertical) [*inter layer separation*](#arquint_interLayerSeparation), (horizontal) [*column width*](#arquint_columnWidth), as well as (horizontal) [*column separation*](#arquint_columnSeparation).
+It assigns the following properties:
+
+* *node*.x0 - the left x-coordinate of the node.
+* *node*.x1 - the right x-coordinate of the node.
+* *node*.y0 - the bottom y-coordinate of the node.
+* *node*.y1 - the top y-coordinate of the node.
+* *link*.data.points - an array of points for how to draw the edge.
+  The first point will always be the same as *source* and the last point will always be the same as *target*.
+  Each point has an x and a y property, that corresponds to the bottom (*source*) resp. top (*target*) center of the node.
+
+<img alt="arquint example" src="resources/arquint.png" width=1000>
+
+<a name="arquint_size" href="#arquint_size">#</a> arquint.**size**([*size*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L199 "Source")
+
+If *size* is specified, sets this arquint layout's size to the specified two-element array of numbers [*width*, *height*] and returns this arquint layout.
+If *size* is not specified, returns the current layout size, which defaults to [1, 1].
+
+<a name="arquint_layering" href="#arquint_layering">#</a> arquint.**layering**([*layering*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L205 "Source")
+
+If *layering* is specified, sets the layering accessor to the specified function and returns this arquint layout.
+If *layering* is not specified, returns the current layering accessor, which defaults to [*d3.layeringLongestPath().topDown(false)*](#layeringLongestPath).
+A layering accessor takes a dag and assigns every node a layer attribute from zero to the number of layers - 1.
+See [Sugiyama Layering Acessors](#sugiyama-layering-accessors).
+
+<a name="arquint_decross" href="#arquint_decross">#</a> arquint.**decross**([*decross*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L211 "Source")
+
+If *decross* is specified, sets the decross accessor to the specified function and returns this arquint layout.
+If *decross* is not specified, returns the current decross accessor, which defaults to [*d3.decrossTwoLayer()*](#decrossTwoLayer).
+A decross accessor takes a dag as an array of layers where each layer is an array of nodes, and modifies the order of nodes in each layer to reduce the number of link crossings.
+See [Sugiyama Decross Acessors](#sugiyama-decross-accessors).
+
+<a name="arquint_columnAssignment" href="#arquint_columnAssignment">#</a> arquint.**columnAssignment**([*columnAssignment*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L217 "Source")
+
+If *columnAssignment* is specified, sets the column accessor to the specified function and returns this arquint layout.
+If *columnAssignment* is not specified, returns the current column accessor, which defaults to [*d3.columnComplex().center(true)*](#columnComplex).
+A column accessor takes a dag as an array of layers where each layer is an array of nodes, and sets *node*.columnIndex to the index of the column in which it should appear.
+See [Arquint Column Accessors](#arquint-column-accessors).
+
+<a name="coord" href="#coord">#</a> arquint.**coord**([*coord*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L223 "Source")
+
+If *coord* is specified, sets the coord accessor to the specified function and returns this arquint layout.
+If *coord* is not specified, returns the current coord accessor, which defaults to [*d3.coordRect()*](#coordRect).
+A coord accessor takes a dag as an array of layers where each layer is an array of nodes, a [column width function](#arquint_columnWidth) and a [column separation function](#arquint_columnSeparation).
+The coord accessor assigns every node an x0 and x1 property in [0, 1] to specify the actual layout.
+See [Arquint Coord Acessors](#arquint-coord-accessors).
+
+<a name="arquint_interLayerSeparation" href="#arquint_interLayerSeparation">#</a> arquint.**interLayerSeparation**([*interLayerSeparation*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L229 "Source")
+
+If *interLayerSeparation* is specified, sets the inter layer accessor to the specified function and returns this arquint layout.
+If *interLayerSeparation* is not specified, returns the current inter layer accessor, which defaults to *1*.
+A inter layer accessor takes a layer (i.e. an array of nodes) and its index and returns the relative distance to the previous layer. It is not called for the first layer, because it does not have a previous layer.
+
+<a name="arquint_columnWidth" href="#arquint_columnWidth">#</a> arquint.**columnWidth**([*columnWidth*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L235 "Source")
+
+If *columnWidth* is specified, sets the column width accessor to the specified function and returns this arquint layout.
+If *columnWidth* is not specified, returns the current column width accessor, which defaults to *10*.
+A column width accessor takes a column index and returns the relative width of the column.
+
+<a name="arquint_columnSeparation" href="#arquint_columnSeparation">#</a> arquint.**columnSeparation**([*columnSeparation*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L241 "Source")
+
+If *columnSeparation* is specified, sets the column separation accessor to the specified function and returns this arquint layout.
+If *columnSeparation* is not specified, returns the current column separation accessor, which defaults to *1*.
+A column separation accessor takes a column index and returns the relative distance to the next column.
+
+
+### Arquint Column Accessors
+
+Several built-in column accessors are provided for use with [*arquint*](#arquint).
+
+<a name="arquint_columnSimpleLeft" href="#arquint_columnSimpleLeft">#</a> d3.**columnSimpleLeft**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/simpleLeft.js "Source")
+
+Constructs a column simple left accessor.
+For each layer, this accessor assigns each node to a column starting from the left side.
+
+<a name="arquint_columnSimpleCenter" href="#arquint_columnSimpleCenter">#</a> d3.**columnSimpleCenter**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/simpleCenter.js "Source")
+
+Constructs a column simple center accessor.
+For each layer, this accessor assigns each node to a column while centering them (per-layer).
+
+<a name="arquint_columnComplex" href="#arquint_columnComplex">#</a> d3.**columnComplex**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js "Source")
+
+Constructs a column complex accessor.
+Instead of doing the assignment of nodes to columns per-layer, this accessor considers the entire subtree per node.
+Therefore, the assignment happens depth-first.
+
+<a name="arquint_cc_center" href="#arquint_cc_center">#</a> columnComplex.**center**(*center*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js#L48 "Source")
+
+Set whether the column complex accessor should center the parent node for each subtree. It defaults to false.
+
+
+### Arquint Coord Acessors
+
+Currently only a single coord accessor is provided for use with [*arquint*](#arquint).
+
+<a name="coordRect" href="#coordRect">#</a> d3.**coordRect**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/coord/coordRect.js#L6 "Source")
+
+Construct a coordinate accessor for rectangles.
+This accessor assigns x0 and x1 coordinates to each node based on their layering and columnIndex.
+Furthermore, [*columnWidth*](#arquint_columnWidth) and [*columnSeparation*](#arquint_columnSeparation) are used to calculate the width of each column (and hence the width of nodes in that column) resp. the distance between columns.
