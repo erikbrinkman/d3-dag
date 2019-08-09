@@ -80,21 +80,23 @@ export default function() {
     dag.each((node) => {
       if (node.data) {
         let childLinkDataIndex = 0;
-        node.children = node.children.map((child, i) => {
-          const points = [ getCenterBottom(node) ];
-          while (child && !child.data) {
-            // dummies have height 0, so it should not matter whether 
-            // getCenterTop or getCenterBottom is used
-            points.push(getCenterTop(child));
-            [child] = child.children === [] ? [null] : child.children;
-          }
-          if (child != null) {
-            points.push(getCenterTop(child));
-            node._childLinkData[childLinkDataIndex].points = points;
-            childLinkDataIndex++;
-          }
-          return child;
-        }).filter((child) => child != null);
+        node.children = node.children
+          .map((child, i) => {
+            const points = [getCenterBottom(node)];
+            while (child && !child.data) {
+              // dummies have height 0, so it should not matter whether
+              // getCenterTop or getCenterBottom is used
+              points.push(getCenterTop(child));
+              [child] = child.children === [] ? [null] : child.children;
+            }
+            if (child != null) {
+              points.push(getCenterTop(child));
+              node._childLinkData[childLinkDataIndex].points = points;
+              childLinkDataIndex++;
+            }
+            return child;
+          })
+          .filter((child) => child != null);
       }
     });
   }

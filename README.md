@@ -673,7 +673,7 @@ It assigns the following properties:
   Each point has an x and a y property, that corresponds to the bottom (*source*) resp. top (*target*) center of the node.
 
 In the following example, the default options were used and *node*.heightRatio was set to Number(*node*.id)+1:
-<img alt="arquint example" src="resources/arquint.png" width=1000>
+<img alt="arquint example" src="resources/arquint.png" width=400>
 
 <a name="arquint_size" href="#arquint_size">#</a> arquint.**size**([*size*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L199 "Source")
 
@@ -739,7 +739,7 @@ For each layer, this accessor assigns each node to a column starting from the le
 Due to the layer local decision process, nodes can overlap if nodes in different layers have different heights.
 Therefore, the following example sets *node*.heightRatio to 1 for all nodes:
 
-<img alt="arquint simple left example" src="resources/arquint_simple_left.png" width=1000>
+<img alt="arquint simple left example" src="resources/arquint_simple_left.png" width=400>
 
 <a name="arquint_columnSimpleCenter" href="#arquint_columnSimpleCenter">#</a> d3.**columnSimpleCenter**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/simpleCenter.js "Source")
 
@@ -748,7 +748,7 @@ For each layer, this accessor assigns each node to a column while centering them
 Due to the layer local decision process, nodes can overlap if nodes in different layers have different heights.
 Therefore, the following example sets *node*.heightRatio to 1 for all nodes:
 
-<img alt="arquint simple center example" src="resources/arquint_simple_center.png" width=1000>
+<img alt="arquint simple center example" src="resources/arquint_simple_center.png" width=400>
 
 <a name="arquint_columnComplex" href="#arquint_columnComplex">#</a> d3.**columnComplex**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js "Source")
 
@@ -756,13 +756,13 @@ Constructs a column complex accessor.
 Instead of doing the assignment of nodes to columns per-layer, this accessor considers the entire subtree per node.
 Therefore, the assignment happens depth-first.
 
-<img alt="arquint complex left example" src="resources/arquint.png" width=1000>
+<img alt="arquint complex left example" src="resources/arquint.png" width=400>
 
 <a name="arquint_cc_center" href="#arquint_cc_center">#</a> columnComplex.**center**(*center*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js#L48 "Source")
 
 Set whether the column complex accessor should center the parent node for each subtree. It defaults to false.
 
-<img alt="arquint complex center example" src="resources/arquint_complex_center.png" width=1000>
+<img alt="arquint complex center example" src="resources/arquint_complex_center.png" width=400>
 
 
 ### Arquint Coord Acessors
