@@ -2,6 +2,7 @@ import Node from "../dag";
 import layeringLongestPath from "../sugiyama/layering/longestPath";
 import twoLayer from "../sugiyama/decross/twoLayer";
 import centerRect from "./coord/centerRect";
+import complex from "./column/complex";
 
 export default function() {
   let debug = false;
@@ -9,6 +10,7 @@ export default function() {
   let height = 1;
   let layering = layeringLongestPath().topDown(false);
   let decross = twoLayer();
+  let columnAssignment = complex().center(true);
   let coord = centerRect();
   let interLayerSeparation = defaultLayerSeparation;
   let columnWidthFunction = defaultColumnWidth;
@@ -175,6 +177,8 @@ export default function() {
 
     // Minimize edge crossings
     decross(layers);
+    // assign an index to each node indicating the "column" in which it should be placed
+    columnAssignment(layers);
     // Assign coordinates
     coord(layers, columnWidthFunction, columnSeparationFunction);
     // Scale x and y
@@ -197,6 +201,30 @@ export default function() {
       ? (([width, height] = x), arquint)
       : [width, height];
   };
+
+  arquint.layering = function(x) {
+    return arguments.length
+      ? ((layering = x), arquint)
+      : layering;
+  }
+
+  arquint.decross = function(x) {
+    return arguments.length
+      ? ((decross = x), arquint)
+      : decross;
+  }
+
+  arquint.columnAssignment = function(x) {
+    return arguments.length
+      ? ((columnAssignment = x), arquint)
+      : columnAssignment;
+  }
+
+  arquint.coord = function(x) {
+    return arguments.length
+      ? ((coord = x), arquint)
+      : coord;
+  }
 
   arquint.interLayerSeparation = function(x) {
     return arguments.length

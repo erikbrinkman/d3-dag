@@ -11,6 +11,10 @@ export function coordVert<Datum>(): CoordAccessor<Datum>;
 export function coordMinCurve<Datum>(): CoordAccessor<Datum>;
 export function coordGreedy<Datum>(): CoordAccessor<Datum>;
 export function coordTopological<Datum>(): CoordAccessor<Datum>;
+export function coordCenterRect<Datum>(): ArquintCoordAccessor<Datum>;
+export function columnSimpleLeft<Datum>(): ColumnAccessor<Datum>;
+export function columnSimpleCenter<Datum>(): ColumnAccessor<Datum>;
+export function columnComplex<Datum>(): ColumnComplexAccessor<Datum>;
 
 export interface DagLayout<Datum> {
     (...roots: Datum[]): Node<Datum>;
@@ -21,8 +25,8 @@ export interface DagLayout<Datum> {
 export interface SugiyamaLayout<Datum> {
     (node: Node<Datum>): PointNode<Datum>;
     size(size: [number, number]): this;
-    layering(layering: (node: Node<Datum>) => void): this;
-    coord(coord: (layers: Node<Datum>[][], separationFunction: (a: Node<Datum>, b: Node<Datum>) => number) => void): this;
+    layering(layering: LayeringAccessor<Datum>): this;
+    coord(coord: CoordAccessor<Datum>): this;
 }
 
 export interface ZherebkoLayout<Datum> {
@@ -33,8 +37,13 @@ export interface ZherebkoLayout<Datum> {
 export interface ArquintLayout<Datum> {
     (node: Node<Datum>): RectangleNode<Datum>;
     size(size: [number, number]): this;
-    intraLayerSeparation(columnSeparationFunction: (columnIndex: number) => number): this;
-    interLayerSeparation(separationFunction: (layer: Node<Datum>[], index: number) => number): this;
+    layering(layering: (node: Node<Datum>) => void): this;
+    decross(decross: (layers: Node<Datum>[][]) => void): this;
+    columnAssignment(columnAssignment: (layers: Node<Datum>[][]) => void): this;
+    coord(coord: ArquintCoordAccessor<Datum>): this;
+    interLayerSeparation(interLayerSeparation: (layer: Node<Datum>[]) => number): this;
+    columnWidthFunction(columnWidthFunction: (columnIndex: number) => number): this;
+    columnSeparationFunction(columnSeparationFunction: (columnIndex: number) => number): this;
 }
 
 export interface Node<T> {
@@ -79,5 +88,20 @@ export interface LayeringAccessor<T> {
 }
 
 export interface CoordAccessor<T> {
-    (layers: Node<T>[][], separationFunction: (a: Node<T>, b: Node<T>) => number): void;
+    (layers: Node<T>[][], 
+        separationFunction: (a: Node<T>, b: Node<T>) => number): void;
+}
+
+export interface ArquintCoordAccessor<T> {
+    (layers: Node<Datum>[][], 
+        columnWidthFunction: (columnIndex: number) => number, 
+        columnSeparationFunction: (columnIndex: number) => number): void;
+}
+
+export interface ColumnAccessor<T> {
+    (layers: Node<T>[][]): void;
+}
+
+export interface ColumnComplexAccessor<T> extends ColumnAccessor<T> {
+    center(center: boolean): this;
 }
