@@ -5,6 +5,7 @@
 //
 export default function() {
   function coordSpread(layers, columnWidthFunction, columnSeparationFunction) {
+    // calculate the number of columns
     const maxColumns = Math.max(
       ...layers.map((layer) =>
         Math.max(...layer.map((node) => node.columnIndex + 1))

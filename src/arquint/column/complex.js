@@ -2,15 +2,23 @@ export default function() {
   let center = false;
 
   function columnIndexAssignmentSubtree(layers) {
-    // keeps order of nodes in a layer but assigns columns to nodes in a layer based on their subtrees
+    // starts at root nodes and assigns column indices based on their subtrees
     if (layers.length == 0) {
       return;
     }
 
-    // iterate over each node in the first layer and assign column indices to each node in its subtree.
+    // find all root nodes
+    let roots = [];
+    layers.forEach((layer) => layer.forEach((node) => {
+      if (node.parents == null || node.parents.length === 0) {
+        roots.push(node);
+      }
+    }));
+
+    // iterate over each root and assign column indices to each node in its subtree.
     // if a node already has a columnIndex, do not change it, this case can occur if the node has more than one predecessor
     let startColumnIndex = 0;
-    layers[0].forEach((node) => {
+    roots.forEach((node) => {
       const subtreeWidth = getSubtreeWidth(node);
       node.columnIndex =
         startColumnIndex + (center ? Math.floor((subtreeWidth - 1) / 2) : 0);
