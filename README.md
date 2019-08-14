@@ -750,6 +750,23 @@ Therefore, the following example sets *node*.heightRatio to 1 for all nodes:
 
 <img alt="arquint simple center example" src="resources/arquint_simple_center.png" width=400>
 
+<a name="arquint_columnAdjacent" href="#arquint_columnAdjacent">#</a> d3.**columnAdjacent**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/adjacent.js "Source")
+
+Constructs a column adjacent accessor.
+Assigns column indices to the layer with most nodes first.
+Afterwards starting from the layer with most nodes, column indices are assigned to nodes in adjacent layers. 
+Column indices are assigned with respect to the node's parents or children while maintaining the same ordering in the layer.
+In comparison to [columnSimpleLeft](#arquint_columnSimpleLeft) and [columnSimpleCenter](#arquint_columnSimpleCenter), this accessor takes the adjacent layer into account and tries to assign a column index that is near the column index of the child or parent.
+Because nodes can be placed in the same column even though they do not have a children/parents relation with each other, nodes can overlap if nodes in different layers have different heights.
+Therefore, the following example sets *node*.heightRatio to 1 for all nodes:
+
+<img alt="arquint adjacent example" src="resources/arquint_adjacent_center.png" width=400>
+
+<a name="arquint_ca_center" href="#arquint_ca_center">#</a> columnAdjacent.**center**(*center*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/adjacent.js#L119 "Source")
+
+Set whether the column adjacent accessor should center the adjacent node. It defaults to false.
+For the particular example with default options, this property has no influence and results in the exact same graph.
+
 <a name="arquint_columnComplex" href="#arquint_columnComplex">#</a> d3.**columnComplex**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js "Source")
 
 Constructs a column complex accessor.
@@ -758,7 +775,7 @@ Therefore, the assignment happens depth-first.
 
 <img alt="arquint complex left example" src="resources/arquint.png" width=400>
 
-<a name="arquint_cc_center" href="#arquint_cc_center">#</a> columnComplex.**center**(*center*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js#L48 "Source")
+<a name="arquint_cc_center" href="#arquint_cc_center">#</a> columnComplex.**center**(*center*) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/complex.js#L56 "Source")
 
 Set whether the column complex accessor should center the parent node for each subtree. It defaults to false.
 
