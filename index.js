@@ -8,6 +8,7 @@ export { default as columnSimpleLeft } from "./src/arquint/column/simpleLeft";
 export {
   default as columnSimpleCenter
 } from "./src/arquint/column/simpleCenter";
+export { default as columnAdjacent } from "./src/arquint/column/adjacent";
 export { default as columnComplex } from "./src/arquint/column/complex";
 export { default as dagConnect } from "./src/dag/connect";
 export { default as dagHierarchy } from "./src/dag/hierarchy";

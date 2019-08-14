@@ -17,7 +17,7 @@ export default function() {
   let columnSeparation = defaultColumnSeparation;
 
   // Takes a dag where nodes have a layer attribute, and adds dummy nodes so each
-  // layer is adjacent, and returns an array of each layer of nodes.
+  // layer is adjacent and each path ends in the last layer, and returns an array of each layer of nodes.
   function createLayers(dag) {
     const layers = [];
     const maxLayer = Math.max(

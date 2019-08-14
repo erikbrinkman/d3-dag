@@ -16,6 +16,7 @@ export function coordTopological<Datum>(): CoordAccessor<Datum>;
 export function coordRect<Datum>(): ArquintCoordAccessor<Datum>;
 export function columnSimpleLeft<Datum>(): ColumnAccessor<Datum>;
 export function columnSimpleCenter<Datum>(): ColumnAccessor<Datum>;
+export function columnAdjacent<Datum>(): ColumnAdjacentAccessor<Datum>;
 export function columnComplex<Datum>(): ColumnComplexAccessor<Datum>;
 
 export interface DagLayout<Datum> {
@@ -106,6 +107,10 @@ export interface ArquintCoordAccessor<T> {
 
 export interface ColumnAccessor<T> {
     (layers: Node<T>[][]): void;
+}
+
+export interface ColumnAdjacentAccessor<T> extends ColumnAccessor<T> {
+    center(center: boolean): this;
 }
 
 export interface ColumnComplexAccessor<T> extends ColumnAccessor<T> {
