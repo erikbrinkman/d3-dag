@@ -9,11 +9,13 @@ export default function() {
 
     // find all root nodes
     let roots = [];
-    layers.forEach((layer) => layer.forEach((node) => {
-      if (node.parents == null || node.parents.length === 0) {
-        roots.push(node);
-      }
-    }));
+    layers.forEach((layer) =>
+      layer.forEach((node) => {
+        if (node.parents == null || node.parents.length === 0) {
+          roots.push(node);
+        }
+      })
+    );
 
     // iterate over each root and assign column indices to each node in its subtree.
     // if a node already has a columnIndex, do not change it, this case can occur if the node has more than one predecessor
