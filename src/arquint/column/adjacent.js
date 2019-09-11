@@ -54,7 +54,7 @@ export default function() {
               Math.floor((childrenColumnIndices.length - 1) / 2)
             ];
           } else {
-            return childrenColumnIndices[0];
+            return Math.min(...childrenColumnIndices);
           }
         });
         // based on the desired column index, the actual column index needs to be assigned
@@ -89,7 +89,7 @@ export default function() {
               Math.floor((parentColumnIndices.length - 1) / 2)
             ];
           } else {
-            return parentColumnIndices[0];
+            return Math.min(...parentColumnIndices);
           }
         });
         // based on the desired column index, the actual column index needs to be assigned
