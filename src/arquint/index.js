@@ -1,7 +1,7 @@
 import Node from "../dag";
 import layeringLongestPath from "../sugiyama/layering/longestPath";
 import twoLayer from "../sugiyama/decross/twoLayer";
-import coordRect from "./coord/coordRect";
+import column2CoordRect from "./coord/column2CoordRect";
 import complex from "./column/complex";
 
 export default function() {
@@ -11,7 +11,7 @@ export default function() {
   let layering = layeringLongestPath().topDown(false);
   let decross = twoLayer();
   let columnAssignment = complex();
-  let coord = coordRect();
+  let column2Coord = column2CoordRect();
   let interLayerSeparation = defaultLayerSeparation;
   let columnWidth = defaultColumnWidth;
   let columnSeparation = defaultColumnSeparation;
@@ -179,7 +179,7 @@ export default function() {
     // assign an index to each node indicating the "column" in which it should be placed
     columnAssignment(layers);
     // Assign coordinates
-    coord(layers, columnWidth, columnSeparation);
+    column2Coord(layers, columnWidth, columnSeparation);
     // Scale x and y
     layers.forEach((layer) =>
       layer.forEach((n) => {
@@ -214,8 +214,8 @@ export default function() {
       : columnAssignment;
   };
 
-  arquint.coord = function(x) {
-    return arguments.length ? ((coord = x), arquint) : coord;
+  arquint.column2Coord = function(x) {
+    return arguments.length ? ((column2Coord = x), arquint) : column2Coord;
   };
 
   arquint.interLayerSeparation = function(x) {

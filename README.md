@@ -653,7 +653,7 @@ If *size* is not specified, returns the current layout size, which defaults to [
 
 This treats nodes not as points (i.e. producing x & y coordinates) but as rectangles.
 Each node has a property *heightRatio* specifying its height in comparison to other nodes.
-The algorithm is based off a PR by L. Arquint.
+The implementation was contributed by the author [L. Arquint](https://linardarquint.com) and provides different algorithms to distribute the nodes along the x-axis.
 
 <a name="c_arquint" href="#c_arquint">#</a> d3.**arquint**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L7 "Source")
 
@@ -701,13 +701,13 @@ If *columnAssignment* is not specified, returns the current column accessor, whi
 A column accessor takes a dag as an array of layers where each layer is an array of nodes, and sets *node*.columnIndex to the index of the column in which it should appear.
 See [Arquint Column Accessors](#arquint-column-accessors).
 
-<a name="coord" href="#coord">#</a> arquint.**coord**([*coord*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L223 "Source")
+<a name="column2Coord" href="#column2Coord">#</a> arquint.**column2Coord**([*coord*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L223 "Source")
 
-If *coord* is specified, sets the coord accessor to the specified function and returns this arquint layout.
-If *coord* is not specified, returns the current coord accessor, which defaults to [*d3.coordRect()*](#coordRect).
-A coord accessor takes a dag as an array of layers where each layer is an array of nodes, a [column width function](#arquint_columnWidth) and a [column separation function](#arquint_columnSeparation).
-The coord accessor assigns every node an x0 and x1 property in [0, 1] to specify the actual layout.
-See [Arquint Coord Acessors](#arquint-coord-accessors).
+If *column2Coord* is specified, sets the column to coord accessor to the specified function and returns this arquint layout.
+If *column2Coord* is not specified, returns the current column to coord accessor, which defaults to [*d3.column2CoordRect()*](#column2CoordRect).
+A column to coord accessor takes a dag as an array of layers where each layer is an array of nodes and each node has an assigned column index, a [column width function](#arquint_columnWidth) and a [column separation function](#arquint_columnSeparation).
+The column to coord accessor assigns every node an x0 and x1 property in [0, 1] to specify the actual layout.
+See [Arquint Column To Coord Acessors](#arquint-column-to-coord-accessors).
 
 <a name="arquint_interLayerSeparation" href="#arquint_interLayerSeparation">#</a> arquint.**interLayerSeparation**([*interLayerSeparation*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/index.js#L229 "Source")
 
@@ -731,6 +731,9 @@ A column separation accessor takes a column index and returns the relative dista
 ### Arquint Column Accessors
 
 Several built-in column accessors are provided for use with [*arquint*](#arquint).
+They take an array of layers as input and set *node*.columnIndex for each node to the index of the column in which the node should appear.
+[columnSimpleLeft](#arquint_columnSimpleLeft) and [columnSimpleCenter](#arquint_columnSimpleCenter) determine the column index just by considering a layer.
+On the contrary, [columnComplex](#arquint_columnComplex) follows a global approach in assigning column indices and tries to place a node in a column as close as possible to the column in which its successors are placed in.
 
 <a name="arquint_columnSimpleLeft" href="#arquint_columnSimpleLeft">#</a> d3.**columnSimpleLeft**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/column/simpleLeft.js "Source")
 
@@ -782,12 +785,12 @@ Set whether the column complex accessor should center the parent node for each s
 <img alt="arquint complex center example" src="resources/arquint_complex_center.png" width=400>
 
 
-### Arquint Coord Acessors
+### Arquint Column To Coord Acessors
 
-Currently only a single coord accessor is provided for use with [*arquint*](#arquint).
+Currently only a single column to coord accessor is provided for use with [*arquint*](#arquint).
 
-<a name="coordRect" href="#coordRect">#</a> d3.**coordRect**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/coord/coordRect.js#L6 "Source")
+<a name="column2CoordRect" href="#column2CoordRect">#</a> d3.**column2CoordRect**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/arquint/coord/column2CoordRect.js#L6 "Source")
 
-Construct a coordinate accessor for rectangles.
+Construct a column to coordinate accessor for rectangles.
 This accessor assigns x0 and x1 coordinates to each node based on their layering and columnIndex.
 Furthermore, [*columnWidth*](#arquint_columnWidth) and [*columnSeparation*](#arquint_columnSeparation) are used to calculate the width of each column (and hence the width of nodes in that column) resp. the distance between columns.

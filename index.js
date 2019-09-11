@@ -3,7 +3,7 @@ export { default as coordGreedy } from "./src/sugiyama/coord/greedy";
 export { default as coordMinCurve } from "./src/sugiyama/coord/minCurve";
 export { default as coordTopological } from "./src/sugiyama/coord/topological";
 export { default as coordVert } from "./src/sugiyama/coord/vert";
-export { default as coordRect } from "./src/arquint/coord/coordRect";
+export { default as column2CoordRect } from "./src/arquint/coord/column2CoordRect";
 export { default as columnSimpleLeft } from "./src/arquint/column/simpleLeft";
 export {
   default as columnSimpleCenter

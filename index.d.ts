@@ -13,7 +13,7 @@ export function coordVert<Datum>(): CoordAccessor<Datum>;
 export function coordMinCurve<Datum>(): CoordAccessor<Datum>;
 export function coordGreedy<Datum>(): CoordAccessor<Datum>;
 export function coordTopological<Datum>(): CoordAccessor<Datum>;
-export function coordRect<Datum>(): ArquintCoordAccessor<Datum>;
+export function column2CoordRect<Datum>(): ArquintColumn2CoordRectAccessor<Datum>;
 export function columnSimpleLeft<Datum>(): ColumnAccessor<Datum>;
 export function columnSimpleCenter<Datum>(): ColumnAccessor<Datum>;
 export function columnAdjacent<Datum>(): ColumnAdjacentAccessor<Datum>;
@@ -43,7 +43,7 @@ export interface ArquintLayout<Datum> {
     layering(layering: LayeringAccessor<Datum>): this;
     decross(decross: DecrossAccessor<Datum>): this;
     columnAssignment(columnAssignment: ColumnAccessor<Datum>): this;
-    coord(coord: ArquintCoordAccessor<Datum>): this;
+    column2Coord(column2Coord: ArquintColumn2CoordRectAccessor<Datum>): this;
     interLayerSeparation(interLayerSeparation: InterLayerAccessor<Datum>): this;
     columnWidth(columnWidth: ColumnWidthAccessor<Datum>): this;
     columnSeparation(columnSeparation: ColumnSeparationAccessor<Datum>): this;
@@ -99,7 +99,7 @@ export interface CoordAccessor<T> {
         separationFunction: (a: Node<T>, b: Node<T>) => number): void;
 }
 
-export interface ArquintCoordAccessor<T> {
+export interface ArquintColumn2CoordRectAccessor<T> {
     (layers: Node<T>[][], 
         columnWidth: (columnIndex: number) => number, 
         columnSeparation: (columnIndex: number) => number): void;
