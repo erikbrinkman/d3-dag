@@ -1,7 +1,7 @@
 # d3-dag
 
-![npm](https://img.shields.io/npm/v/d3-dag.svg?style=flat-square)
-![travis](https://img.shields.io/travis/erikbrinkman/d3-dag.svg?style=flat-square)
+[![npm](https://img.shields.io/npm/v/d3-dag.svg)](https://www.npmjs.com/package/d3-dag)
+[![build](https://github.com/erikbrinkman/d3-dag/workflows/Node%20CI/badge.svg)](https://github.com/erikbrinkman/d3-dag/actions)
 
 Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 In these instances `d3-hierarchy` may not suit your needs, which is why `d3-dag` (Directed Acyclic Graph) exists.
