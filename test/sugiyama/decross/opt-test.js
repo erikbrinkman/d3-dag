@@ -2,6 +2,21 @@ const tape = require("../../close"),
   load = require("../../load"),
   d3_dag = require("../../../");
 
+function orientation(px, py, qx, qy, rx, ry) {
+  /// Returns the orientation of three ordered points assuming they're not colinear
+  return (qy - py) * (rx - qx) - (qx - px) * (ry - qy) > 0;
+}
+
+function intersect(p1x, p1y, p2x, p2y, q1x, q1y, q2x, q2y) {
+  /// returns true if line segments p1-p2 and q1-q2 intersect, doesn't handle degenerate cases
+  return (
+    orientation(p1x, p1y, p2x, p2y, q1x, q1y) !=
+      orientation(p1x, p1y, p2x, p2y, q2x, q2y) &&
+    orientation(q1x, q1y, q2x, q2y, p1x, p1y) !=
+      orientation(q1x, q1y, q2x, q2y, p2x, p2y)
+  );
+}
+
 tape("decrossOpt() works for grafo", (test) => {
   const layout = d3_dag
     .sugiyama()
@@ -35,32 +50,32 @@ tape("decrossOpt() works for grafo", (test) => {
     4,
     0
   ]);
-  // This is brittle as there are many orientations that remove all crossings
-  test.allClose(ordered.map((n) => n.x), [
-    105,
-    98,
-    49,
-    14,
-    77,
-    70,
-    56,
-    42,
-    91,
-    77,
-    98,
-    35,
-    70,
-    49,
-    84,
-    56,
-    126,
-    42,
-    84,
-    63,
-    28,
-    70
-  ]),
-    test.end();
+  // quadratic time crossing counter
+  const crossings = dag.links().reduce((s1, l1, i) => {
+    return (
+      s1 +
+      dag
+        .links()
+        .slice(i + 1)
+        .reduce((s2, l2) => {
+          return (
+            s2 +
+            intersect(
+              l1.source.x,
+              l1.source.y,
+              l1.target.x,
+              l1.target.y,
+              l2.source.x,
+              l2.source.y,
+              l2.target.x,
+              l2.target.y
+            )
+          );
+        }, 0)
+    );
+  }, 0);
+  test.equal(crossings, 14, "didn't optimize crossings for layering");
+  test.end();
 });
 
 tape("decrossOpt() debug works for well behaved node names", (test) => {
