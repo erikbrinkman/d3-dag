@@ -52,7 +52,7 @@ tape("decrossOpt() works for grafo", (test) => {
     70,
     49,
     84,
-    70,
+    56,
     126,
     42,
     84,
