@@ -24,7 +24,7 @@ export default function() {
     let maxIndex = 0;
     dag.eachLinks(({ data }) => {
       minIndex = Math.min(minIndex, data.index);
-      maxIndex = Math.max(maxIndex, data.index);
+      maxIndex = Math.max(maxIndex, data.index > 0 ? data.index : 1);
     });
     let maxLayer = ordered.length - 1;
     dag.each((node) => {
