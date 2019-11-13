@@ -15,7 +15,7 @@
   },
   "author": "Erik Brinkman <erik.brinkman@gmail.com>",
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/d3-dag.js",
   "module": "index",
   "jsnext:main": "index",
   "unpkg": "dist/d3-dag.min.js",
