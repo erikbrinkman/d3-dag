@@ -77,19 +77,6 @@ tape("dagStratify() fails without root", (test) => {
   test.end();
 });
 
-tape("dagStratify() fails with disconnected", (test) => {
-  const data = [
-    {
-      id: "1"
-    },
-    {
-      id: "2"
-    }
-  ];
-  test.throws(() => d3_dag.dagStratify()(data), /not connected/);
-  test.end();
-});
-
 tape("dagStratify() fails with cycle", (test) => {
   const data = [
     {
