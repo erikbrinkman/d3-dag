@@ -27,9 +27,22 @@ export default function() {
       maxIndex = Math.max(maxIndex, data.index > 0 ? data.index : 1);
     });
     let maxLayer = ordered.length - 1;
+
     dag.each((node) => {
-      node.x = (-minIndex / (maxIndex - minIndex)) * width;
-      node.y = (node.layer / maxLayer) * height;
+      if (maxLayer === 0) {
+        // If there's just 1 node
+        // we should just center it
+        node.x = width / 2;
+        node.y = height / 2;
+      } else if (minIndex === maxIndex) {
+        // If there are no links, we want to stack the
+        // nodes vertically
+        node.x = (node.layer / maxLayer) * width;
+        node.y = height / 2;
+      } else {
+        node.x = (-minIndex / (maxIndex - minIndex)) * width;
+        node.y = (node.layer / maxLayer) * height;
+      }
     });
     dag.eachLinks(({ source, target, data }) => {
       const points = [{ x: source.x, y: source.y }];

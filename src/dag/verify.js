@@ -53,7 +53,10 @@ export default function(root) {
         .forEach((span) => span.forEach((n) => (otherSpan[n] = true)));
       return rootSpan.some((n) => otherSpan[n]);
     });
-  if (!connected) throw new Error("dag was not connected");
+  if (!connected) {
+    // eslint-disable-next-line no-console
+    console.warn("dag was not connected");
+  }
 
   // Test that all link data is valid
   if (root.links().some(({ data }) => !data))
