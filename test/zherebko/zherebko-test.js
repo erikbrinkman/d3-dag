@@ -2,6 +2,40 @@ const tape = require("../close"),
   load = require("../load"),
   d3_dag = require("../../");
 
+tape("zherebko() works for a point", (test) => {
+  const dag = d3_dag.dagStratify()([
+    {
+      id: "0",
+      parentIds: []
+    }
+  ]);
+  d3_dag.zherebko().size([2, 2])(dag);
+  const [root] = dag.roots();
+  test.equals(root.x, 1);
+  test.equals(root.y, 1);
+  test.end();
+});
+
+tape("zherebko() works for a line", (test) => {
+  const dag = d3_dag.dagStratify()([
+    {
+      id: "0",
+      parentIds: []
+    },
+    {
+      id: "1",
+      parentIds: ["0"]
+    }
+  ]);
+  d3_dag.zherebko().size([2, 2])(dag);
+  const [root, tail] = dag.descendants();
+  test.equals(root.x, 1);
+  test.equals(root.y, 0);
+  test.equals(tail.x, 1);
+  test.equals(tail.y, 2);
+  test.end();
+});
+
 tape("zherebko() works for grafo", (test) => {
   const dag = load("grafo");
   const nodesBefore = dag.size();
