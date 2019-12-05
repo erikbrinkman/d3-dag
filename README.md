@@ -104,7 +104,6 @@ For example:
 }
 ```
 
-The DAG must be connected, i.e. each roots descendants must overlap.
 Node ids must be unique, and can't contain the null character `'\0'`.
 
 <a name="dh_id" href="#dh_id">#</a> dagHierarchy.**id**([*id*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/hierarchy.js#L38 "Source")
@@ -337,6 +336,10 @@ For example, if your data set has childIds, you can use *dagStratify* with paren
 <a name="count" href="#count">#</a> node.**count**( [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/count.js#L2 "Source"))
 
 Set the *value* of each node to be the number of descendants including itself.
+
+<a name="connected" href="#connected">#</a> node.**connected**( [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/connected.js#L2 "Source"))
+
+Returns `true` if the dag is connected.
 
 <a name="depth" href="#depth">#</a> node.**depth**() [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/depth.js#L3 "Source")
 
