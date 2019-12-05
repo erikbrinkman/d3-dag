@@ -35,3 +35,15 @@ tape("connected() is correct for double v", (test) => {
   test.notOk(dag.connected());
   test.end();
 });
+
+tape("connected() is correct for w", (test) => {
+  const dag = d3_dag.dagStratify()([
+    { id: "0" },
+    { id: "1" },
+    { id: "2" },
+    { id: "3", parentIds: ["0", "2"] },
+    { id: "4", parentIds: ["1", "2"] }
+  ]);
+  test.ok(dag.connected());
+  test.end();
+});

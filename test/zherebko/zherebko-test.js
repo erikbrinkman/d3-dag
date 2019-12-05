@@ -5,8 +5,7 @@ const tape = require("../close"),
 tape("zherebko() works for a point", (test) => {
   const dag = d3_dag.dagStratify()([
     {
-      id: "0",
-      parentIds: []
+      id: "0"
     }
   ]);
   d3_dag.zherebko().size([2, 2])(dag);
@@ -19,8 +18,7 @@ tape("zherebko() works for a point", (test) => {
 tape("zherebko() works for a line", (test) => {
   const dag = d3_dag.dagStratify()([
     {
-      id: "0",
-      parentIds: []
+      id: "0"
     },
     {
       id: "1",
