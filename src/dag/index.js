@@ -1,5 +1,6 @@
 import childLinks from "./childLinks";
 import count from "./count";
+import connected from "./connected";
 import depth from "./depth";
 import descendants from "./descendants";
 import eachAfter from "./eachAfter";
@@ -83,6 +84,7 @@ Node.prototype = {
   childLinks: childLinks,
   copy: copy,
   count: count,
+  connected: connected,
   depth: depth,
   descendants: descendants,
   each: eachDepth,

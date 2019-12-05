@@ -106,19 +106,6 @@ tape("dagHierarchy() fails with invalid root", (test) => {
   test.end();
 });
 
-tape("dagHierarchy() fails with disconnected", (test) => {
-  const data = [
-    {
-      id: "1"
-    },
-    {
-      id: "2"
-    }
-  ];
-  test.throws(() => d3_dag.dagHierarchy()(...data), /not connected/);
-  test.end();
-});
-
 tape("dagHierarchy() fails with cycle", (test) => {
   const selfLoop = { id: "2" };
   selfLoop.children = [selfLoop];

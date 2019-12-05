@@ -41,20 +41,6 @@ export default function(root) {
     if (!node.data) throw new Error("node contained falsy data");
   });
 
-  // Test that dag is connected
-  const rootsSpan = root.children.map((r) => r.descendants().map((n) => n.id));
-  const connected =
-    root.children.length === 1 ||
-    rootsSpan.every((rootSpan, i) => {
-      const otherSpan = {};
-      rootsSpan
-        .slice(0, i)
-        .concat(rootsSpan.slice(i + 1))
-        .forEach((span) => span.forEach((n) => (otherSpan[n] = true)));
-      return rootSpan.some((n) => otherSpan[n]);
-    });
-  if (!connected) throw new Error("dag was not connected");
-
   // Test that all link data is valid
   if (root.links().some(({ data }) => !data))
     throw new Error("dag had falsy link data");
