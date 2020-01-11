@@ -410,10 +410,19 @@ If *debug* is specified, sets sugiyama to debug to *debug*.
 If *debug* is not specified, returns the current debug value, which defaults to false.
 If debug is true, dummy nodes will be given more human readable ids, but this can cause conflicts with poorly chosen ids, so it it disabled by default.
 
-<a name="sugi_size" href="#sugi_size">#</a> sugiyama.**size**([*size*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L94 "Source")
+<a name="sugi_size" href="#sugi_size">#</a> sugiyama.**size**([*size*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L111 "Source")
 
 If *size* is specified, sets this sugiyama layout's size to the specified two-element array of numbers [*width*, *height*] and returns this sugiyama layout.
-If *size* is not specified, returns the current layout size, which defaults to [1, 1].
+If *size* is not specified, returns the current layout size, which defaults to [1, 1], and is `null` if *nodeSize* was set.
+When *size* is set, the minimum coordinate of every node is 0, and the maximum *x* and *y* coordinates are *width* and *height* respectively.
+If the DAG only has one node vertically or horizontally, it will be centered.
+
+<a name="sugi_node_size" href="#sugi_node_size">#</a> sugiyama.**nodeSize**([*nodeSize*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L119 "Source")
+
+If *nodeSize* is specified, sets this sugiyama layout's nodeSize to the specified two-element array of numbers [*nodeWidth*, *nodeHeight*] and returns this sugiyama layout.
+If *nodeSize* is not specified, returns the current layout node size, which defaults to `null`, and will return `null` if *size* was set.
+When *nodeSize* is set, the minimum coordinate of every node is 0, parents and children are at least *nodeHeight* appart, and neighboring nodes in the same layer are at least *nodeWidth* apart.
+If the DAG only has one node vertically or horizontally, it will be centered.
 
 <a name="layering" href="#layering">#</a> sugiyama.**layering**([*layering*]) [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/sugiyama/index.js#L98 "Source")
 

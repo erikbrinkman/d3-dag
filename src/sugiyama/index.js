@@ -8,6 +8,7 @@ import greedy from "./coord/greedy";
 
 export default function() {
   let debug = false;
+  let nodeSize = false;
   let width = 1;
   let height = 1;
   let layering = simplex();
@@ -75,9 +76,8 @@ export default function() {
       const [layer] = layers;
       layer.forEach((n) => (n.y = height / 2));
     } else {
-      layers.forEach((layer, i) =>
-        layer.forEach((n) => (n.y = (height * i) / (layers.length - 1)))
-      );
+      const dh = nodeSize ? height : height / (layers.length - 1);
+      layers.forEach((layer, i) => layer.forEach((n) => (n.y = dh * i)));
     }
     if (layers.every((l) => l.length === 1)) {
       // Next steps aren't necessary
@@ -89,7 +89,15 @@ export default function() {
       // Assign coordinates
       coord(layers, separation);
       // Scale x
-      layers.forEach((layer) => layer.forEach((n) => (n.x *= width)));
+      const minGap = Math.min(
+        ...layers
+          .filter((layer) => layer.length > 1)
+          .map((layer) =>
+            Math.min(...layer.slice(1).map((n, i) => n.x - layer[i].x))
+          )
+      );
+      const sw = nodeSize ? minGap : 1.0;
+      layers.forEach((layer) => layer.forEach((n) => (n.x *= width / sw)));
     }
     // Remove dummy nodes and update edge data
     removeDummies(dag);
@@ -102,8 +110,18 @@ export default function() {
 
   sugiyama.size = function(x) {
     return arguments.length
-      ? (([width, height] = x), sugiyama)
+      ? ((nodeSize = false), ([width, height] = x), sugiyama)
+      : nodeSize
+      ? null
       : [width, height];
+  };
+
+  sugiyama.nodeSize = function(x) {
+    return arguments.length
+      ? ((nodeSize = true), ([width, height] = x), sugiyama)
+      : nodeSize
+      ? [width, height]
+      : null;
   };
 
   sugiyama.layering = function(x) {
