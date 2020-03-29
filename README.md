@@ -25,6 +25,7 @@ The update from 0.1 to 0.2 includes a few small backwards incompatible changes.
 - [Examples with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
 - [Example with Arrows](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows) - This example shows a simple, if inexact, way to render edge arrows with d3.
 - [Examples with Arquint Layout](https://observablehq.com/@arquintl/d3-dag-arquint) - Allows you to experiment with different layouts and different datasets for the arquint layout.
+- [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
 
 ## Installing
