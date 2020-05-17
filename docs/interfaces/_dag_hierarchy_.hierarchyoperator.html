@@ -1,0 +1,423 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>HierarchyOperator | d3-dag</title>
+	<meta name="description" content="Documentation for d3-dag">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">d3-dag</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_dag_hierarchy_.html">&quot;dag/hierarchy&quot;</a>
+				</li>
+				<li>
+					<a href="_dag_hierarchy_.hierarchyoperator.html">HierarchyOperator</a>
+				</li>
+			</ul>
+			<h1>Interface HierarchyOperator&lt;NodeDatum, LinkDatum, Id, Children, ChildrenData&gt;</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>The operator that constructs a <a href="../modules/_dag_node_.html#dag">Dag</a> from hierarchy data.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-type-parameters">
+				<h3>Type parameters</h3>
+				<ul class="tsd-type-parameters">
+					<li>
+						<h4>NodeDatum</h4>
+					</li>
+					<li>
+						<h4>LinkDatum</h4>
+					</li>
+					<li>
+						<h4>Id<span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.idoperator.html" class="tsd-signature-type">IdOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+					<li>
+						<h4>Children<span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.childrenoperator.html" class="tsd-signature-type">ChildrenOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+					<li>
+						<h4>ChildrenData<span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.childrendataoperator.html" class="tsd-signature-type">ChildrenDataOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">HierarchyOperator</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3 class="tsd-before-signature">Callable</h3>
+				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_dag_node_.html#dag" class="tsd-signature-type">Dag</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L74">src/dag/hierarchy.ts:74</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Construct a DAG from the specified root nodes.
+									Each root node must be an object representing a root node.
+								For example:</p>
+							</div>
+							<pre><code class="language-json">{
+  <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Eve&quot;</span>,
+    <span class="hljs-attr">&quot;children&quot;</span>: [
+    {
+      <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Cain&quot;</span>
+    },
+    {
+      <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Seth&quot;</span>,
+      <span class="hljs-attr">&quot;children&quot;</span>: [
+      {
+        <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Enos&quot;</span>
+      },
+      {
+        <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Noam&quot;</span>
+      }
+      ]
+    },
+    {
+      <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Abel&quot;</span>
+    },
+    {
+      <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Awan&quot;</span>,
+      <span class="hljs-attr">&quot;children&quot;</span>: [
+      {
+        <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Enoch&quot;</span>
+      }
+      ]
+    },
+    {
+      <span class="hljs-attr">&quot;id&quot;</span>: <span class="hljs-string">&quot;Azura&quot;</span>
+    }
+  ]
+}</code></pre>
+							<p>Node ids must be unique, and can&#39;t contain the null character <code>&#39;\0&#39;</code>.</p>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>data: <span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../modules/_dag_node_.html#dag" class="tsd-signature-type">Dag</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="_dag_hierarchy_.hierarchyoperator.html#children" class="tsd-kind-icon">children</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="_dag_hierarchy_.hierarchyoperator.html#childrendata" class="tsd-kind-icon">children<wbr>Data</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="_dag_hierarchy_.hierarchyoperator.html#id" class="tsd-kind-icon">id</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="children" class="tsd-anchor"></a>
+					<h3>children</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">children&lt;NewChildren&gt;<span class="tsd-signature-symbol">(</span>ids<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewChildren</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-signature-type">HierarchyOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Id</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildren</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">WrappedChildrenOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildren</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">children<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Children</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L146">src/dag/hierarchy.ts:146</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the children accessor to the given <a href="_dag_hierarchy_.childrenoperator.html">ChildrenOperator</a> and returns
+									this <a href="_dag_hierarchy_.hierarchyoperator.html">HierarchyOperator</a>. The default operator is:</p>
+								</div>
+								<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">children</span>(<span class="hljs-params">d</span>) </span>{
+  <span class="hljs-keyword">return</span> d.children;
+}</code></pre>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>NewChildren<span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.childrenoperator.html" class="tsd-signature-type">ChildrenOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>ids: <span class="tsd-signature-type">NewChildren</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-signature-type">HierarchyOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Id</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildren</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">WrappedChildrenOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildren</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L160">src/dag/hierarchy.ts:160</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Gets the current <a href="_dag_hierarchy_.childrenoperator.html">ChildrenOperator</a>, If <a href="_dag_hierarchy_.hierarchyoperator.html#childrendata">childrenData</a> was specified,
+										this will return a wrapped version that returns only the children of that
+									operator.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Children</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="childrendata" class="tsd-anchor"></a>
+					<h3>children<wbr>Data</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">children<wbr>Data&lt;NewLinkDatum, NewChildrenData&gt;<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewChildrenData</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-signature-type">HierarchyOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLinkDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Id</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">WrappedChildrenDataOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLinkDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildrenData</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildrenData</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">children<wbr>Data<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ChildrenData</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L166">src/dag/hierarchy.ts:166</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the childrenData accessor to the given <a href="_dag_hierarchy_.childrendataoperator.html">ChildrenDataOperator</a> and
+									returns this <a href="_dag_hierarchy_.hierarchyoperator.html">HierarchyOperator</a>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>NewLinkDatum</h4>
+								</li>
+								<li>
+									<h4>NewChildrenData<span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.childrendataoperator.html" class="tsd-signature-type">ChildrenDataOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>data: <span class="tsd-signature-type">NewChildrenData</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-signature-type">HierarchyOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLinkDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Id</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">WrappedChildrenDataOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLinkDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildrenData</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewChildrenData</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L182">src/dag/hierarchy.ts:182</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the current childrenData operator. If <a href="_dag_hierarchy_.hierarchyoperator.html#children">children</a> was specified, this
+									will return a wrapped version that returns undefined data.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ChildrenData</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="id" class="tsd-anchor"></a>
+					<h3>id</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">id&lt;NewId&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewId</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-signature-type">HierarchyOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewId</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Children</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ChildrenData</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">id<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Id</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L130">src/dag/hierarchy.ts:130</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the id accessor to the given <a href="_dag_hierarchy_.idoperator.html">IdOperator</a> and returns this
+									<a href="_dag_hierarchy_.hierarchyoperator.html">HierarchyOperator</a>. The default operator is:</p>
+								</div>
+								<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">id</span>(<span class="hljs-params">d</span>) </span>{
+  <span class="hljs-keyword">return</span> d.id;
+}</code></pre>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>NewId<span class="tsd-signature-symbol">: </span><a href="_dag_hierarchy_.idoperator.html" class="tsd-signature-type">IdOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <span class="tsd-signature-type">NewId</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-signature-type">HierarchyOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewId</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Children</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ChildrenData</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a97e9/src/dag/hierarchy.ts#L134">src/dag/hierarchy.ts:134</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the current id accessor.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Id</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_dag_hierarchy_.html">&quot;dag/hierarchy&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="_dag_hierarchy_.childrendataoperator.html" class="tsd-kind-icon">Children<wbr>Data<wbr>Operator</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="_dag_hierarchy_.childrenoperator.html" class="tsd-kind-icon">Children<wbr>Operator</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_dag_hierarchy_.hierarchyoperator.html" class="tsd-kind-icon">Hierarchy<wbr>Operator</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="_dag_hierarchy_.hierarchyoperator.html#children" class="tsd-kind-icon">children</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="_dag_hierarchy_.hierarchyoperator.html#childrendata" class="tsd-kind-icon">children<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="_dag_hierarchy_.hierarchyoperator.html#id" class="tsd-kind-icon">id</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="_dag_hierarchy_.idoperator.html" class="tsd-kind-icon">Id<wbr>Operator</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../modules/_dag_hierarchy_.html#hierarchy" class="tsd-kind-icon">hierarchy</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

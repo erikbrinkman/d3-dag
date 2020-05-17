@@ -1,0 +1,317 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>d3-dag</title>
+	<meta name="description" content="Documentation for d3-dag">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">d3-dag</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>d3-dag</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#d3-dag" id="d3-dag" style="color: inherit; text-decoration: none;">
+					<h1>d3-dag</h1>
+				</a>
+				<p><a href="https://www.npmjs.com/package/d3-dag"><img src="https://img.shields.io/npm/v/d3-dag.svg" alt="npm"></a>
+				<a href="https://github.com/erikbrinkman/d3-dag/actions"><img src="https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg" alt="build"></a></p>
+				<p>Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
+					In these instances <code>d3-hierarchy</code> may not suit your needs, which is why <code>d3-dag</code> (Directed Acyclic Graph) exists.
+					This module implements a data structure for manipulating DAGs.
+				Old versions were designed to mimic <code>d3-hierarchy</code>&#39;s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard</p>
+				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
+					<h2>Examples</h2>
+				</a>
+				<ul>
+					<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama">Examples with Sugiyama Layout</a> - Allows you to experiment with different layouts and different datasets for the sugiyama layout.</li>
+					<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-topological">Examples with Topological Layout</a> - Allows you to experiment with different layouts and different datasets for topological layouts.</li>
+					<li><a href="https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows">Example with Arrows</a> - This example shows a simple, if inexact, way to render edge arrows with d3.</li>
+					<li><a href="https://observablehq.com/@arquintl/d3-dag-arquint">Examples with Arquint Layout</a> - Allows you to experiment with different layouts and different datasets for the arquint layout.</li>
+					<li><a href="https://github.com/BenPortner/js_family_tree">Expandable Family Tree</a> - An expandable family tree rendered using d3-dag.</li>
+				</ul>
+				<a href="#installing" id="installing" style="color: inherit; text-decoration: none;">
+					<h2>Installing</h2>
+				</a>
+				<p>If you use NPM, <code>npm i d3-dag@0.2.3</code>.
+				Otherwise you can load it using <code>unpkg</code>:</p>
+				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://unpkg.com/d3-dag@0.2.3&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+
+<span class="hljs-keyword">var</span> dag = d3.sugiyama();
+
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
+				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
+					<h2>API Reference</h2>
+				</a>
+				<ul>
+					<li><a href="#hierarchy">Hierarchy</a></li>
+					<li><a href="#stratify">Stratify</a></li>
+					<li><a href="#connect">Connect</a></li>
+					<li><a href="#dag">DAG</a></li>
+					<li><a href="#sugiyama">Sugiyama</a></li>
+					<li><a href="#zherebko">Zherebko</a></li>
+					<li><a href="#arquint">Arquint</a></li>
+				</ul>
+				<a href="#updating" id="updating" style="color: inherit; text-decoration: none;">
+					<h2>Updating</h2>
+				</a>
+				<p>Information for major changes between releases</p>
+				<a href="#updating-from-02-to-03" id="updating-from-02-to-03" style="color: inherit; text-decoration: none;">
+					<h3>Updating from 0.2 to 0.3</h3>
+				</a>
+				<p>The update from 0.2 to 0.3 adds support for typescript, and makes a number of
+					backwards incompatible changes that arrise from the switch. Some are also the
+				result of cleaning up hasty early design decisions.</p>
+				<ul>
+					<li>Instead of having <code>linkData</code> accessors, builders <code>stratify</code> and <code>hierarchy</code>
+						now have either <code>children</code>/<code>parentIds</code> or <code>childrenData</code>/<code>parentData</code> that
+						combine the children/parents with the data for the link. The build link data
+						into the design of the dag and removes the messy handling of the fact that
+					data was tacked on.</li>
+					<li><code>copy</code>, <code>reverse</code>, and <code>equal</code> have been removed as the new structure made
+						them hard to support, as DAGs are viewed more immutably now. Support could
+					potentially be added back.</li>
+					<li>Some DAG methods likes <code>some</code> and <code>every</code> have been removed because they&#39;re
+					better supported by the fulent iterators returned by <code>idescendants</code>.</li>
+					<li>In arquint, the height ratio property was switched to an accessor to be more
+					inline with other methods.</li>
+					<li>Documention has moved from the README to inline, and a github pages generated
+					by typedoc.</li>
+				</ul>
+				<a href="#updating-from-01-to-02" id="updating-from-01-to-02" style="color: inherit; text-decoration: none;">
+					<h3>Updating from 0.1 to 0.2</h3>
+				</a>
+				<p>The update from 0.1 to 0.2 includes a few small backwards incompatible changes.</p>
+				<ul>
+					<li><code>dratify</code> was renamed to <code>dagStratify</code> and <code>dierarchy</code> was renamed to <code>dagHierarchy</code> in order to pollute the d3 namespace less.</li>
+					<li>After running a <code>sugiyama</code> layout, the <code>points</code> attribute will always exist for every links data, and it now also contains the start and end points.</li>
+					<li><code>coordSpread</code> was removed in favor of <code>coordCenter</code> which produces a slightly better layout in the same amount of time.</li>
+					<li><code>test/data</code> was moved to <code>examples</code>. This isn&#39;t technically part of the api, but it may break examples that required the old file location.</li>
+					<li>Link data is created at dag creation time. This also isn&#39;t technically backwards compatible but might increase memory consumption.</li>
+				</ul>
+				<a href="#todo" id="todo" style="color: inherit; text-decoration: none;">
+					<h2>TODO</h2>
+				</a>
+				<ul>
+					<li><input disabled="" type="checkbox"> Update API reference once github pages is live</li>
+					<li><input disabled="" type="checkbox"> Update observable examples once typescript version is published to npm</li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_column_adjacent_.html">&quot;arquint/column/adjacent&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_column_center_.html">&quot;arquint/column/center&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_column_complex_.html">&quot;arquint/column/complex&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_column_index_.html">&quot;arquint/column/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_column_left_.html">&quot;arquint/column/left&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_coord_index_.html">&quot;arquint/coord/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_coord_spread_.html">&quot;arquint/coord/spread&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_dummy_.html">&quot;arquint/dummy&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_arquint_index_.html">&quot;arquint/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_dag_connect_.html">&quot;dag/connect&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_dag_hierarchy_.html">&quot;dag/hierarchy&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_dag_node_.html">&quot;dag/node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_dag_stratify_.html">&quot;dag/stratify&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_dag_verify_.html">&quot;dag/verify&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_iters_.html">&quot;iters&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_center_.html">&quot;sugiyama/coord/center&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_greedy_.html">&quot;sugiyama/coord/greedy&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_index_.html">&quot;sugiyama/coord/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_min_curve_.html">&quot;sugiyama/coord/min-<wbr>curve&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_topological_.html">&quot;sugiyama/coord/topological&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_utils_.html">&quot;sugiyama/coord/utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_vert_.html">&quot;sugiyama/coord/vert&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_decross_index_.html">&quot;sugiyama/decross/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_decross_opt_.html">&quot;sugiyama/decross/opt&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_decross_two_layer_.html">&quot;sugiyama/decross/two-<wbr>layer&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_dummy_.html">&quot;sugiyama/dummy&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_index_.html">&quot;sugiyama/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_layering_coffman_graham_.html">&quot;sugiyama/layering/coffman-<wbr>graham&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_layering_index_.html">&quot;sugiyama/layering/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_layering_longest_path_.html">&quot;sugiyama/layering/longest-<wbr>path&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_layering_simplex_.html">&quot;sugiyama/layering/simplex&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_layering_topological_.html">&quot;sugiyama/layering/topological&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_twolayer_index_.html">&quot;sugiyama/twolayer/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_twolayer_mean_.html">&quot;sugiyama/twolayer/mean&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_twolayer_median_.html">&quot;sugiyama/twolayer/median&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_twolayer_opt_.html">&quot;sugiyama/twolayer/opt&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_.html">&quot;utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_zherebko_greedy_.html">&quot;zherebko/greedy&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_zherebko_index_.html">&quot;zherebko/index&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

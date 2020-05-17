@@ -13,36 +13,65 @@
     "type": "git",
     "url": "https://github.com/erikbrinkman/d3-dag.git"
   },
-  "author": "Erik Brinkman <erik.brinkman@gmail.com>",
+  "author": {
+    "name": "Erik Brinkman",
+    "email": "erik.brinkman@gmail.com"
+  },
   "license": "MIT",
   "main": "dist/d3-dag.js",
+  "files": [
+    "/src/**/*.ts",
+    "/dist/d3-dag.min.js"
+  ],
   "module": "index",
   "jsnext:main": "index",
   "unpkg": "dist/d3-dag.min.js",
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ]
+  },
   "scripts": {
-    "format": "prettier --write index.js 'src/**/*.js' 'test/**/*.js'",
-    "lint": "eslint index.js src test && prettier --check index.js 'src/**/*.js' 'test/**/*.js'",
-    "build": "rm -rf dist && mkdir dist && rollup --banner \"$(preamble)\" --config",
-    "test": "npm run build && tape 'test/**/*-test.js' && npm run lint",
-    "prepare": "npm run test && uglifyjs -b beautify=false,preamble=\"'$(preamble)'\" dist/d3-dag.js -c -m -o dist/d3-dag.min.js",
-    "todo": "grep -nrEI 'FIXME|TODO|XXX' index.js src test"
+    "lint": "prettier --check 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json && eslint src test types --ext .ts",
+    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json && import-sort --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts'",
+    "fix": "eslint src test types --ext .ts --fix",
+    "build": "tsc",
+    "test": "jest --coverage && yarn lint",
+    "prepare": "yarn test && yarn build && yarn docs && rollup --banner \"$(preamble)\" --config",
+    "todo": "grep -rI --color TODO src test types",
+    "docs": "typedoc --out docs --stripInternal --media resources src"
   },
   "dependencies": {
-    "d3-array": "^1.2.1",
-    "fastpriorityqueue": "^0.5.0",
-    "javascript-lp-solver": "0.4.17",
+    "@types/d3-array": "^2.0.0",
+    "d3-array": "^2.7.1",
+    "fastpriorityqueue": "^0.6.3",
+    "javascript-lp-solver": "0.4.24",
+    "quadprog": "^1.6.1",
     "quadprog-js": "^0.1.3"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.14.0",
-    "http-server": "^0.12.3",
+    "@babel/types": "^7.11.5",
+    "@rollup/plugin-commonjs": "^15.0.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@types/jest": "^26.0.14",
+    "@types/node": "^14.11.0",
+    "@typescript-eslint/eslint-plugin": "^4.1.1",
+    "@typescript-eslint/parser": "^4.1.1",
+    "eslint": "^7.9.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-jest": "^24.0.1",
+    "import-sort-cli": "^6.0.0",
+    "jest": "^26.4.2",
     "package-preamble": "^0.1.0",
-    "prettier": "^1.16.4",
-    "rollup": "^0.62.0",
-    "rollup-plugin-commonjs": "^9.2.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "tape": "^4.9.1",
-    "uglify-es": "^3.3.9"
+    "prettier": "^2.1.2",
+    "rollup": "^2.27.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "ts-jest": "^26.3.0",
+    "typedoc": "^0.19.1",
+    "typescript": "^4.0.2"
   }
 }

@@ -1,9 +1,9 @@
 # Node #
 ########
-/dist/
+/dist
 /node_modules
+/coverage
 
-# Vim #
-#######
-.*.swp
-.*.un~
+# Typescript #
+##############
+/src/**/*.js
