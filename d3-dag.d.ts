@@ -209,7 +209,12 @@ declare module "d3-dag"
         /** Sugiyama Layout */
         export namespace Sugiyama {
 
-            export interface Layout<NodeDatum, LinkDatum> extends Node<NodeDatum, LinkDatum> {
+            export interface Layout<NodeDatum, LinkDatum> extends 
+                     Node<NodeDatum, LinkDatum & {
+                         /** polyline points */
+                         points: {x: number, y: number}[]
+                     }>
+            {
                 /** the x-coordinate of the node. */
                 x: number,
                 /** the y-coordinate of the node. */
@@ -423,7 +428,14 @@ declare module "d3-dag"
         /** Zherebk Layout */
         export namespace Zherebko {
 
-            export interface Layout<NodeDatum, LinkDatum> extends Node<NodeDatum, LinkDatum> {
+            export interface Layout<NodeDatum, LinkDatum>  extends 
+                Node<NodeDatum, LinkDatum & {
+                    /** */
+                    index: number
+                    /** polyline points */
+                    points: {x: number, y: number}[]
+                }>
+            {
                 /** the x-coordinate of the node. */
                 x: number,
                 /** the y-coordinate of the node. */
@@ -449,7 +461,12 @@ declare module "d3-dag"
         /** Arquint Layout */
         export namespace Arquint {
 
-            export interface Layout<NodeDatum, LinkDatum> extends Node<NodeDatum, LinkDatum> {
+            export interface Layout<NodeDatum, LinkDatum>  extends 
+                     Node<NodeDatum, LinkDatum & {
+                         /** polyline points */
+                         points: {x: number, y: number}[]
+                     }>
+            {
                 /** the left x-coordinate of the node. */
                 x0: number,
                 /** the right x-coordinate of the node. */
