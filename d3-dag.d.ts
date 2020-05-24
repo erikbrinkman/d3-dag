@@ -192,6 +192,13 @@ declare module "d3-dag"
             /** Set the value of every node to be the sum of this functions return value
              * on the current node's data and the value of every descendant's return value. */
             sum(callback : (node: this) => number): this
+            /** return number of nodes */
+            size(): number
+            /** Calls the specified callback function for all nodes. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+             * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+             * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+            */
+            reduce<U>(callbackfn: (previousValue: U, currentValue: this, currentIndex: number) => U, initialValue: U): U;
         }
 
         /** Link between 2 Nodes */
