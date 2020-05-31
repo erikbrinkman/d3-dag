@@ -336,7 +336,8 @@ For example, if your data set has childIds, you can use *dagStratify* with paren
 
 <a name="count" href="#count">#</a> node.**count**( [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/count.js#L2 "Source"))
 
-Set the *value* of each node to be the number of descendants including itself.
+Set the *value* of each node to be the number of leaves beneath the node.
+If this node is a leaf, it's value is one.
 
 <a name="connected" href="#connected">#</a> node.**connected**( [<>](https://github.com/erikbrinkman/d3-dag/blob/master/src/dag/connected.js#L2 "Source"))
 
