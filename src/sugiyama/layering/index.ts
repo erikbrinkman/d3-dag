@@ -14,6 +14,15 @@
  */
 import { Dag, DagNode } from "../../dag/node";
 
+/**
+ * A rank accessor assigns a rank to specific nodes. Layering operators that
+ * take a rank accessor should respect the convention that nodes with higher
+ * rank should be pushed farther down.
+ */
+export interface RankAccessor<NodeType extends DagNode> {
+  (node: NodeType): number | undefined;
+}
+
 export interface LayerableNode {
   layer?: number;
 }
