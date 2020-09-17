@@ -46,9 +46,9 @@ var dag = d3.sugiyama();
 
 Information for major changes between releases
 
-### Updating from 0.2 to 0.3
+### Updating from 0.3 to 0.4
 
-The update from 0.2 to 0.3 adds support for typescript, and makes a number of
+The update from 0.3 to 0.4 adds support for typescript, and makes a number of
 backwards incompatible changes that arrise from the switch. Some are also the
 result of cleaning up hasty early design decisions.
 
@@ -66,6 +66,7 @@ result of cleaning up hasty early design decisions.
   inline with other methods.
 - Documention has moved from the README to inline, and a github pages generated
   by typedoc.
+- Switched from npm to yarn.
 
 
 ### Updating from 0.1 to 0.2
