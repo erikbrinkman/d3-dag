@@ -2,6 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/d3-dag.svg)](https://www.npmjs.com/package/d3-dag)
 [![build](https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg)](https://github.com/erikbrinkman/d3-dag/actions)
+[![docs](https://img.shields.io/badge/docs-docs-informational)](https://erikbrinkman.github.io/d3-dag/)
 
 Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 In these instances `d3-hierarchy` may not suit your needs, which is why `d3-dag` (Directed Acyclic Graph) exists.
@@ -20,11 +21,11 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 
 ## Installing
 
-If you use NPM, `npm i d3-dag@0.2.3`.
+If you use NPM, `npm i d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag@0.2.3"></script>
+<script src="https://unpkg.com/d3-dag@0.4.0"></script>
 <script>
 
 var dag = d3.sugiyama();
@@ -34,13 +35,16 @@ var dag = d3.sugiyama();
 
 ## API Reference
 
-* [Hierarchy](#hierarchy)
-* [Stratify](#stratify)
-* [Connect](#connect)
-* [DAG](#dag)
-* [Sugiyama](#sugiyama)
-* [Zherebko](#zherebko)
-* [Arquint](#arquint)
+* [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/_index_.html) - methods exported to flat javascript
+* [DAG](https://erikbrinkman.github.io/d3-dag/modules/_dag_node_.html) - documentation on the DAG structur
+* Creating DAGs from data
+  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/modules/_dag_hierarchy_.html) - data in dag format
+  * [Stratify](https://erikbrinkman.github.io/d3-dag/modules/_dag_stratify_.html) - data in tabular format
+  * [Connect](https://erikbrinkman.github.io/d3-dag/modules/_dag_connect_.html) - data in edge format
+* Layout algorithms
+  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/modules/_sugiyama_index_.html) - standard layout
+  * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/_zherebko_index_.html) - topological layout
+  * [Arquint](https://erikbrinkman.github.io/d3-dag/modules/_arquint_index_.html) - variable sized nodes
 
 ## Updating
 
@@ -81,5 +85,4 @@ The update from 0.1 to 0.2 includes a few small backwards incompatible changes.
 
 ## TODO
 
-- [ ] Update API reference once github pages is live
 - [ ] Update observable examples once typescript version is published to npm
