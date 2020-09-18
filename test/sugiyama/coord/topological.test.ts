@@ -13,6 +13,17 @@ test("coordTopological() works for triangle", () => {
   expect(dummy.x).toBeCloseTo(1.0, 7);
 });
 
+test("coordTopological() works for disconnected", () => {
+  const layered = createLayers([[[0, 1]], [[], 0], [[]], [[0]]]);
+  coordTopological()(layered, sep);
+  for (const layer of layered) {
+    for (const node of layer) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
 test("coordTopological() throws for non-topological", () => {
   const layers = createLayers([[[0], [1]]]);
   expect(() => coordTopological()(layers, sep)).toThrow(

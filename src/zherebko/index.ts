@@ -61,12 +61,6 @@ function buildOperator<NodeType extends DagNode>(
   ): DagRoot<NodeType & ZherebkoNode>;
   function zherebkoCall(dag: Dag<NodeType>): Dag<NodeType & ZherebkoNode>;
   function zherebkoCall(dag: Dag<NodeType>): Dag<NodeType & ZherebkoNode> {
-    //
-    if (!dag.connected()) {
-      throw new Error("zherebko() doesn't work well for unconnected dags");
-      // TODO in principle it can, it just needs to be written a little better
-    }
-
     // topological sort
     const ordered = layer(dag);
 

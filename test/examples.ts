@@ -1,6 +1,5 @@
 import { Dag, DagNode } from "../src/dag/node";
-
-import { dagStratify } from "../src";
+import { dagConnect, dagStratify } from "../src";
 
 export interface SimpleDatum {
   id: string;
@@ -383,5 +382,24 @@ export function arq(): Dag<DagNode<SimpleDatum>> {
       id: "5",
       parentIds: ["4"]
     }
+  ]);
+}
+
+// dag from issue #43
+// 0   1
+// |\  |
+// 3 7 2
+// |/
+// 4   5
+//     |
+//     6
+export function ccoz(): Dag<DagNode<undefined, SimpleLinkDatum>> {
+  return dagConnect<SimpleLinkDatum>()([
+    ["0", "3"],
+    ["0", "7"],
+    ["1", "2"],
+    ["3", "4"],
+    ["5", "6"],
+    ["7", "4"]
   ]);
 }

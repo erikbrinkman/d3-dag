@@ -1,6 +1,6 @@
+import { ccoz, square } from "../../examples";
 import { dagConnect, layeringCoffmanGraham } from "../../../src";
 
-import { square } from "../../examples";
 import { toLayers } from "../utils";
 
 test("layeringCoffmanGraham() works for square", () => {
@@ -8,6 +8,13 @@ test("layeringCoffmanGraham() works for square", () => {
   layeringCoffmanGraham()(dag);
   const layers = toLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
+});
+
+test("layeringCoffmanGraham() works for a disconnected graph", () => {
+  const dag = ccoz();
+  layeringCoffmanGraham()(dag);
+  const layers = toLayers(dag);
+  expect(layers.length).toBeTruthy();
 });
 
 test("layeringCoffmanGraham() handles width", () => {

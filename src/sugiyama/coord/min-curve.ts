@@ -4,16 +4,25 @@
  * (QP) and so may take significant time, especially as the number of nodes
  * grows.
  *
+ * It's deprecated as you can get the same layout by passing identical weights
+ * to *vertical* and *curve* in [["sugiyama/coord/quad" | Quadratic
+ * Optimization ]] accessor.
+ *
  * <img alt="min curve example" src="media://min_curve.png" width="400">
  *
+ * @deprecated
  * @packageDocumentation
  */
 import { HorizableNode, Operator, Separation } from ".";
-import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
+import { quad } from "./quad";
 
+/**
+ * Minimum curves operator.
+ * @deprecated
+ */
 export interface MinCurveOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
   /**
@@ -36,25 +45,10 @@ function buildOperator<NodeType extends DagNode>(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
     separation: Separation<NodeType>
   ): void {
-    const inds = indices(layers);
-    const [Q, c, A, b] = init(layers, inds, separation);
-
-    for (const layer of layers) {
-      for (const par of layer) {
-        const pind = inds.getThrow(par.id);
-        for (const node of par.ichildren()) {
-          const nind = inds.getThrow(node.id);
-          minDist(Q, pind, nind, 1 - weightVal);
-          for (const child of node.ichildren()) {
-            const cind = inds.getThrow(child.id);
-            minBend(Q, pind, nind, cind, weightVal);
-          }
-        }
-      }
-    }
-
-    const solution = solve(Q, c, A, b);
-    layout(layers, inds, solution);
+    quad<NodeType>()
+      .vertical([(1 - weightVal) / 2, (1 - weightVal) / 2])
+      .curve([weightVal, weightVal])
+      .component(0.5)(layers, separation);
   }
 
   function weight(): number;
@@ -73,7 +67,10 @@ function buildOperator<NodeType extends DagNode>(
   return minCurveCall;
 }
 
-/** Create a default [[MinCurveOperator]]. */
+/**
+ * Create a default [[MinCurveOperator]].
+ * @deprecated
+ * */
 export function minCurve<NodeType extends DagNode>(
   ...args: never[]
 ): MinCurveOperator<NodeType> {

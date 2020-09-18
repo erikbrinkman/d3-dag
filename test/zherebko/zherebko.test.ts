@@ -80,14 +80,21 @@ test("zherebko() works specific case", () => {
   }
 });
 
+test("zherebko() works on disconnected dag", () => {
+  const dag = doub();
+  const laidout = zherebko().size([2, 2])(dag);
+  expect([
+    ...laidout
+      .idescendants()
+      .map((n) => n.y)
+      .sort()
+  ]).toEqual([0, 2]);
+  for (const node of laidout) {
+    expect(node.x).toEqual(1);
+  }
+});
+
 test("zherebko() fails with args", () => {
   const fail = (zherebko as unknown) as (x: null) => void;
   expect(() => fail(null)).toThrow("got arguments to zherebko");
-});
-
-test("zherebko() fails on disconnected dag", () => {
-  const dag = doub();
-  expect(() => zherebko()(dag)).toThrow(
-    "zherebko() doesn't work well for unconnected dags"
-  );
 });

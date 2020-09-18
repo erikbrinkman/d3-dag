@@ -27,9 +27,9 @@
 import { ChildLink, Dag, DagNode, DagRoot, LayoutChildLink } from "../dag/node";
 import { Operator as CoordOperator, HorizableNode, Separation } from "./coord";
 import { LayerableNode, Operator as LayeringOperator } from "./layering";
+import { QuadOperator, quad } from "./coord/quad";
 import { SimplexOperator, simplex } from "./layering/simplex";
 import { TwoLayerOperator, twoLayer } from "./decross/two-layer";
-import { VertOperator, vert } from "./coord/vert";
 
 import { Operator as DecrossOperator } from "./decross";
 import { DummyNode } from "./dummy";
@@ -104,7 +104,7 @@ export interface SugiyamaOperator<
   /**
    * Set the [[CoordOperator]]. See [["sugiyama/coord/index" | coordinate
    * assignments]] for more information about proper operators and a
-   * description of the built in operators. The default value is [[vert]].
+   * description of the built in operators. The default value is [[quad]].
    */
   coord<NewCoord extends CoordOperator<NodeType>>(
     crd: NewCoord
@@ -298,14 +298,22 @@ function buildOperator<
     // assign y
     if (layers.length === 1) {
       const [layer] = layers;
-      layer.forEach((n) => (n.y = height / 2));
+      for (const node of layer) {
+        node.y = height / 2;
+      }
     } else {
       const dh = nodeSized ? height : height / (layers.length - 1);
-      layers.forEach((layer, i) => layer.forEach((n) => (n.y = dh * i)));
+      for (const [i, layer] of layers.entries()) {
+        for (const node of layer) {
+          node.y = dh * i;
+        }
+      }
     }
     if (layers.every((l) => l.length === 1)) {
       // next steps aren't necessary
-      layers.forEach(([n]) => (n.x = width / 2));
+      for (const [node] of layers) {
+        node.x = width / 2;
+      }
     } else if (layers.length === 1) {
       // next steps aren't necessary
       const [layer] = layers;
@@ -558,7 +566,7 @@ export function sugiyama<NodeType extends DagNode>(
   NodeType,
   SimplexOperator<NodeType>,
   TwoLayerOperator<NodeType, MedianOperator<NodeType>>,
-  VertOperator<NodeType>,
+  QuadOperator<NodeType>,
   false,
   Separation<NodeType>
 > {
@@ -570,7 +578,7 @@ export function sugiyama<NodeType extends DagNode>(
   return buildOperator(
     simplex(),
     twoLayer(),
-    vert(),
+    quad(),
     false,
     [1, 1],
     defaultSeparation,

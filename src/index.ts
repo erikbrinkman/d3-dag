@@ -15,7 +15,12 @@ export { coffmanGraham as layeringCoffmanGraham } from "./sugiyama/layering/coff
 export { twoLayer as decrossTwoLayer } from "./sugiyama/decross/two-layer";
 export { opt as decrossOpt } from "./sugiyama/decross/opt";
 export { center as coordCenter } from "./sugiyama/coord/center";
-export { vert as coordVert } from "./sugiyama/coord/vert";
+export { quad as coordQuad } from "./sugiyama/coord/quad";
+/**
+ * Preserve old import for backwards compatability
+ * @deprecated
+ */
+export { quad as coordVert } from "./sugiyama/coord/quad";
 export { minCurve as coordMinCurve } from "./sugiyama/coord/min-curve";
 export { greedy as coordGreedy } from "./sugiyama/coord/greedy";
 export { topological as coordTopological } from "./sugiyama/coord/topological";

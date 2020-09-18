@@ -32,6 +32,9 @@ export interface OptOperator<NodeType extends DagNode>
 function buildOperator<NodeType extends DagNode>(
   debugVal: boolean
 ): OptOperator<NodeType> {
+  // TODO optimize this for disconnected graphs by breaking them apart, solving
+  // each, then mushing them back together
+
   const joiner = debugVal ? " => " : "\0\0";
   const slackJoiner = debugVal ? " " : "\0\0\0";
 

@@ -12,6 +12,7 @@ import { SugiDummyNode } from "../../src";
 export function toLayers<N extends DagNode & LayerableNode>(
   dag: Dag<N>
 ): number[][] {
+  // TODO Require last layer is fully specified with empty nodes
   const layers: number[][] = [];
   for (const node of dag) {
     const layerId = node.layer;
@@ -20,6 +21,11 @@ export function toLayers<N extends DagNode & LayerableNode>(
     }
     const layer = layers[layerId] || (layers[layerId] = []);
     layer.push(parseInt(node.id));
+  }
+  for (const [i, layer] of layers.entries()) {
+    if (layer === undefined) {
+      throw new Error(`layer ${i} was empty`);
+    }
   }
   return layers.map((layer) => layer.sort());
 }

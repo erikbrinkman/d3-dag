@@ -56,6 +56,19 @@ test("createLayers() throws on out of range", () => {
   ).toThrow("each child id must correspond to a node in the next layer");
 });
 
+test("toLayers() throws with empty layer", () => {
+  const dag = dagStratify<Layered>()([
+    {
+      id: "a",
+      layer: 1
+    }
+  ]);
+  for (const node of dag) {
+    (node as { layer?: number }).layer = node.data.layer;
+  }
+  expect(() => toLayers(dag)).toThrow("layer 0 was empty");
+});
+
 test("crossings() returns correctly for simple case", () => {
   const layers = createLayers([[[0], [1]]]);
   expect(crossings(layers)).toBeCloseTo(0);

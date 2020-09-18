@@ -6,11 +6,14 @@
  *
  * There are three built in coordinate assignment operators, which are all
  * constructed in a fluent fashion:
- * - [["sugiyama/twolayer/vert" | Vertical]]
- * - [["sugiyama/twolayer/min-curve" | Minimize Curves]]
+ * - [["sugiyama/twolayer/quad" | Quadratic Optimization ]] (formerly *Vert*)
  * - [["sugiyama/twolayer/greedy" | Greedy]]
  * - [["sugiyama/twolayer/center" | Center]]
  * - [["sugiyama/twolayer/topological" | Topological]]
+ *
+ * The operator [["sugiyama/twolayer/min-curve" | minimize curves]] is
+ * deprecated as it is identical to quad with equal weights for *vertical* and
+ * *curve*.
  *
  * @packageDocumentation
  */
