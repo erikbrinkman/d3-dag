@@ -1,4 +1,4 @@
-// d3-dag Version 0.4.0. Copyright 2020 Erik Brinkman.
+// d3-dag Version 0.4.1. Copyright 2020 Erik Brinkman.
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('fs'), require('child_process')) :
     typeof define === 'function' && define.amd ? define(['exports', 'fs', 'child_process'], factory) :
