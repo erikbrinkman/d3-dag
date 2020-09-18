@@ -43,7 +43,9 @@ interface ParentDataOperator<NodeDatum, LinkDatum> {
   (d: NodeDatum, i: number): [string, LinkDatum][] | undefined;
 }
 
-/** @internal */
+/**
+ * What gets returned by [[parentData]]() when [[parentIds]] is set.
+ */
 interface WrappedParentIdsOperator<
   NodeDatum,
   ParentIds extends ParentIdsOperator<NodeDatum>
@@ -52,7 +54,9 @@ interface WrappedParentIdsOperator<
   wrapped: ParentIds;
 }
 
-/** @internal */
+/**
+ * What gets returned by [[parentIds]]() when [[parentData]] is set.
+ */
 interface WrappedParentDataOperator<
   NodeDatum,
   LinkDatum,
@@ -68,9 +72,12 @@ interface WrappedParentDataOperator<
 export interface StratifyOperator<
   NodeDatum,
   LinkDatum,
-  Id extends IdOperator<NodeDatum>,
-  ParentIds extends ParentIdsOperator<NodeDatum>,
-  ParentData extends ParentDataOperator<NodeDatum, LinkDatum>
+  Id extends IdOperator<NodeDatum> = IdOperator<NodeDatum>,
+  ParentIds extends ParentIdsOperator<NodeDatum> = ParentIdsOperator<NodeDatum>,
+  ParentData extends ParentDataOperator<
+    NodeDatum,
+    LinkDatum
+  > = ParentDataOperator<NodeDatum, LinkDatum>
 > {
   /**
    * Construct a dag from the specified `data`. The data should be an array

@@ -43,20 +43,27 @@ interface ChildrenDataOperator<NodeDatum, LinkDatum> {
   (d: NodeDatum, i: number): [NodeDatum, LinkDatum][] | undefined;
 }
 
-/** @internal */
+/**
+ * What gets returned by [[childrenData]]() when [[children]] is set.
+ */
 interface WrappedChildrenOperator<
   NodeDatum,
-  Children extends ChildrenOperator<NodeDatum>
+  Children extends ChildrenOperator<NodeDatum> = ChildrenOperator<NodeDatum>
 > extends ChildrenDataOperator<NodeDatum, undefined> {
   (d: NodeDatum, i: number): [NodeDatum, undefined][];
   wrapped: Children;
 }
 
-/** @internal */
+/**
+ * What gets returned by [[children]]() when [[childrenData]] is set.
+ */
 interface WrappedChildrenDataOperator<
   NodeDatum,
   LinkDatum,
-  ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
+  ChildrenData extends ChildrenDataOperator<
+    NodeDatum,
+    LinkDatum
+  > = ChildrenDataOperator<NodeDatum, LinkDatum>
 > extends ChildrenOperator<NodeDatum> {
   (d: NodeDatum, i: number): NodeDatum[];
   wrapped: ChildrenData;
@@ -68,9 +75,12 @@ interface WrappedChildrenDataOperator<
 export interface HierarchyOperator<
   NodeDatum,
   LinkDatum,
-  Id extends IdOperator<NodeDatum>,
-  Children extends ChildrenOperator<NodeDatum>,
-  ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
+  Id extends IdOperator<NodeDatum> = IdOperator<NodeDatum>,
+  Children extends ChildrenOperator<NodeDatum> = ChildrenOperator<NodeDatum>,
+  ChildrenData extends ChildrenDataOperator<
+    NodeDatum,
+    LinkDatum
+  > = ChildrenDataOperator<NodeDatum, LinkDatum>
 > {
   /**
    * Construct a DAG from the specified root nodes.

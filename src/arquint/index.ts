@@ -78,14 +78,14 @@ export interface ArquintNode extends LayeredNode, IndexedNode {
 
 export interface Operator<
   NodeType extends DagNode,
-  Layering extends LayeringOperator<NodeType>,
-  Decross extends DecrossOperator<NodeType>,
-  Column extends ColumnOperator<NodeType>,
-  Coord extends CoordOperator<NodeType>,
-  LayerSep extends LayerSeparation<NodeType>,
-  ColWidth extends ColumnWidth,
-  ColSep extends ColumnSeparation,
-  HeightRat extends HeightRatio<NodeType>
+  Layering extends LayeringOperator<NodeType> = LayeringOperator<NodeType>,
+  Decross extends DecrossOperator<NodeType> = DecrossOperator<NodeType>,
+  Column extends ColumnOperator<NodeType> = ColumnOperator<NodeType>,
+  Coord extends CoordOperator<NodeType> = CoordOperator<NodeType>,
+  LayerSep extends LayerSeparation<NodeType> = LayerSeparation<NodeType>,
+  ColWidth extends ColumnWidth = ColumnWidth,
+  ColSep extends ColumnSeparation = ColumnSeparation,
+  HeightRat extends HeightRatio<NodeType> = HeightRatio<NodeType>
 > {
   /**
    * Lays out the specified DAG while respecting (vertical) *node*.heightRatio
@@ -1062,11 +1062,7 @@ export function arquint<NodeType extends DagNode>(): Operator<
   LongestPathOperator<NodeType>,
   TwoLayerOperator<NodeType, MeanOperator<NodeType>>,
   ComplexOperator<NodeType>,
-  SpreadOperator<NodeType>,
-  LayerSeparation<NodeType>,
-  ColumnWidth,
-  ColumnSeparation,
-  HeightRatio<NodeType>
+  SpreadOperator<NodeType>
 > {
   return buildOperator(
     false,

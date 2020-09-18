@@ -478,11 +478,11 @@ export interface ValuedNode {
 /** @internal */
 export type ChildLink<
   LinkDatum,
-  NodeType extends DagNode<unknown, LinkDatum>
+  NodeType extends DagNode<unknown, LinkDatum> = DagNode<unknown, LinkDatum>
 > = LayoutChildLink<LinkDatum, NodeType>;
 
 /** The public facing interface backed by the [[LayoutLink]] implementation. */
-export type Link<NodeType extends DagNode> = LayoutLink<NodeType>;
+export type Link<NodeType extends DagNode = DagNode> = LayoutLink<NodeType>;
 
 /** The public facing interface backed by the [[LayoutDagNode]] implementation. */
 export type DagNode<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagNode<
@@ -491,7 +491,9 @@ export type DagNode<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagNode<
 >;
 
 /** The public facing interface backed by the [[LayoutDagRoot]] implementation. */
-export type DagRoot<NodeType extends DagNode> = LayoutDagRoot<NodeType>;
+export type DagRoot<NodeType extends DagNode = DagNode> = LayoutDagRoot<
+  NodeType
+>;
 
 /**
  * The union of a [[DagNode]] and [[DagRoot]], representing the return value of

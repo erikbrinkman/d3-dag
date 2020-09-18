@@ -31,8 +31,8 @@ export interface IdOperator<LinkDatum> {
  */
 export interface ConnectOperator<
   LinkDatum,
-  SourceId extends IdOperator<LinkDatum>,
-  TargetId extends IdOperator<LinkDatum>
+  SourceId extends IdOperator<LinkDatum> = IdOperator<LinkDatum>,
+  TargetId extends IdOperator<LinkDatum> = IdOperator<LinkDatum>
 > {
   /**
    * Construct a dag from the specified data. The data should be an array of
@@ -210,7 +210,7 @@ function defaultTargetId(d: unknown): string {
  */
 export function connect<LinkDatum>(
   ...args: never[]
-): ConnectOperator<LinkDatum, IdOperator<LinkDatum>, IdOperator<LinkDatum>> {
+): ConnectOperator<LinkDatum> {
   if (args.length) {
     throw new Error(
       `got arguments to dagConnect(${args}), but constructor takes no aruguments. ` +

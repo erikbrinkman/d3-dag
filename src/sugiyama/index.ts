@@ -59,11 +59,11 @@ export interface SugiyamaNode {
  */
 export interface SugiyamaOperator<
   NodeType extends DagNode,
-  Layering extends LayeringOperator<NodeType>,
-  Decross extends DecrossOperator<NodeType>,
-  Coord extends CoordOperator<NodeType>,
-  NodeSized extends boolean,
-  Sep extends Separation<NodeType>
+  Layering extends LayeringOperator<NodeType> = LayeringOperator<NodeType>,
+  Decross extends DecrossOperator<NodeType> = DecrossOperator<NodeType>,
+  Coord extends CoordOperator<NodeType> = CoordOperator<NodeType>,
+  NodeSized extends boolean = false,
+  Sep extends Separation<NodeType> = Separation<NodeType>
 > {
   /**
    * Layout the [[Dag]] using the currently configured operator. The returned

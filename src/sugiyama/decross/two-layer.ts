@@ -18,7 +18,7 @@ import { Operator as OrderOperator } from "../twolayer";
 
 export interface TwoLayerOperator<
   NodeType extends DagNode,
-  TwoLayer extends OrderOperator<NodeType>
+  TwoLayer extends OrderOperator<NodeType> = OrderOperator<NodeType>
 > extends Operator<NodeType> {
   /**
    * Sets the order accessor to the specified [[OrderOperator]] and returns
