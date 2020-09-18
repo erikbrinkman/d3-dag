@@ -86,9 +86,17 @@ test("dagStratify() fails with empty data", () => {
   expect(() => dagStratify()([])).toThrow("can't stratify empty data");
 });
 
+class BadId {
+  get id() {
+    throw new Error("bad id");
+  }
+}
 test("dagStratify() fails at undefined id", () => {
   expect(() => {
     dagStratify()([{}]);
+  }).toThrow("default id function expected datum to have an id field but got");
+  expect(() => {
+    dagStratify()([new BadId()]);
   }).toThrow("default id function expected datum to have an id field but got");
 });
 
@@ -157,6 +165,12 @@ test("dagStratify() fails with hard cycle", () => {
   expect(() => dagStratify()(data)).toThrow(/cycle: 4 -> 3 -> 4$/);
 });
 
+class BadParentIds {
+  id = "";
+  get parentIds() {
+    throw new Error("bad parent ids");
+  }
+}
 test("dagStratify() fails with incorrect parentIds", () => {
   const data = [
     {
@@ -165,6 +179,9 @@ test("dagStratify() fails with incorrect parentIds", () => {
     }
   ];
   expect(() => dagStratify()(data)).toThrow(
+    "default parentIds function expected datum to have a parentIds field but got: "
+  );
+  expect(() => dagStratify()([new BadParentIds()])).toThrow(
     "default parentIds function expected datum to have a parentIds field but got: "
   );
 });

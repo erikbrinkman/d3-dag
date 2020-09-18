@@ -106,14 +106,34 @@ test("dagConnect() fails with cycle", () => {
   expect(() => dagConnect()(cycle)).toThrow("cycle: a -> b -> a");
 });
 
+class BadZero {
+  get ["0"]() {
+    throw new Error("bad zero");
+  }
+  ["1"] = "a";
+}
+
 test("dagConnect() fails on non-string source", () => {
   expect(() => dagConnect()([[null, "a"]])).toThrow(
     "default source id expected datum[0] to be a string but got datum: "
   );
+  expect(() => dagConnect()([new BadZero()])).toThrow(
+    "default source id expected datum[0] to be a string but got datum: "
+  );
 });
+
+class BadOne {
+  ["0"] = "a";
+  get ["1"]() {
+    throw new Error("bad one");
+  }
+}
 
 test("dagConnect() fails on non-string target", () => {
   expect(() => dagConnect()([["a", null]])).toThrow(
+    "default target id expected datum[1] to be a string but got datum: "
+  );
+  expect(() => dagConnect()([new BadOne()])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
 });

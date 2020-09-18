@@ -364,7 +364,11 @@ interface HasId {
 
 /** @internal */
 function hasId(d: unknown): d is HasId {
-  return typeof (d as HasId).id === "string";
+  try {
+    return typeof (d as HasId).id === "string";
+  } catch {
+    return false;
+  }
 }
 
 /** @internal */
@@ -385,8 +389,12 @@ interface HasChildren<NodeDatum> {
 
 /** @internal */
 function hasChildren<NodeDatum>(d: unknown): d is HasChildren<NodeDatum> {
-  const children = (d as HasChildren<NodeDatum>).children;
-  return children === undefined || children instanceof Array;
+  try {
+    const children = (d as HasChildren<NodeDatum>).children;
+    return children === undefined || children instanceof Array;
+  } catch {
+    return false;
+  }
 }
 
 /** @internal */

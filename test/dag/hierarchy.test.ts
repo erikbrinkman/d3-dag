@@ -179,14 +179,30 @@ test("dagHierarchy() throws for nonempty input", () => {
   }).toThrow("got arguments to dagHierarchy");
 });
 
+class BadId {
+  get id() {
+    throw new Error("bad id");
+  }
+}
+
 test("dagHierarchy() fails with missing id", () => {
   expect(() => dagHierarchy()({})).toThrow(
     "default id function expected datum to have an id field by got: "
   );
+  expect(() => dagHierarchy()(new BadId())).toThrow(
+    "default id function expected datum to have an id field by got: "
+  );
 });
 
+class BadChildren {
+  id = "";
+  get children() {
+    throw new Error("bad children");
+  }
+}
+
 test("dagHierarchy() fails with incorrect children", () => {
-  expect(() => dagHierarchy()({ id: "a", children: null })).toThrow(
+  expect(() => dagHierarchy()(new BadChildren())).toThrow(
     "default children function expected datum to have a children field but got: "
   );
 });

@@ -1032,9 +1032,9 @@ interface HasHeightRatio {
 }
 
 /** @internal */
-function hasHeightRatio(node: unknown): node is HasHeightRatio {
-  // I'm not sure what the utility of this is as it should always return true,
-  // but casting also seemd bad.
+function hasHeightRatio<NodeType extends DagNode>(
+  node: NodeType
+): node is HasHeightRatio & NodeType {
   const heightRatio = (node as HasHeightRatio).heightRatio;
   return heightRatio === undefined || typeof heightRatio === "number";
 }

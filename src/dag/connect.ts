@@ -170,7 +170,11 @@ interface ZeroString {
 
 /** @internal */
 function isZeroString(d: unknown): d is ZeroString {
-  return typeof (d as ZeroString)[0] === "string";
+  try {
+    return typeof (d as ZeroString)[0] === "string";
+  } catch {
+    return false;
+  }
 }
 
 /** @internal */
@@ -191,7 +195,11 @@ interface OneString {
 
 /** @internal */
 function isOneString(d: unknown): d is OneString {
-  return typeof (d as OneString)[1] === "string";
+  try {
+    return typeof (d as OneString)[1] === "string";
+  } catch {
+    return false;
+  }
 }
 
 /** @internal */

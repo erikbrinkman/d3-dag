@@ -353,7 +353,11 @@ interface HasId {
 
 /** @internal */
 function hasId(d: unknown): d is HasId {
-  return typeof (d as HasId).id === "string";
+  try {
+    return typeof (d as HasId).id === "string";
+  } catch {
+    return false;
+  }
 }
 
 /** @internal */
@@ -374,12 +378,16 @@ interface HasParentIds {
 
 /** @internal */
 function hasParentIds(d: unknown): d is HasParentIds {
-  const parentIds = (d as HasParentIds).parentIds;
-  return (
-    parentIds === undefined ||
-    (parentIds instanceof Array &&
-      parentIds.every((id) => typeof id === "string"))
-  );
+  try {
+    const parentIds = (d as HasParentIds).parentIds;
+    return (
+      parentIds === undefined ||
+      (parentIds instanceof Array &&
+        parentIds.every((id) => typeof id === "string"))
+    );
+  } catch {
+    return false;
+  }
 }
 
 /** @internal */
