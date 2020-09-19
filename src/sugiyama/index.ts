@@ -153,7 +153,7 @@ export interface SugiyamaOperator<
    *
    * ```js
    * function separation(a, b) {
-   *   return 1;
+   *   return +!(a instanceof SugiDummyNode) + +!(b instanceof SugiDummyNode);
    * }
    * ```
    *
@@ -163,11 +163,11 @@ export interface SugiyamaOperator<
    *
    * ```js
    * function separation(a, b) {
-   *   return +(a instanceof SugiDummyNode) + +(b instanceof SugiDummyNode);
+   *   return 1;
    * }
    * ```
    *
-   * which will wrap edges around nodes, but give them no spaceing themselves.
+   * which gives edges the same spacing as normal nodes.
    */
   separation<NewSep extends Separation<NodeType>>(
     sep: NewSep
@@ -533,6 +533,14 @@ function buildOperator<
   return sugiyama;
 }
 
+/** @internal */
+function defaultSeparation<NodeType extends DagNode>(
+  left: NodeType | DummyNode,
+  right: NodeType | DummyNode
+): number {
+  return +!(left instanceof DummyNode) + +!(right instanceof DummyNode);
+}
+
 /**
  * Construct a new [[SugiyamaOperator]] with the default settings.
  */
@@ -560,9 +568,4 @@ export function sugiyama<NodeType extends DagNode>(
     defaultSeparation,
     false
   );
-}
-
-/** @internal */
-function defaultSeparation(): number {
-  return 1;
 }
