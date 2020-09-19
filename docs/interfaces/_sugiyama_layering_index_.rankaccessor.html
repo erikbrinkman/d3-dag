@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Operator | d3-dag</title>
+	<title>RankAccessor | d3-dag</title>
 	<meta name="description" content="Documentation for d3-dag">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,19 +56,28 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_arquint_column_index_.html">&quot;arquint/column/index&quot;</a>
+					<a href="../modules/_sugiyama_layering_index_.html">&quot;sugiyama/layering/index&quot;</a>
 				</li>
 				<li>
-					<a href="_arquint_column_index_.operator.html">Operator</a>
+					<a href="_sugiyama_layering_index_.rankaccessor.html">RankAccessor</a>
 				</li>
 			</ul>
-			<h1>Interface Operator&lt;NodeType&gt;</h1>
+			<h1>Interface RankAccessor&lt;NodeType&gt;</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A rank accessor assigns a rank to specific nodes. Layering operators that
+							take a rank accessor should respect the convention that nodes with higher
+						rank should be pushed farther down.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-type-parameters">
 				<h3>Type parameters</h3>
 				<ul class="tsd-type-parameters">
@@ -81,37 +90,36 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Operator</span>
-						<ul class="tsd-hierarchy">
-							<li>
-								<a href="_arquint_column_adjacent_.adjacentoperator.html" class="tsd-signature-type">AdjacentOperator</a>
-							</li>
-							<li>
-								<a href="_arquint_column_complex_.complexoperator.html" class="tsd-signature-type">ComplexOperator</a>
-							</li>
-						</ul>
+						<span class="target">RankAccessor</span>
 					</li>
 				</ul>
 			</section>
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>layers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> &amp; </span><a href="_arquint_column_index_.indexablenode.html" class="tsd-signature-type">IndexableNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> | </span><a href="../classes/_arquint_dummy_.dummynode.html" class="tsd-signature-type">DummyNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/arquint/column/index.ts#L29">src/arquint/column/index.ts:29</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/layering/index.ts#L22">src/sugiyama/layering/index.ts:22</a></li>
 							</ul>
 						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>A rank accessor assigns a rank to specific nodes. Layering operators that
+									take a rank accessor should respect the convention that nodes with higher
+								rank should be pushed farther down.</p>
+							</div>
+						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>layers: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> &amp; </span><a href="_arquint_column_index_.indexablenode.html" class="tsd-signature-type">IndexableNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> | </span><a href="../classes/_arquint_dummy_.dummynode.html" class="tsd-signature-type">DummyNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>node: <span class="tsd-signature-type">NodeType</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -123,19 +131,22 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="../modules/_arquint_column_index_.html">&quot;arquint/column/index&quot;</a>
+						<a href="../modules/_sugiyama_layering_index_.html">&quot;sugiyama/layering/index&quot;</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="_arquint_column_index_.indexablenode.html" class="tsd-kind-icon">Indexable<wbr>Node</a>
+						<a href="_sugiyama_layering_index_.layerablenode.html" class="tsd-kind-icon">Layerable<wbr>Node</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_sugiyama_layering_index_.operator.html" class="tsd-kind-icon">Operator</a>
 					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="_arquint_column_index_.operator.html" class="tsd-kind-icon">Operator</a>
+						<a href="_sugiyama_layering_index_.rankaccessor.html" class="tsd-kind-icon">Rank<wbr>Accessor</a>
 					</li>
 				</ul>
 				<ul class="after-current">

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>IdOperator | d3-dag</title>
+	<title>WrappedParentIdsOperator | d3-dag</title>
 	<meta name="description" content="Documentation for d3-dag">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_dag_stratify_.html">&quot;dag/stratify&quot;</a>
 				</li>
 				<li>
-					<a href="_dag_stratify_.idoperator.html">IdOperator</a>
+					<a href="_dag_stratify_.wrappedparentidsoperator.html">WrappedParentIdsOperator</a>
 				</li>
 			</ul>
-			<h1>Interface IdOperator&lt;NodeDatum&gt;</h1>
+			<h1>Interface WrappedParentIdsOperator&lt;NodeDatum, ParentIds&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -72,11 +72,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>The interface for getting the node id from data. The function must return an
-							unique id for each piece of data, but the same id if called twice on the
-						same data. Ids cannot contain the null character <code>&#39;\0&#39;</code>.</p>
+						<p>What gets returned by <a href="_dag_stratify_.stratifyoperator.html#parentdata">parentData</a>() when <a href="_dag_stratify_.stratifyoperator.html#parentids">parentIds</a> is set.</p>
 					</div>
-					<p><code>i</code> will increment in the order nodes are processed.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-type-parameters">
@@ -85,35 +82,41 @@
 					<li>
 						<h4>NodeDatum</h4>
 					</li>
+					<li>
+						<h4>ParentIds<span class="tsd-signature-symbol">: </span><a href="_dag_stratify_.parentidsoperator.html" class="tsd-signature-type">ParentIdsOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">IdOperator</span>
+						<a href="_dag_stratify_.parentdataoperator.html" class="tsd-signature-type">ParentDataOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">WrappedParentIdsOperator</span>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</section>
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>d<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeDatum</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>d<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeDatum</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span></li>
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>d<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeDatum</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/dag/stratify.ts#L24">src/dag/stratify.ts:24</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/dag/stratify.ts#L52">src/dag/stratify.ts:52</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>The interface for getting the node id from data. The function must return an
-									unique id for each piece of data, but the same id if called twice on the
-								same data. Ids cannot contain the null character <code>&#39;\0&#39;</code>.</p>
+								<p>What gets returned by <a href="_dag_stratify_.stratifyoperator.html#parentdata">parentData</a>() when <a href="_dag_stratify_.stratifyoperator.html#parentids">parentIds</a> is set.</p>
 							</div>
-							<p><code>i</code> will increment in the order nodes are processed.</p>
 						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
@@ -124,9 +127,57 @@
 								<h5>i: <span class="tsd-signature-type">number</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span></h4>
+					</li>
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/dag/stratify.ts#L42">src/dag/stratify.ts:42</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>What gets returned by <a href="_dag_stratify_.stratifyoperator.html#parentdata">parentData</a>() when <a href="_dag_stratify_.stratifyoperator.html#parentids">parentIds</a> is set.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>d: <span class="tsd-signature-type">NodeDatum</span></h5>
+							</li>
+							<li>
+								<h5>i: <span class="tsd-signature-type">number</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h4>
 					</li>
 				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="_dag_stratify_.wrappedparentidsoperator.html#wrapped" class="tsd-kind-icon">wrapped</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="wrapped" class="tsd-anchor"></a>
+					<h3>wrapped</h3>
+					<div class="tsd-signature tsd-kind-icon">wrapped<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ParentIds</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/dag/stratify.ts#L54">src/dag/stratify.ts:54</a></li>
+						</ul>
+					</aside>
+				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -142,13 +193,9 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="_dag_stratify_.idoperator.html" class="tsd-kind-icon">Id<wbr>Operator</a>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="_dag_stratify_.parentdataoperator.html" class="tsd-kind-icon">Parent<wbr>Data<wbr>Operator</a>
 					</li>
@@ -161,9 +208,18 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="_dag_stratify_.wrappedparentdataoperator.html" class="tsd-kind-icon">Wrapped<wbr>Parent<wbr>Data<wbr>Operator</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="_dag_stratify_.wrappedparentidsoperator.html" class="tsd-kind-icon">Wrapped<wbr>Parent<wbr>Ids<wbr>Operator</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="_dag_stratify_.wrappedparentidsoperator.html#wrapped" class="tsd-kind-icon">wrapped</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="../modules/_dag_stratify_.html#stratify" class="tsd-kind-icon">stratify</a>
 					</li>
@@ -185,6 +241,7 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>

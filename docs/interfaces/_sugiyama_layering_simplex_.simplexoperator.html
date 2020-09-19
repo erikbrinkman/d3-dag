@@ -62,7 +62,7 @@
 					<a href="_sugiyama_layering_simplex_.simplexoperator.html">SimplexOperator</a>
 				</li>
 			</ul>
-			<h1>Interface SimplexOperator&lt;NodeType&gt;</h1>
+			<h1>Interface SimplexOperator&lt;NodeType, Rank&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -74,6 +74,9 @@
 				<ul class="tsd-type-parameters">
 					<li>
 						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a></h4>
+					</li>
+					<li>
+						<h4>Rank<span class="tsd-signature-symbol">: </span><a href="_sugiyama_layering_index_.rankaccessor.html" class="tsd-signature-type">RankAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">RankAccessor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -99,7 +102,7 @@
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/f534d1b/src/sugiyama/layering/index.ts#L21">src/sugiyama/layering/index.ts:21</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/layering/index.ts#L30">src/sugiyama/layering/index.ts:30</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -120,6 +123,7 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_sugiyama_layering_simplex_.simplexoperator.html#debug" class="tsd-kind-icon">debug</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="_sugiyama_layering_simplex_.simplexoperator.html#rank" class="tsd-kind-icon">rank</a></li>
 							</ul>
 						</section>
 					</div>
@@ -131,14 +135,14 @@
 					<a name="debug" class="tsd-anchor"></a>
 					<h3>debug</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_layering_simplex_.simplexoperator.html" class="tsd-signature-type">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_layering_simplex_.simplexoperator.html" class="tsd-signature-type">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Rank</span><span class="tsd-signature-symbol">&gt;</span></li>
 						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/f534d1b/src/sugiyama/layering/simplex.ts#L26">src/sugiyama/layering/simplex.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/layering/simplex.ts#L42">src/sugiyama/layering/simplex.ts:42</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -155,12 +159,12 @@
 									<h5>val: <span class="tsd-signature-type">boolean</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_layering_simplex_.simplexoperator.html" class="tsd-signature-type">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_layering_simplex_.simplexoperator.html" class="tsd-signature-type">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Rank</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/f534d1b/src/sugiyama/layering/simplex.ts#L28">src/sugiyama/layering/simplex.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/layering/simplex.ts#L44">src/sugiyama/layering/simplex.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -169,6 +173,56 @@
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="rank" class="tsd-anchor"></a>
+					<h3>rank</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">rank&lt;NewRank&gt;<span class="tsd-signature-symbol">(</span>newRank<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_layering_simplex_.simplexoperator.html" class="tsd-signature-type">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">rank<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Rank</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/layering/simplex.ts#L28">src/sugiyama/layering/simplex.ts:28</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the <a href="_sugiyama_layering_index_.rankaccessor.html">RankAccessor</a>. Any node with a rank assigned will have a second
+										ordering enforcing ordering of the ranks. Note, this can cause the simplex
+									optimization to be ildefined, and may result in an error during layout.</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>NewRank<span class="tsd-signature-symbol">: </span><a href="_sugiyama_layering_index_.rankaccessor.html" class="tsd-signature-type">RankAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newRank: <span class="tsd-signature-type">NewRank</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_layering_simplex_.simplexoperator.html" class="tsd-signature-type">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/layering/simplex.ts#L34">src/sugiyama/layering/simplex.ts:34</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the current <a href="_sugiyama_layering_index_.rankaccessor.html">RankAccessor</a>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Rank</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -194,6 +248,9 @@
 						<ul>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
 								<a href="_sugiyama_layering_simplex_.simplexoperator.html#debug" class="tsd-kind-icon">debug</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="_sugiyama_layering_simplex_.simplexoperator.html#rank" class="tsd-kind-icon">rank</a>
 							</li>
 						</ul>
 					</li>

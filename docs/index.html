@@ -68,7 +68,8 @@
 					<h1>d3-dag</h1>
 				</a>
 				<p><a href="https://www.npmjs.com/package/d3-dag"><img src="https://img.shields.io/npm/v/d3-dag.svg" alt="npm"></a>
-				<a href="https://github.com/erikbrinkman/d3-dag/actions"><img src="https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg" alt="build"></a></p>
+					<a href="https://github.com/erikbrinkman/d3-dag/actions"><img src="https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg" alt="build"></a>
+				<a href="https://erikbrinkman.github.io/d3-dag/"><img src="https://img.shields.io/badge/docs-docs-informational" alt="docs"></a></p>
 				<p>Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 					In these instances <code>d3-hierarchy</code> may not suit your needs, which is why <code>d3-dag</code> (Directed Acyclic Graph) exists.
 					This module implements a data structure for manipulating DAGs.
@@ -86,9 +87,9 @@
 				<a href="#installing" id="installing" style="color: inherit; text-decoration: none;">
 					<h2>Installing</h2>
 				</a>
-				<p>If you use NPM, <code>npm i d3-dag@0.2.3</code>.
+				<p>If you use NPM, <code>npm i d3-dag</code>.
 				Otherwise you can load it using <code>unpkg</code>:</p>
-				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://unpkg.com/d3-dag@0.2.3&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://unpkg.com/d3-dag@0.4.0&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
 
 <span class="hljs-keyword">var</span> dag = d3.sugiyama();
@@ -98,13 +99,20 @@
 					<h2>API Reference</h2>
 				</a>
 				<ul>
-					<li><a href="#hierarchy">Hierarchy</a></li>
-					<li><a href="#stratify">Stratify</a></li>
-					<li><a href="#connect">Connect</a></li>
-					<li><a href="#dag">DAG</a></li>
-					<li><a href="#sugiyama">Sugiyama</a></li>
-					<li><a href="#zherebko">Zherebko</a></li>
-					<li><a href="#arquint">Arquint</a></li>
+					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_index_.html">Javascript API</a> - methods exported to flat javascript</li>
+					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_node_.html">DAG</a> - documentation on the DAG structur</li>
+					<li>Creating DAGs from data<ul>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_hierarchy_.html">Hierarchy</a> - data in dag format</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_stratify_.html">Stratify</a> - data in tabular format</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_connect_.html">Connect</a> - data in edge format</li>
+						</ul>
+					</li>
+					<li>Layout algorithms<ul>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_sugiyama_index_.html">Sugiyama</a> - standard layout</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_zherebko_index_.html">Zherebko</a> - topological layout</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_arquint_index_.html">Arquint</a> - variable sized nodes</li>
+						</ul>
+					</li>
 				</ul>
 				<a href="#updating" id="updating" style="color: inherit; text-decoration: none;">
 					<h2>Updating</h2>
@@ -148,7 +156,6 @@
 					<h2>TODO</h2>
 				</a>
 				<ul>
-					<li><input disabled="" type="checkbox"> Update API reference once github pages is live</li>
 					<li><input disabled="" type="checkbox"> Update observable examples once typescript version is published to npm</li>
 				</ul>
 			</div>
