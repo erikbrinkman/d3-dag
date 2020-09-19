@@ -1,17 +1,17 @@
-import { dagConnect, dagStratify, layeringCoffmanGraham } from "../../../src";
+import { dagConnect, layeringCoffmanGraham } from "../../../src";
 
-import { square } from "../../dags";
+import { square } from "../../examples";
 import { toLayers } from "../utils";
 
 test("layeringCoffmanGraham() works for square", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   layeringCoffmanGraham()(dag);
   const layers = toLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
 });
 
 test("layeringCoffmanGraham() handles width", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   const layering = layeringCoffmanGraham().width(1);
   expect(layering.width()).toBe(1);
   layering(dag);

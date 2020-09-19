@@ -1,10 +1,9 @@
-import { dagStratify, layeringTopological } from "../../../src";
-
-import { square } from "../../dags";
+import { layeringTopological } from "../../../src";
+import { square } from "../../examples";
 import { toLayers } from "../utils";
 
 test("layeringTopological() works for square", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   layeringTopological()(dag);
   const layers = toLayers(dag);
   expect([

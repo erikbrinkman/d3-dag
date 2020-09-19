@@ -2,14 +2,13 @@ import {
   Operator as CoordOperator,
   Separation
 } from "../../src/sugiyama/coord";
-import { SimpleDatum, doub, dummy, single, three } from "../dags";
+import { SimpleDatum, doub, dummy, single, three } from "../examples";
 import {
   coordCenter,
   coordGreedy,
   coordMinCurve,
   coordTopological,
   coordVert,
-  dagStratify,
   decrossOpt,
   decrossTwoLayer,
   layeringCoffmanGraham,
@@ -26,14 +25,14 @@ import { Operator as LayeringOperator } from "../../src/sugiyama/layering";
 type SimpleNode = DagNode<SimpleDatum>;
 
 test("sugiyama() works for single node", () => {
-  const dag = dagStratify()(single);
+  const dag = single();
   const [node] = sugiyama()(dag);
   expect(node.x).toBeCloseTo(0.5);
   expect(node.y).toBeCloseTo(0.5);
 });
 
 test("sugiyama() works for double node", () => {
-  const dag = dagStratify()(doub);
+  const dag = doub();
   const [first, second] = sugiyama().layering(layeringTopological())(dag);
   expect(first.x).toBeCloseTo(0.5);
   expect(first.y).toBeCloseTo(0.0);
@@ -42,7 +41,7 @@ test("sugiyama() works for double node", () => {
 });
 
 test("sugiyama() works with a dummy node", () => {
-  const dag = dagStratify()(dummy);
+  const dag = dummy();
   const [first, second, third] = sugiyama()(dag).idescendants("before");
   expect(first.y).toBeCloseTo(0);
   expect(second.y).toBeCloseTo(0.5);
@@ -57,7 +56,7 @@ test("sugiyama() works with a dummy node", () => {
 });
 
 test("sugiyama() allows changing size", () => {
-  const dag = dagStratify()(three);
+  const dag = three();
   const layout = sugiyama().size([3, 3]);
   expect(layout.size()).toEqual([3, 3]);
   expect(layout.nodeSize()).toBeNull();
@@ -74,7 +73,7 @@ test("sugiyama() allows changing size", () => {
 });
 
 test("sugiyama() allows changing nodeSize", () => {
-  const dag = dagStratify()(three);
+  const dag = three();
   const layout = sugiyama().nodeSize([3, 3]);
   expect(layout.nodeSize()).toEqual([3, 3]);
   expect(layout.size()).toBeNull();
@@ -91,7 +90,7 @@ test("sugiyama() allows changing nodeSize", () => {
 });
 
 test("sugiyama() allows changing operators", () => {
-  const dag = dagStratify<SimpleDatum>()(dummy);
+  const dag = dummy();
   const layering: LayeringOperator<SimpleNode> = (dag) => {
     for (const [i, node] of dag.idescendants("before").entries()) {
       node.layer = i;
@@ -123,7 +122,7 @@ test("sugiyama() allows changing operators", () => {
 });
 
 test("sugiyama() allows setting all builtin operators", () => {
-  const dag = dagStratify()(single);
+  const dag = single();
   const layout = sugiyama()
     .layering(layeringTopological())
     .layering(layeringSimplex())
@@ -143,7 +142,7 @@ test("sugiyama() allows setting all builtin operators", () => {
 });
 
 test("sugiyama() throws with noop layering", () => {
-  const dag = dagStratify()(dummy);
+  const dag = dummy();
   const layout = sugiyama().layering(() => undefined);
   expect(() => layout(dag)).toThrow(
     "layering did not assign layer to node '0'"
@@ -152,7 +151,7 @@ test("sugiyama() throws with noop layering", () => {
 
 test("sugiyama() throws with invalid layers", () => {
   // layers are weird
-  const dag = dagStratify()(dummy);
+  const dag = dummy();
   const layout = sugiyama().layering((dag) => {
     for (const node of dag) {
       node.layer = -1;
@@ -165,7 +164,7 @@ test("sugiyama() throws with invalid layers", () => {
 
 test("sugiyama() throws with flat layering", () => {
   // layers are weird
-  const dag = dagStratify()(dummy);
+  const dag = dummy();
   const layout = sugiyama().layering((dag) => {
     for (const node of dag) {
       node.layer = 0;
@@ -177,7 +176,7 @@ test("sugiyama() throws with flat layering", () => {
 });
 
 test("sugiyama() throws with noop coord", () => {
-  const dag = dagStratify()(dummy);
+  const dag = dummy();
   const layout = sugiyama().coord(() => undefined);
   expect(() => layout(dag)).toThrow("coord didn't assign an x to node '0'");
 });

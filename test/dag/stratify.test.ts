@@ -1,6 +1,36 @@
-import { SimpleDatum, doub, single, square } from "../dags";
-
+import { SimpleDatum } from "../examples";
 import { dagStratify } from "../../src/";
+
+const single: SimpleDatum[] = [
+  {
+    id: "0"
+  }
+];
+const doub: SimpleDatum[] = [
+  {
+    id: "0"
+  },
+  {
+    id: "1"
+  }
+];
+const square: SimpleDatum[] = [
+  {
+    id: "0"
+  },
+  {
+    id: "1",
+    parentIds: ["0"]
+  },
+  {
+    id: "2",
+    parentIds: ["0"]
+  },
+  {
+    id: "3",
+    parentIds: ["1", "2"]
+  }
+];
 
 function alter(id: string): string {
   return `a${id}`;

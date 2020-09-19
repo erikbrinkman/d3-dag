@@ -1,12 +1,11 @@
-import { arq, grafo, square } from "../dags";
+import { arq, grafo, square } from "../examples";
 import {
   arqcoordSpread,
   arquint,
   columnAdjacent,
   columnCenter,
   columnComplex,
-  columnLeft,
-  dagStratify
+  columnLeft
 } from "../../src";
 
 test("spread() works for square with zero column width", () => {
@@ -18,7 +17,7 @@ test("spread() works for square with zero column width", () => {
     .columnWidth(() => 0)
     .columnSeparation(() => 1)
     .size([2, 2]);
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag.idescendants("before");
 
   for (const node of dag) {
@@ -39,7 +38,7 @@ test("spread() works for square with zero separation", () => {
     .columnWidth(() => 1)
     .columnSeparation(() => 0)
     .size([2, 2]);
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag.idescendants("before");
 
   for (const node of dag) {
@@ -53,7 +52,7 @@ test("spread() works for square with zero separation", () => {
 
 test("left() works for arq", () => {
   const layout = arquint().column(columnLeft());
-  const dag = layout(dagStratify()(arq));
+  const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
     .sort((a, b) => parseInt(a.id) - parseInt(b.id))
@@ -67,7 +66,7 @@ test("left() works for arq", () => {
 
 test("center() works for square", () => {
   const layout = arquint().column(columnCenter());
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag
     .idescendants("before")
     .map((n) => n.columnIndex);
@@ -79,7 +78,7 @@ test("center() works for square", () => {
 
 test("center() works for arq", () => {
   const layout = arquint().column(columnCenter());
-  const dag = layout(dagStratify()(arq));
+  const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
     .sort((a, b) => parseInt(a.id) - parseInt(b.id))
@@ -93,7 +92,7 @@ test("center() works for arq", () => {
 
 test("left complex() works for square", () => {
   const layout = arquint().column(columnComplex().center(false));
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag
     .idescendants("before")
     .map((n) => n.columnIndex);
@@ -105,7 +104,7 @@ test("left complex() works for square", () => {
 
 test("left complex() works for dag", () => {
   const layout = arquint().column(columnComplex().center(false));
-  const dag = layout(dagStratify()(arq));
+  const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
     .sort((a, b) => parseInt(a.id) - parseInt(b.id))
@@ -119,7 +118,7 @@ test("left complex() works for dag", () => {
 
 test("center complex() works for square", () => {
   const layout = arquint().column(columnComplex().center(true));
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag
     .idescendants("before")
     .map((n) => n.columnIndex);
@@ -131,7 +130,7 @@ test("center complex() works for square", () => {
 
 test("center complex() works for dag", () => {
   const layout = arquint().column(columnComplex().center(true));
-  const dag = layout(dagStratify()(arq));
+  const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
     .sort((a, b) => parseInt(a.id) - parseInt(b.id))
@@ -145,7 +144,7 @@ test("center complex() works for dag", () => {
 
 test("left adjacent() works for square", () => {
   const layout = arquint().column(columnAdjacent().center(false));
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag
     .idescendants("before")
     .map((n) => n.columnIndex);
@@ -157,7 +156,7 @@ test("left adjacent() works for square", () => {
 
 test("left adjacent() works for dag", () => {
   const layout = arquint().column(columnAdjacent().center(false));
-  const dag = layout(dagStratify()(arq));
+  const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
     .sort((a, b) => parseInt(a.id) - parseInt(b.id))
@@ -171,7 +170,7 @@ test("left adjacent() works for dag", () => {
 
 test("center adjacent() works for square", () => {
   const layout = arquint().column(columnAdjacent().center(true));
-  const dag = layout(dagStratify()(square));
+  const dag = layout(square());
   const [zero, one, two, three] = dag
     .idescendants("before")
     .map((n) => n.columnIndex);
@@ -183,7 +182,7 @@ test("center adjacent() works for square", () => {
 
 test("center adjacent() works for dag", () => {
   const layout = arquint().column(columnAdjacent().center(true));
-  const dag = layout(dagStratify()(arq));
+  const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
     .sort((a, b) => parseInt(a.id) - parseInt(b.id))
@@ -196,7 +195,7 @@ test("center adjacent() works for dag", () => {
 });
 
 test("arquint() works for grafo", () => {
-  const dag = dagStratify()(grafo);
+  const dag = grafo();
   const nodesBefore = dag.size();
   const laidout = arquint().size([2, 2])(dag);
   expect(laidout.size()).toEqual(nodesBefore);

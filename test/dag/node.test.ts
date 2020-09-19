@@ -7,13 +7,12 @@ import {
   single,
   square,
   vee
-} from "../dags";
+} from "../examples";
 
-import { dagStratify } from "../../src/";
 import { def } from "../../src/utils";
 
 test("roots() works for square", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   const [root] = dag.roots();
   expect(dag).toBe(root);
   const [otherRoot] = root.iroots();
@@ -21,13 +20,13 @@ test("roots() works for square", () => {
 });
 
 test("roots() works for N", () => {
-  const dag = dagStratify()(en);
+  const dag = en();
   const roots = dag.roots();
   expect(roots).toHaveLength(2);
 });
 
 test("childLinks() works for square", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   const [root] = dag.iroots();
   const childIds = new Set(root.ichildren().map((c) => c.id));
   const links = root.childLinks();
@@ -41,7 +40,7 @@ test("childLinks() works for square", () => {
 });
 
 test("links() is correct for square", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   const links = new Map([
     ["0", new Set(["1", "2"])],
     ["1", new Set(["3"])],
@@ -54,7 +53,7 @@ test("links() is correct for square", () => {
 });
 
 test("links() is correct for N", () => {
-  const dag = dagStratify()(en);
+  const dag = en();
   const links = new Map([
     ["0", new Set(["2", "3"])],
     ["1", new Set(["3"])],
@@ -67,7 +66,7 @@ test("links() is correct for N", () => {
 });
 
 test("idescendants('breadth') is correct for square", () => {
-  const dag = dagStratify()(square);
+  const dag = square();
   const breadthIds = [...dag.idescendants("breadth").map((n) => n.id)];
   expect([
     ["0", "1", "2", "3"],
@@ -76,26 +75,20 @@ test("idescendants('breadth') is correct for square", () => {
 });
 
 test("idescendants('unk') throws", () => {
-  const dag = dagStratify()(single);
+  const dag = single();
   expect(() => dag.idescendants("unk" as "before")).toThrow(
     "unknown iteration style: unk"
   );
 });
 
-test("size() is correct for square", () => {
-  expect(dagStratify()(square).size()).toBeCloseTo(4);
-});
-
-test("size() is correct for N", () => {
-  expect(dagStratify()(en).size()).toBeCloseTo(4);
-});
-
-test("size() is correct for X", () => {
-  expect(dagStratify()(ex).size()).toBeCloseTo(7);
+test("size() is correct", () => {
+  expect(square().size()).toBeCloseTo(4);
+  expect(en().size()).toBeCloseTo(4);
+  expect(ex().size()).toBeCloseTo(7);
 });
 
 test("sum() is correct for square", () => {
-  const dag = dagStratify()(square).sum((n) => parseInt(n.id));
+  const dag = square().sum((n) => parseInt(n.id));
   const expected = new Map([
     ["0", 6],
     ["1", 4],
@@ -112,7 +105,7 @@ test("sum() is correct for square", () => {
 });
 
 test("sum() is correct for N", () => {
-  const dag = dagStratify()(en).sum((n) => parseInt(n.id));
+  const dag = en().sum((n) => parseInt(n.id));
   const expected = new Map([
     ["0", 5],
     ["1", 4],
@@ -129,7 +122,7 @@ test("sum() is correct for N", () => {
 });
 
 test("sum() is correct for X", () => {
-  const dag = dagStratify()(ex).sum((n) => parseInt(n.id));
+  const dag = ex().sum((n) => parseInt(n.id));
   const expected = new Map([
     ["0", 19],
     ["1", 19],
@@ -149,7 +142,7 @@ test("sum() is correct for X", () => {
 });
 
 test("count() is correct for square", () => {
-  const dag = dagStratify()(square).count();
+  const dag = square().count();
   const expected = new Map([
     ["0", 1],
     ["1", 1],
@@ -166,7 +159,7 @@ test("count() is correct for square", () => {
 });
 
 test("count() is correct for N", () => {
-  const dag = dagStratify()(en).count();
+  const dag = en().count();
   const expected = new Map([
     ["0", 2],
     ["1", 1],
@@ -183,7 +176,7 @@ test("count() is correct for N", () => {
 });
 
 test("count() is correct for X", () => {
-  const dag = dagStratify()(ex).count();
+  const dag = ex().count();
   const expected = new Map([
     ["0", 2],
     ["1", 2],
@@ -203,7 +196,7 @@ test("count() is correct for X", () => {
 });
 
 test("height() is correct for square", () => {
-  const dag = dagStratify()(square).height();
+  const dag = square().height();
   const expected = new Map([
     ["0", 2],
     ["1", 1],
@@ -220,7 +213,7 @@ test("height() is correct for square", () => {
 });
 
 test("height() is correct for N", () => {
-  const dag = dagStratify()(en).height();
+  const dag = en().height();
   const expected = new Map([
     ["0", 1],
     ["1", 1],
@@ -237,7 +230,7 @@ test("height() is correct for N", () => {
 });
 
 test("height() is correct for X", () => {
-  const dag = dagStratify()(ex).height();
+  const dag = ex().height();
   const expected = new Map([
     ["0", 4],
     ["1", 3],
@@ -257,7 +250,7 @@ test("height() is correct for X", () => {
 });
 
 test("depth() is correct for square", () => {
-  const dag = dagStratify()(square).depth();
+  const dag = square().depth();
   const expected = new Map([
     ["0", 0],
     ["1", 1],
@@ -274,7 +267,7 @@ test("depth() is correct for square", () => {
 });
 
 test("depth() is correct for N", () => {
-  const dag = dagStratify()(en).depth();
+  const dag = en().depth();
   const expected = new Map([
     ["0", 0],
     ["1", 0],
@@ -291,7 +284,7 @@ test("depth() is correct for N", () => {
 });
 
 test("depth() is correct for X", () => {
-  const dag = dagStratify()(ex).depth();
+  const dag = ex().depth();
   const expected = new Map([
     ["0", 0],
     ["1", 1],
@@ -311,32 +304,32 @@ test("depth() is correct for X", () => {
 });
 
 test("split() is correct for point", () => {
-  const dag = dagStratify()(single);
+  const dag = single();
   const [split] = dag.split();
   expect(split).toBe(dag);
 });
 
 test("connected() is correct for point", () => {
-  const dag = dagStratify()(single);
+  const dag = single();
   expect(dag.connected()).toBeTruthy();
 });
 
 test("connected() is correct for two points", () => {
-  const dag = dagStratify()(doub);
+  const dag = doub();
   expect(dag.connected()).toBeFalsy();
 });
 
 test("connected() is correct for v", () => {
-  const dag = dagStratify()(vee);
+  const dag = vee();
   expect(dag.connected()).toBeTruthy();
 });
 
 test("connected() is correct for double v", () => {
-  const dag = dagStratify()(doubleVee);
+  const dag = doubleVee();
   expect(dag.connected()).toBeFalsy();
 });
 
 test("connected() is correct for w", () => {
-  const dag = dagStratify()(doubleYou);
+  const dag = doubleYou();
   expect(dag.connected()).toBeTruthy();
 });

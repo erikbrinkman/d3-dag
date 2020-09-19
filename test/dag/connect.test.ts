@@ -1,5 +1,4 @@
-import { SimpleLinkDatum, zherebko } from "../dags";
-
+import { SimpleLinkDatum } from "../examples";
 import { dagConnect } from "../../src/";
 
 interface ComplexLinkDatum {
@@ -22,6 +21,27 @@ const complexSquare: ComplexLinkDatum[] = [
   { source: "a", target: "c" },
   { source: "b", target: "d" },
   { source: "c", target: "d" }
+];
+
+const zherebko: SimpleLinkDatum[] = [
+  ["1", "2"],
+  ["1", "5"],
+  ["1", "7"],
+  ["2", "3"],
+  ["2", "4"],
+  ["2", "5"],
+  ["2", "7"],
+  ["2", "8"],
+  ["3", "6"],
+  ["3", "8"],
+  ["4", "7"],
+  ["5", "7"],
+  ["5", "8"],
+  ["5", "9"],
+  ["6", "8"],
+  ["7", "8"],
+  ["9", "10"],
+  ["9", "11"]
 ];
 
 test("dagConnect() parses a simple square", () => {

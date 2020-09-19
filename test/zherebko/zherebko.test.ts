@@ -1,8 +1,8 @@
-import { dagConnect, dagStratify, zherebko } from "../../src";
-import { doub, single } from "../dags";
+import { dagConnect, zherebko } from "../../src";
+import { doub, single } from "../examples";
 
 test("zherebko() works for a point", () => {
-  const dag = dagStratify()(single);
+  const dag = single();
   const layout = zherebko().size([2, 2]);
   const [width, height] = layout.size();
   expect(width).toBeCloseTo(2);
@@ -86,7 +86,7 @@ test("zherebko() fails with args", () => {
 });
 
 test("zherebko() fails on disconnected dag", () => {
-  const dag = dagStratify()(doub);
+  const dag = doub();
   expect(() => zherebko()(dag)).toThrow(
     "zherebko() doesn't work well for unconnected dags"
   );
