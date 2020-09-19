@@ -20,11 +20,13 @@
   "license": "MIT",
   "main": "dist/d3-dag.js",
   "files": [
+    "/src/**/*.js",
     "/src/**/*.ts",
+    "/dist/d3-dag.js",
     "/dist/d3-dag.min.js"
   ],
-  "module": "index",
-  "jsnext:main": "index",
+  "module": "src/index",
+  "jsnext:main": "src/index",
   "unpkg": "dist/d3-dag.min.js",
   "jest": {
     "preset": "ts-jest",
