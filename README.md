@@ -61,6 +61,9 @@ result of cleaning up hasty early design decisions.
   combine the children/parents with the data for the link. The build link data
   into the design of the dag and removes the messy handling of the fact that
   data was tacked on.
+- `points` was moved from a property on linkData to its own top level link
+  property, since it's somewhat required to be there and shouldn't be mutating
+  user supplied data.
 - `copy`, `reverse`, and `equal` have been removed as the new structure made
   them hard to support, as DAGs are viewed more immutably now. Support could
   potentially be added back.
@@ -82,7 +85,3 @@ The update from 0.1 to 0.2 includes a few small backwards incompatible changes.
 - `coordSpread` was removed in favor of `coordCenter` which produces a slightly better layout in the same amount of time.
 - `test/data` was moved to `examples`. This isn't technically part of the api, but it may break examples that required the old file location.
 - Link data is created at dag creation time. This also isn't technically backwards compatible but might increase memory consumption.
-
-## TODO
-
-- [ ] Update observable examples once typescript version is published to npm
