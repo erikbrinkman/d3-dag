@@ -35,8 +35,8 @@
     ]
   },
   "scripts": {
-    "lint": "prettier --check 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json && eslint src test types --ext .ts",
-    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json && import-sort --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts'",
+    "lint": "prettier --check 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json rollup.config.js && eslint src test types --ext .ts",
+    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json rollup.config.js && import-sort --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' rollup.config.js",
     "fix": "eslint src test types --ext .ts --fix",
     "build": "tsc",
     "test": "jest --coverage && yarn lint",
@@ -45,6 +45,7 @@
     "docs": "typedoc --out docs --stripInternal --media resources src && touch docs/.nojekyll"
   },
   "dependencies": {
+    "@rollup/plugin-replace": "^2.3.3",
     "@types/d3-array": "^2.0.0",
     "d3-array": "^2.7.1",
     "fastpriorityqueue": "^0.6.3",
@@ -68,6 +69,8 @@
     "package-preamble": "^0.1.0",
     "prettier": "^2.1.2",
     "rollup": "^2.27.1",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.27.2",
     "ts-jest": "^26.3.0",
