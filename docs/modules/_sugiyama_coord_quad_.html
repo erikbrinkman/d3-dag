@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;sugiyama/coord/vert&quot; | d3-dag</title>
+	<title>&quot;sugiyama/coord/quad&quot; | d3-dag</title>
 	<meta name="description" content="Documentation for d3-dag">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,84 +56,53 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_sugiyama_coord_vert_.html">&quot;sugiyama/coord/vert&quot;</a>
+					<a href="_sugiyama_coord_quad_.html">&quot;sugiyama/coord/quad&quot;</a>
 				</li>
 			</ul>
-			<h1>Module &quot;sugiyama/coord/vert&quot;</h1>
+			<h1>Module &quot;sugiyama/coord/quad&quot;</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>This accessor positions nodes so that the distance between nodes and the
-							their neightbors is minimized, while the curve through dummy nodes is also
-							minimized. This has the effect of trying to make edges as straight and
-							vertical as possible. This accessor solves a quadratic program (QP) and so
-						may take significant time, especially as the number of nodes grows.</p>
-					</div>
-					<img alt="vert example" src="../media/simplex.png" width="400">
-				</div>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Type aliases</h3>
+							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter"><a href="_sugiyama_coord_vert_.html#vertoperator" class="tsd-kind-icon">Vert<wbr>Operator</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-kind-icon">Quad<wbr>Operator</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter"><a href="_sugiyama_coord_vert_.html#vert" class="tsd-kind-icon">vert</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter"><a href="_sugiyama_coord_quad_.html#quad" class="tsd-kind-icon">quad</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Type aliases</h2>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter">
-					<a name="vertoperator" class="tsd-anchor"></a>
-					<h3>Vert<wbr>Operator</h3>
-					<div class="tsd-signature tsd-kind-icon">Vert<wbr>Operator&lt;NodeType&gt;<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_sugiyama_coord_index_.operator.html" class="tsd-signature-type">Operator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/coord/vert.ts#L21">src/sugiyama/coord/vert.ts:21</a></li>
-						</ul>
-					</aside>
-					<h4 class="tsd-type-parameters-title">Type parameters</h4>
-					<ul class="tsd-type-parameters">
-						<li>
-							<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a></h4>
-						</li>
-					</ul>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-					<a name="vert" class="tsd-anchor"></a>
-					<h3>vert</h3>
+					<a name="quad" class="tsd-anchor"></a>
+					<h3>quad</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">vert&lt;NodeType&gt;<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_coord_vert_.html#vertoperator" class="tsd-signature-type">VertOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">quad&lt;NodeType&gt;<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-signature-type">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/6891bbe/src/sugiyama/coord/vert.ts#L24">src/sugiyama/coord/vert.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/dfedf2e/src/sugiyama/coord/quad.ts#L273">src/sugiyama/coord/quad.ts:273</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Create a vertical coordinate assignment operator.</p>
+									<p>Create a default <a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html">QuadOperator</a>.</p>
 								</div>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -148,7 +117,7 @@
 									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>args: <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_coord_vert_.html#vertoperator" class="tsd-signature-type">VertOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-signature-type">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -161,17 +130,17 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="_sugiyama_coord_vert_.html">&quot;sugiyama/coord/vert&quot;</a>
+						<a href="_sugiyama_coord_quad_.html">&quot;sugiyama/coord/quad&quot;</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="_sugiyama_coord_vert_.html#vertoperator" class="tsd-kind-icon">Vert<wbr>Operator</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-kind-icon">Quad<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="_sugiyama_coord_vert_.html#vert" class="tsd-kind-icon">vert</a>
+						<a href="_sugiyama_coord_quad_.html#quad" class="tsd-kind-icon">quad</a>
 					</li>
 				</ul>
 			</nav>

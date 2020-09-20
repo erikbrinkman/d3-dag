@@ -89,7 +89,7 @@
 				</a>
 				<p>If you use NPM, <code>npm i d3-dag</code>.
 				Otherwise you can load it using <code>unpkg</code>:</p>
-				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://unpkg.com/d3-dag@0.4.0&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://unpkg.com/d3-dag@0.4.3&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
 
 <span class="hljs-keyword">var</span> dag = d3.sugiyama();
@@ -130,6 +130,9 @@
 						combine the children/parents with the data for the link. The build link data
 						into the design of the dag and removes the messy handling of the fact that
 					data was tacked on.</li>
+					<li><code>points</code> was moved from a property on linkData to its own top level link
+						property, since it&#39;s somewhat required to be there and shouldn&#39;t be mutating
+					user supplied data.</li>
 					<li><code>copy</code>, <code>reverse</code>, and <code>equal</code> have been removed as the new structure made
 						them hard to support, as DAGs are viewed more immutably now. Support could
 					potentially be added back.</li>
@@ -151,12 +154,6 @@
 					<li><code>coordSpread</code> was removed in favor of <code>coordCenter</code> which produces a slightly better layout in the same amount of time.</li>
 					<li><code>test/data</code> was moved to <code>examples</code>. This isn&#39;t technically part of the api, but it may break examples that required the old file location.</li>
 					<li>Link data is created at dag creation time. This also isn&#39;t technically backwards compatible but might increase memory consumption.</li>
-				</ul>
-				<a href="#todo" id="todo" style="color: inherit; text-decoration: none;">
-					<h2>TODO</h2>
-				</a>
-				<ul>
-					<li><input disabled="" type="checkbox"> Update observable examples once typescript version is published to npm</li>
 				</ul>
 			</div>
 		</div>
@@ -227,13 +224,13 @@
 						<a href="modules/_sugiyama_coord_min_curve_.html">&quot;sugiyama/coord/min-<wbr>curve&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
+						<a href="modules/_sugiyama_coord_quad_.html">&quot;sugiyama/coord/quad&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
 						<a href="modules/_sugiyama_coord_topological_.html">&quot;sugiyama/coord/topological&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/_sugiyama_coord_utils_.html">&quot;sugiyama/coord/utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_sugiyama_coord_vert_.html">&quot;sugiyama/coord/vert&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/_sugiyama_decross_index_.html">&quot;sugiyama/decross/index&quot;</a>
