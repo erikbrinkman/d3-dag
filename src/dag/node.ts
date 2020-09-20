@@ -10,7 +10,7 @@
  * 2. [["dag/stratify" | dagStratify ]] - when the dag has a tabular structure, referencing parents by id.
  * 3. [["dag/connect" | dagConnect ]] - when the dag has a link structure and is specified as pairs of nodes.
  *
- * Methods names preceeded by an `i` will return a [[FluentIterator]] which is
+ * Methods names preceeded by an `i` will return a [[FluentIterable]] which is
  * a wrapper around native EMCA iterators that also adds most methods found in
  * the `Array` prototype making them much more useful for fluent functional
  * programming.
@@ -18,7 +18,7 @@
  * @packageDocumentation
  */
 
-import { FluentIterator, fluent } from "../iters";
+import { FluentIterable, fluent } from "../iters";
 import { SafeMap, setIntersect } from "../utils";
 
 /** @internal */
@@ -60,7 +60,7 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
   constructor(readonly id: string, public data: NodeDatum) {}
 
   /** An iterator of this node. */
-  iroots(): FluentIterator<this> {
+  iroots(): FluentIterable<this> {
     return fluent([this]);
   }
 
@@ -76,7 +76,7 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
   }
 
   /** An iterator of this node's children. */
-  ichildren(): FluentIterator<this> {
+  ichildren(): FluentIterable<this> {
     return fluent(this.iterChildren());
   }
 
@@ -92,7 +92,7 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
   }
 
   /** An iterator of links between this node and its children. */
-  ichildLinks(): FluentIterator<Link<this>> {
+  ichildLinks(): FluentIterable<Link<this>> {
     return fluent(this.iterChildLinks());
   }
 
@@ -105,7 +105,7 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
     return new LayoutDagRoot([this])[Symbol.iterator]();
   }
 
-  idescendants(style: IterStyle = "depth"): FluentIterator<this> {
+  idescendants(style: IterStyle = "depth"): FluentIterable<this> {
     return new LayoutDagRoot([this]).idescendants(style);
   }
 
@@ -113,7 +113,7 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
     return [...this.idescendants(style)];
   }
 
-  ilinks(): FluentIterator<Link<this>> {
+  ilinks(): FluentIterable<Link<this>> {
     return new LayoutDagRoot([this]).ilinks();
   }
 
@@ -171,7 +171,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * [[DagNode]]s return themselves for this call, this can be an easy way to
    * turn a [[Dag]] into an array of [[DagNode]]s.
    */
-  iroots(): FluentIterator<NodeType> {
+  iroots(): FluentIterable<NodeType> {
     return fluent(this.dagRoots);
   }
 
@@ -267,7 +267,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * - 'after' - yield all leaf nodes, progressing upward, never yielding a
    *   node before all of its parents have been yielded.
    */
-  idescendants(style: IterStyle = "depth"): FluentIterator<NodeType> {
+  idescendants(style: IterStyle = "depth"): FluentIterable<NodeType> {
     if (style === "depth") {
       return fluent(this.idepth());
     } else if (style === "breadth") {
@@ -287,7 +287,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
   }
 
   /** Returns an iterator over every [[Link]] in the DAG. */
-  ilinks(): FluentIterator<Link<NodeType>> {
+  ilinks(): FluentIterable<Link<NodeType>> {
     return this.idescendants().flatMap((node) => node.ichildLinks());
   }
 
@@ -338,7 +338,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
   count(): DagRoot<NodeType & ValuedNode> {
     const leaves = new SafeMap<string, Set<string>>();
     for (const node of this.idescendants("after")) {
-      if (node.ichildren().next().done) {
+      if (node.ichildren()[Symbol.iterator]().next().done) {
         leaves.set(node.id, new Set([node.id]));
         node.value = 1;
       } else {
