@@ -32,6 +32,22 @@ export function doub(): Dag<DagNode<SimpleDatum>> {
   ]);
 }
 
+// three independent nodes
+// 0 1 2
+export function trip(): Dag<DagNode<SimpleDatum>> {
+  return dagStratify<SimpleDatum>()([
+    {
+      id: "0"
+    },
+    {
+      id: "1"
+    },
+    {
+      id: "2"
+    }
+  ]);
+}
+
 // square, simple with a cycle
 //   0
 //  / \

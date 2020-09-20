@@ -2,7 +2,7 @@ import {
   Operator as CoordOperator,
   Separation
 } from "../../src/sugiyama/coord";
-import { SimpleDatum, doub, dummy, single, three } from "../examples";
+import { SimpleDatum, doub, dummy, single, three, trip } from "../examples";
 import {
   coordCenter,
   coordGreedy,
@@ -31,13 +31,35 @@ test("sugiyama() works for single node", () => {
   expect(node.y).toBeCloseTo(0.5);
 });
 
-test("sugiyama() works for double node", () => {
+test("sugiyama() works for double node vertically", () => {
   const dag = doub();
   const [first, second] = sugiyama().layering(layeringTopological())(dag);
   expect(first.x).toBeCloseTo(0.5);
   expect(first.y).toBeCloseTo(0.0);
   expect(second.x).toBeCloseTo(0.5);
   expect(second.y).toBeCloseTo(1.0);
+});
+
+test("sugiyama() works for triple node horizontally", () => {
+  const dag = trip();
+  const [first, second, third] = sugiyama()(dag);
+  expect(first.x).toBeCloseTo(0.0);
+  expect(first.y).toBeCloseTo(0.5);
+  expect(second.x).toBeCloseTo(0.5);
+  expect(second.y).toBeCloseTo(0.5);
+  expect(third.x).toBeCloseTo(1.0);
+  expect(third.y).toBeCloseTo(0.5);
+});
+
+test("sugiyama() works for triple node horizontally node sized", () => {
+  const dag = trip();
+  const [first, second, third] = sugiyama().nodeSize([1, 1])(dag);
+  expect(first.x).toBeCloseTo(0.0);
+  expect(first.y).toBeCloseTo(0.5);
+  expect(second.x).toBeCloseTo(1.0);
+  expect(second.y).toBeCloseTo(0.5);
+  expect(third.x).toBeCloseTo(2.0);
+  expect(third.y).toBeCloseTo(0.5);
 });
 
 test("sugiyama() works with a dummy node", () => {

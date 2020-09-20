@@ -5,6 +5,27 @@ import { DummyNode } from "../dummy";
 import { SafeMap } from "../../utils";
 import { solveQP } from "quadprog";
 
+export function coordSingleLayer<NodeType extends DagNode>(
+  layer: ((NodeType & HorizableNode) | DummyNode)[],
+  sep: Separation<NodeType>
+): void {
+  let [prev, ...rest] = layer;
+  let prevx = (prev.x = 0);
+  for (const curr of rest) {
+    prevx = curr.x = prevx + sep(prev, curr);
+    prev = curr;
+  }
+  if (prevx > 0) {
+    for (const node of layer as ((NodeType | DummyNode) & { x: number })[]) {
+      node.x /= prevx;
+    }
+  } else {
+    for (const node of layer) {
+      node.x = 0.5;
+    }
+  }
+}
+
 // wrapper for solveQP
 function qp(
   Q: number[][],

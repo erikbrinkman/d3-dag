@@ -34,6 +34,7 @@ import { VertOperator, vert } from "./coord/vert";
 import { Operator as DecrossOperator } from "./decross";
 import { DummyNode } from "./dummy";
 import { MedianOperator } from "./twolayer/median";
+import { coordSingleLayer } from "./coord/utils";
 
 /** @internal */
 interface LayeredNode {
@@ -134,9 +135,12 @@ export interface SugiyamaOperator<
    * numbers [ *nodeWidth*, *nodeHeight* ] and returns this
    * [[SugiyamaOperator]].  When [[nodeSize]] is set, the minimum coordinate of
    * every node is 0, parents and children are at least *nodeHeight* appart,
-   * and neighboring nodes in the same layer are at least *nodeWidth* apart.
-   * If the DAG only has one node vertically or horizontally, it will be
-   * centered.
+   * and neighboring nodes in the same layer are approximately *nodeWidth*
+   * apart, in actuality this just sets the width to *nodeWidth* times the
+   * maximum number of nodes in a layer less one. If a constant separation is
+   * used, then it's no longer approximate. This is done because the way to
+   * handle nodes with a separation of zero, or dummy nodes is not clear.  If
+   * the DAG only has one node vertically or horizontally, it will be centered.
    */
   nodeSize(
     sz: [number, number]
@@ -302,6 +306,15 @@ function buildOperator<
     if (layers.every((l) => l.length === 1)) {
       // next steps aren't necessary
       layers.forEach(([n]) => (n.x = width / 2));
+    } else if (layers.length === 1) {
+      // next steps aren't necessary
+      const [layer] = layers;
+      coordSingleLayer(layer, separationOp);
+      const exed = layer as (NodeType & SugiyamaNode)[];
+      const scale = nodeSized ? exed.length - 1 : 1;
+      for (const node of exed) {
+        node.x *= width * scale;
+      }
     } else {
       // minimize edge crossings
       decrossOp(layers);
@@ -316,17 +329,12 @@ function buildOperator<
         }
       }
       const exed = layers as (NodeType & SugiyamaNode)[][];
-      const minGap = Math.min(
-        ...exed
-          .filter((layer) => layer.length > 1)
-          .map((layer) =>
-            Math.min(...layer.slice(1).map((n, i) => n.x - layer[i].x))
-          )
-      );
-      const sw = nodeSized ? minGap : 1.0;
+      const scale = nodeSized
+        ? Math.max(...layers.map((layer) => layer.length)) - 1
+        : 1;
       for (const layer of exed) {
         for (const node of layer) {
-          node.x *= width / sw;
+          node.x *= width * scale;
         }
       }
     }

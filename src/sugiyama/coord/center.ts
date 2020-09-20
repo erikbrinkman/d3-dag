@@ -31,9 +31,9 @@ export function center<NodeType extends DagNode>(
   ): void {
     const maxWidth = Math.max(
       ...layers.map((layer) => {
-        let prev = layer[0];
+        let [prev, ...rest] = layer;
         let prevx = (prev.x = 0);
-        for (const node of layer.slice(1)) {
+        for (const node of rest) {
           prevx = node.x = prevx + separation(prev, node);
           prev = node;
         }
