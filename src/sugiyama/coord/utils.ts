@@ -173,10 +173,18 @@ export function layout<NodeType extends DagNode>(
   // Rescale to be in [0, 1]
   const min = Math.min(...solution);
   const span = Math.max(...solution) - min;
-  for (const layer of layers) {
-    for (const node of layer) {
-      const index = inds.getThrow(node.id);
-      node.x = (solution[index] - min) / span;
+  if (span > 0) {
+    for (const layer of layers) {
+      for (const node of layer) {
+        const index = inds.getThrow(node.id);
+        node.x = (solution[index] - min) / span;
+      }
+    }
+  } else {
+    for (const layer of layers) {
+      for (const node of layer) {
+        node.x = 0.5;
+      }
     }
   }
 }

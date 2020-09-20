@@ -40,10 +40,18 @@ export function center<NodeType extends DagNode>(
         return prevx;
       })
     );
-    for (const layer of layers) {
-      const halfWidth = def(layer[layer.length - 1].x) / 2;
-      for (const node of layer) {
-        node.x = (def(node.x) - halfWidth) / maxWidth + 0.5;
+    if (maxWidth > 0) {
+      for (const layer of layers) {
+        const halfWidth = def(layer[layer.length - 1].x) / 2;
+        for (const node of layer) {
+          node.x = (def(node.x) - halfWidth) / maxWidth + 0.5;
+        }
+      }
+    } else {
+      for (const layer of layers) {
+        for (const node of layer) {
+          node.x = 0.5;
+        }
       }
     }
   }

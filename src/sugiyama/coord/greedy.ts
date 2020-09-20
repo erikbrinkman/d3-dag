@@ -121,9 +121,17 @@ export function greedy<NodeType extends DagNode>(
       Math.max(
         ...layers.map((layer) => Math.max(...layer.map((node) => def(node.x))))
       ) - min;
-    for (const layer of layers) {
-      for (const node of layer) {
-        node.x = (def(node.x) - min) / span;
+    if (span > 0) {
+      for (const layer of layers) {
+        for (const node of layer) {
+          node.x = (def(node.x) - min) / span;
+        }
+      }
+    } else {
+      for (const layer of layers) {
+        for (const node of layer) {
+          node.x = 0.5;
+        }
       }
     }
   }

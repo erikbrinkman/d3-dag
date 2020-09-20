@@ -24,6 +24,16 @@ test("coordTopological() works for disconnected", () => {
   }
 });
 
+test("coordTopological() works with zero separation", () => {
+  const layered = createLayers([[[0, 1]], [[], 0]]);
+  coordTopological()(layered, () => 0);
+  for (const layer of layered) {
+    for (const node of layer) {
+      expect(node.x).toEqual(0.5);
+    }
+  }
+});
+
 test("coordTopological() throws for non-topological", () => {
   const layers = createLayers([[[0], [1]]]);
   expect(() => coordTopological()(layers, sep)).toThrow(

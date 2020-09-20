@@ -38,5 +38,15 @@ for (const dat of [square, ccoz, dtopo, doub, vee, ex]) {
         }
       }
     });
+
+    test(`zero separation works for ${dat.name} assigned by ${method.name}`, () => {
+      const layered = dat();
+      method(layered, () => 0);
+      for (const layer of layered) {
+        for (const node of layer) {
+          expect(node.x).toBeCloseTo(0.5);
+        }
+      }
+    });
   }
 }
