@@ -30,7 +30,9 @@ export default {
       // FastPriorityQueue has this nasty line that breaks iife
       "require.main === module": false
     }),
-    typescript(),
+    typescript({
+      tsconfigOverride: { compilerOptions: { declaration: true } }
+    }),
     resolve(),
     commonjs(),
     globals(),
