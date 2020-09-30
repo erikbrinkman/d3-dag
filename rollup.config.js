@@ -31,7 +31,13 @@ export default {
       "require.main === module": false
     }),
     typescript({
-      tsconfigOverride: { compilerOptions: { declaration: true } }
+      tsconfigOverride: {
+        compilerOptions: {
+          declaration: true,
+          declarationDir: "typings"
+        }
+      },
+      useTsconfigDeclarationDir: true
     }),
     resolve(),
     commonjs(),
