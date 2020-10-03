@@ -4,32 +4,63 @@
  *
  * @packageDocumentation
  */
-export { stratify as dagStratify } from "./dag/stratify";
-export { connect as dagConnect } from "./dag/connect";
-export { hierarchy as dagHierarchy } from "./dag/hierarchy";
-export { sugiyama } from "./sugiyama";
-export { topological as layeringTopological } from "./sugiyama/layering/topological";
-export { simplex as layeringSimplex } from "./sugiyama/layering/simplex";
-export { longestPath as layeringLongestPath } from "./sugiyama/layering/longest-path";
-export { coffmanGraham as layeringCoffmanGraham } from "./sugiyama/layering/coffman-graham";
-export { twoLayer as decrossTwoLayer } from "./sugiyama/decross/two-layer";
-export { opt as decrossOpt } from "./sugiyama/decross/opt";
-export { center as coordCenter } from "./sugiyama/coord/center";
-export { quad as coordQuad } from "./sugiyama/coord/quad";
+export { stratify as dagStratify, StratifyOperator } from "./dag/stratify";
+export { connect as dagConnect, ConnectOperator } from "./dag/connect";
+export { hierarchy as dagHierarchy, HierarchyOperator } from "./dag/hierarchy";
+export { sugiyama, SugiyamaOperator } from "./sugiyama";
+export {
+  topological as layeringTopological,
+  TopologicalOperator as TopologicalLayeringOperator
+} from "./sugiyama/layering/topological";
+export {
+  simplex as layeringSimplex,
+  SimplexOperator
+} from "./sugiyama/layering/simplex";
+export {
+  longestPath as layeringLongestPath,
+  LongestPathOperator
+} from "./sugiyama/layering/longest-path";
+export {
+  coffmanGraham as layeringCoffmanGraham,
+  CoffmanGrahamOperator
+} from "./sugiyama/layering/coffman-graham";
+export {
+  twoLayer as decrossTwoLayer,
+  TwoLayerOperator
+} from "./sugiyama/decross/two-layer";
+export {
+  opt as decrossOpt,
+  OptOperator as OptLayeringOperator
+} from "./sugiyama/decross/opt";
+export { center as coordCenter, CenterOperator } from "./sugiyama/coord/center";
+export { quad as coordQuad, QuadOperator } from "./sugiyama/coord/quad";
 /**
  * Preserve old import for backwards compatability
  * @deprecated
  */
 export { quad as coordVert } from "./sugiyama/coord/quad";
+/**
+ * Preserve old import for backwards compatability
+ * @deprecated
+ */
 export { minCurve as coordMinCurve } from "./sugiyama/coord/min-curve";
-export { greedy as coordGreedy } from "./sugiyama/coord/greedy";
-export { topological as coordTopological } from "./sugiyama/coord/topological";
-export { median as twolayerMedian } from "./sugiyama/twolayer/median";
-export { mean as twolayerMean } from "./sugiyama/twolayer/mean";
-export { opt as twolayerOpt } from "./sugiyama/twolayer/opt";
+export { greedy as coordGreedy, GreedyOperator } from "./sugiyama/coord/greedy";
+export {
+  topological as coordTopological,
+  TopologicalOperator as TopologicalCoordOperator
+} from "./sugiyama/coord/topological";
+export {
+  median as twolayerMedian,
+  MedianOperator
+} from "./sugiyama/twolayer/median";
+export { mean as twolayerMean, MeanOperator } from "./sugiyama/twolayer/mean";
+export {
+  opt as twolayerOpt,
+  OptOperator as OptTwolayerOperator
+} from "./sugiyama/twolayer/opt";
 export { DummyNode as SugiDummyNode } from "./sugiyama/dummy";
-export { zherebko } from "./zherebko";
-export { arquint } from "./arquint";
+export { zherebko, ZherebkoOperator } from "./zherebko";
+export { arquint, Operator as ArquintOperator } from "./arquint";
 export { DummyNode as ArqDummyNode } from "./arquint/dummy";
 export { spread as arqcoordSpread } from "./arquint/coord/spread";
 export { adjacent as columnAdjacent } from "./arquint/column/adjacent";

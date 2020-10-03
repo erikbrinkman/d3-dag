@@ -3,6 +3,7 @@
 import builtins from "rollup-plugin-node-builtins";
 import commonjs from "@rollup/plugin-commonjs";
 import globals from "rollup-plugin-node-globals";
+import pkg from "./package.json";
 import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
@@ -12,17 +13,21 @@ export default {
   input: "src/index.ts",
   output: [
     {
-      file: "dist/d3-dag.js",
+      file: pkg.unpkg,
+      format: "umd",
+      name: "d3",
+      extend: true,
+      plugins: [terser()]
+    },
+    {
+      file: pkg.main,
       format: "umd",
       name: "d3",
       extend: true
     },
     {
-      file: "dist/d3-dag.min.js",
-      format: "umd",
-      name: "d3",
-      extend: true,
-      plugins: [terser()]
+      file: pkg.module,
+      format: "es"
     }
   ],
   plugins: [
