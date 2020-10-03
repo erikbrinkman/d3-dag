@@ -18,8 +18,8 @@
     "email": "erik.brinkman@gmail.com"
   },
   "license": "MIT",
-  "main": "dist/d3-dag",
-  "module": "dist/d3-dag.esm",
+  "main": "dist/d3-dag.js",
+  "module": "dist/d3-dag.esm.js",
   "files": [
     "/src/**/*.js",
     "/src/**/*.ts",
