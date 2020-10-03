@@ -1,6 +1,6 @@
 {
   "name": "d3-dag",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Layout algorithms for visualizing directed acylic graphs.",
   "keywords": [
     "d3",
@@ -18,15 +18,16 @@
     "email": "erik.brinkman@gmail.com"
   },
   "license": "MIT",
-  "main": "dist/d3-dag.js",
+  "main": "dist/d3-dag",
+  "module": "dist/d3-dag.esm",
   "files": [
     "/src/**/*.js",
     "/src/**/*.ts",
     "/dist/d3-dag.js",
-    "/dist/d3-dag.min.js"
+    "/dist/d3-dag.min.js",
+    "/dist/d3-dag.esm.js"
   ],
-  "module": "src/index",
-  "jsnext:main": "src/index",
+  "types": "dist/index.d.ts",
   "unpkg": "dist/d3-dag.min.js",
   "jest": {
     "preset": "ts-jest",
