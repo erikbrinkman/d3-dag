@@ -47,7 +47,6 @@
     "docs": "typedoc --out docs --stripInternal --media resources src && touch docs/.nojekyll"
   },
   "dependencies": {
-    "@rollup/plugin-replace": "^2.3.3",
     "@types/d3-array": "^2.0.0",
     "d3-array": "^2.7.1",
     "fastpriorityqueue": "^0.6.3",
@@ -59,6 +58,7 @@
     "@babel/types": "^7.11.5",
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-replace": "^2.3.3",
     "@types/jest": "^26.0.14",
     "@types/node": "^14.11.0",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
