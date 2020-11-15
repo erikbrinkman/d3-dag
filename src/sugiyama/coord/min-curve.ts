@@ -13,7 +13,7 @@
  * @deprecated
  * @packageDocumentation
  */
-import { HorizableNode, Operator, Separation } from ".";
+import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
@@ -43,12 +43,12 @@ function buildOperator<NodeType extends DagNode>(
 ): MinCurveOperator<NodeType> {
   function minCurveCall(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>
-  ): void {
-    quad<NodeType>()
+    nodeSize: NodeSizeAccessor<NodeType>
+  ): number {
+    return quad<NodeType>()
       .vertical([(1 - weightVal) / 2, (1 - weightVal) / 2])
       .curve([weightVal, weightVal])
-      .component(0.5)(layers, separation);
+      .component(0.5)(layers, nodeSize);
   }
 
   function weight(): number;

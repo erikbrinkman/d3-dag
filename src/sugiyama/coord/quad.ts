@@ -1,4 +1,3 @@
-import { DagNode, LayoutDagRoot } from "../../dag/node";
 /**
  * This accessor positions nodes to minimize aspect of curvature and distance
  * between nodes. The coordinates are assigned by solving a quadratic program,
@@ -8,17 +7,10 @@ import { DagNode, LayoutDagRoot } from "../../dag/node";
  *
  * @packageDocumentation
  */
-import { HorizableNode, Operator, Separation } from ".";
-import { SafeMap, setIntersect } from "../../utils";
-import {
-  coordSingleLayer,
-  indices,
-  init,
-  layout,
-  minBend,
-  minDist,
-  solve
-} from "./utils";
+import { DagNode, LayoutDagRoot } from "../../dag/node";
+import { HorizableNode, NodeSizeAccessor, Operator } from ".";
+import { SafeMap, def, setIntersect } from "../../utils";
+import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
 import { DummyNode } from "../dummy";
 
@@ -149,11 +141,11 @@ function buildOperator<NodeType extends DagNode>(
 ): QuadOperator<NodeType> {
   function quadComponent(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>,
+    nodeSize: NodeSizeAccessor<NodeType>,
     compMap: SafeMap<string, number>
-  ): void {
+  ): number {
     const inds = indices(layers);
-    const [Q, c, A, b] = init(layers, inds, separation);
+    const [Q, c, A, b] = init(layers, inds, nodeSize);
 
     for (const layer of layers) {
       for (const par of layer) {
@@ -184,13 +176,13 @@ function buildOperator<NodeType extends DagNode>(
     }
 
     const solution = solve(Q, c, A, b);
-    layout(layers, inds, solution);
+    return layout(layers, nodeSize, inds, solution);
   }
 
   function quadCall(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>
-  ): void {
+    nodeSize: NodeSizeAccessor<NodeType>
+  ): number {
     if (vertNode === 0 && curveNode === 0) {
       throw new Error(
         "node vertical weight or node curve weight needs to be positive"
@@ -200,19 +192,31 @@ function buildOperator<NodeType extends DagNode>(
         "dummy vertical weight or dummy curve weight needs to be positive"
       );
     }
+
+    // split components
     const compMap = componentMap(layers);
-    for (const comp of splitComponentLayers(layers, compMap)) {
-      if (comp.every((l) => l.length === 1)) {
-        for (const [node] of comp) {
-          node.x = 0.5;
+    const components = splitComponentLayers(layers, compMap);
+
+    // layout each component and get width
+    const widths = components.map((comp) =>
+      quadComponent(comp, nodeSize, compMap)
+    );
+
+    // center components
+    const maxWidth = Math.max(...widths);
+    if (maxWidth <= 0) {
+      throw new Error("must assign nonzero width to at least one node");
+    }
+    for (const [i, comp] of components.entries()) {
+      const offset = (maxWidth - widths[i]) / 2;
+      for (const layer of comp) {
+        for (const node of layer) {
+          node.x = def(node.x) + offset;
         }
-      } else if (comp.length === 1) {
-        const [layer] = comp;
-        coordSingleLayer(layer, separation);
-      } else {
-        quadComponent(comp, separation, compMap);
       }
     }
+
+    return maxWidth;
   }
 
   function vertical(): [number, number];

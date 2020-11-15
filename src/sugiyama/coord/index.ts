@@ -25,18 +25,25 @@ export interface HorizableNode {
 }
 
 /**
- * The separation operator takes two adjacent nodes on the same layer and
- * indicates what their relative spacing should be to all other adjacent nodes.
- * All constant separations are identical.
+ * The node size accessor takes a node and returns its size as a tuple of
+ * [`width`, `height`]. In the layout, the nodes will positioned such that they
+ * have at least width and height clearance around each of them. Due to the
+ * limitations of layered layouts, that means that layers will be separated by
+ * the maximum height nodes in each layer.
  */
-export interface Separation<NodeType extends DagNode> {
-  (left: NodeType | DummyNode, right: NodeType | DummyNode): number;
+export interface NodeSizeAccessor<NodeType extends DagNode> {
+  (node: NodeType | DummyNode): [number, number];
 }
 
-/** The interface for coordinate assignment operators. */
+/**
+ * The interface for coordinate assignment operators. This function must assign
+ * each node an x coordinate, and return the width of the layout. The x
+ * coordinates should satisfy the node size accessor, and all be between zero
+ * and the returned width.
+ */
 export interface Operator<NodeType extends DagNode> {
   (
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>
-  ): void;
+    nodeSize: NodeSizeAccessor<NodeType>
+  ): number;
 }

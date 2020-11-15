@@ -90,8 +90,8 @@ export function createLayers(
   return result;
 }
 
-export function sep(): number {
-  return 1;
+export function nodeSize(): [number, number] {
+  return [1, 1];
 }
 
 export function crossings<NodeType extends DagNode>(

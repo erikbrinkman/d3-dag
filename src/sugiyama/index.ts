@@ -25,7 +25,11 @@
  */
 
 import { ChildLink, Dag, DagNode, DagRoot, LayoutChildLink } from "../dag/node";
-import { Operator as CoordOperator, HorizableNode, Separation } from "./coord";
+import {
+  Operator as CoordOperator,
+  HorizableNode,
+  NodeSizeAccessor
+} from "./coord";
 import { LayerableNode, Operator as LayeringOperator } from "./layering";
 import { QuadOperator, quad } from "./coord/quad";
 import { SimplexOperator, simplex } from "./layering/simplex";
@@ -34,7 +38,7 @@ import { TwoLayerOperator, twoLayer } from "./decross/two-layer";
 import { Operator as DecrossOperator } from "./decross";
 import { DummyNode } from "./dummy";
 import { MedianOperator } from "./twolayer/median";
-import { coordSingleLayer } from "./coord/utils";
+import { cachedNodeSize } from "./utils";
 
 /** @internal */
 interface LayeredNode {
@@ -55,6 +59,12 @@ export interface SugiyamaNode {
   y: number;
 }
 
+export interface SugiyamaLayout<DagType> {
+  dag: DagType;
+  width: number;
+  height: number;
+}
+
 /**
  * The operator used to layout a [[Dag]] using the sugiyama method.
  */
@@ -63,17 +73,16 @@ export interface SugiyamaOperator<
   Layering extends LayeringOperator<NodeType> = LayeringOperator<NodeType>,
   Decross extends DecrossOperator<NodeType> = DecrossOperator<NodeType>,
   Coord extends CoordOperator<NodeType> = CoordOperator<NodeType>,
-  NodeSized extends boolean = false,
-  Sep extends Separation<NodeType> = Separation<NodeType>
+  NodeSize extends NodeSizeAccessor<NodeType> = NodeSizeAccessor<NodeType>
 > {
   /**
    * Layout the [[Dag]] using the currently configured operator. The returned
    * DAG nodes will have added properties from [[SugiyamaNode]]. In addition,
    * each link will have points reset and assigned.
    */
-  (dag: NodeType): NodeType & SugiyamaNode;
-  (dag: DagRoot<NodeType>): DagRoot<NodeType & SugiyamaNode>;
-  (dag: Dag<NodeType>): Dag<NodeType & SugiyamaNode>;
+  (dag: NodeType): SugiyamaLayout<NodeType & SugiyamaNode>;
+  (dag: DagRoot<NodeType>): SugiyamaLayout<DagRoot<NodeType & SugiyamaNode>>;
+  (dag: Dag<NodeType>): SugiyamaLayout<Dag<NodeType & SugiyamaNode>>;
 
   /**
    * Set the [[LayeringOperator]]. See [["sugiyama/layering/index" |
@@ -82,7 +91,7 @@ export interface SugiyamaOperator<
    */
   layering<NewLayering extends LayeringOperator<NodeType>>(
     layer: NewLayering
-  ): SugiyamaOperator<NodeType, NewLayering, Decross, Coord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, NewLayering, Decross, Coord, NodeSize>;
   /**
    * Get the current [[LayeringOperator]].
    */
@@ -95,7 +104,7 @@ export interface SugiyamaOperator<
    */
   decross<NewDecross extends DecrossOperator<NodeType>>(
     dec: NewDecross
-  ): SugiyamaOperator<NodeType, Layering, NewDecross, Coord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, NewDecross, Coord, NodeSize>;
   /**
    * Get the current [[DecrossOperator]].
    */
@@ -108,7 +117,7 @@ export interface SugiyamaOperator<
    */
   coord<NewCoord extends CoordOperator<NodeType>>(
     crd: NewCoord
-  ): SugiyamaOperator<NodeType, Layering, Decross, NewCoord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, Decross, NewCoord, NodeSize>;
   /**
    * Get the current [[CoordOperator]].
    */
@@ -117,69 +126,33 @@ export interface SugiyamaOperator<
   /**
    * Sets the sugiyama layout's size to the specified two-element array of
    * numbers [ *width*, *height* ] and returns this [[SugiyamaOperator]].  When
-   * [[size]] is set, the minimum coordinate of every node is 0, and the
-   * maximum *x* and *y* coordinates are *width* and *height* respectively. If
-   * the DAG only has one node vertically or horizontally, it will be centered.
+   * [[size]] is non-null the dag will be shrunk or expanded to fit in the
+   * size, keeping all distances proportional. If it's null, the nodeSize
+   * parameters will be respected as coordinate sizes.
    */
   size(
-    sz: [number, number]
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, false, Sep>;
+    sz: [number, number] | null
+  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize>;
   /**
    * Get the current layout size, which defaults to [1, 1]. The return value
    * will be null if the layout is [[nodeSize]]d.
    */
-  size(): NodeSized extends true ? null : [number, number];
+  size(): null | [number, number];
 
   /**
-   * Sets this sugiyama layout's nodeSize to the specified two-element array of
-   * numbers [ *nodeWidth*, *nodeHeight* ] and returns this
-   * [[SugiyamaOperator]].  When [[nodeSize]] is set, the minimum coordinate of
-   * every node is 0, parents and children are at least *nodeHeight* appart,
-   * and neighboring nodes in the same layer are approximately *nodeWidth*
-   * apart, in actuality this just sets the width to *nodeWidth* times the
-   * maximum number of nodes in a layer less one. If a constant separation is
-   * used, then it's no longer approximate. This is done because the way to
-   * handle nodes with a separation of zero, or dummy nodes is not clear.  If
-   * the DAG only has one node vertically or horizontally, it will be centered.
+   * Sets this sugiyama layout's [[NodeSizeAccessor]]. This accessor returns
+   * the width and height of a node it's called on, and the node will then be
+   * laidout to have at least that much of a gap between nodes.
    */
-  nodeSize(
-    sz: [number, number]
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, true, Sep>;
+  nodeSize<NewNodeSize extends NodeSizeAccessor<NodeType>>(
+    sz: NewNodeSize
+  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NewNodeSize>;
   /**
-   * Get the current layout nodeSize, which defaults to `null`. The return value
-   * will be null if the layout is [[size]]d.
+   * Get the current [[NodeSizeAccessor][, which defaults to returning [1, 1]
+   * for normal nodes and [0, 1] for [[DummyNodes]], casing edges to be treaded
+   * as if they had no width.
    */
-  nodeSize(): NodeSized extends true ? [number, number] : null;
-
-  /**
-   * Sets the separation accessor to the specified [[Separation]] and returns this
-   * [[SugiyamaOperator]].  The default separation accessor looks like:
-   *
-   * ```js
-   * function separation(a, b) {
-   *   return +!(a instanceof SugiDummyNode) + +!(b instanceof SugiDummyNode);
-   * }
-   * ```
-   *
-   * The separation accessor function takes two adjacent dag nodes and sets
-   * their relative separation, thus any constant function will produce the
-   * same results. Another other common setting is:
-   *
-   * ```js
-   * function separation(a, b) {
-   *   return 1;
-   * }
-   * ```
-   *
-   * which gives edges the same spacing as normal nodes.
-   */
-  separation<NewSep extends Separation<NodeType>>(
-    sep: NewSep
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, NewSep>;
-  /**
-   * Gets the current separation accessor.
-   */
-  separation(): Sep;
+  nodeSize(): NodeSize;
 
   /**
    * Sets sugiyama debug to *deb*. If debug is true, dummy nodes will be given
@@ -188,7 +161,7 @@ export interface SugiyamaOperator<
    */
   debug(
     deb: boolean
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize>;
   /**
    * Gets the current debug value.
    */
@@ -201,22 +174,19 @@ function buildOperator<
   Layering extends LayeringOperator<NodeType>,
   Decross extends DecrossOperator<NodeType>,
   Coord extends CoordOperator<NodeType>,
-  NodeSized extends boolean,
-  Sep extends Separation<NodeType>
+  NodeSize extends NodeSizeAccessor<NodeType>
 >(
   layeringOp: Layering,
   decrossOp: Decross,
   coordOp: Coord,
-  nodeSized: NodeSized,
-  sizeVals: [number, number],
-  separationOp: Sep,
+  sizeVal: [number, number] | null,
+  nodeSizeAcc: NodeSize,
   debugVal: boolean
-): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, Sep> {
-  const [width, height] = sizeVals;
-
+): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize> {
   function createLayers<N extends NodeType & LayeredNode>(
     dag: Dag<N>
   ): ((N & HorizableNode & VertableNode) | DummyNode)[][] {
+    // every time
     const layers: ((N & HorizableNode & VertableNode) | DummyNode)[][] = [];
     // NOTE copy here is explicit so that modifying the graph doesn't change how we iterate
     for (const node of dag.descendants()) {
@@ -277,10 +247,16 @@ function buildOperator<
     }
   }
 
-  function sugiyama(dag: NodeType): NodeType & SugiyamaNode;
-  function sugiyama(dag: DagRoot<NodeType>): DagRoot<NodeType & SugiyamaNode>;
-  function sugiyama(dag: Dag<NodeType>): Dag<NodeType & SugiyamaNode>;
-  function sugiyama(dag: Dag<NodeType>): Dag<NodeType & SugiyamaNode> {
+  function sugiyama(dag: NodeType): SugiyamaLayout<NodeType & SugiyamaNode>;
+  function sugiyama(
+    dag: DagRoot<NodeType>
+  ): SugiyamaLayout<DagRoot<NodeType & SugiyamaNode>>;
+  function sugiyama(
+    dag: Dag<NodeType>
+  ): SugiyamaLayout<Dag<NodeType & SugiyamaNode>>;
+  function sugiyama(
+    dag: Dag<NodeType>
+  ): SugiyamaLayout<Dag<NodeType & SugiyamaNode>> {
     // compute layers
     layeringOp(dag);
     // create layers
@@ -295,90 +271,80 @@ function buildOperator<
       }
     }
     const layers = createLayers(dag as Dag<NodeType & LayeredNode>);
+    const nodeSize = cachedNodeSize<NodeType>(nodeSizeAcc);
+
     // assign y
-    if (layers.length === 1) {
-      const [layer] = layers;
+    let height = 0;
+    for (const layer of layers) {
+      const layerHeight = Math.max(...layer.map((n) => nodeSize(n)[1]));
       for (const node of layer) {
-        node.y = height / 2;
+        node.y = height + layerHeight / 2;
       }
-    } else {
-      const dh = nodeSized ? height : height / (layers.length - 1);
-      for (const [i, layer] of layers.entries()) {
-        for (const node of layer) {
-          node.y = dh * i;
+      height += layerHeight;
+    }
+    if (height <= 0) {
+      throw new Error(
+        "at least one node must have positive height, but total height was zero"
+      );
+    }
+
+    // minimize edge crossings
+    decrossOp(layers);
+
+    // assign coordinates
+    let width = coordOp(layers, nodeSize);
+
+    // scale x
+    for (const layer of layers) {
+      for (const node of layer) {
+        if (node.x === undefined) {
+          throw new Error(`coord didn't assign an x to node '${node.id}'`);
+        } else if (node.x < 0 || node.x > width) {
+          throw new Error(
+            `coord assgined an x (${node.x}) outside of [0, ${width}]`
+          );
         }
       }
     }
-    if (layers.every((l) => l.length === 1)) {
-      // next steps aren't necessary
-      for (const [node] of layers) {
-        node.x = width / 2;
-      }
-    } else if (layers.length === 1) {
-      // next steps aren't necessary
-      const [layer] = layers;
-      coordSingleLayer(layer, separationOp);
-      const exed = layer as (NodeType & SugiyamaNode)[];
-      const scale = nodeSized ? exed.length - 1 : 1;
-      for (const node of exed) {
-        node.x *= width * scale;
-      }
-    } else {
-      // minimize edge crossings
-      decrossOp(layers);
-      // assign coordinates
-      coordOp(layers, separationOp);
-      // scale x
-      for (const layer of layers) {
-        for (const node of layer) {
-          if (node.x === undefined) {
-            throw new Error(`coord didn't assign an x to node '${node.id}'`);
-          }
-        }
-      }
-      const exed = layers as (NodeType & SugiyamaNode)[][];
-      const scale = nodeSized
-        ? Math.max(...layers.map((layer) => layer.length)) - 1
-        : 1;
+    const exed = layers as (NodeType & SugiyamaNode)[][];
+    if (sizeVal !== null) {
+      const [newWidth, newHeight] = sizeVal;
       for (const layer of exed) {
         for (const node of layer) {
-          node.x *= width * scale;
+          node.x *= newWidth / width;
+          node.y *= newHeight / height;
         }
       }
+      width = newWidth;
+      height = newHeight;
     }
+
     // Remove dummy nodes and update edge data
     const sugied = dag as Dag<NodeType & SugiyamaNode>;
     removeDummies(sugied);
-    return sugied;
+    // laidout dag
+    return { dag: sugied, width, height };
   }
 
   function layering(): Layering;
   function layering<NewLayering extends LayeringOperator<NodeType>>(
     layer: NewLayering
-  ): SugiyamaOperator<NodeType, NewLayering, Decross, Coord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, NewLayering, Decross, Coord, NodeSize>;
   function layering<NewLayering extends LayeringOperator<NodeType>>(
     layer?: NewLayering
   ):
     | Layering
-    | SugiyamaOperator<NodeType, NewLayering, Decross, Coord, NodeSized, Sep> {
+    | SugiyamaOperator<NodeType, NewLayering, Decross, Coord, NodeSize> {
     if (layer === undefined) {
       return layeringOp;
     } else {
       const localLayering = layer;
-      return buildOperator<
-        NodeType,
-        NewLayering,
-        Decross,
-        Coord,
-        NodeSized,
-        Sep
-      >(
+      return buildOperator<NodeType, NewLayering, Decross, Coord, NodeSize>(
         localLayering,
         decrossOp,
         coordOp,
-        nodeSized,
-        sizeVals,
-        separationOp,
+        sizeVal,
+        nodeSizeAcc,
         debugVal
       );
     }
@@ -388,23 +354,23 @@ function buildOperator<
   function decross(): Decross;
   function decross<NewDecross extends DecrossOperator<NodeType>>(
     dec: NewDecross
-  ): SugiyamaOperator<NodeType, Layering, NewDecross, Coord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, NewDecross, Coord, NodeSize>;
   function decross<NewDecross extends DecrossOperator<NodeType>>(
     dec?: NewDecross
   ):
     | Decross
-    | SugiyamaOperator<NodeType, Layering, NewDecross, Coord, NodeSized, Sep> {
+    | SugiyamaOperator<NodeType, Layering, NewDecross, Coord, NodeSize> {
     if (dec === undefined) {
       return decrossOp;
     } else {
-      return buildOperator<
-        NodeType,
-        Layering,
-        NewDecross,
-        Coord,
-        NodeSized,
-        Sep
-      >(layeringOp, dec, coordOp, nodeSized, sizeVals, separationOp, debugVal);
+      return buildOperator<NodeType, Layering, NewDecross, Coord, NodeSize>(
+        layeringOp,
+        dec,
+        coordOp,
+        sizeVal,
+        nodeSizeAcc,
+        debugVal
+      );
     }
   }
   sugiyama.decross = decross;
@@ -412,134 +378,90 @@ function buildOperator<
   function coord(): Coord;
   function coord<NewCoord extends CoordOperator<NodeType>>(
     crd: NewCoord
-  ): SugiyamaOperator<NodeType, Layering, Decross, NewCoord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, Decross, NewCoord, NodeSize>;
   function coord<NewCoord extends CoordOperator<NodeType>>(
     crd?: NewCoord
-  ):
-    | Coord
-    | SugiyamaOperator<NodeType, Layering, Decross, NewCoord, NodeSized, Sep> {
+  ): Coord | SugiyamaOperator<NodeType, Layering, Decross, NewCoord, NodeSize> {
     if (crd === undefined) {
       return coordOp;
     } else {
-      return buildOperator<
-        NodeType,
-        Layering,
-        Decross,
-        NewCoord,
-        NodeSized,
-        Sep
-      >(
+      return buildOperator<NodeType, Layering, Decross, NewCoord, NodeSize>(
         layeringOp,
         decrossOp,
         crd,
-        nodeSized,
-        sizeVals,
-        separationOp,
+        sizeVal,
+        nodeSizeAcc,
         debugVal
       );
     }
   }
   sugiyama.coord = coord;
 
-  function size(): NodeSized extends true ? null : [number, number];
+  function size(): null | [number, number];
   function size(
     sz: [number, number]
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, false, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize>;
   function size(
-    sz?: [number, number]
+    sz?: [number, number] | null
   ):
-    | SugiyamaOperator<NodeType, Layering, Decross, Coord, false, Sep>
-    | (NodeSized extends true ? null : [number, number]) {
+    | SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize>
+    | null
+    | [number, number] {
     if (sz !== undefined) {
       return buildOperator(
         layeringOp,
         decrossOp,
         coordOp,
-        false,
         sz,
-        separationOp,
+        nodeSizeAcc,
         debugVal
       );
-    } else if (nodeSized) {
-      return null as NodeSized extends true ? null : [number, number];
     } else {
-      return sizeVals as NodeSized extends true ? null : [number, number];
+      return sizeVal;
     }
   }
   sugiyama.size = size;
 
-  function nodeSize(): NodeSized extends true ? [number, number] : null;
-  function nodeSize(
-    sz: [number, number]
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, true, Sep>;
-  function nodeSize(
-    sz?: [number, number]
+  function nodeSize(): NodeSize;
+  function nodeSize<NewNodeSize extends NodeSizeAccessor<NodeType>>(
+    sz: NewNodeSize
+  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NewNodeSize>;
+  function nodeSize<NewNodeSize extends NodeSizeAccessor<NodeType>>(
+    sz?: NewNodeSize
   ):
-    | SugiyamaOperator<NodeType, Layering, Decross, Coord, true, Sep>
-    | (NodeSized extends true ? [number, number] : null) {
+    | SugiyamaOperator<NodeType, Layering, Decross, Coord, NewNodeSize>
+    | NodeSize {
     if (sz !== undefined) {
       return buildOperator(
         layeringOp,
         decrossOp,
         coordOp,
-        true,
+        sizeVal,
         sz,
-        separationOp,
         debugVal
       );
-    } else if (nodeSized) {
-      return sizeVals as NodeSized extends true ? [number, number] : null;
     } else {
-      return null as NodeSized extends true ? [number, number] : null;
+      return nodeSizeAcc;
     }
   }
   sugiyama.nodeSize = nodeSize;
 
-  function separation(): Sep;
-  function separation<NewSep extends Separation<NodeType>>(
-    sep: NewSep
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, NewSep>;
-  function separation<NewSep extends Separation<NodeType>>(
-    sep?: NewSep
-  ):
-    | Sep
-    | SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, NewSep> {
-    if (sep === undefined) {
-      return separationOp;
-    } else {
-      const localSep = sep;
-      return buildOperator(
-        layeringOp,
-        decrossOp,
-        coordOp,
-        nodeSized,
-        sizeVals,
-        localSep,
-        debugVal
-      );
-    }
-  }
-  sugiyama.separation = separation;
-
   function debug(): boolean;
   function debug(
     deb: boolean
-  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, Sep>;
+  ): SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize>;
   function debug(
     deb?: boolean
-  ):
-    | boolean
-    | SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSized, Sep> {
+  ): boolean | SugiyamaOperator<NodeType, Layering, Decross, Coord, NodeSize> {
     if (deb === undefined) {
       return debugVal;
     } else {
-      return buildOperator(
+      return buildOperator<NodeType, Layering, Decross, Coord, NodeSize>(
         layeringOp,
         decrossOp,
         coordOp,
-        nodeSized,
-        sizeVals,
-        separationOp,
+        sizeVal,
+        nodeSizeAcc,
         deb
       );
     }
@@ -550,11 +472,11 @@ function buildOperator<
 }
 
 /** @internal */
-function defaultSeparation<NodeType extends DagNode>(
-  left: NodeType | DummyNode,
-  right: NodeType | DummyNode
-): number {
-  return +!(left instanceof DummyNode) + +!(right instanceof DummyNode);
+function defaultNodeSize<NodeType extends DagNode>(
+  node: NodeType | DummyNode
+): [number, number] {
+  const size = +!(node instanceof DummyNode);
+  return [size, size];
 }
 
 /**
@@ -567,8 +489,7 @@ export function sugiyama<NodeType extends DagNode>(
   SimplexOperator<NodeType>,
   TwoLayerOperator<NodeType, MedianOperator<NodeType>>,
   QuadOperator<NodeType>,
-  false,
-  Separation<NodeType>
+  NodeSizeAccessor<NodeType>
 > {
   if (args.length) {
     throw new Error(
@@ -579,9 +500,8 @@ export function sugiyama<NodeType extends DagNode>(
     simplex(),
     twoLayer(),
     quad(),
-    false,
-    [1, 1],
-    defaultSeparation,
+    null,
+    defaultNodeSize,
     false
   );
 }

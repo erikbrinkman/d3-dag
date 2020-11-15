@@ -1,4 +1,4 @@
-import { createLayers, sep } from "../utils";
+import { createLayers, nodeSize } from "../utils";
 
 import { coordMinCurve } from "../../../src";
 
@@ -9,12 +9,12 @@ test("coordMinCurve() works for square", () => {
   const coord = coordMinCurve().weight(0.99999);
   expect(coord.weight()).toBeCloseTo(0.99999, 5);
 
-  coord(layers, sep);
+  coord(layers, nodeSize);
 
-  expect(head.x).toBeCloseTo(0.5, 3);
-  expect(left.x).toBeCloseTo(0.0, 3);
-  expect(right.x).toBeCloseTo(1.0, 3);
-  expect(tail.x).toBeCloseTo(0.5, 3);
+  expect(head.x).toBeCloseTo(1, 3);
+  expect(left.x).toBeCloseTo(1 / 2, 3);
+  expect(right.x).toBeCloseTo(3 / 2, 3);
+  expect(tail.x).toBeCloseTo(1, 3);
 });
 
 test("coordMinCurve() throws for invalid weights", () => {

@@ -6,7 +6,7 @@
  *
  * @packageDocumentation
  */
-import { HorizableNode, Operator, Separation } from ".";
+import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 import { init, layout, minBend, solve } from "./utils";
 
 import { DagNode } from "../../dag/node";
@@ -27,8 +27,8 @@ export function topological<NodeType extends DagNode>(
 
   function topologicalCall(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>
-  ): void {
+    nodeSize: NodeSizeAccessor<NodeType>
+  ): number {
     for (const layer of layers) {
       const numNodes = layer.reduce(
         (count, node) => count + +!(node instanceof DummyNode),
@@ -57,7 +57,7 @@ export function topological<NodeType extends DagNode>(
         }
       }
     }
-    const [Q, c, A, b] = init(layers, inds, separation);
+    const [Q, c, A, b] = init(layers, inds, nodeSize);
 
     for (const layer of layers) {
       for (const par of layer) {
@@ -75,7 +75,11 @@ export function topological<NodeType extends DagNode>(
     }
 
     const solution = solve(Q, c, A, b);
-    layout(layers, inds, solution);
+    const width = layout(layers, nodeSize, inds, solution);
+    if (width <= 0) {
+      throw new Error("must assign nonzero width to at least one node");
+    }
+    return width;
   }
 
   return topologicalCall;

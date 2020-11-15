@@ -1,32 +1,11 @@
-import { HorizableNode, Separation } from ".";
+import { HorizableNode, NodeSizeAccessor } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { SafeMap } from "../../utils";
 import { solveQP } from "quadprog";
 
-export function coordSingleLayer<NodeType extends DagNode>(
-  layer: ((NodeType & HorizableNode) | DummyNode)[],
-  sep: Separation<NodeType>
-): void {
-  let [prev, ...rest] = layer;
-  let prevx = (prev.x = 0);
-  for (const curr of rest) {
-    prevx = curr.x = prevx + sep(prev, curr);
-    prev = curr;
-  }
-  if (prevx > 0) {
-    for (const node of layer as ((NodeType | DummyNode) & { x: number })[]) {
-      node.x /= prevx;
-    }
-  } else {
-    for (const node of layer) {
-      node.x = 0.5;
-    }
-  }
-}
-
-// wrapper for solveQP
+/** @internal wrapper for solveQP */
 function qp(
   Q: number[][],
   c: number[],
@@ -34,6 +13,10 @@ function qp(
   b: number[],
   meq: number
 ): number[] {
+  if (!c.length) {
+    return [];
+  }
+
   const Dmat = [[0]];
   const dvec = [0];
   const Amat = [[0]];
@@ -62,7 +45,7 @@ function qp(
   return solution;
 }
 
-// solve for node positions
+/** @internal solve for node positions */
 export function solve(
   Q: number[][],
   c: number[],
@@ -86,7 +69,7 @@ export function solve(
   return solution;
 }
 
-// compute indices used to index arrays
+/** @internal compute indices used to index arrays */
 export function indices<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][]
 ): SafeMap<string, number> {
@@ -100,11 +83,11 @@ export function indices<NodeType extends DagNode>(
   return inds;
 }
 
-// Compute constraint arrays for layer separation
+/** @interal Compute constraint arrays for layer separation */
 export function init<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][],
   inds: SafeMap<string, number>,
-  separation: Separation<NodeType>
+  nodeSize: NodeSizeAccessor<NodeType>
 ): [number[][], number[], number[][], number[]] {
   const n = 1 + Math.max(...inds.values());
   const A: number[][] = [];
@@ -119,7 +102,7 @@ export function init<NodeType extends DagNode>(
       cons[find] = 1;
       cons[sind] = -1;
       A.push(cons);
-      b.push(-separation(first, second));
+      b.push(-(nodeSize(first)[0] + nodeSize(second)[0]) / 2);
       first = second;
     }
   }
@@ -130,7 +113,7 @@ export function init<NodeType extends DagNode>(
   return [Q, c, A, b];
 }
 
-// update Q that minimizes edge distance squared
+/** @internal update Q that minimizes edge distance squared */
 export function minDist(
   Q: number[][],
   pind: number,
@@ -143,9 +126,13 @@ export function minDist(
   Q[pind][pind] += coef;
 }
 
-// update Q that minimizes curve of edges through a node
-// where curve is calcukates as the squared distance of the middle node from
-// the midpoint of the first and last, multiplied by four for some reason
+/**
+ * update Q that minimizes curve of edges through a node where curve is
+ * calcukates as the squared distance of the middle node from the midpoint of
+ * the first and last, multiplied by four for some reason
+ *
+ * @internal
+ */
 export function minBend(
   Q: number[][],
   pind: number,
@@ -164,27 +151,42 @@ export function minBend(
   Q[pind][pind] += coef;
 }
 
-// Assign nodes x in [0, 1] based on solution
+/**
+ * Assign nodes x based off of solution, and return the width of the final
+ * layout.
+ *
+ * @internal
+ */
 export function layout<NodeType extends DagNode>(
   layers: ((NodeType & HorizableNode) | DummyNode)[][],
+  nodeSize: NodeSizeAccessor<NodeType>,
   inds: SafeMap<string, number>,
   solution: number[]
-): void {
-  // Rescale to be in [0, 1]
-  const min = Math.min(...solution);
-  const span = Math.max(...solution) - min;
-  if (span > 0) {
-    for (const layer of layers) {
-      for (const node of layer) {
-        const index = inds.getThrow(node.id);
-        node.x = (solution[index] - min) / span;
-      }
-    }
-  } else {
-    for (const layer of layers) {
-      for (const node of layer) {
-        node.x = 0.5;
-      }
+): number {
+  // find span of solution
+  let start = Number.POSITIVE_INFINITY;
+  let finish = Number.NEGATIVE_INFINITY;
+  for (const layer of layers) {
+    const first = layer[0];
+    const last = layer[layer.length - 1];
+
+    start = Math.min(
+      start,
+      solution[inds.getThrow(first.id)] - nodeSize(first)[0] / 2
+    );
+    finish = Math.max(
+      finish,
+      solution[inds.getThrow(last.id)] + nodeSize(last)[0] / 2
+    );
+  }
+
+  // assign inds based off of span
+  for (const layer of layers) {
+    for (const node of layer) {
+      node.x = solution[inds.getThrow(node.id)] - start;
     }
   }
+
+  // return width
+  return finish - start;
 }

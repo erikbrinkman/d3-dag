@@ -14,7 +14,7 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 
-import { HorizableNode, Operator, Separation } from ".";
+import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 import { SafeMap, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
@@ -34,8 +34,8 @@ export function greedy<NodeType extends DagNode>(
 
   function greedyCall(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>
-  ): void {
+    nodeSize: NodeSizeAccessor<NodeType>
+  ): number {
     // TODO other initial assignments
     const assignment = meanAssignment;
 
@@ -62,11 +62,12 @@ export function greedy<NodeType extends DagNode>(
 
     // set first layer
     let [lastLayer, ...restLayers] = layers;
-    let [last, ...rest] = lastLayer;
-    let lastX = (last.x = 0);
-    for (const node of rest) {
-      lastX = node.x = lastX + separation(last, node);
-      last = node;
+    let start = 0;
+    let finish = 0;
+    for (const node of lastLayer) {
+      const size = nodeSize(node)[0];
+      node.x = finish + size / 2;
+      finish += size;
     }
 
     // assign the rest of nodes
@@ -89,51 +90,40 @@ export function greedy<NodeType extends DagNode>(
       for (const [j, node] of ordered) {
         // first push nodes over to left
         // TODO we do left than right, but really we should do both and average
-        let last = node;
-        let lastX = def(last.x);
+        const nwidth = nodeSize(node)[0];
+
+        let end = def(node.x) + nwidth / 2;
         for (const next of layer.slice(j + 1)) {
-          lastX = next.x = Math.max(
-            def(next.x),
-            lastX + separation(last, next)
-          );
-          last = next;
+          const hsize = nodeSize(next)[0] / 2;
+          const nx = (next.x = Math.max(def(next.x), end + hsize));
+          end = nx + hsize;
         }
+        finish = Math.max(finish, end);
+
         // then push from the right
-        last = node;
-        lastX = def(last.x);
+        let begin = def(node.x) - nwidth / 2;
         for (const next of layer.slice(0, j).reverse()) {
-          lastX = next.x = Math.min(
-            def(next.x),
-            lastX - separation(next, last)
-          );
-          last = next;
+          const hsize = nodeSize(next)[0] / 2;
+          const nx = (next.x = Math.min(def(next.x), begin - hsize));
+          begin = nx - hsize;
         }
+        start = Math.min(start, begin);
       }
 
       lastLayer = layer;
     }
 
-    // scale
-    const min = Math.min(
-      ...layers.map((layer) => Math.min(...layer.map((node) => def(node.x))))
-    );
-    const span =
-      Math.max(
-        ...layers.map((layer) => Math.max(...layer.map((node) => def(node.x))))
-      ) - min;
-    if (span > 0) {
-      for (const layer of layers) {
-        for (const node of layer) {
-          node.x = (def(node.x) - min) / span;
-        }
-      }
-    } else {
-      for (const layer of layers) {
-        for (const node of layer) {
-          node.x = 0.5;
-        }
+    // separate for zero based
+    for (const layer of layers) {
+      for (const node of layer) {
+        node.x = def(node.x) - start;
       }
     }
+    const width = finish - start;
+    if (width <= 0) {
+      throw new Error("must assign nonzero width to at least one node");
+    }
+    return width;
   }
 
   return greedyCall;

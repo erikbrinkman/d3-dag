@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { HorizableNode, Operator, Separation } from ".";
+import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
@@ -27,33 +27,30 @@ export function center<NodeType extends DagNode>(
 
   function centerCall(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    separation: Separation<NodeType>
-  ): void {
-    const maxWidth = Math.max(
-      ...layers.map((layer) => {
-        let [prev, ...rest] = layer;
-        let prevx = (prev.x = 0);
-        for (const node of rest) {
-          prevx = node.x = prevx + separation(prev, node);
-          prev = node;
-        }
-        return prevx;
-      })
-    );
-    if (maxWidth > 0) {
-      for (const layer of layers) {
-        const halfWidth = def(layer[layer.length - 1].x) / 2;
-        for (const node of layer) {
-          node.x = (def(node.x) - halfWidth) / maxWidth + 0.5;
-        }
+    nodeSize: NodeSizeAccessor<NodeType>
+  ): number {
+    const widths = layers.map((layer) => {
+      let width = 0;
+      for (const node of layer) {
+        const nodeWidth = nodeSize(node)[0];
+        node.x = width + nodeWidth / 2;
+        width += nodeWidth;
       }
-    } else {
-      for (const layer of layers) {
-        for (const node of layer) {
-          node.x = 0.5;
-        }
+      return width;
+    });
+    const maxWidth = Math.max(...widths);
+    if (maxWidth <= 0) {
+      throw new Error("must assign nonzero width to at least one node");
+    }
+    for (const [i, layer] of layers.entries()) {
+      const width = widths[i];
+      const offset = (maxWidth - width) / 2;
+      for (const node of layer) {
+        node.x = def(node.x) + offset;
       }
     }
+
+    return maxWidth;
   }
 
   return centerCall;
