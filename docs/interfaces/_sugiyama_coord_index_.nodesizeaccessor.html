@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;sugiyama/coord/quad&quot; | d3-dag</title>
+	<title>NodeSizeAccessor | d3-dag</title>
 	<meta name="description" content="Documentation for d3-dag">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_sugiyama_coord_quad_.html">&quot;sugiyama/coord/quad&quot;</a>
+					<a href="../modules/_sugiyama_coord_index_.html">&quot;sugiyama/coord/index&quot;</a>
+				</li>
+				<li>
+					<a href="_sugiyama_coord_index_.nodesizeaccessor.html">NodeSizeAccessor</a>
 				</li>
 			</ul>
-			<h1>Module &quot;sugiyama/coord/quad&quot;</h1>
+			<h1>Interface NodeSizeAccessor&lt;NodeType&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -69,69 +72,60 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>This accessor positions nodes to minimize aspect of curvature and distance
-							between nodes. The coordinates are assigned by solving a quadratic program,
-							with weights for various parts of the objective function. Quadratic programs
-							can take a while to solve, but this will likely produce the most appealing
-						output.</p>
+						<p>The node size accessor takes a node and returns its size as a tuple of
+							[<code>width</code>, <code>height</code>]. In the layout, the nodes will positioned such that they
+							have at least width and height clearance around each of them. Due to the
+							limitations of layered layouts, that means that layers will be separated by
+						the maximum height nodes in each layer.</p>
 					</div>
 				</div>
 			</section>
-			<section class="tsd-panel-group tsd-index-group">
-				<h2>Index</h2>
-				<section class="tsd-panel tsd-index-panel">
-					<div class="tsd-index-content">
-						<section class="tsd-index-section ">
-							<h3>Interfaces</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-kind-icon">Quad<wbr>Operator</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Functions</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter"><a href="_sugiyama_coord_quad_.html#quad" class="tsd-kind-icon">quad</a></li>
-							</ul>
-						</section>
-					</div>
-				</section>
+			<section class="tsd-panel tsd-type-parameters">
+				<h3>Type parameters</h3>
+				<ul class="tsd-type-parameters">
+					<li>
+						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a></h4>
+					</li>
+				</ul>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-					<a name="quad" class="tsd-anchor"></a>
-					<h3>quad</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">quad&lt;NodeType&gt;<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-signature-type">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/coord/quad.ts#L277">src/sugiyama/coord/quad.ts:277</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Create a default <a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html">QuadOperator</a>.</p>
-								</div>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">NodeSizeAccessor</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3 class="tsd-before-signature">Callable</h3>
+				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> | </span><a href="../classes/_sugiyama_dummy_.dummynode.html" class="tsd-signature-type">DummyNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/coord/index.ts#L34">src/sugiyama/coord/index.ts:34</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>The node size accessor takes a node and returns its size as a tuple of
+									[<code>width</code>, <code>height</code>]. In the layout, the nodes will positioned such that they
+									have at least width and height clearance around each of them. Due to the
+									limitations of layered layouts, that means that layers will be separated by
+								the maximum height nodes in each layer.</p>
 							</div>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a></h4>
-								</li>
-							</ul>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>args: <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-signature-type">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>node: <span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> | </span><a href="../classes/_sugiyama_dummy_.dummynode.html" class="tsd-signature-type">DummyNode</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4>
+					</li>
+				</ul>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -141,17 +135,24 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="_sugiyama_coord_quad_.html">&quot;sugiyama/coord/quad&quot;</a>
+						<a href="../modules/_sugiyama_coord_index_.html">&quot;sugiyama/coord/index&quot;</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../interfaces/_sugiyama_coord_quad_.quadoperator.html" class="tsd-kind-icon">Quad<wbr>Operator</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="_sugiyama_coord_index_.horizablenode.html" class="tsd-kind-icon">Horizable<wbr>Node</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="_sugiyama_coord_quad_.html#quad" class="tsd-kind-icon">quad</a>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_sugiyama_coord_index_.nodesizeaccessor.html" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_sugiyama_coord_index_.operator.html" class="tsd-kind-icon">Operator</a>
 					</li>
 				</ul>
 			</nav>
