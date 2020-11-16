@@ -50,6 +50,20 @@ var dag = d3.sugiyama();
 
 Information for major changes between releases
 
+### Updating from 0.4 to 0.5
+
+The way Sugiyama layout works was entirely rewritten. Instead of defaulting to
+fitting nodes into [0, 1] in x and y, it now features a `nodeSize` accessor.
+Nodes are spaced out to respect their nodeSizes, along x coordinates this is
+exact, the y coordinates will respect the max height in each layer. As a result
+of the this change, there is no longer a separation accessor, as the role of
+that was replaced by specifying node sizes. Also, instead of sugiyama layout
+just returning the laidout dag (nice for type script), it now return an object
+with the dag, as well as the width and height of the final dag, including
+"padding" for node sizes. The default size of dummy nodes is [0, 0]. To get
+back to almost the old behavior, you can still specify a `size`. This will
+rescale everything, but still keep the outside padding.
+
 ### Updating from 0.3 to 0.4
 
 The update from 0.3 to 0.4 adds support for typescript, and makes a number of
