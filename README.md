@@ -25,7 +25,7 @@ If you use NPM, `npm i d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag@0.4.3"></script>
+<script src="https://unpkg.com/d3-dag@0.5.0"></script>
 <script>
 
 var dag = d3.sugiyama();
