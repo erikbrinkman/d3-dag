@@ -491,9 +491,9 @@ export type DagNode<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagNode<
 >;
 
 /** The public facing interface backed by the [[LayoutDagRoot]] implementation. */
-export type DagRoot<NodeType extends DagNode = DagNode> = LayoutDagRoot<
-  NodeType
->;
+export type DagRoot<
+  NodeType extends DagNode = DagNode
+> = LayoutDagRoot<NodeType>;
 
 /**
  * The union of a [[DagNode]] and [[DagRoot]], representing the return value of
