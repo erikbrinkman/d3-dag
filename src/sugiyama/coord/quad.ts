@@ -132,18 +132,19 @@ export interface QuadOperator<NodeType extends DagNode>
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(
-  vertNode: number,
-  vertDummy: number,
-  curveNode: number,
-  curveDummy: number,
-  comp: number
-): QuadOperator<NodeType> {
+function buildOperator<NodeType extends DagNode>(options: {
+  vertNode: number;
+  vertDummy: number;
+  curveNode: number;
+  curveDummy: number;
+  comp: number;
+}): QuadOperator<NodeType> {
   function quadComponent(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
     nodeSize: NodeSizeAccessor<NodeType>,
     compMap: SafeMap<string, number>
   ): number {
+    const { vertNode, vertDummy, curveNode, curveDummy, comp } = options;
     const inds = indices(layers);
     const [Q, c, A, b] = init(layers, inds, nodeSize);
 
@@ -183,6 +184,7 @@ function buildOperator<NodeType extends DagNode>(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
     nodeSize: NodeSizeAccessor<NodeType>
   ): number {
+    const { vertNode, vertDummy, curveNode, curveDummy } = options;
     if (vertNode === 0 && curveNode === 0) {
       throw new Error(
         "node vertical weight or node curve weight needs to be positive"
@@ -198,8 +200,8 @@ function buildOperator<NodeType extends DagNode>(
     const components = splitComponentLayers(layers, compMap);
 
     // layout each component and get width
-    const widths = components.map((comp) =>
-      quadComponent(comp, nodeSize, compMap)
+    const widths = components.map((compon) =>
+      quadComponent(compon, nodeSize, compMap)
     );
 
     // center components
@@ -207,9 +209,9 @@ function buildOperator<NodeType extends DagNode>(
     if (maxWidth <= 0) {
       throw new Error("must assign nonzero width to at least one node");
     }
-    for (const [i, comp] of components.entries()) {
+    for (const [i, compon] of components.entries()) {
       const offset = (maxWidth - widths[i]) / 2;
-      for (const layer of comp) {
+      for (const layer of compon) {
         for (const node of layer) {
           node.x = def(node.x) + offset;
         }
@@ -225,15 +227,16 @@ function buildOperator<NodeType extends DagNode>(
     val?: [number, number]
   ): [number, number] | QuadOperator<NodeType> {
     if (val === undefined) {
+      const { vertNode, vertDummy } = options;
       return [vertNode, vertDummy];
     }
-    const [valNode, valDummy] = val;
-    if (valNode < 0 || valDummy < 0) {
+    const [vertNode, vertDummy] = val;
+    if (vertNode < 0 || vertDummy < 0) {
       throw new Error(
-        `weights must be non-negative, but were ${valNode} and ${valDummy}`
+        `weights must be non-negative, but were ${vertNode} and ${vertDummy}`
       );
     } else {
-      return buildOperator(valNode, valDummy, curveNode, curveDummy, comp);
+      return buildOperator({ ...options, vertNode, vertDummy });
     }
   }
   quadCall.vertical = vertical;
@@ -244,15 +247,16 @@ function buildOperator<NodeType extends DagNode>(
     val?: [number, number]
   ): [number, number] | QuadOperator<NodeType> {
     if (val === undefined) {
+      const { curveNode, curveDummy } = options;
       return [curveNode, curveDummy];
     }
-    const [valNode, valDummy] = val;
-    if (valNode < 0 || valDummy < 0) {
+    const [curveNode, curveDummy] = val;
+    if (curveNode < 0 || curveDummy < 0) {
       throw new Error(
-        `weights must be non-negative, but were ${valNode} and ${valDummy}`
+        `weights must be non-negative, but were ${curveNode} and ${curveDummy}`
       );
     } else {
-      return buildOperator(vertNode, vertDummy, valNode, valDummy, comp);
+      return buildOperator({ ...options, curveNode, curveDummy });
     }
   }
   quadCall.curve = curve;
@@ -261,11 +265,11 @@ function buildOperator<NodeType extends DagNode>(
   function component(val: number): QuadOperator<NodeType>;
   function component(val?: number): number | QuadOperator<NodeType> {
     if (val === undefined) {
-      return comp;
+      return options.comp;
     } else if (val <= 0) {
       throw new Error(`weight must be positive, but was ${val}`);
     } else {
-      return buildOperator(vertNode, vertDummy, curveNode, curveDummy, val);
+      return buildOperator({ ...options, comp: val });
     }
   }
   quadCall.component = component;
@@ -283,5 +287,11 @@ export function quad<NodeType extends DagNode>(
     );
   }
 
-  return buildOperator(1, 0, 0, 1, 1);
+  return buildOperator({
+    vertNode: 1,
+    vertDummy: 0,
+    curveNode: 0,
+    curveDummy: 1,
+    comp: 1
+  });
 }

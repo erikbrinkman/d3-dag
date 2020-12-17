@@ -38,16 +38,17 @@ export interface MinCurveOperator<NodeType extends DagNode>
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(
-  weightVal: number
-): MinCurveOperator<NodeType> {
+function buildOperator<NodeType extends DagNode>(options: {
+  weight: number;
+}): MinCurveOperator<NodeType> {
   function minCurveCall(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
     nodeSize: NodeSizeAccessor<NodeType>
   ): number {
+    const { weight } = options;
     return quad<NodeType>()
-      .vertical([(1 - weightVal) / 2, (1 - weightVal) / 2])
-      .curve([weightVal, weightVal])
+      .vertical([(1 - weight) / 2, (1 - weight) / 2])
+      .curve([weight, weight])
       .component(0.5)(layers, nodeSize);
   }
 
@@ -55,11 +56,11 @@ function buildOperator<NodeType extends DagNode>(
   function weight(val: number): MinCurveOperator<NodeType>;
   function weight(val?: number): number | MinCurveOperator<NodeType> {
     if (val === undefined) {
-      return weightVal;
+      return options.weight;
     } else if (val < 0 || val >= 1) {
-      throw new Error(`weight must be in [0, 1), but was ${weightVal}`);
+      throw new Error(`weight must be in [0, 1), but was ${val}`);
     } else {
-      return buildOperator(val);
+      return buildOperator({ ...options, weight: val });
     }
   }
   minCurveCall.weight = weight;
@@ -80,5 +81,5 @@ export function minCurve<NodeType extends DagNode>(
     );
   }
 
-  return buildOperator(0.5);
+  return buildOperator({ weight: 0.5 });
 }

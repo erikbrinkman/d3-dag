@@ -16,9 +16,15 @@ import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode, Link } from "../../dag/node";
 import { LayerableNode, Operator, RankAccessor } from ".";
 
+import { Replace } from "../../utils";
+
+interface Operators<NodeType extends DagNode> {
+  rank: RankAccessor<NodeType>;
+}
+
 export interface SimplexOperator<
   NodeType extends DagNode,
-  Rank extends RankAccessor<NodeType> = RankAccessor<NodeType>
+  Ops extends Operators<NodeType> = Operators<NodeType>
 > extends Operator<NodeType> {
   /**
    * Set the [[RankAccessor]]. Any node with a rank assigned will have a second
@@ -27,11 +33,11 @@ export interface SimplexOperator<
    */
   rank<NewRank extends RankAccessor<NodeType>>(
     newRank: NewRank
-  ): SimplexOperator<NodeType, NewRank>;
+  ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>>;
   /**
    * Get the current [[RankAccessor]].
    */
-  rank(): Rank;
+  rank(): Ops["rank"];
 
   /**
    * Setting *debug* to true will cause the simplex solver to use more human
@@ -39,7 +45,7 @@ export interface SimplexOperator<
    * cause other types of failures for poorly constructed node ids, and is
    * therefore disabled by default.
    */
-  debug(val: boolean): SimplexOperator<NodeType, Rank>;
+  debug(val: boolean): SimplexOperator<NodeType, Ops>;
   /** Get the current debug value. */
   debug(): boolean;
 }
@@ -47,12 +53,12 @@ export interface SimplexOperator<
 /** @internal */
 function buildOperator<
   NodeType extends DagNode,
-  Rank extends RankAccessor<NodeType>
->(ranker: Rank, debugVal: boolean): SimplexOperator<NodeType, Rank> {
+  Ops extends Operators<NodeType>
+>(options: Ops & { debug: boolean }): SimplexOperator<NodeType, Ops> {
   // use null prefixes to prevent clash
-  const prefix = debugVal ? "" : "\0";
-  const rankPrefix = debugVal ? "rank: " : "\0";
-  const delim = debugVal ? " -> " : "\0";
+  const prefix = options.debug ? "" : "\0";
+  const rankPrefix = options.debug ? "rank: " : "\0";
+  const delim = options.debug ? " -> " : "\0";
 
   /** node id */
   function n(node: NodeType): string {
@@ -84,7 +90,7 @@ function buildOperator<
         opt: node.children.length
       };
 
-      const rank = ranker(node);
+      const rank = options.rank(node);
       if (rank !== undefined) {
         ranks.push([rank, node]);
       }
@@ -160,26 +166,27 @@ function buildOperator<
 
   function rank<NewRank extends RankAccessor<NodeType>>(
     newRank: NewRank
-  ): SimplexOperator<NodeType, NewRank>;
-  function rank(): Rank;
+  ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>>;
+  function rank(): Ops["rank"];
   function rank<NewRank extends RankAccessor<NodeType>>(
     newRank?: NewRank
-  ): SimplexOperator<NodeType, NewRank> | Rank {
+  ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>> | Ops["rank"] {
     if (newRank === undefined) {
-      return ranker;
+      return options.rank;
     } else {
-      return buildOperator(newRank, debugVal);
+      const { rank: _, ...rest } = options;
+      return buildOperator({ ...rest, rank: newRank });
     }
   }
   simplexCall.rank = rank;
 
   function debug(): boolean;
-  function debug(val: boolean): SimplexOperator<NodeType, Rank>;
-  function debug(val?: boolean): boolean | SimplexOperator<NodeType, Rank> {
+  function debug(val: boolean): SimplexOperator<NodeType, Ops>;
+  function debug(val?: boolean): boolean | SimplexOperator<NodeType, Ops> {
     if (val === undefined) {
-      return debugVal;
+      return options.debug;
     } else {
-      return buildOperator(ranker, val);
+      return buildOperator({ ...options, debug: val });
     }
   }
   simplexCall.debug = debug;
@@ -201,5 +208,5 @@ export function simplex<NodeType extends DagNode>(
       `got arguments to simplex(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator(defaultRank, false);
+  return buildOperator({ rank: defaultRank, debug: false });
 }

@@ -25,10 +25,10 @@ export interface OptOperator<NodeType extends DagNode>
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(
-  debugVal: boolean
-): OptOperator<NodeType> {
-  const joiner = debugVal ? " => " : "\0\0";
+function buildOperator<NodeType extends DagNode>(options: {
+  debug: boolean;
+}): OptOperator<NodeType> {
+  const joiner = options.debug ? " => " : "\0\0";
 
   function key(...nodes: (NodeType | DummyNode)[]): string {
     return nodes
@@ -132,9 +132,9 @@ function buildOperator<NodeType extends DagNode>(
   function debug(val: boolean): OptOperator<NodeType>;
   function debug(val?: boolean): boolean | OptOperator<NodeType> {
     if (val === undefined) {
-      return debugVal;
+      return options.debug;
     } else {
-      return buildOperator(val);
+      return buildOperator({ ...options, debug: val });
     }
   }
   optCall.debug = debug;
@@ -151,5 +151,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator(false);
+  return buildOperator({ debug: false });
 }

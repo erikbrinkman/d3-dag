@@ -29,14 +29,14 @@ export interface OptOperator<NodeType extends DagNode>
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(
-  debugVal: boolean
-): OptOperator<NodeType> {
+function buildOperator<NodeType extends DagNode>(options: {
+  debug: boolean;
+}): OptOperator<NodeType> {
   // TODO optimize this for disconnected graphs by breaking them apart, solving
   // each, then mushing them back together
 
-  const joiner = debugVal ? " => " : "\0\0";
-  const slackJoiner = debugVal ? " " : "\0\0\0";
+  const joiner = options.debug ? " => " : "\0\0";
+  const slackJoiner = options.debug ? " " : "\0\0\0";
 
   function key(...nodes: (NodeType | DummyNode)[]): string {
     return nodes
@@ -104,7 +104,7 @@ function buildOperator<NodeType extends DagNode>(
               continue;
             }
             const pairc = key(c1, c2);
-            const slack = debugVal
+            const slack = options.debug
               ? `slack (${pairp}) (${pairc})`
               : `${pairp}\0\0\0${pairc}`;
             const slackUp = `${slack}${slackJoiner}+`;
@@ -171,9 +171,9 @@ function buildOperator<NodeType extends DagNode>(
   function debug(val: boolean): OptOperator<NodeType>;
   function debug(val?: boolean): boolean | OptOperator<NodeType> {
     if (val === undefined) {
-      return debugVal;
+      return options.debug;
     } else {
-      return buildOperator(val);
+      return buildOperator({ ...options, debug: val });
     }
   }
   optCall.debug = debug;
@@ -190,5 +190,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator(false);
+  return buildOperator({ debug: false });
 }

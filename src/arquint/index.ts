@@ -1060,7 +1060,7 @@ function defaultHeightRatio<NodeType extends DagNode>(
 export function arquint<NodeType extends DagNode>(): Operator<
   NodeType,
   LongestPathOperator<NodeType>,
-  TwoLayerOperator<NodeType, MeanOperator<NodeType>>,
+  TwoLayerOperator<NodeType, { order: MeanOperator<NodeType> }>,
   ComplexOperator<NodeType>,
   SpreadOperator<NodeType>
 > {

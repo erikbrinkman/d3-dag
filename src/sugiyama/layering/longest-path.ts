@@ -25,9 +25,9 @@ export interface LongestPathOperator<NodeType extends DagNode>
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(
-  topDownVal: boolean
-): LongestPathOperator<NodeType> {
+function buildOperator<NodeType extends DagNode>(options: {
+  topDown: boolean;
+}): LongestPathOperator<NodeType> {
   function bottomUp<N extends NodeType & ValuedNode & LayerableNode>(
     dag: Dag<N>
   ): void {
@@ -40,7 +40,7 @@ function buildOperator<NodeType extends DagNode>(
   function longestPathCall<N extends NodeType & LayerableNode>(
     dag: Dag<N>
   ): void {
-    if (topDownVal) {
+    if (options.topDown) {
       for (const node of dag.depth()) {
         node.layer = node.value;
       }
@@ -53,9 +53,9 @@ function buildOperator<NodeType extends DagNode>(
   function topDown(val: boolean): LongestPathOperator<NodeType>;
   function topDown(val?: boolean): boolean | LongestPathOperator<NodeType> {
     if (val === undefined) {
-      return topDownVal;
+      return options.topDown;
     } else {
-      return buildOperator(val);
+      return buildOperator({ ...options, topDown: val });
     }
   }
   longestPathCall.topDown = topDown;
@@ -72,5 +72,5 @@ export function longestPath<NodeType extends DagNode>(
       `got arguments to longestPath(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator(true);
+  return buildOperator({ topDown: true });
 }

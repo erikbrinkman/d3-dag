@@ -35,13 +35,13 @@ class Data<NodeType> {
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(
-  maxWidthVal: number
-): CoffmanGrahamOperator<NodeType> {
+function buildOperator<NodeType extends DagNode>(options: {
+  width: number;
+}): CoffmanGrahamOperator<NodeType> {
   function coffmanGrahamCall<N extends NodeType & LayerableNode>(
     dag: Dag<N>
   ): void {
-    const maxWidth = maxWidthVal || Math.floor(Math.sqrt(dag.size() + 0.5));
+    const maxWidth = options.width || Math.floor(Math.sqrt(dag.size() + 0.5));
 
     // initialize node data
     const data = new SafeMap<string, Data<N>>(
@@ -107,11 +107,11 @@ function buildOperator<NodeType extends DagNode>(
   function width(maxWidth: number): CoffmanGrahamOperator<NodeType>;
   function width(maxWidth?: number): number | CoffmanGrahamOperator<NodeType> {
     if (maxWidth === undefined) {
-      return maxWidthVal;
+      return options.width;
     } else if (maxWidth < 0) {
       throw new Error(`width must be non-negative: ${maxWidth}`);
     } else {
-      return buildOperator(maxWidth);
+      return buildOperator({ ...options, width: maxWidth });
     }
   }
   coffmanGrahamCall.width = width;
@@ -128,5 +128,5 @@ export function coffmanGraham<NodeType extends DagNode>(
       `got arguments to coffmanGraham(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator(0);
+  return buildOperator({ width: 0 });
 }
