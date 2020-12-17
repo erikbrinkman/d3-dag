@@ -43,10 +43,20 @@ test("decrossOpt() is optimal", () => {
     [1, [0, 2], 1]
   ]).map((layer) => layer.reverse());
   expect(crossings(layers)).toBeCloseTo(2);
-  const decross = decrossOpt().debug(true);
+  const decross = decrossOpt().debug(true).clowntown(true);
   expect(decross.debug()).toBeTruthy();
+  expect(decross.clowntown()).toBeTruthy();
   decross(layers);
   expect(crossings(layers)).toBeCloseTo(1);
+});
+
+test("decrossOpt() fails for large inputs", () => {
+  const layers = createLayers([
+    [...Array(30).keys()].map((k) => [k]),
+    [...Array(30).keys()].map((k) => [k]),
+    [...Array(30).keys()].map((k) => [k])
+  ]);
+  expect(() => decrossOpt()(layers)).toThrow("clowntown");
 });
 
 test("decrossOpt() fails passing an arg to constructor", () => {

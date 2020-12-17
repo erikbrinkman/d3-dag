@@ -22,11 +22,17 @@ export interface OptOperator<NodeType extends DagNode>
   debug(val: boolean): OptOperator<NodeType>;
   /** Return the current debug value. */
   debug(): boolean;
+
+  /** Set to true to allow running on inputs that are likely to fail. */
+  clowntown(val: boolean): OptOperator<NodeType>;
+  /** Return true if large inputs will be allowed to run. */
+  clowntown(): boolean;
 }
 
 /** @internal */
 function buildOperator<NodeType extends DagNode>(options: {
   debug: boolean;
+  clowntown: boolean;
 }): OptOperator<NodeType> {
   const joiner = options.debug ? " => " : "\0\0";
 
@@ -41,6 +47,13 @@ function buildOperator<NodeType extends DagNode>(options: {
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
   ): void {
+    // check if input is too large
+    if (!options.clowntown && bottomLayer.length > 50) {
+      throw new Error(
+        "bottomLayer to twolayerOpt is too large and will likely crash, enable clowntown to run anyway"
+      );
+    }
+
     // initialize model
     const model: Model = {
       optimize: "opt",
@@ -139,6 +152,17 @@ function buildOperator<NodeType extends DagNode>(options: {
   }
   optCall.debug = debug;
 
+  function clowntown(): boolean;
+  function clowntown(val: boolean): OptOperator<NodeType>;
+  function clowntown(val?: boolean): boolean | OptOperator<NodeType> {
+    if (val === undefined) {
+      return options.clowntown;
+    } else {
+      return buildOperator({ ...options, clowntown: val });
+    }
+  }
+  optCall.clowntown = clowntown;
+
   return optCall;
 }
 
@@ -151,5 +175,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ debug: false });
+  return buildOperator({ debug: false, clowntown: false });
 }

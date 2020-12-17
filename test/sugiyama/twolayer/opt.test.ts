@@ -12,8 +12,9 @@ test("twolayerOpt() works for very simple case", () => {
 
 test("twolayerOpt() works for debug", () => {
   const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
-  const twolayer = twolayerOpt().debug(true);
+  const twolayer = twolayerOpt().debug(true).clowntown(true);
   expect(twolayer.debug()).toBeTruthy();
+  expect(twolayer.clowntown()).toBeTruthy();
   twolayer(topLayer, bottomLayer);
   const ids = bottomLayer.map((n) => n.id);
   expect(ids).toEqual(["1,1", "1,0"]);
@@ -38,6 +39,11 @@ test("twolayerOpt() works where median is suboptimal", () => {
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(6);
   const ids = bottomLayer.map((n) => n.id);
   expect(ids).toEqual(["1,3", "1,2", "1,0", "1,1"]);
+});
+
+test("twolayerOpt() fails for large inputs", () => {
+  const [topLayer, bottomLayer] = createLayers([[[...Array(51).keys()]]]);
+  expect(() => twolayerOpt()(topLayer, bottomLayer)).toThrow("clowntown");
 });
 
 test("twolayerOpt() fails passing an arg to constructor", () => {

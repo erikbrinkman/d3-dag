@@ -26,11 +26,20 @@ export interface OptOperator<NodeType extends DagNode>
   debug(val: boolean): OptOperator<NodeType>;
   /** Get the current debug value. */
   debug(): boolean;
+
+  /**
+   * Set the clowntown value, which when true will allow opt to run on inputs
+   * that will either crash or never complete.
+   */
+  clowntown(val: boolean): OptOperator<NodeType>;
+  /** Get the current clowntown value. */
+  clowntown(): boolean;
 }
 
 /** @internal */
 function buildOperator<NodeType extends DagNode>(options: {
   debug: boolean;
+  clowntown: boolean;
 }): OptOperator<NodeType> {
   // TODO optimize this for disconnected graphs by breaking them apart, solving
   // each, then mushing them back together
@@ -136,6 +145,16 @@ function buildOperator<NodeType extends DagNode>(options: {
   }
 
   function optCall(layers: (NodeType | DummyNode)[][]): void {
+    // check for large input
+    if (
+      !options.clowntown &&
+      layers.reduce((t, l) => t + l.length * l.length, 0) > 2500
+    ) {
+      throw new Error(
+        "size of dag to decrossOpt is too large and will likely crash not complete, enable clowntown to run anyway"
+      );
+    }
+
     // initialize model
     const model: Model = {
       optimize: "opt",
@@ -178,6 +197,17 @@ function buildOperator<NodeType extends DagNode>(options: {
   }
   optCall.debug = debug;
 
+  function clowntown(): boolean;
+  function clowntown(val: boolean): OptOperator<NodeType>;
+  function clowntown(val?: boolean): boolean | OptOperator<NodeType> {
+    if (val === undefined) {
+      return options.clowntown;
+    } else {
+      return buildOperator({ ...options, clowntown: val });
+    }
+  }
+  optCall.clowntown = clowntown;
+
   return optCall;
 }
 
@@ -190,5 +220,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ debug: false });
+  return buildOperator({ debug: false, clowntown: false });
 }
