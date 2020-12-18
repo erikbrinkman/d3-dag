@@ -21,11 +21,11 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 
 ## Installing
 
-If you use NPM, `npm i d3-dag`.
+If you use node, `npm i d3-dag` or `yarn add d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag@0.5.0"></script>
+<script src="https://unpkg.com/d3-dag@0.6.0"></script>
 <script>
 
 var dag = d3.sugiyama();
@@ -49,6 +49,19 @@ var dag = d3.sugiyama();
 ## Updating
 
 Information for major changes between releases
+
+### Updating from 0.5 to 0.6
+
+The only breaking change happens if you happend to use this linrary in
+typescript, and happened store an operator with its types attached (e.g. `layout:
+SugiyamaOperator<NodeType, ...> = ...`). All of the individual attribute
+modifier functions retained their generic signatures.
+
+The typing for most operators changed to more easily allow adding new typed
+attributes later on. `sugiyama` went from being typed like `sugiyama<NodeType,
+LayeringType, DecrossType, ...>` to `sugiyama<NodeType, { layering:
+LayeringType, decross: DecrosType, ... }>`. To update, you'll need to change
+these declarations.
 
 ### Updating from 0.4 to 0.5
 

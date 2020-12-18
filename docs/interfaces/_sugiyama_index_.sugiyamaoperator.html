@@ -62,7 +62,7 @@
 					<a href="_sugiyama_index_.sugiyamaoperator.html">SugiyamaOperator</a>
 				</li>
 			</ul>
-			<h1>Interface SugiyamaOperator&lt;NodeType, Layering, Decross, Coord, NodeSize&gt;</h1>
+			<h1>Interface SugiyamaOperator&lt;NodeType, Ops&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -83,16 +83,7 @@
 						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/_dag_node_.html#dagnode" class="tsd-signature-type">DagNode</a></h4>
 					</li>
 					<li>
-						<h4>Layering<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">LayeringOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">LayeringOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
-					</li>
-					<li>
-						<h4>Decross<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DecrossOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">DecrossOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
-					</li>
-					<li>
-						<h4>Coord<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">CoordOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">CoordOperator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
-					</li>
-					<li>
-						<h4>NodeSize<span class="tsd-signature-symbol">: </span><a href="_sugiyama_coord_index_.nodesizeaccessor.html" class="tsd-signature-type">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">NodeSizeAccessor</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4>Ops<span class="tsd-signature-symbol">: </span><a href="_sugiyama_decross_two_layer_.operators.html" class="tsd-signature-type">Operators</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">Operators</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -115,7 +106,7 @@
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L77">src/sugiyama/index.ts:77</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L82">src/sugiyama/index.ts:82</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -136,7 +127,7 @@
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L83">src/sugiyama/index.ts:83</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L88">src/sugiyama/index.ts:88</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -155,7 +146,7 @@
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L84">src/sugiyama/index.ts:84</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L89">src/sugiyama/index.ts:89</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -197,14 +188,14 @@
 					<a name="coord" class="tsd-anchor"></a>
 					<h3>coord</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">coord&lt;NewCoord&gt;<span class="tsd-signature-symbol">(</span>crd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewCoord</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewCoord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">coord<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Coord</span></li>
+						<li class="tsd-signature tsd-kind-icon">coord&lt;NewCoord&gt;<span class="tsd-signature-symbol">(</span>crd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewCoord</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"coord"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewCoord</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">coord<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"coord"</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L118">src/sugiyama/index.ts:118</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L123">src/sugiyama/index.ts:123</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -225,12 +216,12 @@
 									<h5>crd: <span class="tsd-signature-type">NewCoord</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewCoord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"coord"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewCoord</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L124">src/sugiyama/index.ts:124</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L129">src/sugiyama/index.ts:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -238,7 +229,7 @@
 									<p>Get the current [[CoordOperator]].</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Coord</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"coord"</span><span class="tsd-signature-symbol">]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -246,14 +237,14 @@
 					<a name="debug" class="tsd-anchor"></a>
 					<h3>debug</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span>deb<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span>deb<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span></li>
 						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L162">src/sugiyama/index.ts:162</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L165">src/sugiyama/index.ts:165</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -269,12 +260,12 @@
 									<h5>deb: <span class="tsd-signature-type">boolean</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L168">src/sugiyama/index.ts:168</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L169">src/sugiyama/index.ts:169</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -290,14 +281,14 @@
 					<a name="decross" class="tsd-anchor"></a>
 					<h3>decross</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">decross&lt;NewDecross&gt;<span class="tsd-signature-symbol">(</span>dec<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewDecross</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewDecross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">decross<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Decross</span></li>
+						<li class="tsd-signature tsd-kind-icon">decross&lt;NewDecross&gt;<span class="tsd-signature-symbol">(</span>dec<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewDecross</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"decross"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewDecross</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">decross<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"decross"</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L105">src/sugiyama/index.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L110">src/sugiyama/index.ts:110</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -318,12 +309,12 @@
 									<h5>dec: <span class="tsd-signature-type">NewDecross</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewDecross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"decross"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewDecross</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L111">src/sugiyama/index.ts:111</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L116">src/sugiyama/index.ts:116</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -331,7 +322,7 @@
 									<p>Get the current [[DecrossOperator]].</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Decross</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"decross"</span><span class="tsd-signature-symbol">]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -339,14 +330,14 @@
 					<a name="layering" class="tsd-anchor"></a>
 					<h3>layering</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">layering&lt;NewLayering&gt;<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewLayering</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLayering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">layering<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Layering</span></li>
+						<li class="tsd-signature tsd-kind-icon">layering&lt;NewLayering&gt;<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewLayering</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"layering"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLayering</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">layering<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"layering"</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L92">src/sugiyama/index.ts:92</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L97">src/sugiyama/index.ts:97</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -367,12 +358,12 @@
 									<h5>layer: <span class="tsd-signature-type">NewLayering</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLayering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"layering"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewLayering</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L98">src/sugiyama/index.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L103">src/sugiyama/index.ts:103</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -380,7 +371,7 @@
 									<p>Get the current [[LayeringOperator]].</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Layering</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"layering"</span><span class="tsd-signature-symbol">]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -388,14 +379,14 @@
 					<a name="nodesize" class="tsd-anchor"></a>
 					<h3>node<wbr>Size</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">node<wbr>Size&lt;NewNodeSize&gt;<span class="tsd-signature-symbol">(</span>sz<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewNodeSize</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewNodeSize</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">node<wbr>Size<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NodeSize</span></li>
+						<li class="tsd-signature tsd-kind-icon">node<wbr>Size&lt;NewNodeSize&gt;<span class="tsd-signature-symbol">(</span>sz<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewNodeSize</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"nodeSize"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewNodeSize</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">node<wbr>Size<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"nodeSize"</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L147">src/sugiyama/index.ts:147</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L150">src/sugiyama/index.ts:150</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -417,12 +408,12 @@
 									<h5>sz: <span class="tsd-signature-type">NewNodeSize</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewNodeSize</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/_utils_.html#replace" class="tsd-signature-type">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"nodeSize"</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewNodeSize</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L155">src/sugiyama/index.ts:155</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L158">src/sugiyama/index.ts:158</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -432,7 +423,7 @@
 									as if they had no width.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">NodeSize</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"nodeSize"</span><span class="tsd-signature-symbol">]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -440,14 +431,14 @@
 					<a name="size" class="tsd-anchor"></a>
 					<h3>size</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">(</span>sz<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">(</span>sz<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span></li>
 						<li class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L133">src/sugiyama/index.ts:133</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L138">src/sugiyama/index.ts:138</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -465,12 +456,12 @@
 									<h5>sz: <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Layering</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Decross</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Coord</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeSize</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_sugiyama_index_.sugiyamaoperator.html" class="tsd-signature-type">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/78472a2/src/sugiyama/index.ts#L140">src/sugiyama/index.ts:140</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83b45c6/src/sugiyama/index.ts#L143">src/sugiyama/index.ts:143</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -498,6 +489,9 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="_sugiyama_index_.operators.html" class="tsd-kind-icon">Operators</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="_sugiyama_index_.sugiyamalayout.html" class="tsd-kind-icon">Sugiyama<wbr>Layout</a>
 					</li>
