@@ -36,7 +36,7 @@ var dag = d3.sugiyama();
 ## API Reference
 
 * [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/_index_.html) - methods exported to flat javascript
-* [DAG](https://erikbrinkman.github.io/d3-dag/modules/_dag_node_.html) - documentation on the DAG structur
+* [DAG](https://erikbrinkman.github.io/d3-dag/modules/_dag_node_.html) - documentation on the DAG structure
 * Creating DAGs from data
   * [Hierarchy](https://erikbrinkman.github.io/d3-dag/modules/_dag_hierarchy_.html) - data in dag format
   * [Stratify](https://erikbrinkman.github.io/d3-dag/modules/_dag_stratify_.html) - data in tabular format
