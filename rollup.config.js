@@ -36,9 +36,9 @@ export default {
       "require.main === module": false
     }),
     typescript(),
+    builtins(),
     resolve(),
     commonjs(),
-    globals(),
-    builtins()
+    globals()
   ]
 };

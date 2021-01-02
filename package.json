@@ -40,7 +40,7 @@
     "lint": "prettier --check 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json rollup.config.js && tsc --noEmit && eslint src test types --ext .ts",
     "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json rollup.config.js && import-sort --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' rollup.config.js",
     "fix": "eslint src test types --ext .ts --fix",
-    "build": "rollup --banner \"$(preamble)\" --config",
+    "build": "rollup --banner \"$(preamble)\" --failAfterWarnings --config",
     "test": "jest --coverage && yarn lint",
     "prepare": "yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
