@@ -174,8 +174,8 @@ test("dagHierarchy() fails with null id", () => {
 
 test("dagHierarchy() throws for nonempty input", () => {
   expect(() => {
-    const willFail = (dagHierarchy as unknown) as (x: null) => void;
-    willFail(null);
+    // @ts-expect-error testing javascript failure case
+    dagHierarchy(undefined);
   }).toThrow("got arguments to dagHierarchy");
 });
 
@@ -209,6 +209,7 @@ test("dagHierarchy() fails with incorrect children", () => {
 
 test("dagHierarchy() fails with invalid manual ids", () => {
   expect(() =>
-    dagHierarchy().id(() => (null as unknown) as string)({})
+    // @ts-expect-error null is not a valid id
+    dagHierarchy().id(() => null)({})
   ).toThrow("id is supposed to be string but got type ");
 });

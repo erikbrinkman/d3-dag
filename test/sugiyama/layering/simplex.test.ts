@@ -71,8 +71,8 @@ test("layeringSimplex() works for disconnected dag", () => {
 });
 
 test("layeringSimplex() fails passing an arg to constructor", () => {
-  const willFail = (layeringSimplex as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to simplex");
+  // @ts-expect-error simplex takes no arguments
+  expect(() => layeringSimplex(undefined)).toThrow("got arguments to simplex");
 });
 
 test("layeringSimplex() fails with ill-defined ranks", () => {

@@ -1057,13 +1057,20 @@ function defaultHeightRatio<NodeType extends DagNode>(
 /**
  * Construct a new Arquint layout operator with the default settings.
  */
-export function arquint<NodeType extends DagNode>(): Operator<
+export function arquint<NodeType extends DagNode>(
+  ...args: never[]
+): Operator<
   NodeType,
   LongestPathOperator<NodeType>,
   TwoLayerOperator<NodeType, { order: MeanOperator<NodeType> }>,
   ComplexOperator<NodeType>,
   SpreadOperator<NodeType>
 > {
+  if (args.length) {
+    throw new Error(
+      `got arguments to arquint(${args}), but constructor takes no aruguments.`
+    );
+  }
   return buildOperator(
     false,
     1,

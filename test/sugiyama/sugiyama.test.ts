@@ -244,6 +244,6 @@ test("sugiyama() throws with zero node height", () => {
 });
 
 test("sugiyama() fails passing an arg to constructor", () => {
-  const willFail = (sugiyama as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to sugiyama");
+  // @ts-expect-error sugiyama takes no arguments
+  expect(() => sugiyama(undefined)).toThrow("got arguments to sugiyama");
 });

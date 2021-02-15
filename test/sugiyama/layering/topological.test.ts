@@ -24,6 +24,8 @@ test("layeringTopological() works for disconnected graph", () => {
 });
 
 test("layeringTopological() fails passing an arg to constructor", () => {
-  const willFail = (layeringTopological as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to topological");
+  // @ts-expect-error topological takes no arguments
+  expect(() => layeringTopological(undefined)).toThrow(
+    "got arguments to topological"
+  );
 });

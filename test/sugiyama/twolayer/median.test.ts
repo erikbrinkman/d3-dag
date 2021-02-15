@@ -43,6 +43,6 @@ test("twolayerMedian() is suboptimal", () => {
 });
 
 test("twolayerMedian() fails passing an arg to constructor", () => {
-  const willFail = (twolayerMedian as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to median");
+  // @ts-expect-error median takes no arguments
+  expect(() => twolayerMedian(undefined)).toThrow("got arguments to median");
 });

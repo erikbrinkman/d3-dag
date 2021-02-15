@@ -32,8 +32,10 @@ test("coordTopological() throws for non-topological", () => {
 });
 
 test("coordTopological() fails passing an arg to constructor", () => {
-  const willFail = (coordTopological as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to topological");
+  // @ts-expect-error topological takes no arguments
+  expect(() => coordTopological(undefined)).toThrow(
+    "got arguments to topological"
+  );
 });
 
 test("coordTopological() throws for zero width", () => {

@@ -38,6 +38,8 @@ test("layeringLongestPath() works for bottomUp", () => {
 });
 
 test("layeringLongestPath() fails passing an arg to constructor", () => {
-  const willFail = (layeringLongestPath as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to longestPath");
+  // @ts-expect-error longest-path takes no arguments
+  expect(() => layeringLongestPath(undefined)).toThrow(
+    "got arguments to longestPath"
+  );
 });

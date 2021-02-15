@@ -38,8 +38,8 @@ test("coordGreedy() works for triangle", () => {
 });
 
 test("coordGreedy() fails passing an arg to constructor", () => {
-  const willFail = (coordGreedy as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to greedy");
+  // @ts-expect-error greedy takes no arguments
+  expect(() => coordGreedy(undefined)).toThrow("got arguments to greedy");
 });
 
 test("coordGreedy() throws for zero width", () => {

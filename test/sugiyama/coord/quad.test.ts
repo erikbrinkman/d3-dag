@@ -81,8 +81,8 @@ test("coordQuad() fails with two dummy zeros", () => {
 });
 
 test("coordQuad() fails passing an arg to constructor", () => {
-  const willFail = (coordQuad as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to quad");
+  // @ts-expect-error quad takes no arguments
+  expect(() => coordQuad(undefined)).toThrow("got arguments to quad");
 });
 
 test("coordQuad() throws for zero width", () => {

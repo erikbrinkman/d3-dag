@@ -203,3 +203,8 @@ test("arquint() works for grafo", () => {
     expect(link.points.length).toBeGreaterThan(1);
   }
 });
+
+test("arquint() errors with arguments", () => {
+  // @ts-expect-error arquint takes no arguments
+  expect(() => arquint(undefined)).toThrow("got arguments to arquint");
+});

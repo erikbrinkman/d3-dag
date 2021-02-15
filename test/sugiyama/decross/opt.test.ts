@@ -60,6 +60,6 @@ test("decrossOpt() fails for large inputs", () => {
 });
 
 test("decrossOpt() fails passing an arg to constructor", () => {
-  const willFail = (decrossOpt as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to opt");
+  // @ts-expect-error opt takes no arguments
+  expect(() => decrossOpt(undefined)).toThrow("got arguments to opt");
 });

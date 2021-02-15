@@ -47,6 +47,6 @@ test("twolayerOpt() fails for large inputs", () => {
 });
 
 test("twolayerOpt() fails passing an arg to constructor", () => {
-  const willFail = (twolayerOpt as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to opt");
+  // @ts-expect-error opt doesn't take arguments
+  expect(() => twolayerOpt(undefined)).toThrow("got arguments to opt");
 });

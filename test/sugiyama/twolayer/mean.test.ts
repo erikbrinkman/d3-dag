@@ -31,6 +31,6 @@ test("twolayerMean() doesn't optimize crossings", () => {
 });
 
 test("twolayerMean() fails passing an arg to constructor", () => {
-  const willFail = (twolayerMean as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to mean");
+  // @ts-expect-error mean takes no arguments
+  expect(() => twolayerMean(undefined)).toThrow("got arguments to mean");
 });

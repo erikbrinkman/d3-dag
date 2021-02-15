@@ -55,6 +55,6 @@ test("decrossTwoLayer() can be set with all built in methods", () => {
 });
 
 test("decrossTwoLayer() fails passing an arg to constructor", () => {
-  const willFail = (decrossTwoLayer as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to twoLayer");
+  // @ts-expect-error two-layer takes no arguments
+  expect(() => decrossTwoLayer(undefined)).toThrow("got arguments to twoLayer");
 });

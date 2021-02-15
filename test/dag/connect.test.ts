@@ -93,8 +93,8 @@ test("dagConnect() fails on empty", () => {
 });
 
 test("dagConnect() fails passing an arg to dagConnect", () => {
-  const willFail = (dagConnect as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to dagConnect");
+  // @ts-expect-error testing javascript failure case
+  expect(() => dagConnect(null)).toThrow("got arguments to dagConnect");
 });
 
 test("dagConnect() fails with null source id", () => {

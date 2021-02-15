@@ -81,6 +81,8 @@ test("layeringCoffmanGraham() requires positive width", () => {
 });
 
 test("layeringCoffmanGraham() fails passing an arg to constructor", () => {
-  const willFail = (layeringCoffmanGraham as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to coffmanGraham");
+  // @ts-expect-error coffman-graham takes no arguments
+  expect(() => layeringCoffmanGraham(undefined)).toThrow(
+    "got arguments to coffmanGraham"
+  );
 });

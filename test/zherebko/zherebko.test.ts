@@ -95,6 +95,6 @@ test("zherebko() works on disconnected dag", () => {
 });
 
 test("zherebko() fails with args", () => {
-  const fail = (zherebko as unknown) as (x: null) => void;
-  expect(() => fail(null)).toThrow("got arguments to zherebko");
+  // @ts-expect-error zherebko takes no arguments
+  expect(() => zherebko(undefined)).toThrow("got arguments to zherebko");
 });

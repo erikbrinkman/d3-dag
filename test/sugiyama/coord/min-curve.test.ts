@@ -23,6 +23,6 @@ test("coordMinCurve() throws for invalid weights", () => {
 });
 
 test("coordMinCurve() fails passing an arg to constructor", () => {
-  const willFail = (coordMinCurve as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to minCurve");
+  // @ts-expect-error minCurve takes no arguments
+  expect(() => coordMinCurve(undefined)).toThrow("got arguments to minCurve");
 });

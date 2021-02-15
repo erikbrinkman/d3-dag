@@ -108,8 +108,8 @@ test("dagStratify() works with data accessor", () => {
 });
 
 test("dagStratify() fails with arguments", () => {
-  const willFail = (dagStratify as unknown) as (x: undefined) => undefined;
-  expect(() => willFail(undefined)).toThrow("got arguments to dagStratify");
+  // @ts-expect-error stratify takes no arguments
+  expect(() => dagStratify(undefined)).toThrow("got arguments to dagStratify");
 });
 
 test("dagStratify() fails with empty data", () => {

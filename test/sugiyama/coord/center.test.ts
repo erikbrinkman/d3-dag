@@ -14,8 +14,8 @@ test("coordCenter() works for square like layout", () => {
 });
 
 test("coordCenter() fails passing an arg to constructor", () => {
-  const willFail = (coordCenter as unknown) as (x: null) => void;
-  expect(() => willFail(null)).toThrow("got arguments to center");
+  // @ts-expect-error center takes no arguments
+  expect(() => coordCenter(undefined)).toThrow("got arguments to center");
 });
 
 test("coordCenter() throws for zero width", () => {
