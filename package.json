@@ -1,6 +1,6 @@
 {
   "name": "d3-dag",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Layout algorithms for visualizing directed acylic graphs.",
   "keywords": [
     "d3",
