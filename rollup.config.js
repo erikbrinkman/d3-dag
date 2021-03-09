@@ -1,8 +1,7 @@
 "use strict";
 
-import builtins from "rollup-plugin-node-builtins";
+import alias from "@rollup/plugin-alias";
 import commonjs from "@rollup/plugin-commonjs";
-import globals from "rollup-plugin-node-globals";
 import pkg from "./package.json";
 import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
@@ -32,13 +31,21 @@ export default {
   ],
   plugins: [
     replace({
+      // don't replace assignments
+      preventAssignment: true,
       // FastPriorityQueue has this nasty line that breaks iife
       "require.main === module": false
     }),
+    alias({
+      // this is a hack, we replace fs and child process with "something else"
+      // since we know they won't be called
+      entries: {
+        fs: "d3-array",
+        child_process: "d3-array"
+      }
+    }),
     typescript(),
-    builtins(),
-    resolve(),
-    commonjs(),
-    globals()
+    resolve({ preferBuiltins: false }),
+    commonjs()
   ]
 };
