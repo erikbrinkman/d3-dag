@@ -52,7 +52,7 @@ Information for major changes between releases
 
 ### Updating from 0.5 to 0.6
 
-The only breaking change happens if you happend to use this linrary in
+The only breaking change happens if you happend to use this library in
 typescript, and happened store an operator with its types attached (e.g. `layout:
 SugiyamaOperator<NodeType, ...> = ...`). All of the individual attribute
 modifier functions retained their generic signatures.
