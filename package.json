@@ -44,7 +44,7 @@
     "test": "jest --coverage && yarn lint",
     "prepare": "yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
-    "docs": "typedoc --out docs --stripInternal --media resources src && touch docs/.nojekyll"
+    "docs": "typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
   },
   "dependencies": {
     "d3-array": "^2.11.0",
