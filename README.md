@@ -35,16 +35,16 @@ var dag = d3.sugiyama();
 
 ## API Reference
 
-* [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/_index_.html) - methods exported to flat javascript
-* [DAG](https://erikbrinkman.github.io/d3-dag/modules/_dag_node_.html) - documentation on the DAG structure
+* [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/index.html) - methods exported to flat javascript
+* [DAG](https://erikbrinkman.github.io/d3-dag/modules/dag_node.html) - documentation on the DAG structure
 * Creating DAGs from data
-  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/modules/_dag_hierarchy_.html) - data in dag format
-  * [Stratify](https://erikbrinkman.github.io/d3-dag/modules/_dag_stratify_.html) - data in tabular format
-  * [Connect](https://erikbrinkman.github.io/d3-dag/modules/_dag_connect_.html) - data in edge format
+  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/modules/dag_hierarchy.html) - data in dag format
+  * [Stratify](https://erikbrinkman.github.io/d3-dag/modules/dag_stratify.html) - data in tabular format
+  * [Connect](https://erikbrinkman.github.io/d3-dag/modules/dag_connect.html) - data in edge format
 * Layout algorithms
-  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/modules/_sugiyama_index_.html) - standard layout
-  * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/_zherebko_index_.html) - topological layout
-  * [Arquint](https://erikbrinkman.github.io/d3-dag/modules/_arquint_index_.html) - variable sized nodes
+  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/modules/sugiyama.html) - standard layout
+  * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/zherebko.html) - topological layout
+  * [Arquint](https://erikbrinkman.github.io/d3-dag/modules/arquint.html) - variable sized nodes
 
 ## Updating
 
