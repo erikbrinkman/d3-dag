@@ -31,6 +31,15 @@ const square: SimpleDatum[] = [
     parentIds: ["1", "2"]
   }
 ];
+const spaces: SimpleDatum[] = [
+  {
+    id: "0 0"
+  },
+  {
+    id: "1 1",
+    parentIds: ["0 0"]
+  }
+];
 
 function alter(id: string): string {
   return `a${id}`;
@@ -50,6 +59,12 @@ test("dagStratify() parses multi-root dag", () => {
     .map((d) => d.id)
     .sort();
   expect(ids).toEqual(["0", "1"]);
+});
+
+test("dagStratify() parses ids with spaces", () => {
+  const dag = dagStratify()(spaces);
+  const ids = dag.descendants().map((d) => d.id);
+  expect(ids).toEqual(["0 0", "1 1"]);
 });
 
 test("dagStratify() parses a square", () => {
