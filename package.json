@@ -18,14 +18,13 @@
     "email": "erik.brinkman@gmail.com"
   },
   "license": "MIT",
-  "main": "dist/d3-dag.umd.js",
-  "module": "dist/d3-dag.esm.js",
-  "unpkg": "dist/d3-dag.umd.min.js",
+  "module": "bundle/d3-dag.esm.js",
   "types": "dist/index.d.ts",
+  "main": "bundle/d3-dag.umd.js",
+  "unpkg": "bundle/d3-dag.umd.min.js",
   "files": [
-    "/dist/d3-dag.umd.js",
-    "/dist/d3-dag.umd.min.js",
-    "/dist/d3-dag.esm.js",
+    "/bundle/*.js",
+    "/dist/**/*.js",
     "/dist/**/*.d.ts"
   ],
   "jest": {
@@ -37,10 +36,10 @@
     ]
   },
   "scripts": {
-    "lint": "prettier --check 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json rollup.config.js && tsc --noEmit && eslint src test types --ext .ts",
-    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' package.json tsconfig.json .eslintrc.json rollup.config.js && import-sort --write 'src/**/*.ts' 'test/**/*.ts' 'types/**/*.d.ts' rollup.config.js",
-    "fix": "eslint src test types --ext .ts --fix",
-    "build": "rollup --banner \"$(preamble)\" --failAfterWarnings --config",
+    "format": "prettier --write {src,test,types}/**/*.ts {,.}*.json rollup.config.js && import-sort --write {src,test,types}/**/*.ts rollup.config.js",
+    "lint": "prettier --check {src,test,types}/**/*.ts {,.}*.json rollup.config.js && tsc --noEmit && eslint {src,test,types}/**/*.ts",
+    "fix": "eslint --fix {src,test,types}/**/*.ts",
+    "build": "tsc && rollup --banner \"$(preamble)\" --failAfterWarnings --config",
     "test": "jest --coverage && yarn lint",
     "prepare": "yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
@@ -72,7 +71,6 @@
     "prettier": "^2.2.1",
     "rollup": "^2.41.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^26.5.3",
     "typedoc": "^0.20.30",
     "typescript": "^4.2.3"

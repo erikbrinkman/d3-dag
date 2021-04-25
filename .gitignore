@@ -1,6 +1,7 @@
 # Node #
 ########
 /dist
+/bundle
 /node_modules
 /coverage
 /yarn-error.log
