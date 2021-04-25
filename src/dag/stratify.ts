@@ -2,7 +2,7 @@
  * You can rearrange tabularesque data into a [[Dag]] using [[stratify]], which
  * will create a default [[StratifyOperator]].
  *
- * @packageDocumentation
+ * @module
  */
 
 import {

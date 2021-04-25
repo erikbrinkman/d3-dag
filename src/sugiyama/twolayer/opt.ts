@@ -5,7 +5,7 @@
  *
  * <img alt="two layer opt example" src="media://two_layer_opt.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { Model, Solve } from "javascript-lp-solver";
 

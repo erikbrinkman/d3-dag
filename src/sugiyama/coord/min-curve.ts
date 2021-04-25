@@ -11,7 +11,7 @@
  * <img alt="min curve example" src="media://min_curve.png" width="400">
  *
  * @deprecated
- * @packageDocumentation
+ * @module
  */
 import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 

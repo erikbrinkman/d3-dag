@@ -2,7 +2,7 @@
  * This file contains all of the exports that make it into the pure javascript
  * flat structure.
  *
- * @packageDocumentation
+ * @module
  */
 export { Dag, DagNode, DagRoot, Link, ChildLink } from "./dag/node";
 export { stratify as dagStratify, StratifyOperator } from "./dag/stratify";

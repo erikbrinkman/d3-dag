@@ -17,7 +17,7 @@
  * - [["arquint/column/adjacent" | Adjacent]]
  * - [["arquint/column/complex" | Complex]]
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";

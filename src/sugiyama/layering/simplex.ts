@@ -9,7 +9,7 @@
  *
  * <img alt="simplex example" src="media://simplex.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";

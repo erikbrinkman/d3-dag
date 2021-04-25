@@ -7,7 +7,7 @@
  *
  * <img alt="optimal decross example" src="media://simplex.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { Model, Solve } from "javascript-lp-solver";
 

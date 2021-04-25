@@ -15,7 +15,7 @@
  * deprecated as it is identical to quad with equal weights for *vertical* and
  * *curve*.
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";

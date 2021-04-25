@@ -9,7 +9,7 @@
  * - [["sugiyama/twolayer/median" | Median]]
  * - [["sugiyama/twolayer/mean" | Mean]]
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";

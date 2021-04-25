@@ -21,7 +21,7 @@
  *    nodes are assigned x and y coordinates that respect their layer, and
  *    layer ordering.
  *
- * @packageDocumentation
+ * @module
  */
 
 import { ChildLink, Dag, DagNode, DagRoot, LayoutChildLink } from "../dag/node";

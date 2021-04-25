@@ -2,7 +2,7 @@
  * The mean order operator orders the bottom layer according to the mean of
  * their parent's indices.
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";

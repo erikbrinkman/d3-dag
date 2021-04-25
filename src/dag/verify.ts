@@ -2,7 +2,7 @@
  * This wraps the logic to verify DAGs are valid, and is shared by the three
  * construction methods.
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode, LayoutDagRoot } from "./node";
 

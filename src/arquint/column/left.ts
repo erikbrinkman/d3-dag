@@ -6,7 +6,7 @@
  *
  * <img alt="arquint simple left example" src="media://arquint_simple_left.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { IndexableNode, Operator } from ".";
 

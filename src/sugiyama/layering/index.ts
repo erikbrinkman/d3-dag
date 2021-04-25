@@ -10,7 +10,7 @@
  * - [["sugiyama/layering/simplex" | Simplex]]
  * - [["sugiyama/layering/topological" | Topological]]
  *
- * @packageDocumentation
+ * @module
  */
 import { Dag, DagNode } from "../../dag/node";
 

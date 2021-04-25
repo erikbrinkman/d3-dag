@@ -2,7 +2,7 @@
  * You can rearrange raw edge data into a [[Dag]] using [[connect]] to create a
  * default [[ConnectOperator]].
  *
- * @packageDocumentation
+ * @module
  */
 import {
   Dag,

@@ -8,7 +8,7 @@
  *
  * <img alt="greedy example" src="media://greedy_coordinate.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 
 // TODO add assignment like mean that skips dummy nodes as that seems like

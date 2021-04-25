@@ -12,7 +12,7 @@
  *
  * <img alt="arquint adjacent example" src="media://arquint_adjacent_center.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { IndexableNode, Operator } from ".";
 import { SafeMap, def } from "../../utils";

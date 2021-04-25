@@ -6,7 +6,7 @@
  *
  * <img alt="two layer example" src="media://two_layer_greedy.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 
 import { MedianOperator, median } from "../twolayer/median";

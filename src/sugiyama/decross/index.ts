@@ -10,7 +10,7 @@
  * - [["sugiyama/decross/opt" | Optimal]]
  * - [["sugiyama/decross/two-layer" | Two Layer]]
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";

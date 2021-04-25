@@ -9,7 +9,7 @@
  * In the following example, the default options were used and *node*.heightRatio was set to Number(*node*.id)+1:
  * <img alt="arquint example" src="media://arquint.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { ChildLink, Dag, DagNode, DagRoot, LayoutChildLink } from "../dag/node";
 import { Operator as ColumnOperator, IndexableNode } from "./column";

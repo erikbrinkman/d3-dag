@@ -4,7 +4,7 @@
  * generate a default [[HierarchyOperator]] which can then be used to transform
  * your data into a [[Dag]].
  *
- * @packageDocumentation
+ * @module
  */
 
 import {

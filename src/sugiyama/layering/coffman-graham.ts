@@ -8,7 +8,7 @@
  *
  * <img alt="Coffman-Graham example" src="media://coffman_graham.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 
 import { Dag, DagNode } from "../../dag/node";

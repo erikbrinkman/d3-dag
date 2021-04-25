@@ -15,7 +15,7 @@
  * the `Array` prototype making them much more useful for fluent functional
  * programming.
  *
- * @packageDocumentation
+ * @module
  */
 
 import { FluentIterable, fluent } from "../iters";

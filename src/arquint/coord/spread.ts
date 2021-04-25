@@ -5,7 +5,7 @@
  * present at the same y coordinate therefore, nodes should not be centered in
  * their layer but centering should be considered over all layers.
  *
- * @packageDocumentation
+ * @module
  */
 
 import {

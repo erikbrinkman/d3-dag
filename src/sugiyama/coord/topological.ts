@@ -4,7 +4,7 @@
  *
  * <img alt="topological example" src="media://topological.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 import { init, layout, minBend, solve } from "./utils";

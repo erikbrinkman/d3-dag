@@ -8,7 +8,7 @@
  *
  * <img alt="topological example" src="media://topological.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 
 import { Dag, DagNode } from "../../dag/node";

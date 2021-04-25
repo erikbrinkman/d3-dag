@@ -8,7 +8,7 @@
  * Center:
  * <img alt="arquint complex center example" src="media://arquint_complex_center.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { IndexableNode, Operator } from ".";
 

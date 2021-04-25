@@ -5,7 +5,7 @@
  * can take a while to solve, but this will likely produce the most appealing
  * output.
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode, LayoutDagRoot } from "../../dag/node";
 import { HorizableNode, NodeSizeAccessor, Operator } from ".";

@@ -4,7 +4,7 @@
  *
  * <img alt="center example" src="media://center_coordinate.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 
 import { HorizableNode, NodeSizeAccessor, Operator } from ".";

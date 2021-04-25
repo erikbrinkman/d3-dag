@@ -6,7 +6,7 @@
  *
  * <img alt="zherebko example" src="media://zherebko.png" width="1000">
  *
- * @packageDocumentation
+ * @module
  */
 import { Dag, DagNode, DagRoot } from "../dag/node";
 

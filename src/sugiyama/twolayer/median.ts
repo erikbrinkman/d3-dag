@@ -4,7 +4,7 @@
  *
  * <img alt="median example" src="media://two_layer_greedy.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";

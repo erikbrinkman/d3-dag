@@ -7,7 +7,7 @@
  *
  * <img alt="longest path example" src="media://longest_path.png" width="400">
  *
- * @packageDocumentation
+ * @module
  */
 import { Dag, DagNode, ValuedNode } from "../../dag/node";
 import { LayerableNode, Operator } from ".";

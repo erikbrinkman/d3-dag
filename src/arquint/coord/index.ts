@@ -7,7 +7,7 @@
  * in a fluent fashion:
  * - [["arquint/coord/spread" | Spread]]
  *
- * @packageDocumentation
+ * @module
  */
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
