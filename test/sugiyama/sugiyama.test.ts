@@ -6,9 +6,8 @@ import { SimpleDatum, doub, dummy, single, three, trip } from "../examples";
 import {
   coordCenter,
   coordGreedy,
-  coordMinCurve,
+  coordQuad,
   coordTopological,
-  coordVert,
   decrossOpt,
   decrossTwoLayer,
   layeringCoffmanGraham,
@@ -150,8 +149,7 @@ test("sugiyama() allows setting all builtin operators", () => {
     .layering(layeringLongestPath())
     .layering(layeringCoffmanGraham())
     .coord(coordCenter())
-    .coord(coordVert())
-    .coord(coordMinCurve())
+    .coord(coordQuad())
     .coord(coordGreedy())
     .coord(coordTopological())
     .decross(decrossTwoLayer())

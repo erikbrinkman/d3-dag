@@ -1,9 +1,4 @@
-import {
-  coordCenter,
-  coordGreedy,
-  coordMinCurve,
-  coordQuad
-} from "../../../src";
+import { coordCenter, coordGreedy, coordQuad } from "../../../src";
 import { createLayers, nodeSize } from "../utils";
 
 import { DagNode } from "../../../src/dag/node";
@@ -29,12 +24,7 @@ function idLayerSize(node: DagNode): [number, number] {
   return [size, 1];
 }
 
-for (const method of [
-  coordCenter(),
-  coordGreedy(),
-  coordMinCurve(),
-  coordQuad()
-]) {
+for (const method of [coordCenter(), coordGreedy(), coordQuad()]) {
   for (const dat of [square, ccoz, dtopo, doub, vee, ex]) {
     test(`invariants apply to ${dat.name} assigned by ${method.name}`, () => {
       const layered = dat();

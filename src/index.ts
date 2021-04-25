@@ -35,16 +35,6 @@ export {
 } from "./sugiyama/decross/opt";
 export { center as coordCenter, CenterOperator } from "./sugiyama/coord/center";
 export { quad as coordQuad, QuadOperator } from "./sugiyama/coord/quad";
-/**
- * Preserve old import for backwards compatability
- * @deprecated
- */
-export { quad as coordVert } from "./sugiyama/coord/quad";
-/**
- * Preserve old import for backwards compatability
- * @deprecated
- */
-export { minCurve as coordMinCurve } from "./sugiyama/coord/min-curve";
 export { greedy as coordGreedy, GreedyOperator } from "./sugiyama/coord/greedy";
 export {
   topological as coordTopological,
