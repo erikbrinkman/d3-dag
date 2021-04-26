@@ -1,5 +1,10 @@
-import { coordCenter, coordGreedy, coordQuad } from "../../../src";
-import { createLayers, nodeSize } from "../utils";
+import {
+  SugiDummyNode,
+  coordCenter,
+  coordGreedy,
+  coordQuad
+} from "../../../src";
+import { TestNode, createLayers, nodeSize } from "../utils";
 
 import { DagNode } from "../../../src/dag/node";
 
@@ -18,13 +23,17 @@ const doub = () => createLayers([[[0], []]]);
 const vee = () => createLayers([[[0], [0]]]);
 const ex = () => createLayers([[[1], [0]]]);
 
-function idLayerSize(node: DagNode): [number, number] {
-  const [, col] = node.id.split(",");
-  const size = parseInt(col) + 1;
-  return [size, 1];
+function idLayerSize(
+  node: DagNode<{ index: number }> | SugiDummyNode
+): [number, number] {
+  return [(node.data?.index || 0) + 1, 1];
 }
 
-for (const method of [coordCenter(), coordGreedy(), coordQuad()]) {
+for (const method of [
+  coordCenter<TestNode>(),
+  coordGreedy<TestNode>(),
+  coordQuad<TestNode>()
+]) {
   for (const dat of [square, ccoz, dtopo, doub, vee, ex]) {
     test(`invariants apply to ${dat.name} assigned by ${method.name}`, () => {
       const layered = dat();

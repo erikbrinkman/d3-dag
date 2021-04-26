@@ -9,6 +9,7 @@
  * @module
  */
 import { Dag, DagNode, DagRoot } from "../dag/node";
+import { def, js } from "../utils";
 
 import { greedy } from "./greedy";
 
@@ -26,9 +27,9 @@ export interface ZherebkoNode extends PartialNode {
 
 export interface ZherebkoOperator<NodeType extends DagNode> {
   /** Layout the input DAG. */
-  (dag: NodeType): NodeType & ZherebkoNode;
-  (dag: DagRoot<NodeType>): DagRoot<NodeType & ZherebkoNode>;
-  (dag: Dag<NodeType>): Dag<NodeType & ZherebkoNode>;
+  <N extends NodeType>(dag: N): N & ZherebkoNode;
+  <N extends NodeType>(dag: DagRoot<N>): DagRoot<N & ZherebkoNode>;
+  <N extends NodeType>(dag: Dag<N>): Dag<N & ZherebkoNode>;
 
   /**
    * Sets this zherebko layout's size to the specified two-element array of
@@ -55,12 +56,14 @@ function buildOperator<NodeType extends DagNode>(
     return ordered as (N & PartialNode)[];
   }
 
-  function zherebkoCall(dag: NodeType): NodeType & ZherebkoNode;
-  function zherebkoCall(
-    dag: DagRoot<NodeType>
-  ): DagRoot<NodeType & ZherebkoNode>;
-  function zherebkoCall(dag: Dag<NodeType>): Dag<NodeType & ZherebkoNode>;
-  function zherebkoCall(dag: Dag<NodeType>): Dag<NodeType & ZherebkoNode> {
+  function zherebkoCall<N extends NodeType>(dag: N): N & ZherebkoNode;
+  function zherebkoCall<N extends NodeType>(
+    dag: DagRoot<N>
+  ): DagRoot<N & ZherebkoNode>;
+  function zherebkoCall<N extends NodeType>(dag: Dag<N>): Dag<N & ZherebkoNode>;
+  function zherebkoCall<N extends NodeType>(
+    dag: Dag<N>
+  ): Dag<N & ZherebkoNode> {
     // topological sort
     const ordered = layer(dag);
 
@@ -75,15 +78,15 @@ function buildOperator<NodeType extends DagNode>(
       const indices = greedy(ordered);
 
       // assign points to links
-      assignPositions(dag as Dag<NodeType & PartialNode>, indices, maxLayer);
+      assignPositions(dag as Dag<N & PartialNode>, indices, maxLayer);
     }
 
-    return dag as Dag<NodeType & ZherebkoNode>;
+    return dag as Dag<N & ZherebkoNode>;
   }
 
   function assignPositions<LayeredNodeType extends NodeType & PartialNode>(
     dag: Dag<LayeredNodeType>,
-    indices: Map<string, number>,
+    indices: Map<DagNode, Map<DagNode, number>>,
     maxLayer: number
   ): void {
     // map to coordinates
@@ -91,10 +94,10 @@ function buildOperator<NodeType extends DagNode>(
     let maxIndex = 0;
     for (const { source, target } of dag.ilinks()) {
       if (target.layer > source.layer + 1) {
-        const index = indices.get(`${source.id}\0${target.id}`);
+        const index = def(def(indices.get(source)).get(target));
         /* istanbul ignore next */
         if (index === undefined) {
-          throw new Error(`indexer didn't index ${source.id} -> ${target.id}`);
+          throw new Error(js`indexer didn't index ${source} -> ${target}`);
         }
         minIndex = Math.min(minIndex, index);
         maxIndex = Math.max(maxIndex, index);
@@ -121,7 +124,7 @@ function buildOperator<NodeType extends DagNode>(
 
   function assignPoints<PosNodeType extends NodeType & ZherebkoNode>(
     dag: Dag<PosNodeType>,
-    indices: Map<string, number>,
+    indices: Map<DagNode, Map<DagNode, number>>,
     maxLayer: number,
     minIndex: number,
     maxIndex: number
@@ -131,10 +134,10 @@ function buildOperator<NodeType extends DagNode>(
       points.push({ x: source.x, y: source.y });
 
       if (target.layer - source.layer > 1) {
-        const index = indices.get(`${source.id}\0${target.id}`);
+        const index = def(def(indices.get(source)).get(target));
         /* istanbul ignore next */
         if (index === undefined) {
-          throw new Error(`indexer didn't index ${source.id} -> ${target.id}`);
+          throw new Error(js`indexer didn't index ${source} -> ${target}`);
         }
         const x = ((index - minIndex) / (maxIndex - minIndex)) * width;
         const y1 = ((source.layer + 1) / maxLayer) * height;

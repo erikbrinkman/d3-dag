@@ -9,24 +9,24 @@ test("decrossOpt() propogates to both layers", () => {
   // | |    | |
   // o o    o o
   const layers = createLayers([
-    [1, 0],
-    [0, 1]
+    [[1], [0]],
+    [[0], [1]]
   ]);
   decrossOpt()(layers);
-  const ids = layers.map((layer) => layer.map((node) => node.id));
+  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
   // reversing all layers is always valid
   expect([
     [
-      ["0,0", "0,1"],
-      ["1,1", "1,0"],
-      ["2,1", "2,0"]
+      [0, 1],
+      [1, 0],
+      [1, 0]
     ],
     [
-      ["0,1", "0,0"],
-      ["1,0", "1,1"],
-      ["2,0", "2,1"]
+      [1, 0],
+      [0, 1],
+      [0, 1]
     ]
-  ]).toContainEqual(ids);
+  ]).toContainEqual(inds);
 });
 
 test("decrossOpt() is optimal", () => {
@@ -39,12 +39,11 @@ test("decrossOpt() is optimal", () => {
   //  X X
   // o o o
   const layers = createLayers([
-    [0, [0, 1, 2], 2],
-    [1, [0, 2], 1]
+    [[0], [0, 1, 2], [2]],
+    [[1], [0, 2], [1]]
   ]).map((layer) => layer.reverse());
   expect(crossings(layers)).toBeCloseTo(2);
-  const decross = decrossOpt().debug(true).clowntown(true);
-  expect(decross.debug()).toBeTruthy();
+  const decross = decrossOpt().clowntown(true);
   expect(decross.clowntown()).toBeTruthy();
   decross(layers);
   expect(crossings(layers)).toBeCloseTo(1);

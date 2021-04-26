@@ -15,7 +15,7 @@
 // better behavior
 
 import { HorizableNode, NodeSizeAccessor, Operator } from ".";
-import { SafeMap, def } from "../../utils";
+import { SafeMap, def, js } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
@@ -40,14 +40,14 @@ export function greedy<NodeType extends DagNode>(
     const assignment = meanAssignment;
 
     // assign degrees
-    const degrees = new SafeMap<string, number>();
+    const degrees = new SafeMap<NodeType | DummyNode, number>();
     for (const layer of layers) {
       for (const node of layer) {
         // the -3 at the end ensures that dummy nodes have the lowest priority,
         // as dummy nodes always have degree 2, degree -1 ensures they are
         // below any other valid node
         degrees.set(
-          node.id,
+          node,
           node.ichildren().length + (node instanceof DummyNode ? -3 : 0)
         );
       }
@@ -55,7 +55,7 @@ export function greedy<NodeType extends DagNode>(
     for (const layer of layers) {
       for (const node of layer) {
         for (const child of node.ichildren()) {
-          degrees.set(child.id, degrees.getThrow(child.id) + 1);
+          degrees.set(child, degrees.getThrow(child) + 1);
         }
       }
     }
@@ -82,8 +82,8 @@ export function greedy<NodeType extends DagNode>(
             [j, node] as [number, (NodeType & HorizableNode) | DummyNode]
         )
         .sort(([aj, anode], [bj, bnode]) => {
-          const adeg = degrees.getThrow(anode.id);
-          const bdeg = degrees.getThrow(bnode.id);
+          const adeg = degrees.getThrow(anode);
+          const bdeg = degrees.getThrow(bnode);
           return adeg === bdeg ? aj - bj : bdeg - adeg;
         });
       // Iterate over nodes in degree order
@@ -140,15 +140,17 @@ function meanAssignment<NodeType extends (DagNode & HorizableNode) | DummyNode>(
   for (const node of bottomLayer) {
     node.x = 0.0;
   }
-  const counts = new SafeMap<string, number>();
+  const counts = new SafeMap<DagNode | DummyNode, number>();
   for (const node of topLayer) {
     for (const child of node.ichildren()) {
-      /* istanbul ignore next */
+      /* istanbul ignore if */
       if (child.x === undefined) {
-        throw new Error(`unexpected undefined x for '${child.id}'`);
+        throw new Error(
+          js`internal error: unexpected undefined x for '${child}'`
+        );
       }
-      const newCount = counts.getDefault(child.id, 0) + 1;
-      counts.set(child.id, newCount);
+      const newCount = counts.getDefault(child, 0) + 1;
+      counts.set(child, newCount);
       child.x += (def(node.x) - child.x) / newCount;
     }
   }

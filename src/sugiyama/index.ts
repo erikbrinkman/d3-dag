@@ -32,13 +32,13 @@ import {
 } from "./coord";
 import { LayerableNode, Operator as LayeringOperator } from "./layering";
 import { QuadOperator, quad } from "./coord/quad";
+import { Replace, js } from "../utils";
 import { SimplexOperator, simplex } from "./layering/simplex";
 import { TwoLayerOperator, twoLayer } from "./decross/two-layer";
 
 import { Operator as DecrossOperator } from "./decross";
 import { DummyNode } from "./dummy";
 import { MedianOperator } from "./twolayer/median";
-import { Replace } from "../utils";
 import { cachedNodeSize } from "./utils";
 
 /** @internal */
@@ -156,17 +156,6 @@ export interface SugiyamaOperator<
    * as if they had no width.
    */
   nodeSize(): Ops["nodeSize"];
-
-  /**
-   * Sets sugiyama debug to *deb*. If debug is true, dummy nodes will be given
-   * more human readable ids, but this can cause conflicts with poorly chosen
-   * ids, so it it disabled by default.
-   */
-  debug(deb: boolean): SugiyamaOperator<NodeType, Ops>;
-  /**
-   * Gets the current debug value.
-   */
-  debug(): boolean;
 }
 
 /** @internal */
@@ -176,7 +165,6 @@ function buildOperator<
 >(
   options: Ops & {
     size: [number, number] | null;
-    debug: boolean;
   }
 ): SugiyamaOperator<NodeType, Ops> {
   function createLayers<N extends NodeType & LayeredNode>(
@@ -195,21 +183,15 @@ function buildOperator<
         const clayer = link.child.layer;
         if (clayer <= nlayer) {
           throw new Error(
-            `layering left child node "${link.child.id}" (${clayer}) ` +
-              `with a greater or equal layer to parent node "${node.id}" (${nlayer})`
+            js`layering left child node '${link.child}' (${clayer}) ` +
+              js`with a greater or equal layer to parent node '${node}' (${nlayer})`
           );
         }
         // NOTE this cast breaks the type system, but sugiyama basically
         // needs to do that, so...
         let last = link.child as DummyNode;
         for (let l = clayer - 1; l > nlayer; l--) {
-          let dummyId: string;
-          if (options.debug) {
-            dummyId = `${node.id}->${link.child.id} (${l})`;
-          } else {
-            dummyId = `${node.id}\0${link.child.id}\0${l}`;
-          }
-          const dummy = new DummyNode(dummyId);
+          const dummy = new DummyNode();
           dummy.dataChildren.push(new LayoutChildLink(last, undefined));
           (layers[l] || (layers[l] = [])).push(dummy);
           last = dummy;
@@ -259,10 +241,10 @@ function buildOperator<
     for (const node of dag) {
       const layer = (node as LayerableNode).layer;
       if (layer === undefined) {
-        throw new Error(`layering did not assign layer to node '${node.id}'`);
+        throw new Error(js`layering did not assign layer to node '${node}'`);
       } else if (layer < 0) {
         throw new Error(
-          `layering assigned a negative layer (${layer}) to node '${node.id}'`
+          js`layering assigned a negative layer (${layer}) to node '${node}'`
         );
       }
     }
@@ -294,7 +276,7 @@ function buildOperator<
     for (const layer of layers) {
       for (const node of layer) {
         if (node.x === undefined) {
-          throw new Error(`coord didn't assign an x to node '${node.id}'`);
+          throw new Error(js`coord didn't assign an x to node '${node}'`);
         } else if (node.x < 0 || node.x > width) {
           throw new Error(
             `coord assgined an x (${node.x}) outside of [0, ${width}]`
@@ -419,17 +401,6 @@ function buildOperator<
   }
   sugiyama.nodeSize = nodeSize;
 
-  function debug(): boolean;
-  function debug(deb: boolean): SugiyamaOperator<NodeType, Ops>;
-  function debug(deb?: boolean): boolean | SugiyamaOperator<NodeType, Ops> {
-    if (deb === undefined) {
-      return options.debug;
-    } else {
-      return buildOperator<NodeType, Ops>({ ...options, debug: deb });
-    }
-  }
-  sugiyama.debug = debug;
-
   return sugiyama;
 }
 
@@ -465,7 +436,6 @@ export function sugiyama<NodeType extends DagNode>(
     decross: twoLayer(),
     coord: quad(),
     size: null,
-    nodeSize: defaultNodeSize,
-    debug: false
+    nodeSize: defaultNodeSize
   });
 }

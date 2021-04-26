@@ -36,19 +36,19 @@ function buildOperator<NodeType extends DagNode>(
   ): void {
     // find all root nodes and subtree widths
     const rootMap = new SafeMap<
-      string,
+      NodeType | DummyNode,
       (NodeType & IndexableNode) | DummyNode
     >();
-    const subtreeWidths = new SafeMap<string, number>();
+    const subtreeWidths = new SafeMap<NodeType | DummyNode, number>();
     for (const layer of layers.slice().reverse()) {
       for (const node of layer) {
-        rootMap.set(node.id, node);
+        rootMap.set(node, node);
         let subtreeWidth = 0;
         for (const child of node.ichildren()) {
-          rootMap.delete(child.id);
-          subtreeWidth += subtreeWidths.getThrow(child.id);
+          rootMap.delete(child);
+          subtreeWidth += subtreeWidths.getThrow(child);
         }
-        subtreeWidths.set(node.id, Math.max(subtreeWidth, 1));
+        subtreeWidths.set(node, Math.max(subtreeWidth, 1));
       }
     }
 
@@ -59,7 +59,7 @@ function buildOperator<NodeType extends DagNode>(
     // not clear how that would look
     let startColumnIndex = 0;
     for (const node of rootMap.values()) {
-      const subtreeWidth = subtreeWidths.getThrow(node.id);
+      const subtreeWidth = subtreeWidths.getThrow(node);
       node.columnIndex =
         startColumnIndex + (centerVal ? Math.floor((subtreeWidth - 1) / 2) : 0);
       assignColumnIndexToChildren(node, startColumnIndex);
@@ -76,7 +76,7 @@ function buildOperator<NodeType extends DagNode>(
           // stop recursion, this child was already visited
           return;
         }
-        const width = subtreeWidths.getThrow(child.id);
+        const width = subtreeWidths.getThrow(child);
         child.columnIndex =
           childColumnIndex + (centerVal ? Math.floor((width - 1) / 2) : 0);
         assignColumnIndexToChildren<N>(child, childColumnIndex);

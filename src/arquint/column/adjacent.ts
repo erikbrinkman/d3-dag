@@ -44,13 +44,13 @@ function buildOperator<NodeType extends DagNode>(
 
     // create parents
     const parentMap = new SafeMap<
-      string,
+      NodeType | DummyNode,
       ((NodeType & IndexableNode) | DummyNode)[]
     >();
     for (const layer of layers) {
       for (const node of layer) {
         for (const child of node.ichildren()) {
-          parentMap.setIfAbsent(child.id, []).push(node);
+          parentMap.setIfAbsent(child, []).push(node);
         }
       }
     }
@@ -126,7 +126,7 @@ function buildOperator<NodeType extends DagNode>(
       } else {
         // map each node to its desired location:
         const desiredColumnIndices = layer.map((node, index) => {
-          const parents = parentMap.getDefault(node.id, []);
+          const parents = parentMap.getDefault(node, []);
           if (parents.length === 0) {
             return index;
           }

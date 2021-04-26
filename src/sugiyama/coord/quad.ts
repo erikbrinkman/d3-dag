@@ -21,29 +21,29 @@ import { DummyNode } from "../dummy";
  */
 function componentMap<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][]
-): SafeMap<string, number> {
+): SafeMap<NodeType | DummyNode, number> {
   // Note computing connected components is generally difficult, and with the
   // layer representation, we lost access to convenient dag methods. Thus, we
   // first reconstruct a mock dag to get connected components, then add them.
-  const roots = new SafeMap<string, NodeType | DummyNode>();
+  const roots = new SafeMap<NodeType | DummyNode, NodeType | DummyNode>();
   // We iterate in reverse order because we pop children, thus we're guaranteed
   // to only have roots after we're done.
   for (const layer of layers.slice().reverse()) {
     for (const node of layer) {
       for (const child of node.ichildren()) {
-        roots.delete(child.id);
+        roots.delete(child);
       }
-      roots.set(node.id, node);
+      roots.set(node, node);
     }
   }
 
   // create a fake dag, and use it to get components
   const components = new LayoutDagRoot([...roots.values()]).split();
   // assign each node it's component id for fast checking if they're identical
-  const compMap = new SafeMap<string, number>();
+  const compMap = new SafeMap<NodeType | DummyNode, number>();
   for (const [i, comp] of components.entries()) {
     for (const node of comp) {
-      compMap.set(node.id, i);
+      compMap.set(node, i);
     }
   }
   return compMap;
@@ -58,7 +58,7 @@ function componentMap<NodeType extends DagNode>(
  */
 function splitComponentLayers<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][],
-  compMap: SafeMap<string, number>
+  compMap: SafeMap<NodeType | DummyNode, number>
 ): (NodeType | DummyNode)[][][] {
   // Because of dummy nodes, there's no way for a component to skip a layer,
   // thus for layers to share no common components, there must be a clear
@@ -67,7 +67,7 @@ function splitComponentLayers<NodeType extends DagNode>(
   let newLayers = [];
   let lastComponents = new Set<number>();
   for (const layer of layers) {
-    const currentComponents = new Set(layer.map((n) => compMap.getThrow(n.id)));
+    const currentComponents = new Set(layer.map((n) => compMap.getThrow(n)));
     if (!setIntersect(lastComponents, currentComponents)) {
       split.push((newLayers = []));
     }
@@ -142,7 +142,7 @@ function buildOperator<NodeType extends DagNode>(options: {
   function quadComponent(
     layers: ((NodeType & HorizableNode) | DummyNode)[][],
     nodeSize: NodeSizeAccessor<NodeType>,
-    compMap: SafeMap<string, number>
+    compMap: SafeMap<NodeType | DummyNode, number>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy, comp } = options;
     const inds = indices(layers);
@@ -150,15 +150,15 @@ function buildOperator<NodeType extends DagNode>(options: {
 
     for (const layer of layers) {
       for (const par of layer) {
-        const pind = inds.getThrow(par.id);
+        const pind = inds.getThrow(par);
         const wpdist = par instanceof DummyNode ? vertDummy : vertNode;
         for (const node of par.ichildren()) {
-          const nind = inds.getThrow(node.id);
+          const nind = inds.getThrow(node);
           const wndist = node instanceof DummyNode ? vertDummy : vertNode;
           const wcurve = node instanceof DummyNode ? curveDummy : curveNode;
           minDist(Q, pind, nind, wpdist + wndist);
           for (const child of node.ichildren()) {
-            const cind = inds.getThrow(child.id);
+            const cind = inds.getThrow(child);
             minBend(Q, pind, nind, cind, wcurve);
           }
         }
@@ -168,8 +168,8 @@ function buildOperator<NodeType extends DagNode>(options: {
     // for disconnected dags, add loss for being too far apart
     for (let [first, ...rest] of layers) {
       for (const second of rest) {
-        if (compMap.getThrow(first.id) !== compMap.getThrow(second.id)) {
-          minDist(Q, inds.getThrow(first.id), inds.getThrow(second.id), comp);
+        if (compMap.getThrow(first) !== compMap.getThrow(second)) {
+          minDist(Q, inds.getThrow(first), inds.getThrow(second), comp);
         }
 
         first = second;

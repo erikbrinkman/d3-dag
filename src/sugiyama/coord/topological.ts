@@ -39,12 +39,12 @@ export function topological<NodeType extends DagNode>(
       }
     }
 
-    const inds = new SafeMap<string, number>();
+    const inds = new SafeMap<NodeType | DummyNode, number>();
     let i = 0;
     for (const layer of layers) {
       for (const node of layer) {
         if (node instanceof DummyNode) {
-          inds.set(node.id, i++);
+          inds.set(node, i++);
         }
       }
     }
@@ -53,7 +53,7 @@ export function topological<NodeType extends DagNode>(
     for (const layer of layers) {
       for (const node of layer) {
         if (!(node instanceof DummyNode)) {
-          inds.set(node.id, i);
+          inds.set(node, i);
         }
       }
     }
@@ -61,12 +61,12 @@ export function topological<NodeType extends DagNode>(
 
     for (const layer of layers) {
       for (const par of layer) {
-        const pind = inds.getThrow(par.id);
+        const pind = inds.getThrow(par);
         for (const node of par.ichildren()) {
-          const nind = inds.getThrow(node.id);
+          const nind = inds.getThrow(node);
           if (node instanceof DummyNode) {
             for (const child of node.ichildren()) {
-              const cind = inds.getThrow(child.id);
+              const cind = inds.getThrow(child);
               minBend(Q, pind, nind, cind, 1);
             }
           }

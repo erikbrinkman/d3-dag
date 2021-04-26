@@ -12,17 +12,10 @@ import { Model, Solve } from "javascript-lp-solver";
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { Operator } from ".";
+import { def } from "../../utils";
 
 export interface OptOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
-  /** Set the debug value. If debug is true, the optimization formulation will
-   * be given more human readable names that help debugging the optimization,
-   * but may cause conflicts if used with poorly chosen node ids.
-   */
-  debug(val: boolean): OptOperator<NodeType>;
-  /** Return the current debug value. */
-  debug(): boolean;
-
   /** Set to true to allow running on inputs that are likely to fail. */
   clowntown(val: boolean): OptOperator<NodeType>;
   /** Return true if large inputs will be allowed to run. */
@@ -31,18 +24,8 @@ export interface OptOperator<NodeType extends DagNode>
 
 /** @internal */
 function buildOperator<NodeType extends DagNode>(options: {
-  debug: boolean;
   clowntown: boolean;
 }): OptOperator<NodeType> {
-  const joiner = options.debug ? " => " : "\0\0";
-
-  function key(...nodes: (NodeType | DummyNode)[]): string {
-    return nodes
-      .map((n) => n.id)
-      .sort()
-      .join(joiner);
-  }
-
   function optCall(
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
@@ -63,9 +46,30 @@ function buildOperator<NodeType extends DagNode>(options: {
       ints: Object.create(null)
     };
 
+    // initialize map to create "ids"
+    const ids = new Map<NodeType | DummyNode, string>();
+    for (const [i, layer] of [topLayer, bottomLayer].entries()) {
+      for (const [j, node] of layer.entries()) {
+        ids.set(node, `(${i} ${j})`);
+      }
+    }
+
+    /** create key from nodes */
+    function key(...nodes: (NodeType | DummyNode)[]): string {
+      return nodes
+        .map((n) => def(ids.get(n)))
+        .sort()
+        .join(" => ");
+    }
+
+    /** compare nodes based on ids */
+    function comp(n1: NodeType | DummyNode, n2: NodeType | DummyNode): number {
+      return def(ids.get(n1)).localeCompare(def(ids.get(n2)));
+    }
+
     // sort bottom layer so ids can be used to see if one node was originally
     // before another one
-    bottomLayer.sort((n1, n2) => +(n1.id > n2.id) || -1);
+    bottomLayer.sort(comp);
 
     // add variables for each pair of bottom later nodes indicating if they
     // should be flipped
@@ -125,7 +129,7 @@ function buildOperator<NodeType extends DagNode>(options: {
               continue;
             }
             const pair = key(c1, c2);
-            model.variables[pair].opt += +(c1.id > c2.id) || -1;
+            model.variables[pair].opt += comp(c1, c2);
           }
         }
       }
@@ -137,20 +141,9 @@ function buildOperator<NodeType extends DagNode>(options: {
     // sort layers
     bottomLayer.sort(
       /* istanbul ignore next */
-      (n1, n2) => (+(n1.id > n2.id) || -1) * (+ordering[key(n1, n2)] || -1)
+      (n1, n2) => comp(n1, n2) * (+ordering[key(n1, n2)] || -1)
     );
   }
-
-  function debug(): boolean;
-  function debug(val: boolean): OptOperator<NodeType>;
-  function debug(val?: boolean): boolean | OptOperator<NodeType> {
-    if (val === undefined) {
-      return options.debug;
-    } else {
-      return buildOperator({ ...options, debug: val });
-    }
-  }
-  optCall.debug = debug;
 
   function clowntown(): boolean;
   function clowntown(val: boolean): OptOperator<NodeType>;
@@ -175,5 +168,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ debug: false, clowntown: false });
+  return buildOperator({ clowntown: false });
 }

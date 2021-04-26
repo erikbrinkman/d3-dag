@@ -7,7 +7,7 @@ export class DummyNode extends LayoutDagNode<undefined, undefined> {
   y0?: number;
   y1?: number;
 
-  constructor(id: string) {
-    super(id, undefined);
+  constructor() {
+    super(undefined);
   }
 }

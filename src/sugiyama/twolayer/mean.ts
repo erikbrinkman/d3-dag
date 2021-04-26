@@ -34,17 +34,15 @@ export function mean<NodeType extends DagNode>(
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
   ): void {
-    const means = new SafeMap<string, Mean>(
-      bottomLayer.map((node) => [node.id, new Mean()])
+    const means = new SafeMap<NodeType | DummyNode, Mean>(
+      bottomLayer.map((node) => [node, new Mean()])
     );
     for (const [i, node] of topLayer.entries()) {
       for (const child of node.ichildren()) {
-        means.getThrow(child.id).add(i);
+        means.getThrow(child).add(i);
       }
     }
-    bottomLayer.sort(
-      (a, b) => means.getThrow(a.id).mean - means.getThrow(b.id).mean
-    );
+    bottomLayer.sort((a, b) => means.getThrow(a).mean - means.getThrow(b).mean);
   }
 
   return meanCall;

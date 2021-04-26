@@ -48,7 +48,7 @@ test("dagConnect() parses a simple square", () => {
   const dag = dagConnect()(simpleSquare);
   expect(dag.size()).toBeCloseTo(4);
   const [root] = dag.iroots();
-  expect(root.id).toBe("a");
+  expect(root.data.id).toBe("a");
   const [left, right] = root.ichildren();
   const [leftc] = left.ichildren();
   const [rightc] = right.ichildren();
@@ -56,7 +56,7 @@ test("dagConnect() parses a simple square", () => {
   expect([
     ["a", "b", "c", "d"],
     ["a", "c", "b", "d"]
-  ]).toContainEqual([...dag.idescendants("before").map((n) => n.id)]);
+  ]).toContainEqual([...dag.idescendants("before").map((n) => n.data.id)]);
 });
 
 test("dagConnect() parses a more complex square", () => {
@@ -97,18 +97,6 @@ test("dagConnect() fails passing an arg to dagConnect", () => {
   expect(() => dagConnect(null)).toThrow("got arguments to dagConnect");
 });
 
-test("dagConnect() fails with null source id", () => {
-  expect(() => dagConnect()([["\0", "1"]])).toThrow(
-    "node id \0 contained null character"
-  );
-});
-
-test("dagConnect() fails with null target id", () => {
-  expect(() => dagConnect()([["1", "\0"]])).toThrow(
-    "node id \0 contained null character"
-  );
-});
-
 test("dagConnect() fails with no roots", () => {
   const cycle = [
     ["a", "b"],
@@ -123,7 +111,9 @@ test("dagConnect() fails with cycle", () => {
     ["a", "b"],
     ["b", "a"]
   ];
-  expect(() => dagConnect()(cycle)).toThrow("cycle: a -> b -> a");
+  expect(() => dagConnect()(cycle)).toThrow(
+    `cycle: '{"id":"a"}' -> '{"id":"b"}' -> '{"id":"a"}'`
+  );
 });
 
 class BadZero {

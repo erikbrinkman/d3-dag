@@ -15,8 +15,7 @@
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode, Link } from "../../dag/node";
 import { LayerableNode, Operator, RankAccessor } from ".";
-
-import { Replace } from "../../utils";
+import { Replace, def } from "../../utils";
 
 interface Operators<NodeType extends DagNode> {
   rank: RankAccessor<NodeType>;
@@ -38,47 +37,39 @@ export interface SimplexOperator<
    * Get the current [[RankAccessor]].
    */
   rank(): Ops["rank"];
-
-  /**
-   * Setting *debug* to true will cause the simplex solver to use more human
-   * readable names, which can help debug optimizer errors. These names will
-   * cause other types of failures for poorly constructed node ids, and is
-   * therefore disabled by default.
-   */
-  debug(val: boolean): SimplexOperator<NodeType, Ops>;
-  /** Get the current debug value. */
-  debug(): boolean;
 }
 
 /** @internal */
 function buildOperator<
   NodeType extends DagNode,
   Ops extends Operators<NodeType>
->(options: Ops & { debug: boolean }): SimplexOperator<NodeType, Ops> {
-  // use null prefixes to prevent clash
-  const prefix = options.debug ? "" : "\0";
-  const rankPrefix = options.debug ? "rank: " : "\0";
-  const delim = options.debug ? " -> " : "\0";
-
-  /** node id */
-  function n(node: NodeType): string {
-    return `${prefix}${node.id}`;
-  }
-
-  /** link id */
-  function l(link: Link<NodeType>): string {
-    return `${link.source.id}${delim}${link.target.id}`;
-  }
-
-  /** rank constraint */
-  function r(low: NodeType, high: NodeType): string {
-    return `${rankPrefix}${low.id}${delim}${high.id}`;
-  }
-
+>(options: Ops): SimplexOperator<NodeType, Ops> {
   function simplexCall<N extends NodeType & LayerableNode>(dag: Dag<N>): void {
     const variables: SolverDict<Variable> = Object.create(null);
     const ints: SolverDict<number> = Object.create(null);
     const constraints: SolverDict<Constraint> = Object.create(null);
+
+    const ids = new Map<NodeType, string>(
+      dag
+        .idescendants()
+        .entries()
+        .map(([i, node]) => [node, i.toString()])
+    );
+
+    /** node id */
+    function n(node: NodeType): string {
+      return def(ids.get(node));
+    }
+
+    /** link id */
+    function l(link: Link<NodeType>): string {
+      return `${def(ids.get(link.source))} -> ${def(ids.get(link.target))}`;
+    }
+
+    /** rank constraint */
+    function r(low: NodeType, high: NodeType): string {
+      return `rank: ${def(ids.get(low))} -> ${def(ids.get(high))}`;
+    }
 
     const ranks: [number, N][] = [];
 
@@ -180,17 +171,6 @@ function buildOperator<
   }
   simplexCall.rank = rank;
 
-  function debug(): boolean;
-  function debug(val: boolean): SimplexOperator<NodeType, Ops>;
-  function debug(val?: boolean): boolean | SimplexOperator<NodeType, Ops> {
-    if (val === undefined) {
-      return options.debug;
-    } else {
-      return buildOperator({ ...options, debug: val });
-    }
-  }
-  simplexCall.debug = debug;
-
   return simplexCall;
 }
 
@@ -208,5 +188,5 @@ export function simplex<NodeType extends DagNode>(
       `got arguments to simplex(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ rank: defaultRank, debug: false });
+  return buildOperator({ rank: defaultRank });
 }

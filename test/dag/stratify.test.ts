@@ -48,7 +48,7 @@ function alter(id: string): string {
 test("dagStratify() parses minimal dag", () => {
   const dag = dagStratify()(single);
   const [node] = dag;
-  expect(node.id).toBe("0");
+  expect(node.data.id).toBe("0");
   expect(node.children()).toHaveLength(0);
 });
 
@@ -56,21 +56,21 @@ test("dagStratify() parses multi-root dag", () => {
   const dag = dagStratify()(doub);
   const ids = dag
     .descendants()
-    .map((d) => d.id)
+    .map((d) => d.data.id)
     .sort();
   expect(ids).toEqual(["0", "1"]);
 });
 
 test("dagStratify() parses ids with spaces", () => {
   const dag = dagStratify()(spaces);
-  const ids = dag.descendants().map((d) => d.id);
+  const ids = dag.descendants().map((d) => d.data.id);
   expect(ids).toEqual(["0 0", "1 1"]);
 });
 
 test("dagStratify() parses a square", () => {
   const dag = dagStratify()(square);
-  const [root] = dag.descendants().filter((n) => n.id === "0");
-  expect(root.id).toBe("0");
+  const [root] = dag.iroots();
+  expect(root.data.id).toBe("0");
   expect(root.children()).toHaveLength(2);
   const [left, right] = root.ichildren();
   expect(left.children()[0]).toBe(right.children()[0]);
@@ -88,8 +88,8 @@ test("dagStratify() parses a square with altered ids", () => {
   expect(layout.parentIds()).toBe(newParentIds);
   expect(layout.parentData().wrapped).toBe(newParentIds);
   const dag = layout(square);
-  const [root] = dag.descendants().filter((n) => n.id === "a0");
-  expect(root.id).toBe("a0");
+  const [root] = dag.iroots();
+  expect(root.data.id).toBe("0");
   expect(root.children()).toHaveLength(2);
   const [left, right] = root.ichildren();
   expect(left.children()[0]).toBe(right.children()[0]);
@@ -115,8 +115,8 @@ test("dagStratify() works with data accessor", () => {
   }
 
   const dag = layout(square);
-  const [root] = dag.descendants().filter((n) => n.id === "0");
-  expect(root.id).toBe("0");
+  const [root] = dag.descendants().filter((n) => n.data.id === "0");
+  expect(root.data.id).toBe("0");
   expect(root.children()).toHaveLength(2);
   const [left, right] = root.ichildren();
   expect(left.children()[0]).toBe(right.children()[0]);
@@ -150,17 +150,12 @@ test("dagStratify() fails without unique ids", () => {
     { id: "1", parentIds: [] },
     { id: "1", parentIds: [] }
   ];
-  expect(() => dagStratify()(data)).toThrow(/duplicate id/);
+  expect(() => dagStratify()(data)).toThrow("duplicate id");
 });
 
 test("dagStratify() fails with missing id", () => {
   const data = [{ id: "1", parentIds: ["2"] }];
-  expect(() => dagStratify()(data)).toThrow(/missing id/);
-});
-
-test("dagStratify() fails with null id", () => {
-  const data = [{ id: "nu\0ll", parentIds: [] }];
-  expect(() => dagStratify()(data)).toThrow("contained null character");
+  expect(() => dagStratify()(data)).toThrow("missing id");
 });
 
 test("dagStratify() fails without root", () => {
@@ -187,7 +182,9 @@ test("dagStratify() fails with cycle", () => {
       parentIds: ["1", "2"]
     }
   ];
-  expect(() => dagStratify()(data)).toThrow(/cycle: 2 -> 2$/);
+  expect(() => dagStratify()(data)).toThrow(
+    /cycle: '{"id":"2",.*}' -> '{"id":"2",.*}'/
+  );
 });
 
 test("dagStratify() fails with hard cycle", () => {
@@ -207,7 +204,15 @@ test("dagStratify() fails with hard cycle", () => {
       parentIds: ["1", "3"]
     }
   ];
-  expect(() => dagStratify()(data)).toThrow(/cycle: 4 -> 3 -> 4$/);
+  expect(() => dagStratify()(data)).toThrow(
+    /cycle: '{"id":"4",.*}' -> '{"id":"3",.*}' -> '{"id":"4".*}'/
+  );
+});
+
+test("dagStratify() fails with invalid id type", () => {
+  expect(() =>
+    dagStratify().id(() => (null as unknown) as string)([null])
+  ).toThrow("id is supposed to be string but got type object");
 });
 
 class BadParentIds {
@@ -216,6 +221,7 @@ class BadParentIds {
     throw new Error("bad parent ids");
   }
 }
+
 test("dagStratify() fails with incorrect parentIds", () => {
   const data = [
     {

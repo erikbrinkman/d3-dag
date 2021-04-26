@@ -29,13 +29,13 @@ import {
   LongestPathOperator,
   longestPath
 } from "../sugiyama/layering/longest-path";
+import { SafeMap, assert } from "../utils";
 import { SpreadOperator, spread } from "./coord/spread";
 import { TwoLayerOperator, twoLayer } from "../sugiyama/decross/two-layer";
 
 import { Operator as DecrossOperator } from "../sugiyama/decross";
 import { DummyNode } from "../arquint/dummy";
 import { MeanOperator } from "../sugiyama/twolayer/mean";
-import { SafeMap } from "../utils";
 
 /** The operator that gets a height ratio from a node. */
 export interface HeightRatio<NodeType extends DagNode> {
@@ -285,7 +285,6 @@ function buildOperator<
   ColSep extends ColumnSeparation,
   HeightRat extends HeightRatio<NodeType>
 >(
-  debugVal: boolean,
   width: number,
   height: number,
   layeringOp: Layering,
@@ -308,31 +307,32 @@ function buildOperator<
   HeightRat
 > {
   // TODO it'd be good to see this wrapped up in height somehow
-  function getLongestPaths(dag: Dag<NodeType>): SafeMap<string, number> {
-    const longestPaths = new SafeMap<string, number>();
+  function getLongestPaths(dag: Dag<NodeType>): SafeMap<NodeType, number> {
+    const longestPaths = new SafeMap<NodeType, number>();
     for (const node of dag.idescendants("after")) {
       const childPaths = Math.max(
         0,
-        ...node.ichildren().map((child) => longestPaths.getThrow(child.id))
+        ...node.ichildren().map((child) => longestPaths.getThrow(child))
       );
-      longestPaths.set(node.id, heightRatioOp(node) + childPaths);
+      longestPaths.set(node, heightRatioOp(node) + childPaths);
     }
     return longestPaths;
   }
 
   // TODO it'd be good to see this wrapped up in depth somehow
-  function getLongestPathsRoot(dag: Dag<NodeType>): SafeMap<string, number> {
-    const longestPaths = new SafeMap<string, number>();
+  function getLongestPathsRoot(
+    dag: Dag<NodeType | DummyNode>
+  ): SafeMap<NodeType | DummyNode, number> {
+    const longestPaths = new SafeMap<NodeType | DummyNode, number>();
     for (const node of dag.idescendants("before")) {
-      const pathLength =
-        longestPaths.getDefault(node.id, 0) + heightRatioOp(node);
-      longestPaths.set(node.id, pathLength);
+      const pathLength = longestPaths.getDefault(node, 0) + heightRatioOp(node);
+      longestPaths.set(node, pathLength);
       for (const child of node.ichildren()) {
         const childLength = Math.max(
           pathLength,
-          longestPaths.getDefault(child.id, 0)
+          longestPaths.getDefault(child, 0)
         );
-        longestPaths.set(child.id, childLength);
+        longestPaths.set(child, childLength);
       }
     }
     return longestPaths;
@@ -355,21 +355,15 @@ function buildOperator<
         const clayer = link.child.layer;
         if (clayer <= nlayer) {
           throw new Error(
-            `layering left child node "${link.child.id}" (${clayer}) ` +
-              `with a greater or equal layer to parent node "${node.id}" (${nlayer})`
+            `layering left child node "${link.child}" (${clayer}) ` +
+              `with a greater or equal layer to parent node "${node.data}" (${nlayer})`
           );
         }
         // NOTE this cast breaks the type system, but sugiyama basically
         // needs to do that, so...
         let last = link.child as DummyNode;
         for (let l = clayer - 1; l > nlayer; l--) {
-          let dummyId: string;
-          if (debugVal) {
-            dummyId = `${node.id}->${link.child.id} (${l})`;
-          } else {
-            dummyId = `${node.id}\0${link.child.id}\0${l}`;
-          }
-          const dummy = new DummyNode(dummyId);
+          const dummy = new DummyNode();
           dummy.dataChildren.push(new LayoutChildLink(last, undefined));
           (layers[l] || (layers[l] = [])).push(dummy);
           last = dummy;
@@ -381,14 +375,10 @@ function buildOperator<
 
       if (node.dataChildren.length === 0 && nlayer < maxLayer) {
         // insert a dummy node per layer
-        let last = new DummyNode(
-          debugVal ? `${node.id} (${maxLayer})` : `${node.id}\0${maxLayer}`
-        );
+        let last = new DummyNode();
         (layers[maxLayer] || (layers[maxLayer] = [])).push(last);
         for (let l = maxLayer - 1; l > node.layer; l--) {
-          const dummy = new DummyNode(
-            debugVal ? `${node.id} (${maxLayer})` : `${node.id}\0${maxLayer}`
-          );
+          const dummy = new DummyNode();
           dummy.dataChildren.push(new LayoutChildLink(last, undefined));
           (layers[l] || (layers[l] = [])).push(dummy);
           last = dummy;
@@ -454,10 +444,10 @@ function buildOperator<
     for (const node of dag) {
       const layer = (node as LayerableNode).layer;
       if (layer === undefined) {
-        throw new Error(`layering did not assign layer to node '${node.id}'`);
+        throw new Error(`layering did not assign layer to node '${node.data}'`);
       } else if (layer < 0) {
         throw new Error(
-          `layering assigned a negative layer (${layer}) to node '${node.id}'`
+          `layering assigned a negative layer (${layer}) to node '${node.data}'`
         );
       }
     }
@@ -476,18 +466,20 @@ function buildOperator<
       const longestToRoot = getLongestPathsRoot(dag);
       let last = layers[0];
       const maxPathLength = Math.max(
-        ...last.map((node) => longestPaths.getThrow(node.id))
+        ...last.map((node) => {
+          assert(!(node instanceof DummyNode));
+          return longestPaths.getThrow(node);
+        })
       );
       for (const node of last) {
-        const y1 = (node.y1 = longestToRoot.getThrow(node.id));
+        const y1 = (node.y1 = longestToRoot.getThrow(node));
         node.y0 = y1 - heightRatioOp(node);
       }
       totalPathLength = 0;
       for (const [i, layer] of layers.slice(1).entries()) {
         totalPathLength += layerSep(last, layer, i);
         for (const node of layer) {
-          const y1 = (node.y1 =
-            totalPathLength + longestToRoot.getThrow(node.id));
+          const y1 = (node.y1 = totalPathLength + longestToRoot.getThrow(node));
           node.y0 = y1 - heightRatioOp(node);
         }
         last = layer;
@@ -504,11 +496,11 @@ function buildOperator<
       for (const node of layer) {
         if (node.columnIndex === undefined) {
           throw new Error(
-            `column did not assign an index to node '${node.id}'`
+            `column did not assign an index to node '${node.data}'`
           );
         } else if (node.columnIndex < 0) {
           throw new Error(
-            `column assigned a negative index (${node.columnIndex}) to node '${node.id}'`
+            `column assigned a negative index (${node.columnIndex}) to node '${node.data}'`
           );
         }
       }
@@ -527,11 +519,11 @@ function buildOperator<
       for (const node of layer) {
         if (node.x0 === undefined || node.x1 === undefined) {
           throw new Error(
-            `coord did not assign both x coordinates to node '${node.id}'`
+            `coord did not assign both x coordinates to node '${node.data}'`
           );
         } else if (node.x0 > node.x1) {
           throw new Error(
-            `coord did not assign valid x coordinates to node '${node.id}'`
+            `coord did not assign valid x coordinates to node '${node.data}'`
           );
         }
       }
@@ -579,7 +571,6 @@ function buildOperator<
     } else {
       const [newWidth, newHeight] = val;
       return buildOperator(
-        debugVal,
         newWidth,
         newHeight,
         layeringOp,
@@ -638,7 +629,6 @@ function buildOperator<
         ColSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         newLayering,
@@ -697,7 +687,6 @@ function buildOperator<
         ColSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         layeringOp,
@@ -756,7 +745,6 @@ function buildOperator<
         ColSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         layeringOp,
@@ -815,7 +803,6 @@ function buildOperator<
         ColSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         layeringOp,
@@ -874,7 +861,6 @@ function buildOperator<
         ColSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         layeringOp,
@@ -933,7 +919,6 @@ function buildOperator<
         ColSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         layeringOp,
@@ -992,7 +977,6 @@ function buildOperator<
         NewSep,
         HeightRat
       >(
-        debugVal,
         width,
         height,
         layeringOp,
@@ -1072,7 +1056,6 @@ export function arquint<NodeType extends DagNode>(
     );
   }
   return buildOperator(
-    false,
     1,
     1,
     longestPath().topDown(false),

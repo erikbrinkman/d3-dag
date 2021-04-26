@@ -1,5 +1,5 @@
-import { arq, grafo, square } from "../examples";
 import {
+  DagNode,
   arqcoordSpread,
   arquint,
   columnAdjacent,
@@ -7,6 +7,7 @@ import {
   columnComplex,
   columnLeft
 } from "../../src";
+import { SimpleDatum, arq, grafo, square } from "../examples";
 
 test("spread() works for square with zero column width", () => {
   // simple left is used as column assignment, which uses
@@ -51,11 +52,11 @@ test("spread() works for square with zero separation", () => {
 });
 
 test("left() works for arq", () => {
-  const layout = arquint().column(columnLeft());
+  const layout = arquint<DagNode<SimpleDatum>>().column(columnLeft());
   const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .sort((a, b) => parseInt(a.data.id) - parseInt(b.data.id))
     .map((n) => n.columnIndex);
 
   expect(zero).toEqual(0);
@@ -77,11 +78,11 @@ test("center() works for square", () => {
 });
 
 test("center() works for arq", () => {
-  const layout = arquint().column(columnCenter());
+  const layout = arquint<DagNode<SimpleDatum>>().column(columnCenter());
   const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .sort((a, b) => parseInt(a.data.id) - parseInt(b.data.id))
     .map((n) => n.columnIndex);
 
   expect([0, 1, 2]).toContainEqual(zero);
@@ -103,11 +104,13 @@ test("left complex() works for square", () => {
 });
 
 test("left complex() works for dag", () => {
-  const layout = arquint().column(columnComplex().center(false));
+  const layout = arquint<DagNode<SimpleDatum>>().column(
+    columnComplex().center(false)
+  );
   const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .sort((a, b) => parseInt(a.data.id) - parseInt(b.data.id))
     .map((n) => n.columnIndex);
 
   expect(zero).toEqual(0);
@@ -129,11 +132,13 @@ test("center complex() works for square", () => {
 });
 
 test("center complex() works for dag", () => {
-  const layout = arquint().column(columnComplex().center(true));
+  const layout = arquint<DagNode<SimpleDatum>>().column(
+    columnComplex().center(true)
+  );
   const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .sort((a, b) => parseInt(a.data.id) - parseInt(b.data.id))
     .map((n) => n.columnIndex);
 
   expect(zero).toEqual(1);
@@ -155,11 +160,13 @@ test("left adjacent() works for square", () => {
 });
 
 test("left adjacent() works for dag", () => {
-  const layout = arquint().column(columnAdjacent().center(false));
+  const layout = arquint<DagNode<SimpleDatum>>().column(
+    columnAdjacent().center(false)
+  );
   const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .sort((a, b) => parseInt(a.data.id) - parseInt(b.data.id))
     .map((n) => n.columnIndex);
 
   expect(zero).toEqual(0);
@@ -181,11 +188,13 @@ test("center adjacent() works for square", () => {
 });
 
 test("center adjacent() works for dag", () => {
-  const layout = arquint().column(columnAdjacent().center(true));
+  const layout = arquint<DagNode<SimpleDatum>>().column(
+    columnAdjacent().center(true)
+  );
   const dag = layout(arq());
   const [zero, one, two, three, four, five] = dag
     .descendants()
-    .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+    .sort((a, b) => parseInt(a.data.id) - parseInt(b.data.id))
     .map((n) => n.columnIndex);
 
   expect(zero).toEqual(1);

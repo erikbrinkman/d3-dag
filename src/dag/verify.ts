@@ -6,12 +6,12 @@
  */
 import { DagNode, LayoutDagRoot } from "./node";
 
+import { getCircularReplacer } from "../utils";
+
 /** @internal Verify an ID is a valid ID. */
 export function verifyId(id: string): string {
   if (typeof id !== "string") {
     throw new Error(`id is supposed to be string but got type ${typeof id}`);
-  } else if (id.indexOf("\0") >= 0) {
-    throw new Error(`node id ${id} contained null character`);
   }
   return id;
 }
@@ -24,27 +24,28 @@ export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
   // test that dag is free of cycles
   // we attempt to take every unique path from each root and see if we ever see
   // a node again
-  const seen = new Set<string>(); // already processed
-  const past = new Set<string>(); // seen down this path
-  let rec: string | null = null;
+  const seen = new Set<NodeType>(); // already processed
+  const past = new Set<NodeType>(); // seen down this path
+  let rec: NodeType | null = null;
 
-  function visit(node: NodeType): string[] {
-    if (seen.has(node.id)) {
+  /** visit nodes returning cycle if found */
+  function visit(node: NodeType): NodeType[] {
+    if (seen.has(node)) {
       return [];
-    } else if (past.has(node.id)) {
-      rec = node.id;
-      return [node.id];
+    } else if (past.has(node)) {
+      rec = node;
+      return [node];
     } else {
-      past.add(node.id);
-      let result: string[] = [];
+      past.add(node);
+      let result: NodeType[] = [];
       for (const child of node.ichildren()) {
         result = visit(child);
         if (result.length) break;
       }
-      past.delete(node.id);
-      seen.add(node.id);
-      if (result.length && rec !== null) result.push(node.id);
-      if (rec === node.id) rec = null;
+      past.delete(node);
+      seen.add(node);
+      if (result.length && rec !== null) result.push(node);
+      if (rec === node) rec = null;
       return result;
     }
   }
@@ -52,15 +53,23 @@ export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
   for (const root of roots) {
     const msg = visit(root);
     if (msg.length) {
-      throw new Error("dag contained a cycle: " + msg.reverse().join(" -> "));
+      throw new Error(
+        "dag contained a cycle: " +
+          msg
+            .reverse()
+            .map(
+              ({ data }) => `'${JSON.stringify(data, getCircularReplacer())}'`
+            )
+            .join(" -> ")
+      );
     }
   }
 
   // make sure there's no duplicate edges
   for (const node of new LayoutDagRoot(roots)) {
-    const childIdSet = new Set(node.ichildren().map((n) => n.id));
+    const childIdSet = new Set(node.ichildren());
     if (childIdSet.size !== node.dataChildren.length) {
-      throw new Error(`node '${node.id}' contained duplicate children`);
+      throw new Error(`node '${node.data}' contained duplicate children`);
     }
   }
 }

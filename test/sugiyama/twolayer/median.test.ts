@@ -6,8 +6,8 @@ test("twolayerMedian() works for very simple case", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
   twolayerMedian()(topLayer, bottomLayer);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,1", "1,0"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([1, 0]);
 });
 
 test("twolayerMedian() is different than mean", () => {
@@ -16,8 +16,8 @@ test("twolayerMedian() is different than mean", () => {
   // order will be different for median and mean
   const [topLayer, bottomLayer] = createLayers([[[1], [0, 1], [0], [2], [1]]]);
   twolayerMedian()(topLayer, bottomLayer);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,1", "1,0", "1,2"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([1, 0, 2]);
 });
 
 test("twolayerMedian() allocates parentless nodes alternating", () => {
@@ -28,8 +28,8 @@ test("twolayerMedian() allocates parentless nodes alternating", () => {
     [[], [], [], []]
   ]);
   twolayerMedian()(topLayer, bottomLayer);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,1", "1,0", "1,3", "1,2"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([1, 0, 3, 2]);
 });
 
 test("twolayerMedian() is suboptimal", () => {
@@ -38,8 +38,8 @@ test("twolayerMedian() is suboptimal", () => {
   ]);
   twolayerMedian()(topLayer, bottomLayer);
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(8);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,2", "1,3", "1,0", "1,1"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([2, 3, 0, 1]);
 });
 
 test("twolayerMedian() fails passing an arg to constructor", () => {

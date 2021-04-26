@@ -6,8 +6,8 @@ test("twolayerMean() works for very simple case", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
   twolayerMean()(topLayer, bottomLayer);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,1", "1,0"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([1, 0]);
 });
 
 test("twolayerMean() is different than median", () => {
@@ -16,8 +16,8 @@ test("twolayerMean() is different than median", () => {
   // order will be different for median and mean
   const [topLayer, bottomLayer] = createLayers([[[0], [0, 1], [1], [2], [0]]]);
   twolayerMean()(topLayer, bottomLayer);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,1", "1,0", "1,2"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([1, 0, 2]);
 });
 
 test("twolayerMean() doesn't optimize crossings", () => {
@@ -26,8 +26,8 @@ test("twolayerMean() doesn't optimize crossings", () => {
   ]);
   twolayerMean()(topLayer, bottomLayer);
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(5);
-  const ids = bottomLayer.map((n) => n.id);
-  expect(ids).toEqual(["1,0", "1,4", "1,1", "1,2", "1,3"]);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 4, 1, 2, 3]);
 });
 
 test("twolayerMean() fails passing an arg to constructor", () => {

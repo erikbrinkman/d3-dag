@@ -14,6 +14,8 @@ import {
 } from "./node";
 import { verifyDag, verifyId } from "./verify";
 
+import { js } from "../utils";
+
 /**
  * The interface for getting the node id from data. The function must return an
  * unique id for each piece of data, but the same id if called twice on the
@@ -123,7 +125,7 @@ export interface StratifyOperator<
    * ]
    * ```
    */
-  (data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>>;
+  <N extends NodeDatum>(data: N[]): Dag<DagNode<N, LinkDatum>>;
 
   /**
    * Sets the id accessor to the given [[IdOperator]] and returns this
@@ -203,35 +205,37 @@ function buildOperator<
   parentIdsOp: ParentIds,
   parentDataOp: ParentData
 ): StratifyOperator<NodeDatum, LinkDatum, Id, ParentIds, ParentData> {
-  function stratify(data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>> {
+  function stratify<N extends NodeDatum>(
+    data: N[]
+  ): Dag<DagNode<N, LinkDatum>> {
     if (!data.length) throw new Error("can't stratify empty data");
-    const nodes = data.map(
-      (datum, i) =>
-        new LayoutDagNode<NodeDatum, LinkDatum>(verifyId(idOp(datum, i)), datum)
-    );
-
-    const mapping = new Map<string, DagNode<NodeDatum, LinkDatum>>();
-    nodes.forEach((node) => {
-      if (mapping.has(node.id)) {
-        throw new Error(`found a duplicate id: ${node.id}`);
+    const mapping = new Map<
+      string,
+      [DagNode<N, LinkDatum>, [string, LinkDatum][]]
+    >();
+    for (const [i, datum] of data.entries()) {
+      const id = verifyId(idOp(datum, i));
+      const pdata = parentDataOp(datum, i) || [];
+      const node = new LayoutDagNode<N, LinkDatum>(datum);
+      if (mapping.has(id)) {
+        throw new Error(`found a duplicate id: ${id}`);
       } else {
-        mapping.set(node.id, node);
+        mapping.set(id, [node, pdata]);
       }
-    });
+    }
 
-    const roots: DagNode<NodeDatum, LinkDatum>[] = [];
-    nodes.forEach((node, i) => {
-      const pData = parentDataOp(node.data, i) || [];
-      pData.forEach(([pid, linkData]) => {
-        const par = mapping.get(pid);
-        if (!par) throw new Error(`missing id: ${pid}`);
+    const roots: DagNode<N, LinkDatum>[] = [];
+    for (const [node, pdata] of mapping.values()) {
+      for (const [pid, linkData] of pdata) {
+        const info = mapping.get(pid);
+        if (!info) throw new Error(`missing id: ${pid}`);
+        const [par] = info;
         par.dataChildren.push(new LayoutChildLink(node, linkData));
-        return par;
-      });
-      if (!pData.length) {
+      }
+      if (!pdata.length) {
         roots.push(node);
       }
-    });
+    }
 
     verifyDag(roots);
     return roots.length > 1 ? new LayoutDagRoot(roots) : roots[0];
@@ -361,12 +365,12 @@ function hasId(d: unknown): d is HasId {
 }
 
 /** @internal */
-function defaultId(d: unknown): string {
-  if (hasId(d)) {
-    return d.id;
+function defaultId(data: unknown): string {
+  if (hasId(data)) {
+    return data.id;
   } else {
     throw new Error(
-      `default id function expected datum to have an id field but got: ${d}`
+      js`default id function expected datum to have an id field but got '${data}'`
     );
   }
 }

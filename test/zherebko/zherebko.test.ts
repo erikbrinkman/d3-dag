@@ -35,26 +35,26 @@ test("zherebko() works specific case", () => {
   const laidout = zherebko()(dag);
   for (const node of laidout) {
     expect(node.x).toBeCloseTo(0.5);
-    expect(node.y).toBeCloseTo(parseFloat(node.id) / 4);
+    expect(node.y).toBeCloseTo(parseFloat(node.data.id) / 4);
   }
   const [zero, , two] = laidout.idescendants("before");
 
   {
-    expect(zero.id).toBe("0");
+    expect(zero.data.id).toBe("0");
     const [onel, twol, threel] = zero
       .childLinks()
-      .sort((a, b) => parseInt(a.target.id) - parseInt(b.target.id));
+      .sort((a, b) => parseInt(a.target.data.id) - parseInt(b.target.data.id));
 
-    expect(onel.target.id).toBe("1");
+    expect(onel.target.data.id).toBe("1");
     expect(onel.points).toHaveLength(2);
 
-    expect(twol.target.id).toBe("2");
+    expect(twol.target.data.id).toBe("2");
     expect(twol.points).toHaveLength(3);
     const [, point] = twol.points;
     expect(point.x).toBeCloseTo(1.0);
     expect(point.y).toBeCloseTo(0.25);
 
-    expect(threel.target.id).toBe("3");
+    expect(threel.target.data.id).toBe("3");
     expect(threel.points).toHaveLength(4);
     const [, up, down] = threel.points;
     expect(up.x).toBeCloseTo(0.0);
@@ -64,15 +64,15 @@ test("zherebko() works specific case", () => {
   }
 
   {
-    expect(two.id).toBe("2");
+    expect(two.data.id).toBe("2");
     const [threel, fourl] = two
       .childLinks()
-      .sort((a, b) => parseInt(a.target.id) - parseInt(b.target.id));
+      .sort((a, b) => parseInt(a.target.data.id) - parseInt(b.target.data.id));
 
-    expect(threel.target.id).toBe("3");
+    expect(threel.target.data.id).toBe("3");
     expect(threel.points).toHaveLength(2);
 
-    expect(fourl.target.id).toBe("4");
+    expect(fourl.target.data.id).toBe("4");
     expect(fourl.points).toHaveLength(3);
     const [, point] = fourl.points;
     expect(point.x).toBeCloseTo(1.0);

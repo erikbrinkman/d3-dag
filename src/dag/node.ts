@@ -57,7 +57,7 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
   dataChildren: ChildLink<LinkDatum, this>[] = [];
   value?: number;
 
-  constructor(readonly id: string, public data: NodeDatum) {}
+  constructor(public data: NodeDatum) {}
 
   /** An iterator of this node. */
   iroots(): FluentIterable<this> {
@@ -182,11 +182,11 @@ export class LayoutDagRoot<NodeType extends DagNode>
 
   private *idepth(): Generator<NodeType> {
     const queue = this.roots();
-    const seen = new Set<string>();
+    const seen = new Set<NodeType>();
     let node;
     while ((node = queue.pop())) {
-      if (!seen.has(node.id)) {
-        seen.add(node.id);
+      if (!seen.has(node)) {
+        seen.add(node);
         yield node;
         queue.push(...node.ichildren());
       }
@@ -194,7 +194,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
   }
 
   private *ibreadth(): Generator<NodeType> {
-    const seen = new Set<string>();
+    const seen = new Set<NodeType>();
     let next = this.roots();
     let current: NodeType[] = [];
     do {
@@ -202,8 +202,8 @@ export class LayoutDagRoot<NodeType extends DagNode>
       next = [];
       let node;
       while ((node = current.pop())) {
-        if (!seen.has(node.id)) {
-          seen.add(node.id);
+        if (!seen.has(node)) {
+          seen.add(node);
           yield node;
           next.push(...node.ichildren());
         }
@@ -212,10 +212,10 @@ export class LayoutDagRoot<NodeType extends DagNode>
   }
 
   private *ibefore(): Generator<NodeType> {
-    const numBefore = new SafeMap<string, number>();
+    const numBefore = new SafeMap<NodeType, number>();
     for (const node of this) {
       for (const child of node.ichildren()) {
-        numBefore.set(child.id, numBefore.getDefault(child.id, 0) + 1);
+        numBefore.set(child, numBefore.getDefault(child, 0) + 1);
       }
     }
 
@@ -224,9 +224,9 @@ export class LayoutDagRoot<NodeType extends DagNode>
     while ((node = queue.pop())) {
       yield node;
       for (const child of node.ichildren()) {
-        const before = numBefore.getThrow(child.id);
+        const before = numBefore.getThrow(child);
         if (before > 1) {
-          numBefore.set(child.id, before - 1);
+          numBefore.set(child, before - 1);
         } else {
           queue.push(child);
         }
@@ -236,13 +236,13 @@ export class LayoutDagRoot<NodeType extends DagNode>
 
   private *iafter(): Generator<NodeType> {
     const queue = this.roots();
-    const seen = new Set<string>();
+    const seen = new Set<NodeType>();
     let node;
     while ((node = queue.pop())) {
-      if (seen.has(node.id)) {
+      if (seen.has(node)) {
         // noop
-      } else if (node.ichildren().every((c) => seen.has(c.id))) {
-        seen.add(node.id);
+      } else if (node.ichildren().every((c) => seen.has(c))) {
+        seen.add(node);
         yield node;
       } else {
         queue.push(node); // need to revisit after children
@@ -310,21 +310,21 @@ export class LayoutDagRoot<NodeType extends DagNode>
   sum(
     callback: (node: NodeType, index: number) => number
   ): DagRoot<NodeType & ValuedNode> {
-    const descendantVals = new SafeMap<string, SafeMap<string, number>>();
+    const descendantVals = new SafeMap<NodeType, SafeMap<NodeType, number>>();
     for (const [index, node] of this.idescendants("after").entries()) {
       const val = callback(node, index);
-      const nodeVals = new SafeMap<string, number>();
-      nodeVals.set(node.id, val);
+      const nodeVals = new SafeMap<NodeType, number>();
+      nodeVals.set(node, val);
       for (const child of node.ichildren()) {
-        const childMap = descendantVals.getThrow(child.id);
-        for (const [nid, v] of childMap.entries()) {
-          nodeVals.set(nid, v);
+        const childMap = descendantVals.getThrow(child);
+        for (const [child, v] of childMap.entries()) {
+          nodeVals.set(child, v);
         }
       }
       node.value = fluent(nodeVals.entries())
         .map(([, v]) => v)
         .reduce((a, b) => a + b);
-      descendantVals.set(node.id, nodeVals);
+      descendantVals.set(node, nodeVals);
     }
     return this as DagRoot<NodeType & ValuedNode>;
   }
@@ -336,20 +336,20 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * This method returns [[ValuedNode]]s that also have a value property.
    */
   count(): DagRoot<NodeType & ValuedNode> {
-    const leaves = new SafeMap<string, Set<string>>();
+    const leaves = new SafeMap<NodeType, Set<NodeType>>();
     for (const node of this.idescendants("after")) {
       if (node.ichildren()[Symbol.iterator]().next().done) {
-        leaves.set(node.id, new Set([node.id]));
+        leaves.set(node, new Set([node]));
         node.value = 1;
       } else {
-        const nodeLeaves = new Set<string>();
+        const nodeLeaves = new Set<NodeType>();
         for (const child of node.ichildren()) {
-          const childLeaves = leaves.getThrow(child.id);
+          const childLeaves = leaves.getThrow(child);
           for (const leaf of childLeaves) {
             nodeLeaves.add(leaf);
           }
         }
-        leaves.set(node.id, nodeLeaves);
+        leaves.set(node, nodeLeaves);
         node.value = nodeLeaves.size;
       }
     }
@@ -384,16 +384,16 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * This method returns [[ValuedNode]]s that also have a value property.
    */
   depth(): DagRoot<NodeType & ValuedNode> {
-    const parents = new SafeMap<string, NodeType[]>();
+    const parents = new SafeMap<NodeType, NodeType[]>();
     for (const node of this) {
       for (const child of node.ichildren()) {
-        parents.setIfAbsent(child.id, []).push(node);
+        parents.setIfAbsent(child, []).push(node);
       }
     }
     for (const node of this.idescendants("before")) {
       node.value = Math.max(
         0,
-        ...parents.getDefault(node.id, []).map((par) => {
+        ...parents.getDefault(node, []).map((par) => {
           /* istanbul ignore next */
           if (par.value === undefined) {
             throw new Error(
@@ -415,41 +415,38 @@ export class LayoutDagRoot<NodeType extends DagNode>
   split(): Dag<NodeType>[] {
     // construct a graph between root nodes with edges if they share
     // descendants
-    const children = new SafeMap<string, NodeType[]>();
-    const descendants = new SafeMap<string, Set<string>>();
+    const children = new SafeMap<NodeType, NodeType[]>();
+    const descendants = new SafeMap<NodeType, Set<NodeType>>();
     for (const root of this.iroots()) {
-      children.set(root.id, []);
-      descendants.set(
-        root.id,
-        new Set<string>(root.idescendants().map((n) => n.id))
-      );
+      children.set(root, []);
+      descendants.set(root, new Set<NodeType>(root.idescendants()));
     }
     for (const [i, source] of this.iroots().entries()) {
-      const sourceCov = descendants.getThrow(source.id);
+      const sourceCov = descendants.getThrow(source);
       for (const target of this.iroots().slice(i + 1)) {
-        const targetCov = descendants.getThrow(target.id);
+        const targetCov = descendants.getThrow(target);
         if (setIntersect(sourceCov, targetCov)) {
-          children.getThrow(source.id).push(target);
-          children.getThrow(target.id).push(source);
+          children.getThrow(source).push(target);
+          children.getThrow(target).push(source);
         }
       }
     }
 
     // now run dfs to collect connected components
     const splitRoots: NodeType[][] = [];
-    const seen = new Set<string>();
+    const seen = new Set<NodeType>();
     for (const root of this.iroots()) {
-      if (!seen.has(root.id)) {
-        seen.add(root.id);
+      if (!seen.has(root)) {
+        seen.add(root);
         const connected = [root];
         splitRoots.push(connected);
-        const queue = children.getThrow(root.id).slice();
+        const queue = children.getThrow(root).slice();
         let node;
         while ((node = queue.pop())) {
-          if (!seen.has(node.id)) {
-            seen.add(node.id);
+          if (!seen.has(node)) {
+            seen.add(node);
             connected.push(node);
-            queue.push(...children.getThrow(node.id));
+            queue.push(...children.getThrow(node));
           }
         }
       }

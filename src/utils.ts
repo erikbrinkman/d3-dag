@@ -11,6 +11,16 @@ export function def<T>(val: T | undefined): T {
   }
 }
 
+/** assert something */
+export function assert(
+  statement: unknown,
+  msg: string = "failed assert"
+): asserts statement {
+  if (!statement) {
+    throw new Error(`internal error: ${msg}`);
+  }
+}
+
 /** determines if two sets intersect */
 export function setIntersect<T>(first: Set<T>, second: Set<T>): boolean {
   if (second.size < first.size) {
@@ -22,6 +32,40 @@ export function setIntersect<T>(first: Set<T>, second: Set<T>): boolean {
     }
   }
   return false;
+}
+
+export interface Replacer {
+  (key: string, value: unknown): unknown;
+}
+
+/** replacer for serializing possibly circular json */
+export function getCircularReplacer(): Replacer {
+  const seen = new WeakSet();
+  return (key: string, value: unknown): unknown => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        return "[circular]";
+      }
+      seen.add(value);
+    }
+    return value;
+  };
+}
+
+/** format tag for converting inputs to json */
+export function js(
+  strings: TemplateStringsArray,
+  ...values: unknown[]
+): string {
+  const [base, ...rest] = strings;
+  return [base]
+    .concat(
+      ...rest.map((str, i) => [
+        JSON.stringify(values[i], getCircularReplacer()),
+        str
+      ])
+    )
+    .join("");
 }
 
 /** map with extra convenience functions */

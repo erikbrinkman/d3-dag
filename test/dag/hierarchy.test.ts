@@ -22,21 +22,21 @@ test("dagHierarchy() parses minimal dag", () => {
     return undefined;
   }
 
-  const layout = dagHierarchy().children(empty);
+  const layout = dagHierarchy<{ id: string }>().children(empty);
   expect(layout.children()).toBe(empty);
   expect(layout.childrenData()(single, 0)).toHaveLength(0);
   const dag = layout(single);
   expect(dag.size()).toBeCloseTo(1);
   const [root] = dag.iroots();
   expect(root).toBe(dag);
-  expect(root.id).toBe("a");
+  expect(root.data.id).toBe("a");
 });
 
 test("dagHierarchy() parses a simple square", () => {
-  const dag = dagHierarchy()(square);
+  const dag = dagHierarchy<{ id: string }>()(square);
   const [root] = dag.iroots();
   expect(root).toBe(dag);
-  expect(root.id).toBe("a");
+  expect(root.data.id).toBe("a");
   expect(root.children()).toHaveLength(2);
   const [left, right] = root.ichildren();
   const [leftc] = left.ichildren();
@@ -54,25 +54,21 @@ test("dagHierarchy() parses simple vee", () => {
 });
 
 interface ComplexDatum {
-  i: string;
   c?: [ComplexDatum, string][];
 }
 
 test("dagHierarchy() works with custom operators", () => {
-  const t: ComplexDatum = { i: "d" };
+  const t: ComplexDatum = {};
   const s: ComplexDatum = {
-    i: "a",
     c: [
       [
         {
-          i: "b",
           c: [[t, "b -> d"]]
         },
         "a -> b"
       ],
       [
         {
-          i: "c",
           c: [[t, "c -> d"]]
         },
         "a -> c"
@@ -80,18 +76,11 @@ test("dagHierarchy() works with custom operators", () => {
     ]
   };
 
-  function newId(d: ComplexDatum): string {
-    return d.i;
-  }
-
   function newChildData(d: ComplexDatum): [ComplexDatum, string][] | undefined {
     return d.c;
   }
 
-  const layout = dagHierarchy<ComplexDatum>()
-    .id(newId)
-    .childrenData(newChildData);
-  expect(layout.id()).toBe(newId);
+  const layout = dagHierarchy<ComplexDatum>().childrenData(newChildData);
   expect(layout.children().wrapped).toBe(newChildData);
   expect(layout.childrenData()).toBe(newChildData);
   expect(layout.children()(s, 0)).toHaveLength(2);
@@ -105,27 +94,10 @@ test("dagHierarchy() fails with empty data", () => {
   expect(() => dagHierarchy()()).toThrow("must pass in at least one node");
 });
 
-test("dagHierarchy() fails without unique ids", () => {
-  const line = {
-    id: "1",
-    children: [
-      {
-        id: "2",
-        children: [
-          {
-            id: "1"
-          }
-        ]
-      }
-    ]
-  };
-  expect(() => dagHierarchy()(line)).toThrow("duplicate id");
-});
-
 test("dagHierarchy() fails with invalid root", () => {
   const input = { id: "1", children: [{ id: "2" }] };
   expect(() => dagHierarchy()(input, ...input.children)).toThrow(
-    "node 1 pointed to a root"
+    /node '{"id":"1",.*}' pointed to a root/
   );
 });
 
@@ -141,7 +113,9 @@ test("dagHierarchy() fails with cycle", () => {
     id: "1",
     children: [selfLoop]
   };
-  expect(() => dagHierarchy()(line)).toThrow("cycle: 2 -> 2");
+  expect(() => dagHierarchy()(line)).toThrow(
+    /cycle: '{"id":"2",.*}' -> '{"id":"2",.*}'/
+  );
 });
 
 test("dagHierarchy() fails with hard cycle", () => {
@@ -163,12 +137,8 @@ test("dagHierarchy() fails with hard cycle", () => {
       children: [loop]
     };
   loop.children[0].children.push(loop);
-  expect(() => dagHierarchy()(roota, rootb)).toThrow("cycle: 4 -> 3 -> 4");
-});
-
-test("dagHierarchy() fails with null id", () => {
-  expect(() => dagHierarchy()({ id: "\0" })).toThrow(
-    "node id \0 contained null character"
+  expect(() => dagHierarchy()(roota, rootb)).toThrow(
+    /cycle: '{"id":"4",.*}' -> '{"id":"3",.*}' -> '{"id":"4",.*}'/
   );
 });
 
@@ -177,21 +147,6 @@ test("dagHierarchy() throws for nonempty input", () => {
     // @ts-expect-error testing javascript failure case
     dagHierarchy(undefined);
   }).toThrow("got arguments to dagHierarchy");
-});
-
-class BadId {
-  get id() {
-    throw new Error("bad id");
-  }
-}
-
-test("dagHierarchy() fails with missing id", () => {
-  expect(() => dagHierarchy()({})).toThrow(
-    "default id function expected datum to have an id field by got: "
-  );
-  expect(() => dagHierarchy()(new BadId())).toThrow(
-    "default id function expected datum to have an id field by got: "
-  );
 });
 
 class BadChildren {
@@ -205,11 +160,4 @@ test("dagHierarchy() fails with incorrect children", () => {
   expect(() => dagHierarchy()(new BadChildren())).toThrow(
     "default children function expected datum to have a children field but got: "
   );
-});
-
-test("dagHierarchy() fails with invalid manual ids", () => {
-  expect(() =>
-    // @ts-expect-error null is not a valid id
-    dagHierarchy().id(() => null)({})
-  ).toThrow("id is supposed to be string but got type ");
 });

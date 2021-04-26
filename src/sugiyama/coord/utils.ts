@@ -72,12 +72,12 @@ export function solve(
 /** @internal compute indices used to index arrays */
 export function indices<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][]
-): SafeMap<string, number> {
-  const inds = new SafeMap<string, number>();
+): SafeMap<NodeType | DummyNode, number> {
+  const inds = new SafeMap<NodeType | DummyNode, number>();
   let i = 0;
   for (const layer of layers) {
     for (const node of layer) {
-      inds.set(node.id, i++);
+      inds.set(node, i++);
     }
   }
   return inds;
@@ -86,7 +86,7 @@ export function indices<NodeType extends DagNode>(
 /** @interal Compute constraint arrays for layer separation */
 export function init<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][],
-  inds: SafeMap<string, number>,
+  inds: SafeMap<NodeType | DummyNode, number>,
   nodeSize: NodeSizeAccessor<NodeType>
 ): [number[][], number[], number[][], number[]] {
   const n = 1 + Math.max(...inds.values());
@@ -96,8 +96,8 @@ export function init<NodeType extends DagNode>(
   for (const layer of layers) {
     let [first, ...rest] = layer;
     for (const second of rest) {
-      const find = inds.getThrow(first.id);
-      const sind = inds.getThrow(second.id);
+      const find = inds.getThrow(first);
+      const sind = inds.getThrow(second);
       const cons = new Array(n).fill(0);
       cons[find] = 1;
       cons[sind] = -1;
@@ -160,7 +160,7 @@ export function minBend(
 export function layout<NodeType extends DagNode>(
   layers: ((NodeType & HorizableNode) | DummyNode)[][],
   nodeSize: NodeSizeAccessor<NodeType>,
-  inds: SafeMap<string, number>,
+  inds: SafeMap<NodeType | DummyNode, number>,
   solution: number[]
 ): number {
   // find span of solution
@@ -172,18 +172,18 @@ export function layout<NodeType extends DagNode>(
 
     start = Math.min(
       start,
-      solution[inds.getThrow(first.id)] - nodeSize(first)[0] / 2
+      solution[inds.getThrow(first)] - nodeSize(first)[0] / 2
     );
     finish = Math.max(
       finish,
-      solution[inds.getThrow(last.id)] + nodeSize(last)[0] / 2
+      solution[inds.getThrow(last)] + nodeSize(last)[0] / 2
     );
   }
 
   // assign inds based off of span
   for (const layer of layers) {
     for (const node of layer) {
-      node.x = solution[inds.getThrow(node.id)] - start;
+      node.x = solution[inds.getThrow(node)] - start;
     }
   }
 

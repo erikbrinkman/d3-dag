@@ -26,9 +26,13 @@ for (const dat of [square, ccoz, dtopo, doub]) {
   ]) {
     test(`invariants apply to ${dat.name} decrossed by ${method.name}`, () => {
       const layered = dat();
-      const before = layered.map((layer) => layer.map((n) => n.id).sort());
+      const before = layered.map((layer) =>
+        layer.map((n) => n.data?.index).sort()
+      );
       method(layered);
-      const after = layered.map((layer) => layer.map((n) => n.id).sort());
+      const after = layered.map((layer) =>
+        layer.map((n) => n.data?.index).sort()
+      );
       expect(after).toEqual(before);
     });
   }

@@ -22,7 +22,7 @@ test("toLayers() throws when not all nodes have a layer", () => {
   for (const node of dag) {
     (node as { layer?: number }).layer = node.data.layer;
   }
-  expect(() => toLayers(dag)).toThrow("node with id b was not given a layer");
+  expect(() => toLayers(dag)).toThrow(`node with id 'b' was not given a layer`);
 });
 
 test("createLayers() return the right number of nodes", () => {
@@ -53,7 +53,7 @@ test("createLayers() throws on out of range", () => {
       [[0], [2]],
       [[1], [0]]
     ])
-  ).toThrow("each child id must correspond to a node in the next layer");
+  ).toThrow("got unexpected undefined value");
 });
 
 test("toLayers() throws with empty layer", () => {

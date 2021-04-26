@@ -15,6 +15,10 @@ import { verifyDag, verifyId } from "./verify";
 
 import { def } from "../utils";
 
+export interface ConnectDatum {
+  id: string;
+}
+
 /**
  * The interface for getting a node id from data. The function must return an
  * appropriate id for given link data.  Ids cannot contain the null character
@@ -49,7 +53,7 @@ export interface ConnectOperator<
    * ]
    * ```
    */
-  (data: LinkDatum[]): Dag<DagNode<undefined, LinkDatum>>;
+  <L extends LinkDatum>(data: readonly L[]): Dag<DagNode<ConnectDatum, L>>;
 
   /**
    * Sets the source accessor to the given [[IdOperator]] and returns this
@@ -93,24 +97,26 @@ function buildOperator<
   sourceIdOp: SourceId,
   targetIdOp: TargetId
 ): ConnectOperator<LinkDatum, SourceId, TargetId> {
-  function connect(data: LinkDatum[]): Dag<DagNode<undefined, LinkDatum>> {
+  function connect<L extends LinkDatum>(
+    data: readonly L[]
+  ): Dag<DagNode<ConnectDatum, L>> {
     if (!data.length) {
       throw new Error("can't connect empty data");
     }
-    const nodes = new Map<string, DagNode<undefined, LinkDatum>>();
+    const nodes = new Map<string, DagNode<ConnectDatum, L>>();
     const hasParents = new Map<string, boolean>();
     for (const [i, datum] of data.entries()) {
       // create dag
       const source = verifyId(sourceIdOp(datum, i));
       let sourceNode = nodes.get(source);
       if (sourceNode === undefined) {
-        sourceNode = new LayoutDagNode<undefined, LinkDatum>(source, undefined);
+        sourceNode = new LayoutDagNode<ConnectDatum, L>({ id: source });
         nodes.set(source, sourceNode);
       }
       const target = verifyId(targetIdOp(datum, i));
       let targetNode = nodes.get(target);
       if (targetNode === undefined) {
-        targetNode = new LayoutDagNode<undefined, LinkDatum>(target, undefined);
+        targetNode = new LayoutDagNode<ConnectDatum, L>({ id: target });
         nodes.set(target, targetNode);
       }
       sourceNode.dataChildren.push(new LayoutChildLink(targetNode, datum));
@@ -120,7 +126,7 @@ function buildOperator<
       hasParents.set(target, true);
     }
 
-    const roots: DagNode<undefined, LinkDatum>[] = [];
+    const roots: DagNode<ConnectDatum, L>[] = [];
     for (const [id, parents] of hasParents) {
       if (!parents) {
         roots.push(def(nodes.get(id)));

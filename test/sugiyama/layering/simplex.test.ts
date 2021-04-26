@@ -14,9 +14,9 @@ test("layeringSimplex() works for square", () => {
 test("layeringSimplex() respects ranks and gets them", () => {
   const dag = square();
   function ranker(node: DagNode): undefined | number {
-    if (node.id === "1") {
+    if (node.data.id === "1") {
       return 1;
-    } else if (node.id === "2") {
+    } else if (node.data.id === "2") {
       return 2;
     } else {
       return undefined;
@@ -27,15 +27,6 @@ test("layeringSimplex() respects ranks and gets them", () => {
   layout(dag);
   const layers = toLayers(dag);
   expect([[0], [1], [2], [3]]).toEqual(layers);
-});
-
-test("layeringSimplex() works for square with debug", () => {
-  const dag = square();
-  const layer = layeringSimplex().debug(true);
-  expect(layer.debug()).toBeTruthy();
-  layer(dag);
-  const layers = toLayers(dag);
-  expect([[0], [1, 2], [3]]).toEqual(layers);
 });
 
 test("layeringSimplex() works for X", () => {
@@ -50,9 +41,9 @@ test("layeringSimplex() works for X", () => {
 test("layeringSimplex() respects equality rank", () => {
   const dag = ex();
   const layout = layeringSimplex().rank((node) => {
-    if (node.id === "0") {
+    if (node.data.id === "0") {
       return 0;
-    } else if (node.id === "2") {
+    } else if (node.data.id === "2") {
       return 0;
     } else {
       return undefined;
@@ -78,9 +69,9 @@ test("layeringSimplex() fails passing an arg to constructor", () => {
 test("layeringSimplex() fails with ill-defined ranks", () => {
   const dag = square();
   const layout = layeringSimplex().rank((node) => {
-    if (node.id === "0") {
+    if (node.data.id === "0") {
       return 1;
-    } else if (node.id === "3") {
+    } else if (node.data.id === "3") {
       return 0;
     } else {
       return undefined;

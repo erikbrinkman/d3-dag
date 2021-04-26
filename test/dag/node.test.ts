@@ -28,12 +28,12 @@ test("roots() works for N", () => {
 test("childLinks() works for square", () => {
   const dag = square();
   const [root] = dag.iroots();
-  const childIds = new Set(root.ichildren().map((c) => c.id));
+  const childIds = new Set(root.ichildren().map((c) => c.data.id));
   const links = root.childLinks();
   expect(links).toHaveLength(2);
   for (const link of links) {
     expect(link.source).toBe(root);
-    expect(childIds.has(link.target.id)).toBeTruthy();
+    expect(childIds.has(link.target.data.id)).toBeTruthy();
     expect(link.points).toHaveLength(0);
     expect(link.data).toEqual(undefined);
   }
@@ -48,7 +48,9 @@ test("links() is correct for square", () => {
     ["3", new Set()]
   ]);
   for (const link of dag.links()) {
-    expect(def(links.get(link.source.id)).has(link.target.id)).toBeTruthy();
+    expect(
+      def(links.get(link.source.data.id)).has(link.target.data.id)
+    ).toBeTruthy();
   }
 });
 
@@ -61,13 +63,15 @@ test("links() is correct for N", () => {
     ["3", new Set()]
   ]);
   for (const link of dag.links()) {
-    expect(def(links.get(link.source.id)).has(link.target.id)).toBeTruthy();
+    expect(
+      def(links.get(link.source.data.id)).has(link.target.data.id)
+    ).toBeTruthy();
   }
 });
 
 test("idescendants('breadth') is correct for square", () => {
   const dag = square();
-  const breadthIds = [...dag.idescendants("breadth").map((n) => n.id)];
+  const breadthIds = [...dag.idescendants("breadth").map((n) => n.data.id)];
   expect([
     ["0", "1", "2", "3"],
     ["0", "2", "1", "3"]
@@ -87,7 +91,7 @@ test("size() is correct", () => {
 });
 
 test("sum() is correct for square", () => {
-  const dag = square().sum((n) => parseInt(n.id));
+  const dag = square().sum((n) => parseInt(n.data.id));
   const expected = new Map([
     ["0", 6],
     ["1", 4],
@@ -95,16 +99,16 @@ test("sum() is correct for square", () => {
     ["3", 3]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
 });
 
 test("sum() is correct for N", () => {
-  const dag = en().sum((n) => parseInt(n.id));
+  const dag = en().sum((n) => parseInt(n.data.id));
   const expected = new Map([
     ["0", 5],
     ["1", 4],
@@ -112,16 +116,16 @@ test("sum() is correct for N", () => {
     ["3", 3]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
 });
 
 test("sum() is correct for X", () => {
-  const dag = ex().sum((n) => parseInt(n.id));
+  const dag = ex().sum((n) => parseInt(n.data.id));
   const expected = new Map([
     ["0", 19],
     ["1", 19],
@@ -132,9 +136,9 @@ test("sum() is correct for X", () => {
     ["6", 6]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -149,9 +153,9 @@ test("count() is correct for square", () => {
     ["3", 1]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -166,9 +170,9 @@ test("count() is correct for N", () => {
     ["3", 1]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -186,9 +190,9 @@ test("count() is correct for X", () => {
     ["6", 1]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -203,9 +207,9 @@ test("height() is correct for square", () => {
     ["3", 0]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -220,9 +224,9 @@ test("height() is correct for N", () => {
     ["3", 0]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -240,9 +244,9 @@ test("height() is correct for X", () => {
     ["6", 0]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -257,9 +261,9 @@ test("depth() is correct for square", () => {
     ["3", 2]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -274,9 +278,9 @@ test("depth() is correct for N", () => {
     ["3", 1]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }
@@ -294,9 +298,9 @@ test("depth() is correct for X", () => {
     ["6", 4]
   ]);
   for (const node of dag) {
-    const exp = expected.get(node.id);
+    const exp = expected.get(node.data.id);
     if (exp === undefined) {
-      throw new Error(`didn't define expected value for id: "${node.id}"`);
+      throw new Error(`didn't define expected value for id: "${node.data.id}"`);
     }
     expect(node.value).toBeCloseTo(exp);
   }

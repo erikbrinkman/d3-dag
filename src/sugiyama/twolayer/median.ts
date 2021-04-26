@@ -27,26 +27,26 @@ export function median<NodeType extends DagNode>(
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
   ): void {
-    const positions = new SafeMap<string, number[]>();
+    const positions = new SafeMap<NodeType | DummyNode, number[]>();
     for (const [i, node] of topLayer.entries()) {
       for (const child of node.ichildren()) {
-        positions.setIfAbsent(child.id, []).push(i);
+        positions.setIfAbsent(child, []).push(i);
       }
     }
-    const medians = new SafeMap<string, number>();
+    const medians = new SafeMap<NodeType | DummyNode, number>();
     let otherwise = -1;
     for (const node of bottomLayer) {
-      const med = arrayMedian(positions.getDefault(node.id, []));
+      const med = arrayMedian(positions.getDefault(node, []));
       if (med === undefined) {
-        medians.set(node.id, otherwise);
+        medians.set(node, otherwise);
         otherwise =
           +!((otherwise + 1) / (topLayer.length + 1)) * (topLayer.length + 1) -
           1;
       } else {
-        medians.set(node.id, med);
+        medians.set(node, med);
       }
     }
-    bottomLayer.sort((a, b) => medians.getThrow(a.id) - medians.getThrow(b.id));
+    bottomLayer.sort((a, b) => medians.getThrow(a) - medians.getThrow(b));
   }
 
   return medianCall;

@@ -14,16 +14,9 @@ import {
   LayoutDagNode,
   LayoutDagRoot
 } from "./node";
-import { verifyDag, verifyId } from "./verify";
 
-/**
- * The interface for getting the node id from data. The function must return an
- * unique id for each piece of data, but the same id if called twice on the
- * same data. Ids cannot contain the null character `'\0'`.
- */
-interface IdOperator<NodeDatum> {
-  (d: NodeDatum): string;
-}
+import { js } from "../utils";
+import { verifyDag } from "./verify";
 
 /**
  * The interface for getting child data from node data. This function must
@@ -75,7 +68,6 @@ interface WrappedChildrenDataOperator<
 export interface HierarchyOperator<
   NodeDatum,
   LinkDatum,
-  Id extends IdOperator<NodeDatum> = IdOperator<NodeDatum>,
   Children extends ChildrenOperator<NodeDatum> = ChildrenOperator<NodeDatum>,
   ChildrenData extends ChildrenDataOperator<
     NodeDatum,
@@ -122,26 +114,10 @@ export interface HierarchyOperator<
    *   ]
    * }
    * ```
-   *
-   * Node ids must be unique, and can't contain the null character `'\0'`.
    */
+  // NOTE we can't infer data type for hierarchy generator because the children
+  // and children data method also has to be typed
   (...data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>>;
-
-  /**
-   * Sets the id accessor to the given [[IdOperator]] and returns this
-   * [[HierarchyOperator]]. The default operator is:
-   *
-   * ```js
-   * function id(d) {
-   *   return d.id;
-   * }
-   * ```
-   */
-  id<NewId extends IdOperator<NodeDatum>>(
-    id: NewId
-  ): HierarchyOperator<NodeDatum, LinkDatum, NewId, Children, ChildrenData>;
-  /** Get the current id accessor. */
-  id(): Id;
 
   /**
    * Sets the children accessor to the given [[ChildrenOperator]] and returns
@@ -158,7 +134,6 @@ export interface HierarchyOperator<
   ): HierarchyOperator<
     NodeDatum,
     undefined,
-    Id,
     NewChildren,
     WrappedChildrenOperator<NodeDatum, NewChildren>
   >;
@@ -181,7 +156,6 @@ export interface HierarchyOperator<
   ): HierarchyOperator<
     NodeDatum,
     NewLinkDatum,
-    Id,
     WrappedChildrenDataOperator<NodeDatum, NewLinkDatum, NewChildrenData>,
     NewChildrenData
   >;
@@ -196,31 +170,26 @@ export interface HierarchyOperator<
 function buildOperator<
   NodeDatum,
   LinkDatum,
-  Id extends IdOperator<NodeDatum>,
   Children extends ChildrenOperator<NodeDatum>,
   ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
 >(
-  idOp: Id,
   childrenOp: Children,
   childrenDataOp: ChildrenData
-): HierarchyOperator<NodeDatum, LinkDatum, Id, Children, ChildrenData> {
+): HierarchyOperator<NodeDatum, LinkDatum, Children, ChildrenData> {
   function hierarchy(...data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>> {
     if (!data.length) {
       throw new Error("must pass in at least one node");
     }
 
-    const mapping = new Map<string, DagNode<NodeDatum, LinkDatum>>();
+    const mapping = new Map<NodeDatum, DagNode<NodeDatum, LinkDatum>>();
     const queue: DagNode<NodeDatum, LinkDatum>[] = [];
 
     function nodify(datum: NodeDatum): DagNode<NodeDatum, LinkDatum> {
-      const idVal = verifyId(idOp(datum));
-      let node = mapping.get(idVal);
+      let node = mapping.get(datum);
       if (node === undefined) {
-        node = new LayoutDagNode(idVal, datum);
-        mapping.set(idVal, node);
+        node = new LayoutDagNode(datum);
+        mapping.set(datum, node);
         queue.push(node);
-      } else if (datum !== node.data) {
-        throw new Error(`found duplicate id with different data: ${idVal}`);
       }
       return node;
     }
@@ -235,10 +204,10 @@ function buildOperator<
     }
 
     // verifty roots are roots
-    const rootIds = new Set(roots.map((r) => r.id));
+    const rootSet = new Set(roots);
     for (const node of mapping.values()) {
-      if (node.ichildren().some((child) => rootIds.has(child.id))) {
-        throw new Error(`node ${node.id} pointed to a root`);
+      if (node.ichildren().some((child) => rootSet.has(child))) {
+        throw new Error(js`node '${node.data}' pointed to a root`);
       }
     }
 
@@ -247,30 +216,12 @@ function buildOperator<
     return roots.length > 1 ? new LayoutDagRoot(roots) : roots[0];
   }
 
-  function id(): Id;
-  function id<NewId extends IdOperator<NodeDatum>>(
-    idGet: NewId
-  ): HierarchyOperator<NodeDatum, LinkDatum, NewId, Children, ChildrenData>;
-  function id<NewId extends IdOperator<NodeDatum>>(
-    idGet?: NewId
-  ):
-    | Id
-    | HierarchyOperator<NodeDatum, LinkDatum, NewId, Children, ChildrenData> {
-    if (idGet === undefined) {
-      return idOp;
-    } else {
-      return buildOperator(idGet, childrenOp, childrenDataOp);
-    }
-  }
-  hierarchy.id = id;
-
   function children(): Children;
   function children<NewChildren extends ChildrenOperator<NodeDatum>>(
     childs: NewChildren
   ): HierarchyOperator<
     NodeDatum,
     undefined,
-    Id,
     NewChildren,
     WrappedChildrenOperator<NodeDatum, NewChildren>
   >;
@@ -281,14 +232,13 @@ function buildOperator<
     | HierarchyOperator<
         NodeDatum,
         undefined,
-        Id,
         NewChildren,
         WrappedChildrenOperator<NodeDatum, NewChildren>
       > {
     if (childs === undefined) {
       return childrenOp;
     } else {
-      return buildOperator(idOp, childs, wrapChildren(childs));
+      return buildOperator(childs, wrapChildren(childs));
     }
   }
   hierarchy.children = children;
@@ -302,7 +252,6 @@ function buildOperator<
   ): HierarchyOperator<
     NodeDatum,
     NewLinkDatum,
-    Id,
     WrappedChildrenDataOperator<NodeDatum, NewLinkDatum, NewChildrenData>,
     NewChildrenData
   >;
@@ -316,14 +265,13 @@ function buildOperator<
     | HierarchyOperator<
         NodeDatum,
         NewLinkDatum,
-        Id,
         WrappedChildrenDataOperator<NodeDatum, NewLinkDatum, NewChildrenData>,
         NewChildrenData
       > {
     if (data === undefined) {
       return childrenDataOp;
     } else {
-      return buildOperator(idOp, wrapChildrenData(data), data);
+      return buildOperator(wrapChildrenData(data), data);
     }
   }
   hierarchy.childrenData = childrenData;
@@ -358,31 +306,6 @@ function wrapChildrenData<
 }
 
 /** @internal */
-interface HasId {
-  id: string;
-}
-
-/** @internal */
-function hasId(d: unknown): d is HasId {
-  try {
-    return typeof (d as HasId).id === "string";
-  } catch {
-    return false;
-  }
-}
-
-/** @internal */
-function defaultId(d: unknown): string {
-  if (hasId(d)) {
-    return d.id;
-  } else {
-    throw new Error(
-      `default id function expected datum to have an id field by got: ${d}`
-    );
-  }
-}
-
-/** @internal */
 interface HasChildren<NodeDatum> {
   children: NodeDatum[] | undefined;
 }
@@ -403,7 +326,7 @@ function defaultChildren<NodeDatum>(d: NodeDatum): NodeDatum[] | undefined {
     return d.children;
   } else {
     throw new Error(
-      `default children function expected datum to have a children field but got: ${d}`
+      js`default children function expected datum to have a children field but got: ${d}`
     );
   }
 }
@@ -421,7 +344,6 @@ export function hierarchy<NodeDatum>(
 ): HierarchyOperator<
   NodeDatum,
   undefined,
-  IdOperator<NodeDatum>,
   ChildrenOperator<NodeDatum>,
   WrappedChildrenOperator<NodeDatum, ChildrenOperator<NodeDatum>>
 > {
@@ -431,9 +353,5 @@ export function hierarchy<NodeDatum>(
         "These were probably meant as data which should be called as dagHierarchy()(...)"
     );
   }
-  return buildOperator(
-    defaultId,
-    defaultChildren,
-    wrapChildren(defaultChildren)
-  );
+  return buildOperator(defaultChildren, wrapChildren(defaultChildren));
 }
