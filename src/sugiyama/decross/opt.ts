@@ -16,32 +16,48 @@ import { DummyNode } from "../dummy";
 import { Operator } from ".";
 import { def } from "../../utils";
 
+export type LargeHandling = "small" | "medium" | "large";
+
 export interface OptOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
   /**
-   * Set the clowntown value, which when true will allow opt to run on inputs
-   * that will either crash or never complete.
+   * Set the large dag handling, which will error if you try to decross DAGs
+   * that are too large. Since this operator is so expensive, this exists
+   * mostly to protect you from stalling. `"small"` the default only allows
+   * small graphs. `"medium"` will allow large graphs that may take an
+   * unreasonable amount of time to finish. `"large"` allows all graphs,
+   * including ones that will likely crash the vm.
    */
-  clowntown(val: boolean): OptOperator<NodeType>;
-  /** Get the current clowntown value. */
-  clowntown(): boolean;
+  large(val: LargeHandling): OptOperator<NodeType>;
+  /** Get the current large graph handling value. */
+  large(): LargeHandling;
 }
 
 /** @internal */
 function buildOperator<NodeType extends DagNode>(options: {
-  clowntown: boolean;
+  large: LargeHandling;
 }): OptOperator<NodeType> {
   // TODO optimize this for disconnected graphs by breaking them apart, solving
   // each, then mushing them back together
 
   function optCall(layers: (NodeType | DummyNode)[][]): void {
     // check for large input
-    if (
-      !options.clowntown &&
-      layers.reduce((t, l) => t + l.length * l.length, 0) > 2500
+    const nodeCost = layers.reduce((t, l) => t + l.length * l.length, 0);
+    const edgeCost = layers.reduce(
+      (t, l) => t + l.reduce((s, n) => s + n.ichildren().length, 0),
+      0
+    );
+    if (options.large !== "large" && nodeCost > 2500) {
+      throw new Error(
+        `size of dag to decrossOpt is too large and will likely crash instead of complete, enable "large" grahps to run anyway`
+      );
+    } else if (
+      options.large !== "large" &&
+      options.large !== "medium" &&
+      (nodeCost > 900 || edgeCost > 100)
     ) {
       throw new Error(
-        "size of dag to decrossOpt is too large and will likely crash not complete, enable clowntown to run anyway"
+        `size of dag to decrossOpt is too large and will likely not complete, enable "medium" grahps to run anyway`
       );
     }
 
@@ -191,16 +207,16 @@ function buildOperator<NodeType extends DagNode>(options: {
     }
   }
 
-  function clowntown(): boolean;
-  function clowntown(val: boolean): OptOperator<NodeType>;
-  function clowntown(val?: boolean): boolean | OptOperator<NodeType> {
+  function large(): LargeHandling;
+  function large(val: LargeHandling): OptOperator<NodeType>;
+  function large(val?: LargeHandling): LargeHandling | OptOperator<NodeType> {
     if (val === undefined) {
-      return options.clowntown;
+      return options.large;
     } else {
-      return buildOperator({ ...options, clowntown: val });
+      return buildOperator({ ...options, large: val });
     }
   }
-  optCall.clowntown = clowntown;
+  optCall.large = large;
 
   return optCall;
 }
@@ -214,5 +230,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ clowntown: false });
+  return buildOperator({ large: "small" });
 }

@@ -14,26 +14,44 @@ import { DummyNode } from "../dummy";
 import { Operator } from ".";
 import { def } from "../../utils";
 
+export type LargeHandling = "small" | "medium" | "large";
+
 export interface OptOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
-  /** Set to true to allow running on inputs that are likely to fail. */
-  clowntown(val: boolean): OptOperator<NodeType>;
-  /** Return true if large inputs will be allowed to run. */
-  clowntown(): boolean;
+  /**
+   * Set the large dag handling which will error if you try to decross a dag
+   * that is too large. `"small"` the default only allows small graphs.
+   * `"medium"` will allow large graphs that may take an unreasonable amount of
+   * time to finish. `"large"` allows all graphs, including ones that will
+   * likely crash the vm.
+   */
+  large(val: LargeHandling): OptOperator<NodeType>;
+  /** Return the handling of large graphs. */
+  large(): LargeHandling;
 }
 
 /** @internal */
 function buildOperator<NodeType extends DagNode>(options: {
-  clowntown: boolean;
+  large: LargeHandling;
 }): OptOperator<NodeType> {
   function optCall(
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
   ): void {
     // check if input is too large
-    if (!options.clowntown && bottomLayer.length > 50) {
+    const nodeCost = bottomLayer.length * bottomLayer.length;
+    const edgeCost = topLayer.reduce((t, n) => t + n.ichildren().length, 0);
+    if (options.large !== "large" && nodeCost > 2500) {
       throw new Error(
-        "bottomLayer to twolayerOpt is too large and will likely crash, enable clowntown to run anyway"
+        `size of dag to twolayerOpt is too large and will likely crash, enable "large" dags to run anyway`
+      );
+    } else if (
+      options.large !== "large" &&
+      options.large !== "medium" &&
+      (nodeCost > 900 || edgeCost > 100)
+    ) {
+      throw new Error(
+        `size of dag to twolayerOpt is too large and will likely not finish, enable "medium" dags to run anyway`
       );
     }
 
@@ -145,16 +163,16 @@ function buildOperator<NodeType extends DagNode>(options: {
     );
   }
 
-  function clowntown(): boolean;
-  function clowntown(val: boolean): OptOperator<NodeType>;
-  function clowntown(val?: boolean): boolean | OptOperator<NodeType> {
+  function large(): LargeHandling;
+  function large(val: LargeHandling): OptOperator<NodeType>;
+  function large(val?: LargeHandling): LargeHandling | OptOperator<NodeType> {
     if (val === undefined) {
-      return options.clowntown;
+      return options.large;
     } else {
-      return buildOperator({ ...options, clowntown: val });
+      return buildOperator({ ...options, large: val });
     }
   }
-  optCall.clowntown = clowntown;
+  optCall.large = large;
 
   return optCall;
 }
@@ -168,5 +186,5 @@ export function opt<NodeType extends DagNode>(
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ clowntown: false });
+  return buildOperator({ large: "small" });
 }

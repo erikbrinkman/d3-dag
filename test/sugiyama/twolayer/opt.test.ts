@@ -2,9 +2,9 @@ import { createLayers, crossings } from "../utils";
 
 import { twolayerOpt } from "../../../src";
 
-test("twolayerOpt() allows setting clowntown", () => {
-  const layering = twolayerOpt().clowntown(true);
-  expect(layering.clowntown()).toBe(true);
+test("twolayerOpt() allows setting large", () => {
+  const layering = twolayerOpt().large("large");
+  expect(layering.large()).toEqual("large");
 });
 
 test("twolayerOpt() works for very simple case", () => {
@@ -38,7 +38,12 @@ test("twolayerOpt() works where median is suboptimal", () => {
 
 test("twolayerOpt() fails for large inputs", () => {
   const [topLayer, bottomLayer] = createLayers([[[...Array(51).keys()]]]);
-  expect(() => twolayerOpt()(topLayer, bottomLayer)).toThrow("clowntown");
+  expect(() => twolayerOpt()(topLayer, bottomLayer)).toThrow(`"large"`);
+});
+
+test("twolayerOpt() fails for medium inputs", () => {
+  const [topLayer, bottomLayer] = createLayers([[[...Array(31).keys()]]]);
+  expect(() => twolayerOpt()(topLayer, bottomLayer)).toThrow(`"medium"`);
 });
 
 test("twolayerOpt() fails passing an arg to constructor", () => {
