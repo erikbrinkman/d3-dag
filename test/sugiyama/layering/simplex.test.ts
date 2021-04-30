@@ -1,4 +1,4 @@
-import { doub, ex, square } from "../../examples";
+import { doub, ex, square, SimpleDatum } from "../../examples";
 
 import { DagNode } from "../../../src/dag/node";
 import { layeringSimplex } from "../../../src";
@@ -13,7 +13,7 @@ test("layeringSimplex() works for square", () => {
 
 test("layeringSimplex() respects ranks and gets them", () => {
   const dag = square();
-  function ranker(node: DagNode): undefined | number {
+  function ranker(node: DagNode<SimpleDatum>): undefined | number {
     if (node.data.id === "1") {
       return 1;
     } else if (node.data.id === "2") {
@@ -22,7 +22,7 @@ test("layeringSimplex() respects ranks and gets them", () => {
       return undefined;
     }
   }
-  const layout = layeringSimplex().rank(ranker);
+  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank(ranker);
   expect(layout.rank()).toBe(ranker);
   layout(dag);
   const layers = toLayers(dag);
@@ -40,7 +40,7 @@ test("layeringSimplex() works for X", () => {
 
 test("layeringSimplex() respects equality rank", () => {
   const dag = ex();
-  const layout = layeringSimplex().rank((node) => {
+  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank((node) => {
     if (node.data.id === "0") {
       return 0;
     } else if (node.data.id === "2") {
@@ -68,7 +68,7 @@ test("layeringSimplex() fails passing an arg to constructor", () => {
 
 test("layeringSimplex() fails with ill-defined ranks", () => {
   const dag = square();
-  const layout = layeringSimplex().rank((node) => {
+  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank((node) => {
     if (node.data.id === "0") {
       return 1;
     } else if (node.data.id === "3") {

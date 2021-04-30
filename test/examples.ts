@@ -1,4 +1,5 @@
 import { Dag, DagNode } from "../src/dag/node";
+import { ConnectDatum } from "../src/dag/connect";
 import { dagConnect, dagStratify } from "../src";
 
 export interface SimpleDatum {
@@ -393,7 +394,7 @@ export function arq(): Dag<DagNode<SimpleDatum>> {
 // 4   5
 //     |
 //     6
-export function ccoz(): Dag<DagNode<undefined, SimpleLinkDatum>> {
+export function ccoz(): Dag<DagNode<ConnectDatum, SimpleLinkDatum>> {
   return dagConnect<SimpleLinkDatum>()([
     ["0", "3"],
     ["0", "7"],
