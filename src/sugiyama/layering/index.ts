@@ -1,14 +1,14 @@
 /**
- * A layering is any function that complies with the [[Operator]] interface.
+ * A layering is any function that complies with the {@link Operator} interface.
  * This function must assign each node a non-negative integer `layer` such that
  * children have larger layers than their parents.
  *
  * There are several built in layering operators, which are all constructed in
  * a fluent fashion:
- * - [["sugiyama/layering/longest-path" | Longest path]]
- * - [["sugiyama/layering/coffman-graham" | Coffman-Graham]]
- * - [["sugiyama/layering/simplex" | Simplex]]
- * - [["sugiyama/layering/topological" | Topological]]
+ * - {@link "sugiyama/layering/longest-path" | Longest path}
+ * - {@link "sugiyama/layering/coffman-graham" | Coffman-Graham}
+ * - {@link "sugiyama/layering/simplex" | Simplex}
+ * - {@link "sugiyama/layering/topological" | Topological}
  *
  * @module
  */

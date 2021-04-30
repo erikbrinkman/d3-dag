@@ -1,8 +1,8 @@
 /**
  * Create a decrossing operator that minimizes the number of decrossings
- * heuristically by looking at each pair of layers. This method is very fast and very general and pften produces good results. It is also highly customizable, and can be parametrized by any [["sugiyama/twolayer/index" | two layer operator]].
+ * heuristically by looking at each pair of layers. This method is very fast and very general and pften produces good results. It is also highly customizable, and can be parametrized by any {@link "sugiyama/twolayer/index" | two layer operator}.
  *
- * Create a new [[TwoLayerOperator]] with [[twoLayer]].
+ * Create a new {@link TwoLayerOperator} with {@link twoLayer}.
  *
  * <img alt="two layer example" src="media://two_layer_greedy.png" width="400">
  *
@@ -26,15 +26,15 @@ export interface TwoLayerOperator<
   Ops extends Operators<NodeType> = Operators<NodeType>
 > extends Operator<NodeType> {
   /**
-   * Sets the order accessor to the specified [[OrderOperator]] and returns
-   * this [[TwoLayerOperator]]. See the [["sugiyama/twolayer/index" | two
-   * layer]] module for more information on order operators.
+   * Sets the order accessor to the specified {@link OrderOperator} and returns
+   * this {@link TwoLayerOperator}. See the {@link "sugiyama/twolayer/index" | two
+   * layer} module for more information on order operators.
    */
   order<NewOrder extends OrderOperator<NodeType>>(
     ord: NewOrder
   ): TwoLayerOperator<NodeType, Replace<Ops, "order", NewOrder>>;
   /**
-   * Get the current [[OrderOperator]] which defaults to [[median]].
+   * Get the current {@link OrderOperator} which defaults to {@link median}.
    */
   order(): Ops["order"];
 }
@@ -76,7 +76,7 @@ function buildOperator<
   return twoLayerCall;
 }
 
-/** Create a default [[TwoLayerOperator]]. */
+/** Create a default {@link TwoLayerOperator}. */
 export function twoLayer<NodeType extends DagNode>(
   ...args: never[]
 ): TwoLayerOperator<NodeType, { order: MedianOperator<NodeType> }> {

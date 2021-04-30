@@ -1,8 +1,8 @@
 /**
  * Before you can compute a DAG layout, you need a DAG structure.  If your data
- * is already in a DAG structure, you can use the [[hierarchy]] method to
- * generate a default [[HierarchyOperator]] which can then be used to transform
- * your data into a [[Dag]].
+ * is already in a DAG structure, you can use the {@link hierarchy} method to
+ * generate a default {@link HierarchyOperator} which can then be used to transform
+ * your data into a {@link Dag}.
  *
  * @module
  */
@@ -37,7 +37,7 @@ interface ChildrenDataOperator<NodeDatum, LinkDatum> {
 }
 
 /**
- * What gets returned by [[childrenData]]() when [[children]] is set.
+ * What gets returned by {@link childrenData}() when {@link children} is set.
  */
 interface WrappedChildrenOperator<
   NodeDatum,
@@ -48,7 +48,7 @@ interface WrappedChildrenOperator<
 }
 
 /**
- * What gets returned by [[children]]() when [[childrenData]] is set.
+ * What gets returned by {@link children}() when {@link childrenData} is set.
  */
 interface WrappedChildrenDataOperator<
   NodeDatum,
@@ -63,7 +63,7 @@ interface WrappedChildrenDataOperator<
 }
 
 /**
- * The operator that constructs a [[Dag]] from hierarchy data.
+ * The operator that constructs a {@link Dag} from hierarchy data.
  */
 export interface HierarchyOperator<
   NodeDatum,
@@ -120,8 +120,8 @@ export interface HierarchyOperator<
   (...data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>>;
 
   /**
-   * Sets the children accessor to the given [[ChildrenOperator]] and returns
-   * this [[HierarchyOperator]]. The default operator is:
+   * Sets the children accessor to the given {@link ChildrenOperator} and returns
+   * this {@link HierarchyOperator}. The default operator is:
    *
    * ```js
    * function children(d) {
@@ -138,15 +138,15 @@ export interface HierarchyOperator<
     WrappedChildrenOperator<NodeDatum, NewChildren>
   >;
   /**
-   * Gets the current [[ChildrenOperator]], If [[childrenData]] was specified,
+   * Gets the current {@link ChildrenOperator}, If {@link childrenData} was specified,
    * this will return a wrapped version that returns only the children of that
    * operator.
    */
   children(): Children;
 
   /**
-   * Sets the childrenData accessor to the given [[ChildrenDataOperator]] and
-   * returns this [[HierarchyOperator]].
+   * Sets the childrenData accessor to the given {@link ChildrenDataOperator} and
+   * returns this {@link HierarchyOperator}.
    */
   childrenData<
     NewLinkDatum,
@@ -160,7 +160,7 @@ export interface HierarchyOperator<
     NewChildrenData
   >;
   /**
-   * Get the current childrenData operator. If [[children]] was specified, this
+   * Get the current childrenData operator. If {@link children} was specified, this
    * will return a wrapped version that returns undefined data.
    */
   childrenData(): ChildrenData;
@@ -332,7 +332,7 @@ function defaultChildren<NodeDatum>(d: NodeDatum): NodeDatum[] | undefined {
 }
 
 /**
- * Constructs a new [[HierarchyOperator]] with default settings.
+ * Constructs a new {@link HierarchyOperator} with default settings.
  *
  * By default ids will be pulled from the `id` property and children will be
  * pulled from the `children` property. Since `children` being undefined is

@@ -277,7 +277,7 @@ function buildOperator<NodeType extends DagNode>(options: {
   return quadCall;
 }
 
-/** Create a default [[QuadOperator]]. */
+/** Create a default {@link QuadOperator}. */
 export function quad<NodeType extends DagNode>(
   ...args: never[]
 ): QuadOperator<NodeType> {

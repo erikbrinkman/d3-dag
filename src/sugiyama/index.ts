@@ -9,15 +9,15 @@
  * interface for that stage is valid, but custom methods can also be provided,
  * assuming they do what's necessary in that step.
  *
- * The method [[sugiyama]] is used to create a new [[SugiyamaOperator]]. This
+ * The method {@link sugiyama} is used to create a new {@link SugiyamaOperator}. This
  * can be customized with all of the methods available, but in particular the
  * method is broken down into three steps:
- * 1. [["sugiyama/layering/index" | layering]] - in this step, every node is
+ * 1. {@link "sugiyama/layering/index" | layering} - in this step, every node is
  *    assigned an integer later such that children are guaranteed to have
  *    higher layers than their parents.
- * 2. [["sugiyama/decross/index" | decrossing]] - in the step, nodes in each
+ * 2. {@link "sugiyama/decross/index" | decrossing} - in the step, nodes in each
  *    layer are reordered to minimize the number of crossings.
- * 3. [["sugiyama/coord/index" | coordinate assignment]] - in the step, the
+ * 3. {@link "sugiyama/coord/index" | coordinate assignment} - in the step, the
  *    nodes are assigned x and y coordinates that respect their layer, and
  *    layer ordering.
  *
@@ -52,7 +52,7 @@ interface VertableNode {
 }
 
 /**
- * The added attributes to the [[Dag]] once the [[SugiyamaOperator]] is called.
+ * The added attributes to the {@link Dag} once the {@link SugiyamaOperator} is called.
  */
 export interface SugiyamaNode {
   layer: number;
@@ -74,15 +74,15 @@ interface Operators<NodeType extends DagNode> {
 }
 
 /**
- * The operator used to layout a [[Dag]] using the sugiyama method.
+ * The operator used to layout a {@link Dag} using the sugiyama method.
  */
 export interface SugiyamaOperator<
   NodeType extends DagNode,
   Ops extends Operators<NodeType> = Operators<NodeType>
 > {
   /**
-   * Layout the [[Dag]] using the currently configured operator. The returned
-   * DAG nodes will have added properties from [[SugiyamaNode]]. In addition,
+   * Layout the {@link Dag} using the currently configured operator. The returned
+   * DAG nodes will have added properties from {@link SugiyamaNode}. In addition,
    * each link will have points reset and assigned.
    */
   (dag: NodeType): SugiyamaLayout<NodeType & SugiyamaNode>;
@@ -90,60 +90,60 @@ export interface SugiyamaOperator<
   (dag: Dag<NodeType>): SugiyamaLayout<Dag<NodeType & SugiyamaNode>>;
 
   /**
-   * Set the [[LayeringOperator]]. See [["sugiyama/layering/index" |
-   * layerings]] for more information about proper operators and a description
-   * of the built in operators. The default value is [[simplex]].
+   * Set the {@link LayeringOperator}. See {@link "sugiyama/layering/index" |
+   * layerings} for more information about proper operators and a description
+   * of the built in operators. The default value is {@link simplex}.
    */
   layering<NewLayering extends LayeringOperator<NodeType>>(
     layer: NewLayering
   ): SugiyamaOperator<NodeType, Replace<Ops, "layering", NewLayering>>;
   /**
-   * Get the current [[LayeringOperator]].
+   * Get the current {@link LayeringOperator}.
    */
   layering(): Ops["layering"];
 
   /**
-   * Set the [[DecrossOperator]]. See [["sugiyama/decross/index" |
-   * decrossings]] for more information about proper operators and a description
-   * of the built in operators. The default value is [[twoLayer]].
+   * Set the {@link DecrossOperator}. See {@link "sugiyama/decross/index" |
+   * decrossings} for more information about proper operators and a description
+   * of the built in operators. The default value is {@link twoLayer}.
    */
   decross<NewDecross extends DecrossOperator<NodeType>>(
     dec: NewDecross
   ): SugiyamaOperator<NodeType, Replace<Ops, "decross", NewDecross>>;
   /**
-   * Get the current [[DecrossOperator]].
+   * Get the current {@link DecrossOperator}.
    */
   decross(): Ops["decross"];
 
   /**
-   * Set the [[CoordOperator]]. See [["sugiyama/coord/index" | coordinate
-   * assignments]] for more information about proper operators and a
-   * description of the built in operators. The default value is [[quad]].
+   * Set the {@link CoordOperator}. See {@link "sugiyama/coord/index" | coordinate
+   * assignments} for more information about proper operators and a
+   * description of the built in operators. The default value is {@link quad}.
    */
   coord<NewCoord extends CoordOperator<NodeType>>(
     crd: NewCoord
   ): SugiyamaOperator<NodeType, Replace<Ops, "coord", NewCoord>>;
   /**
-   * Get the current [[CoordOperator]].
+   * Get the current {@link CoordOperator}.
    */
   coord(): Ops["coord"];
 
   /**
    * Sets the sugiyama layout's size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns this [[SugiyamaOperator]].  When
-   * [[size]] is non-null the dag will be shrunk or expanded to fit in the
+   * numbers [ *width*, *height* ] and returns this {@link SugiyamaOperator}.  When
+   * {@link size} is non-null the dag will be shrunk or expanded to fit in the
    * size, keeping all distances proportional. If it's null, the nodeSize
    * parameters will be respected as coordinate sizes.
    */
   size(sz: [number, number] | null): SugiyamaOperator<NodeType, Ops>;
   /**
    * Get the current layout size, which defaults to [1, 1]. The return value
-   * will be null if the layout is [[nodeSize]]d.
+   * will be null if the layout is {@link nodeSize}d.
    */
   size(): null | [number, number];
 
   /**
-   * Sets this sugiyama layout's [[NodeSizeAccessor]]. This accessor returns
+   * Sets this sugiyama layout's {@link NodeSizeAccessor}. This accessor returns
    * the width and height of a node it's called on, and the node will then be
    * laidout to have at least that much of a gap between nodes.
    */
@@ -151,8 +151,8 @@ export interface SugiyamaOperator<
     sz: NewNodeSize
   ): SugiyamaOperator<NodeType, Replace<Ops, "nodeSize", NewNodeSize>>;
   /**
-   * Get the current [[NodeSizeAccessor][, which defaults to returning [1, 1]
-   * for normal nodes and [0, 1] for [[DummyNodes]], casing edges to be treaded
+   * Get the current {@link NodeSizeAccessor][, which defaults to returning [1, 1]
+   * for normal nodes and [0, 1] for {@link DummyNodes}, casing edges to be treaded
    * as if they had no width.
    */
   nodeSize(): Ops["nodeSize"];
@@ -413,7 +413,7 @@ function defaultNodeSize<NodeType extends DagNode>(
 }
 
 /**
- * Construct a new [[SugiyamaOperator]] with the default settings.
+ * Construct a new {@link SugiyamaOperator} with the default settings.
  */
 export function sugiyama<NodeType extends DagNode>(
   ...args: never[]

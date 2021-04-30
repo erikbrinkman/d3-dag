@@ -1,6 +1,6 @@
 /**
- * You can rearrange raw edge data into a [[Dag]] using [[connect]] to create a
- * default [[ConnectOperator]].
+ * You can rearrange raw edge data into a {@link Dag} using {@link connect} to create a
+ * default {@link ConnectOperator}.
  *
  * @module
  */
@@ -31,7 +31,7 @@ export interface IdOperator<LinkDatum> {
 }
 
 /**
- * The operator that constructs a [[Dag]] from link data.
+ * The operator that constructs a {@link Dag} from link data.
  */
 export interface ConnectOperator<
   LinkDatum,
@@ -56,8 +56,8 @@ export interface ConnectOperator<
   <L extends LinkDatum>(data: readonly L[]): Dag<DagNode<ConnectDatum, L>>;
 
   /**
-   * Sets the source accessor to the given [[IdOperator]] and returns this
-   * [[ConnectOperator]]. The default accessor is:
+   * Sets the source accessor to the given {@link IdOperator} and returns this
+   * {@link ConnectOperator}. The default accessor is:
    *
    * ```js
    * function sourceAccessor(link) {
@@ -72,8 +72,8 @@ export interface ConnectOperator<
   sourceId(): SourceId;
 
   /**
-   * Sets the target accessor to the given [[IdOperator]] and returns this
-   * [[ConnectOperator]]. The default accessor is:
+   * Sets the target accessor to the given {@link IdOperator} and returns this
+   * {@link ConnectOperator}. The default accessor is:
    *
    * ```js
    * function sourceAccessor(link) {
@@ -220,7 +220,7 @@ function defaultTargetId(d: unknown): string {
 }
 
 /**
- * Constructs a new [[ConnectOperator]] with the default settings.
+ * Constructs a new {@link ConnectOperator} with the default settings.
  */
 export function connect<LinkDatum>(
   ...args: never[]

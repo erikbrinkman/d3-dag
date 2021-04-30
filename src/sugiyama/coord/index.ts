@@ -1,17 +1,17 @@
 /**
  * A coordinate assignmnet operator is any function that complies with the
- * [[Operator]] interface, and assigns each node an x coordinate between zero
+ * {@link Operator} interface, and assigns each node an x coordinate between zero
  * and one, respecting node order within in a layer, and the node separation
  * function.
  *
  * There are three built in coordinate assignment operators, which are all
  * constructed in a fluent fashion:
- * - [["sugiyama/twolayer/quad" | Quadratic Optimization ]] (formerly *Vert*)
- * - [["sugiyama/twolayer/greedy" | Greedy]]
- * - [["sugiyama/twolayer/center" | Center]]
- * - [["sugiyama/twolayer/topological" | Topological]]
+ * - {@link "sugiyama/twolayer/quad" | Quadratic Optimization } (formerly *Vert*)
+ * - {@link "sugiyama/twolayer/greedy" | Greedy}
+ * - {@link "sugiyama/twolayer/center" | Center}
+ * - {@link "sugiyama/twolayer/topological" | Topological}
  *
- * The operator [["sugiyama/twolayer/min-curve" | minimize curves]] is
+ * The operator {@link "sugiyama/twolayer/min-curve" | minimize curves} is
  * deprecated as it is identical to quad with equal weights for *vertical* and
  * *curve*.
  *

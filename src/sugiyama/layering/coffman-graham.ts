@@ -4,7 +4,7 @@
  * reasonably fast. If the max width is set to zero (the default), the width
  * will instead be set to the square root of the number of nodes.
  *
- * Create a new [[CoffmanGrahamOperator]] with [[coffmanGraham]].
+ * Create a new {@link CoffmanGrahamOperator} with {@link coffmanGraham}.
  *
  * <img alt="Coffman-Graham example" src="media://coffman_graham.png" width="400">
  *
@@ -119,7 +119,7 @@ function buildOperator<NodeType extends DagNode>(options: {
   return coffmanGrahamCall;
 }
 
-/** Create a default [[CoffmanGrahamOperator]]. */
+/** Create a default {@link CoffmanGrahamOperator}. */
 export function coffmanGraham<NodeType extends DagNode>(
   ...args: never[]
 ): CoffmanGrahamOperator<NodeType> {

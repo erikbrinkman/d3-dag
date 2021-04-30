@@ -1,11 +1,11 @@
 /**
- * A coord assignment is any function that complies with the [[Operator]]
+ * A coord assignment is any function that complies with the {@link Operator}
  * interface. The column to coord accessor assigns every node an x0 and x1
  * property in [0, 1] to specify the actual layout.
  *
  * There is one built in coord assignment operators, which are all constructed
  * in a fluent fashion:
- * - [["arquint/coord/spread" | Spread]]
+ * - {@link "arquint/coord/spread" | Spread}
  *
  * @module
  */

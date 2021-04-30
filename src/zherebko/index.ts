@@ -33,7 +33,7 @@ export interface ZherebkoOperator<NodeType extends DagNode> {
 
   /**
    * Sets this zherebko layout's size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns this [[ZherebkoOperator]]..
+   * numbers [ *width*, *height* ] and returns this {@link ZherebkoOperator}..
    */
   size(sz: [number, number]): ZherebkoOperator<NodeType>;
   /** Get the current size, which defaults to [1, 1]. */
@@ -170,7 +170,7 @@ function buildOperator<NodeType extends DagNode>(
   return zherebkoCall;
 }
 
-/** Create a new [[ZherebkoOperator]] with default settings. */
+/** Create a new {@link ZherebkoOperator} with default settings. */
 export function zherebko<NodeType extends DagNode>(
   ...args: never[]
 ): ZherebkoOperator<NodeType> {

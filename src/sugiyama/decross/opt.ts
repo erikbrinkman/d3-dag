@@ -3,7 +3,7 @@
  * crossings. This method solves an np-complete integer program, and as such
  * can take a very long time for large DAGs.
  *
- * Create a new [[OptOperator]] with [[opt]].
+ * Create a new {@link OptOperator} with {@link opt}.
  *
  * <img alt="optimal decross example" src="media://simplex.png" width="400">
  *
@@ -205,7 +205,7 @@ function buildOperator<NodeType extends DagNode>(options: {
   return optCall;
 }
 
-/** Create a default [[OptOperator]]. */
+/** Create a default {@link OptOperator}. */
 export function opt<NodeType extends DagNode>(
   ...args: never[]
 ): OptOperator<NodeType> {

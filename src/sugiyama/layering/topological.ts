@@ -4,7 +4,7 @@
  * is very fast, but it may make other steps take longer due to the many
  * created dummy nodes.
  *
- * Create a new [[TopologicalOperator]] with [[topological]].
+ * Create a new {@link TopologicalOperator} with {@link topological}.
  *
  * <img alt="topological example" src="media://topological.png" width="400">
  *

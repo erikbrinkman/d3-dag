@@ -1,16 +1,16 @@
 /**
- * A [[Dag]] is simply a collection of [[DagNode]]s, defined by every reachable
+ * A {@link Dag} is simply a collection of {@link DagNode}s, defined by every reachable
  * child node from the current returned node.  If a DAG contains multiple
- * roots, then the returned node will be a [[DagRoot]] that links to all nodes.
+ * roots, then the returned node will be a {@link DagRoot} that links to all nodes.
  * Each child node on its own will function as a valid DAG with a single root.
  * All DAGs are also iterators over all of their nodes.
  *
- * Three methods exist to turn existing data into [[Dag]]s:
- * 1. [["dag/hierarchy" | dagHierarchy]] - when the data already has a dag structure.
- * 2. [["dag/stratify" | dagStratify ]] - when the dag has a tabular structure, referencing parents by id.
- * 3. [["dag/connect" | dagConnect ]] - when the dag has a link structure and is specified as pairs of nodes.
+ * Three methods exist to turn existing data into {@link Dag}s:
+ * 1. {@link "dag/hierarchy" | dagHierarchy} - when the data already has a dag structure.
+ * 2. {@link "dag/stratify" | dagStratify } - when the dag has a tabular structure, referencing parents by id.
+ * 3. {@link "dag/connect" | dagConnect } - when the dag has a link structure and is specified as pairs of nodes.
  *
- * Methods names preceeded by an `i` will return a [[FluentIterable]] which is
+ * Methods names preceeded by an `i` will return a {@link FluentIterable} which is
  * a wrapper around native EMCA iterators that also adds most methods found in
  * the `Array` prototype making them much more useful for fluent functional
  * programming.
@@ -34,7 +34,7 @@ export class LayoutChildLink<
 }
 
 /**
- * The concrete class backing the [[Link]] interface.
+ * The concrete class backing the {@link Link} interface.
  */
 export class LayoutLink<NodeType extends DagNode> {
   constructor(
@@ -49,9 +49,9 @@ export class LayoutLink<NodeType extends DagNode> {
 }
 
 /**
- * The concreate implementation of [[DagNode]], this forwards most calls to a
- * singleton [[LayoutDagRoot]] with the exception of children methods, as
- * [[DagRoot]]s don't have children.
+ * The concreate implementation of {@link DagNode}, this forwards most calls to a
+ * singleton {@link LayoutDagRoot} with the exception of children methods, as
+ * {@link DagRoot}s don't have children.
  */
 export class LayoutDagNode<NodeDatum, LinkDatum> {
   dataChildren: ChildLink<LinkDatum, this>[] = [];
@@ -155,8 +155,8 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
 }
 
 /**
- * The concrete implementation backing [[DagRoot]] which also contains the
- * implementation of most methods in [[DagNode]].
+ * The concrete implementation backing {@link DagRoot} which also contains the
+ * implementation of most methods in {@link DagNode}.
  */
 export class LayoutDagRoot<NodeType extends DagNode>
   implements Iterable<NodeType> {
@@ -167,9 +167,9 @@ export class LayoutDagRoot<NodeType extends DagNode>
   }
 
   /**
-   * This returns an iterator over every root in the [[Dag]]. Since
-   * [[DagNode]]s return themselves for this call, this can be an easy way to
-   * turn a [[Dag]] into an array of [[DagNode]]s.
+   * This returns an iterator over every root in the {@link Dag}. Since
+   * {@link DagNode}s return themselves for this call, this can be an easy way to
+   * turn a {@link Dag} into an array of {@link DagNode}s.
    */
   iroots(): FluentIterable<NodeType> {
     return fluent(this.dagRoots);
@@ -253,7 +253,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
 
   /**
    * Returns an iterator over all descendants of this node, e.g. every node in
-   * the [[Dag]]. An [[IterStyle]] can be passed in to influence the iteration
+   * the {@link Dag}. An {@link IterStyle} can be passed in to influence the iteration
    * order, the default (`'depth'`) should generally be the fastest, but note
    * that in general, traversal in a DAG takes linear space as we need to track
    * what nodes we've already visited.
@@ -281,17 +281,17 @@ export class LayoutDagRoot<NodeType extends DagNode>
     }
   }
 
-  /** Returns an array of [[idescendants]]. */
+  /** Returns an array of {@link idescendants}. */
   descendants(style: IterStyle = "depth"): NodeType[] {
     return [...this.idescendants(style)];
   }
 
-  /** Returns an iterator over every [[Link]] in the DAG. */
+  /** Returns an iterator over every {@link Link} in the DAG. */
   ilinks(): FluentIterable<Link<NodeType>> {
     return this.idescendants().flatMap((node) => node.ichildLinks());
   }
 
-  /** Returns an array of [[ilinks]]. */
+  /** Returns an array of {@link ilinks}. */
   links(): Link<NodeType>[] {
     return [...this.ilinks()];
   }
@@ -305,7 +305,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * Provide a callback that computes a number for each node, then set a node's
    * value to the sum of this number for this node and all of its descendants.
    *
-   * This method returns [[ValuedNode]]s that also have a value property.
+   * This method returns {@link ValuedNode}s that also have a value property.
    */
   sum(
     callback: (node: NodeType, index: number) => number
@@ -333,7 +333,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * Set the value of each node to be the number of leaves beneath the node.
    * If this node is a leaf, its value is one.
    *
-   * This method returns [[ValuedNode]]s that also have a value property.
+   * This method returns {@link ValuedNode}s that also have a value property.
    */
   count(): DagRoot<NodeType & ValuedNode> {
     const leaves = new SafeMap<NodeType, Set<NodeType>>();
@@ -359,7 +359,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
   /**
    * Assign each node a value equal to its longest distance from a root.
    *
-   * This method returns [[ValuedNode]]s that also have a value property.
+   * This method returns {@link ValuedNode}s that also have a value property.
    */
   height(): DagRoot<NodeType & ValuedNode> {
     for (const node of this.idescendants("after")) {
@@ -381,7 +381,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
   /**
    * Assign each node a value equal to its longest distance to a leaf.
    *
-   * This method returns [[ValuedNode]]s that also have a value property.
+   * This method returns {@link ValuedNode}s that also have a value property.
    */
   depth(): DagRoot<NodeType & ValuedNode> {
     const parents = new SafeMap<NodeType, NodeType[]>();
@@ -478,25 +478,25 @@ export type ChildLink<
   NodeType extends DagNode<unknown, LinkDatum> = DagNode<unknown, LinkDatum>
 > = LayoutChildLink<LinkDatum, NodeType>;
 
-/** The public facing interface backed by the [[LayoutLink]] implementation. */
+/** The public facing interface backed by the {@link LayoutLink} implementation. */
 export type Link<NodeType extends DagNode = DagNode> = LayoutLink<NodeType>;
 
-/** The public facing interface backed by the [[LayoutDagNode]] implementation. */
+/** The public facing interface backed by the {@link LayoutDagNode} implementation. */
 export type DagNode<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagNode<
   NodeDatum,
   LinkDatum
 >;
 
-/** The public facing interface backed by the [[LayoutDagRoot]] implementation. */
+/** The public facing interface backed by the {@link LayoutDagRoot} implementation. */
 export type DagRoot<
   NodeType extends DagNode = DagNode
 > = LayoutDagRoot<NodeType>;
 
 /**
- * The union of a [[DagNode]] and [[DagRoot]], representing the return value of
- * a Dag constructor. Since the interface between [[DagNode]]s and [[DagRoot]]s
+ * The union of a {@link DagNode} and {@link DagRoot}, representing the return value of
+ * a Dag constructor. Since the interface between {@link DagNode}s and {@link DagRoot}s
  * is almost identical, this union is mostly inconsequential, and all methods
- * can be fond within [[LayoutDagRoot]].
+ * can be fond within {@link LayoutDagRoot}.
  */
 export type Dag<NodeType extends DagNode = DagNode> =
   | NodeType

@@ -1,6 +1,6 @@
 /**
- * You can rearrange tabularesque data into a [[Dag]] using [[stratify]], which
- * will create a default [[StratifyOperator]].
+ * You can rearrange tabularesque data into a {@link Dag} using {@link stratify}, which
+ * will create a default {@link StratifyOperator}.
  *
  * @module
  */
@@ -46,7 +46,7 @@ interface ParentDataOperator<NodeDatum, LinkDatum> {
 }
 
 /**
- * What gets returned by [[parentData]]() when [[parentIds]] is set.
+ * What gets returned by {@link parentData}() when {@link parentIds} is set.
  */
 interface WrappedParentIdsOperator<
   NodeDatum,
@@ -57,7 +57,7 @@ interface WrappedParentIdsOperator<
 }
 
 /**
- * What gets returned by [[parentIds]]() when [[parentData]] is set.
+ * What gets returned by {@link parentIds}() when {@link parentData} is set.
  */
 interface WrappedParentDataOperator<
   NodeDatum,
@@ -69,7 +69,7 @@ interface WrappedParentDataOperator<
 }
 
 /**
- * The operator that constructs a [[Dag]] from stratified tabularesque data.
+ * The operator that constructs a {@link Dag} from stratified tabularesque data.
  */
 export interface StratifyOperator<
   NodeDatum,
@@ -128,8 +128,8 @@ export interface StratifyOperator<
   <N extends NodeDatum>(data: N[]): Dag<DagNode<N, LinkDatum>>;
 
   /**
-   * Sets the id accessor to the given [[IdOperator]] and returns this
-   * [[StratifyOperator]]. The default operator is:
+   * Sets the id accessor to the given {@link IdOperator} and returns this
+   * {@link StratifyOperator}. The default operator is:
    *
    * ```js
    * function id(d) {
@@ -146,8 +146,8 @@ export interface StratifyOperator<
   id(): Id;
 
   /**
-   * Sets the parentIds accessor to the given [[ParentIdsOperator]]
-   * and returns this [[StratifyOperator]]. The default operator is:
+   * Sets the parentIds accessor to the given {@link ParentIdsOperator}
+   * and returns this {@link StratifyOperator}. The default operator is:
    *
    * ```js
    * function parentIds(d) {
@@ -165,14 +165,14 @@ export interface StratifyOperator<
     WrappedParentIdsOperator<NodeDatum, NewParentIds>
   >;
   /**
-   * Gets the current parent ids accessor.  If [[parentData]] was passed, the
+   * Gets the current parent ids accessor.  If {@link parentData} was passed, the
    * returned function will wrap that to just return the ids.
    */
   parentIds(): ParentIds;
 
   /**
-   * Sets the parentData accessor to the given [[ParentDataOperator]] and
-   * returns this [[StratifyOperator]].
+   * Sets the parentData accessor to the given {@link ParentDataOperator} and
+   * returns this {@link StratifyOperator}.
    */
   parentData<
     NewLinkDatum,
@@ -187,7 +187,7 @@ export interface StratifyOperator<
     NewParentData
   >;
   /**
-   * Gets the current parentData accessor. If [[parentIds]] was passed, this
+   * Gets the current parentData accessor. If {@link parentIds} was passed, this
    * will wrap that to just return the ids with `undefined` data.
    */
   parentData(): ParentData;
@@ -406,7 +406,7 @@ function defaultParentIds(d: unknown): string[] | undefined {
 }
 
 /**
- * Constructs a new [[StratifyOperator]] with the default settings.
+ * Constructs a new {@link StratifyOperator} with the default settings.
  */
 export function stratify<NodeDatum>(
   ...args: never[]

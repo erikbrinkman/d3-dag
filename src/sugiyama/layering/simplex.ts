@@ -3,9 +3,9 @@
  * nodes (long edges) inserted. Computing this layering requires solving an
  * integer linear program, which may take a long time, although in practice is
  * often quite fast. This is often known as the network simplex layering from
- * [Gansner et al. [1993]](https://www.graphviz.org/Documentation/TSE93.pdf).
+ * [Gansner et al. [1993}]](https://www.graphviz.org/Documentation/TSE93.pdf).
  *
- * Create a new [[SimplexOperator]] with [[simplex]].
+ * Create a new {@link SimplexOperator} with {@link simplex}.
  *
  * <img alt="simplex example" src="media://simplex.png" width="400">
  *
@@ -26,7 +26,7 @@ export interface SimplexOperator<
   Ops extends Operators<NodeType> = Operators<NodeType>
 > extends Operator<NodeType> {
   /**
-   * Set the [[RankAccessor]]. Any node with a rank assigned will have a second
+   * Set the {@link RankAccessor}. Any node with a rank assigned will have a second
    * ordering enforcing ordering of the ranks. Note, this can cause the simplex
    * optimization to be ildefined, and may result in an error during layout.
    */
@@ -34,7 +34,7 @@ export interface SimplexOperator<
     newRank: NewRank
   ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>>;
   /**
-   * Get the current [[RankAccessor]].
+   * Get the current {@link RankAccessor}.
    */
   rank(): Ops["rank"];
 }
@@ -179,7 +179,7 @@ function defaultRank(): undefined {
   return undefined;
 }
 
-/** Create a default [[SimplexOperator]]. */
+/** Create a default {@link SimplexOperator}. */
 export function simplex<NodeType extends DagNode>(
   ...args: never[]
 ): SimplexOperator<NodeType> {

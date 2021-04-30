@@ -159,7 +159,7 @@ function buildOperator<NodeType extends DagNode>(options: {
   return optCall;
 }
 
-/** Create a default [[OptOperator]]. */
+/** Create a default {@link OptOperator}. */
 export function opt<NodeType extends DagNode>(
   ...args: never[]
 ): OptOperator<NodeType> {

@@ -3,7 +3,7 @@
  * (the height) is minimized.  This often results in very wide graphs, but is
  * also fast to compute.
  *
- * Create a new [[LongestPathOperator]] with [[longestPath]].
+ * Create a new {@link LongestPathOperator} with {@link longestPath}.
  *
  * <img alt="longest path example" src="media://longest_path.png" width="400">
  *
@@ -63,7 +63,7 @@ function buildOperator<NodeType extends DagNode>(options: {
   return longestPathCall;
 }
 
-/** Create a default [[LongestPathOperator]]. */
+/** Create a default {@link LongestPathOperator}. */
 export function longestPath<NodeType extends DagNode>(
   ...args: never[]
 ): LongestPathOperator<NodeType> {

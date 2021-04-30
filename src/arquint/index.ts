@@ -67,7 +67,7 @@ interface RectVertableNode {
 }
 
 /**
- * The properties that are applied to a node after running [[Operator]].
+ * The properties that are applied to a node after running {@link Operator}.
  */
 export interface ArquintNode extends LayeredNode, IndexedNode {
   y0: number;
@@ -89,9 +89,9 @@ export interface Operator<
 > {
   /**
    * Lays out the specified DAG while respecting (vertical) *node*.heightRatio
-   * together with (vertical) [[LayerSeparation | inter layer separation]],
-   * (horizontal) [[ColumnWidth | column width]], as well as (horizontal)
-   * [[ColumnSeparation | column separation]].
+   * together with (vertical) {@link LayerSeparation | inter layer separation},
+   * (horizontal) {@link ColumnWidth | column width}, as well as (horizontal)
+   * {@link ColumnSeparation | column separation}.
    */
   (dag: NodeType): NodeType & ArquintNode;
   (dag: DagRoot<NodeType>): DagRoot<NodeType & ArquintNode>;
@@ -99,7 +99,7 @@ export interface Operator<
 
   /**
    * Sets this arquint layout's size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns this [[Operator]].
+   * numbers [ *width*, *height* ] and returns this {@link Operator}.
    */
   size(
     val: [number, number]
@@ -121,8 +121,8 @@ export interface Operator<
 
   /**
    * Sets the layering accessor to the specified function and returns this
-   * [[Operator]]. This is the same as [["sugiyama/layering/index" | sugiyama's
-   * layering operators]].
+   * {@link Operator}. This is the same as {@link "sugiyama/layering/index" | sugiyama's
+   * layering operators}.
    */
   layering<NewLayering extends LayeringOperator<NodeType>>(
     newLayering: NewLayering
@@ -145,8 +145,8 @@ export interface Operator<
 
   /**
    * Sets the decrossing accessor to the specified function and returns this
-   * [[Operator]]. This is the same as [["sugiyama/decross/index" | sugiyama's
-   * decrossing operators]].
+   * {@link Operator}. This is the same as {@link "sugiyama/decross/index" | sugiyama's
+   * decrossing operators}.
    */
   decross<NewDecross extends DecrossOperator<NodeType>>(
     newDecross: NewDecross
@@ -167,8 +167,8 @@ export interface Operator<
   decross(): Decross;
 
   /**
-   * Set the [[ColumnOperator]]. See [["arquint/column/index" | column
-   * asignments]] for more information on column assignments and the built in
+   * Set the {@link ColumnOperator}. See {@link "arquint/column/index" | column
+   * asignments} for more information on column assignments and the built in
    * options.
    */
   column<NewColumn extends ColumnOperator<NodeType>>(
@@ -185,14 +185,14 @@ export interface Operator<
     HeightRat
   >;
   /**
-   * Get the current [[ColumnOperator]], which defaults to `complex()`.
+   * Get the current {@link ColumnOperator}, which defaults to `complex()`.
    */
   column(): Column;
 
   /**
-   * Set the [[CoordOperator]], which is distinct from sugiyama coordinate
-   * assignment operators. See [["arquint/coord/index" | arquint coordinate
-   * assignments]] for more information and built in options.
+   * Set the {@link CoordOperator}, which is distinct from sugiyama coordinate
+   * assignment operators. See {@link "arquint/coord/index" | arquint coordinate
+   * assignments} for more information and built in options.
    */
   coord<NewCoord extends CoordOperator<NodeType>>(
     newCoord: NewCoord
@@ -213,7 +213,7 @@ export interface Operator<
   coord(): Coord;
 
   /**
-   * Set the current [[LayerSeparation]] to the supplied function.
+   * Set the current {@link LayerSeparation} to the supplied function.
    */
   layerSeparation<NewSep extends LayerSeparation<NodeType>>(
     newSep: NewSep
@@ -232,7 +232,7 @@ export interface Operator<
   layerSeparation(): LayerSep;
 
   /**
-   * Sets the [[ColumnWidth]] to the supplied function.
+   * Sets the {@link ColumnWidth} to the supplied function.
    */
   columnWidth<NewWidth extends ColumnWidth>(
     newWidth: NewWidth
@@ -251,7 +251,7 @@ export interface Operator<
   columnWidth(): ColWidth;
 
   /**
-   * Sets the [[ColumnSeparation]] to the supplied function.
+   * Sets the {@link ColumnSeparation} to the supplied function.
    */
   columnSeparation<NewSep extends ColumnSeparation>(
     newSep: NewSep

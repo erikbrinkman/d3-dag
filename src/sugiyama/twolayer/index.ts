@@ -1,13 +1,13 @@
 /**
  * A two layer (order) operator is any function that complies with the
- * [[Operator]] interface.  This function must rearrange the oder of the bottom
+ * {@link Operator} interface.  This function must rearrange the oder of the bottom
  * layer to minimize the number of crossings.
  *
  * There are three built in decrossing operators, which are all constructed in
  * a fluent fashion:
- * - [["sugiyama/twolayer/opt" | Optimal]]
- * - [["sugiyama/twolayer/median" | Median]]
- * - [["sugiyama/twolayer/mean" | Mean]]
+ * - {@link "sugiyama/twolayer/opt" | Optimal}
+ * - {@link "sugiyama/twolayer/median" | Median}
+ * - {@link "sugiyama/twolayer/mean" | Mean}
  *
  * @module
  */
