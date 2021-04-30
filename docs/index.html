@@ -67,7 +67,7 @@
 				<p>Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 					In these instances <code>d3-hierarchy</code> may not suit your needs, which is why <code>d3-dag</code> (Directed Acyclic Graph) exists.
 					This module implements a data structure for manipulating DAGs.
-				Old versions were designed to mimic <code>d3-hierarchy</code>&#39;s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard</p>
+				Old versions were designed to mimic <code>d3-hierarchy</code>&#39;s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard set by d3.</p>
 				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
 					<h2>Examples</h2>
 				</a>
@@ -93,26 +93,58 @@
 				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
 					<h2>API Reference</h2>
 				</a>
+				<blockquote>
+					<p>:warning: <strong>Documentation links aren&#39;t consistent</strong>: Due to the evolving nature of tsdoc and typedoc, internal linking between various points in the codebase doesn&#39;t work well.
+						Notably, it&#39;s currently impossible to differentiate linking between two symbols with the same name.
+					While there are workarounds, they are painful. Until this is addressed in typedoc, it&#39;s unlikely the documentation will be fixed.</p>
+				</blockquote>
 				<ul>
-					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_index_.html">Javascript API</a> - methods exported to flat javascript</li>
-					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_node_.html">DAG</a> - documentation on the DAG structure</li>
+					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/index.html">Javascript API</a> - methods exported to flat javascript</li>
+					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/dag_node.html">DAG</a> - documentation on the DAG structure</li>
 					<li>Creating DAGs from data<ul>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_hierarchy_.html">Hierarchy</a> - data in dag format</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_stratify_.html">Stratify</a> - data in tabular format</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_dag_connect_.html">Connect</a> - data in edge format</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/dag_hierarchy.html">Hierarchy</a> - data in dag format</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/dag_stratify.html">Stratify</a> - data in tabular format</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/dag_connect.html">Connect</a> - data in edge format</li>
 						</ul>
 					</li>
 					<li>Layout algorithms<ul>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_sugiyama_index_.html">Sugiyama</a> - standard layout</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_zherebko_index_.html">Zherebko</a> - topological layout</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/_arquint_index_.html">Arquint</a> - variable sized nodes</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/sugiyama.html">Sugiyama</a> - standard layout</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/zherebko.html">Zherebko</a> - topological layout</li>
+							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/arquint.html">Arquint</a> - variable sized nodes</li>
 						</ul>
 					</li>
 				</ul>
+				<a href="#experimental-es6-imports" id="experimental-es6-imports" style="color: inherit; text-decoration: none;">
+					<h2>Experimental ES6 Imports</h2>
+				</a>
+				<p>As of version 0.7, the full typescript build is released in the <code>dist</code> folder. That means in addition to importing from the bundled es6 module that was available before, you should be able to import arbitrary nested modules from <code>d3-dag/dist/...</code>. There may be issues with doing this, but it is at least an option. If people report success importing once private members from this more structured interface it may become stable.</p>
 				<a href="#updating" id="updating" style="color: inherit; text-decoration: none;">
 					<h2>Updating</h2>
 				</a>
 				<p>Information for major changes between releases</p>
+				<a href="#updating-from-06-to-07" id="updating-from-06-to-07" style="color: inherit; text-decoration: none;">
+					<h3>Updating from 0.6 to 0.7</h3>
+				</a>
+				<p>There are a number of potentially breaking changes when upgrading from 0.6 to 0.7.
+				The first may be a big breaker, the the rest were for private apis or otherwise shouldn&#39;t have been used very often.</p>
+				<ul>
+					<li>The only large breaking change is the remove of node ids. Prior to 0.7, all nodes must have a string id.
+						The string id was necessary to detect loops and identical elements efficiently when iterating.
+						ES6 Sets and Maps make this constraint unnecessary, and so it was removed.
+						To fix the errors created, you&#39;ll need to go from accessing <code>node.id</code> to instead access <code>node.data.id</code> or whatever field was used for the id during creation.
+						Note that <code>connect</code> and <code>stratify</code> still need ids to create the dag, and so still have their accessors, but <code>hierarchy</code> doesn&#39;t.
+					Also note that because nodes don&#39;t take an id anymore, <code>connect</code> now produces nodes with data that stores the id, instead of undefined as before.</li>
+					<li>In <code>decrossOpt</code> and <code>twolayerOpt</code> the clowntown option was replaced with the <code>large</code> option.
+					This renaming should be more clear, and should fail more quickly, preventing people from running optimal decross algorithms on dags that are too big without knowing what&#39;s going on.</li>
+					<li>Deprecated members <code>coordVert</code> and <code>coordMinCurve</code> were removed. Note that their layouts can still be achieved with <code>coordQuad</code>.</li>
+					<li>The bundled outputs used to be in the <code>dist</code> folder, and now their in the <code>bundle</code> folder. Those paths shouldn&#39;t have been hard coded, and the new paths are updated in <code>package.json</code>, but if you did hardcode them, this will break.</li>
+					<li>Version 0.6 was tested on node 12, now the minimum node version is 14.</li>
+				</ul>
+				<p>There were a few nobreaking updates:</p>
+				<ul>
+					<li>The <code>zherebko</code> method should be a bit better, while running negligibly longer.</li>
+					<li>Now when creating a dag with <code>dagConnect</code> or <code>dagStratify</code> typescript will pick up the datatype actually passed in, rather than just what was defined when creating the operator.</li>
+				</ul>
 				<a href="#updating-from-05-to-06" id="updating-from-05-to-06" style="color: inherit; text-decoration: none;">
 					<h3>Updating from 0.5 to 0.6</h3>
 				</a>
@@ -173,6 +205,10 @@
 					<li><code>test/data</code> was moved to <code>examples</code>. This isn&#39;t technically part of the api, but it may break examples that required the old file location.</li>
 					<li>Link data is created at dag creation time. This also isn&#39;t technically backwards compatible but might increase memory consumption.</li>
 				</ul>
+				<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+					<h2>Contributing</h2>
+				</a>
+				<p>Contributions, issues, and PRs are all welcome!</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -240,9 +276,6 @@
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord_min_curve.html">sugiyama/coord/min-<wbr>curve</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
@@ -318,7 +351,9 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
 				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">

@@ -98,7 +98,7 @@
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/sugiyama/twolayer/index.ts#L17">src/sugiyama/twolayer/index.ts:17</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/twolayer/index.ts#L17">src/sugiyama/twolayer/index.ts:17</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -121,8 +121,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="sugiyama_twolayer_opt.optoperator.html#clowntown" class="tsd-kind-icon">clowntown</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="sugiyama_twolayer_opt.optoperator.html#debug" class="tsd-kind-icon">debug</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="sugiyama_twolayer_opt.optoperator.html#large" class="tsd-kind-icon">large</a></li>
 							</ul>
 						</section>
 					</div>
@@ -131,28 +130,32 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
-					<a name="clowntown" class="tsd-anchor"></a>
-					<h3>clowntown</h3>
+					<a name="large" class="tsd-anchor"></a>
+					<h3>large</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">clowntown<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">clowntown<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">large<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">large<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/sugiyama/twolayer/opt.ts#L27">src/sugiyama/twolayer/opt.ts:27</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/twolayer/opt.ts#L28">src/sugiyama/twolayer/opt.ts:28</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Set to true to allow running on inputs that are likely to fail.</p>
+									<p>Set the large dag handling which will error if you try to decross a dag
+										that is too large. <code>&quot;small&quot;</code> the default only allows small graphs.
+										<code>&quot;medium&quot;</code> will allow large graphs that may take an unreasonable amount of
+										time to finish. <code>&quot;large&quot;</code> allows all graphs, including ones that will
+									likely crash the vm.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>val: <span class="tsd-signature-type">boolean</span></h5>
+									<h5>val: <a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -160,59 +163,15 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/sugiyama/twolayer/opt.ts#L29">src/sugiyama/twolayer/opt.ts:29</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/twolayer/opt.ts#L30">src/sugiyama/twolayer/opt.ts:30</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Return true if large inputs will be allowed to run.</p>
+									<p>Return the handling of large graphs.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
-					<a name="debug" class="tsd-anchor"></a>
-					<h3>debug</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/sugiyama/twolayer/opt.ts#L22">src/sugiyama/twolayer/opt.ts:22</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Set the debug value. If debug is true, the optimization formulation will
-										be given more human readable names that help debugging the optimization,
-									but may cause conflicts if used with poorly chosen node ids.</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>val: <span class="tsd-signature-type">boolean</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/sugiyama/twolayer/opt.ts#L24">src/sugiyama/twolayer/opt.ts:24</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Return the current debug value.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -237,15 +196,15 @@
 						<a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-kind-icon">Opt<wbr>Operator</a>
 						<ul>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
-								<a href="sugiyama_twolayer_opt.optoperator.html#clowntown" class="tsd-kind-icon">clowntown</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-interface">
-								<a href="sugiyama_twolayer_opt.optoperator.html#debug" class="tsd-kind-icon">debug</a>
+								<a href="sugiyama_twolayer_opt.optoperator.html#large" class="tsd-kind-icon">large</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-kind-icon">Large<wbr>Handling</a>
+					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="../modules/sugiyama_twolayer_opt.html#opt" class="tsd-kind-icon">opt</a>
 					</li>
@@ -259,13 +218,15 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
-				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>

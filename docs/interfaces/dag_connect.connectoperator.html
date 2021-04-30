@@ -100,13 +100,13 @@
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">Connect<wbr>Operator<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dag" class="tsd-signature-type" data-tsd-kind="Type alias">Dag</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">Connect<wbr>Operator&lt;L&gt;<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dag" class="tsd-signature-type" data-tsd-kind="Type alias">Dag</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a><span class="tsd-signature-symbol">&lt;</span><a href="dag_connect.connectdatum.html" class="tsd-signature-type" data-tsd-kind="Interface">ConnectDatum</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/dag/connect.ts#L36">src/dag/connect.ts:36</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/dag/connect.ts#L40">src/dag/connect.ts:40</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -124,13 +124,19 @@
 <span style="color: #000000">]</span>
 </code></pre>
 						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>L</h4>
+							</li>
+						</ul>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>data: <span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>data: <span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="../modules/dag_node.html#dag" class="tsd-signature-type" data-tsd-kind="Type alias">Dag</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="../modules/dag_node.html#dag" class="tsd-signature-type" data-tsd-kind="Type alias">Dag</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a><span class="tsd-signature-symbol">&lt;</span><a href="dag_connect.connectdatum.html" class="tsd-signature-type" data-tsd-kind="Interface">ConnectDatum</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -161,13 +167,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/dag/connect.ts#L64">src/dag/connect.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/dag/connect.ts#L68">src/dag/connect.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Sets the source accessor to the given <a href="dag_connect.idoperator.html">IdOperator</a> and returns this
-									[[ConnectOperator]]. The default accessor is:</p>
+									{@link ConnectOperator}. The default accessor is:</p>
 								</div>
 								<pre><code class="language-js"><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">sourceAccessor</span><span style="color: #000000">(</span><span style="color: #001080">link</span><span style="color: #000000">) {</span>
 <span style="color: #000000">  </span><span style="color: #AF00DB">return</span><span style="color: #000000"> </span><span style="color: #001080">link</span><span style="color: #000000">[</span><span style="color: #098658">0</span><span style="color: #000000">];</span>
@@ -191,7 +197,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/dag/connect.ts#L68">src/dag/connect.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/dag/connect.ts#L72">src/dag/connect.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -214,13 +220,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/dag/connect.ts#L80">src/dag/connect.ts:80</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/dag/connect.ts#L84">src/dag/connect.ts:84</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Sets the target accessor to the given <a href="dag_connect.idoperator.html">IdOperator</a> and returns this
-									[[ConnectOperator]]. The default accessor is:</p>
+									{@link ConnectOperator}. The default accessor is:</p>
 								</div>
 								<pre><code class="language-js"><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">sourceAccessor</span><span style="color: #000000">(</span><span style="color: #001080">link</span><span style="color: #000000">) {</span>
 <span style="color: #000000">  </span><span style="color: #AF00DB">return</span><span style="color: #000000"> </span><span style="color: #001080">link</span><span style="color: #000000">[</span><span style="color: #098658">1</span><span style="color: #000000">];</span>
@@ -244,7 +250,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/cc74681/src/dag/connect.ts#L84">src/dag/connect.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/dag/connect.ts#L88">src/dag/connect.ts:88</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -271,6 +277,9 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="dag_connect.connectdatum.html" class="tsd-kind-icon">Connect<wbr>Datum</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
@@ -302,7 +311,9 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
 				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
