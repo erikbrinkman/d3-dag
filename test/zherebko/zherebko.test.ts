@@ -94,6 +94,24 @@ test("zherebko() works on disconnected dag", () => {
   }
 });
 
+test("zherebko() works on sink", () => {
+  const dag = dagConnect()([
+    ["0", "3"],
+    ["1", "3"],
+    ["2", "3"]
+  ]);
+  const laidout = zherebko().size([2, 3])(dag);
+  for (const node of laidout) {
+    expect(node.x).toEqual(1);
+    expect(node.data.id === "3" ? node.y === 3 : node.y < 3).toBeTruthy();
+    const [{ points = [] } = {}] = node.ichildLinks();
+    const exes = new Set(points.slice(1, -1).map(({ x }) => x));
+    expect(exes.size).toBeLessThan(2);
+    const [x = 0] = exes;
+    expect([0, 2]).toContainEqual(x);
+  }
+});
+
 test("zherebko() fails with args", () => {
   // @ts-expect-error zherebko takes no arguments
   expect(() => zherebko(undefined)).toThrow("got arguments to zherebko");
