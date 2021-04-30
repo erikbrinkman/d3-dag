@@ -8,7 +8,7 @@ import replace from "@rollup/plugin-replace";
 import { terser } from "rollup-plugin-terser";
 
 export default {
-  input: "dist/bundle.js",
+  input: "dist/index.js",
   output: [
     {
       file: pkg.unpkg,
