@@ -7,7 +7,7 @@
 Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 In these instances `d3-hierarchy` may not suit your needs, which is why `d3-dag` (Directed Acyclic Graph) exists.
 This module implements a data structure for manipulating DAGs.
-Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard
+Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard set by d3.
 
 
 ## Examples
@@ -35,6 +35,10 @@ var dag = d3.sugiyama();
 
 ## API Reference
 
+> :warning: **Documentation links aren't consistent**: Due to the evolving nature of tsdoc and typedoc, internal linking between various points in the codebase doesn't work well.
+> Notably, it's currently impossible to differentiate linking between two symbols with the same name.
+> While there are workarounds, they are painful. Until this is addressed in typedoc, it's unlikely the documentation will be fixed.
+
 * [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/index.html) - methods exported to flat javascript
 * [DAG](https://erikbrinkman.github.io/d3-dag/modules/dag_node.html) - documentation on the DAG structure
 * Creating DAGs from data
@@ -46,9 +50,33 @@ var dag = d3.sugiyama();
   * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/zherebko.html) - topological layout
   * [Arquint](https://erikbrinkman.github.io/d3-dag/modules/arquint.html) - variable sized nodes
 
+## Experimental ES6 Imports
+
+As of version 0.7, the full typescript build is released in the `dist` folder. That means in addition to importing from the bundled es6 module that was available before, you should be able to import arbitrary nested modules from `d3-dag/dist/...`. There may be issues with doing this, but it is at least an option. If people report success importing once private members from this more structured interface it may become stable.
+
 ## Updating
 
 Information for major changes between releases
+
+### Updating from 0.6 to 0.7
+
+There are a number of potentially breaking changes when upgrading from 0.6 to 0.7.
+The first may be a big breaker, the the rest were for private apis or otherwise shouldn't have been used very often.
+- The only large breaking change is the remove of node ids. Prior to 0.7, all nodes must have a string id.
+  The string id was necessary to detect loops and identical elements efficiently when iterating.
+  ES6 Sets and Maps make this constraint unnecessary, and so it was removed.
+  To fix the errors created, you'll need to go from accessing `node.id` to instead access `node.data.id` or whatever field was used for the id during creation.
+  Note that `connect` and `stratify` still need ids to create the dag, and so still have their accessors, but `hierarchy` doesn't.
+  Also note that because nodes don't take an id anymore, `connect` now produces nodes with data that stores the id, instead of undefined as before.
+- In `decrossOpt` and `twolayerOpt` the clowntown option was replaced with the `large` option.
+  This renaming should be more clear, and should fail more quickly, preventing people from running optimal decross algorithms on dags that are too big without knowing what's going on.
+- Deprecated members `coordVert` and `coordMinCurve` were removed. Note that their layouts can still be achieved with `coordQuad`.
+- The bundled outputs used to be in the `dist` folder, and now their in the `bundle` folder. Those paths shouldn't have been hard coded, and the new paths are updated in `package.json`, but if you did hardcode them, this will break.
+- Version 0.6 was tested on node 12, now the minimum node version is 14.
+
+There were a few nobreaking updates:
+- The `zherebko` method should be a bit better, while running negligibly longer.
+- Now when creating a dag with `dagConnect` or `dagStratify` typescript will pick up the datatype actually passed in, rather than just what was defined when creating the operator.
 
 ### Updating from 0.5 to 0.6
 
@@ -112,3 +140,8 @@ The update from 0.1 to 0.2 includes a few small backwards incompatible changes.
 - `coordSpread` was removed in favor of `coordCenter` which produces a slightly better layout in the same amount of time.
 - `test/data` was moved to `examples`. This isn't technically part of the api, but it may break examples that required the old file location.
 - Link data is created at dag creation time. This also isn't technically backwards compatible but might increase memory consumption.
+
+
+## Contributing
+
+Contributions, issues, and PRs are all welcome!
