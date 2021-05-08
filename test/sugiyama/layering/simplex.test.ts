@@ -1,4 +1,4 @@
-import { doub, ex, square, SimpleDatum } from "../../examples";
+import { SimpleDatum, doub, ex, square } from "../../examples";
 
 import { DagNode } from "../../../src/dag/node";
 import { layeringSimplex } from "../../../src";
@@ -40,15 +40,20 @@ test("layeringSimplex() works for X", () => {
 
 test("layeringSimplex() respects equality rank", () => {
   const dag = ex();
-  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank((node) => {
-    if (node.data.id === "0") {
-      return 0;
-    } else if (node.data.id === "2") {
-      return 0;
-    } else {
-      return undefined;
-    }
-  });
+  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank((node) =>
+    node.data.id === "0" || node.data.id === "2" ? 0 : undefined
+  );
+  layout(dag);
+  const layers = toLayers(dag);
+  expect([[0, 2], [1], [3], [4, 5], [6]]).toEqual(layers);
+});
+
+test("layeringSimplex() respects groups", () => {
+  const dag = ex();
+  const grp = (node: DagNode<SimpleDatum>) =>
+    node.data.id === "0" || node.data.id === "2" ? "group" : undefined;
+  const layout = layeringSimplex<DagNode<SimpleDatum>>().group(grp);
+  expect(layout.group()).toBe(grp);
   layout(dag);
   const layers = toLayers(dag);
   expect([[0, 2], [1], [3], [4, 5], [6]]).toEqual(layers);
@@ -78,6 +83,16 @@ test("layeringSimplex() fails with ill-defined ranks", () => {
     }
   });
   expect(() => layout(dag)).toThrow(
-    "check that rank accessors are not ill-defined"
+    "check that rank or group accessors are not ill-defined"
+  );
+});
+
+test("layeringSimplex() fails with ill-defined group", () => {
+  const dag = square();
+  const layout = layeringSimplex<DagNode<SimpleDatum>>().group((node) =>
+    node.data.id === "0" || node.data.id === "3" ? "group" : undefined
+  );
+  expect(() => layout(dag)).toThrow(
+    "check that rank or group accessors are not ill-defined"
   );
 });

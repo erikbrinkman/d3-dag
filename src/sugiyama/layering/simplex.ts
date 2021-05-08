@@ -13,12 +13,13 @@
  */
 
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
-import { Dag, DagNode, Link } from "../../dag/node";
-import { LayerableNode, Operator, RankAccessor } from ".";
+import { Dag, DagNode } from "../../dag/node";
+import { GroupAccessor, LayerableNode, Operator, RankAccessor } from ".";
 import { Replace, def } from "../../utils";
 
 interface Operators<NodeType extends DagNode> {
   rank: RankAccessor<NodeType>;
+  group: GroupAccessor<NodeType>;
 }
 
 export interface SimplexOperator<
@@ -28,7 +29,7 @@ export interface SimplexOperator<
   /**
    * Set the {@link RankAccessor}. Any node with a rank assigned will have a second
    * ordering enforcing ordering of the ranks. Note, this can cause the simplex
-   * optimization to be ildefined, and may result in an error during layout.
+   * optimization to be ill-defined, and may result in an error during layout.
    */
   rank<NewRank extends RankAccessor<NodeType>>(
     newRank: NewRank
@@ -37,6 +38,20 @@ export interface SimplexOperator<
    * Get the current {@link RankAccessor}.
    */
   rank(): Ops["rank"];
+
+  /**
+   * Set the {@link GroupAccessor}. Any node with a group assigned will have a second
+   * ordering enforcing all nodes with the same group have the same layer.
+   * Note, this can cause the simplex optimization to be ill-defined, and may
+   * result in an error during layout.
+   */
+  group<NewGroup extends GroupAccessor<NodeType>>(
+    newGroup: NewGroup
+  ): SimplexOperator<NodeType, Replace<Ops, "group", NewGroup>>;
+  /**
+   * Get the current {@link GroupAccessor}.
+   */
+  group(): Ops["group"];
 }
 
 /** @internal */
@@ -56,22 +71,44 @@ function buildOperator<
         .map(([i, node]) => [node, i.toString()])
     );
 
-    /** node id */
+    /** get node id */
     function n(node: NodeType): string {
       return def(ids.get(node));
     }
 
-    /** link id */
-    function l(link: Link<NodeType>): string {
-      return `${def(ids.get(link.source))} -> ${def(ids.get(link.target))}`;
+    /** get variable associated with a node */
+    function variable(node: NodeType): Variable {
+      return variables[n(node)];
     }
 
-    /** rank constraint */
-    function r(low: NodeType, high: NodeType): string {
-      return `rank: ${def(ids.get(low))} -> ${def(ids.get(high))}`;
+    /** enforce that first occurs before second
+     *
+     * @param prefix determines a unique prefix to describe constraint
+     * @param strict strictly before or possibly equal
+     */
+    function before(
+      prefix: string,
+      first: NodeType,
+      second: NodeType,
+      strict: boolean = true
+    ): void {
+      const fvar = variable(first);
+      const svar = variable(second);
+      const cons = `${prefix}: ${def(n(first))} -> ${def(n(second))}`;
+
+      constraints[cons] = { min: +strict };
+      fvar[cons] = -1;
+      svar[cons] = 1;
+    }
+
+    /** enforce that first and second occur on the same layer */
+    function equal(prefix: string, first: NodeType, second: NodeType): void {
+      before(`${prefix} before`, first, second, false);
+      before(`${prefix} after`, second, first, false);
     }
 
     const ranks: [number, N][] = [];
+    const groups = new Map<string, N[]>();
 
     // Add node variables and fetch ranks
     for (const node of dag) {
@@ -85,19 +122,22 @@ function buildOperator<
       if (rank !== undefined) {
         ranks.push([rank, node]);
       }
+      const group = options.group(node);
+      if (group !== undefined) {
+        const existing = groups.get(group);
+        if (existing) {
+          existing.push(node);
+        } else {
+          groups.set(group, [node]);
+        }
+      }
     }
 
     // Add link constraints
     for (const link of dag.ilinks()) {
-      const source = variables[n(link.source)];
-      const target = variables[n(link.target)];
-      const edge = l(link);
-
-      constraints[edge] = { min: 1 };
-      source[edge] = -1;
-      source.opt++;
-      target[edge] = 1;
-      target.opt--;
+      before("link", link.source, link.target);
+      ++variable(link.source).opt;
+      --variable(link.target).opt;
     }
 
     // Add rank constraints
@@ -105,28 +145,21 @@ function buildOperator<
     for (const second of rest) {
       const [frank, fnode] = first;
       const [srank, snode] = second;
-
-      const low = variables[n(fnode)];
-      const high = variables[n(snode)];
-      const cons = r(fnode, snode);
-
       if (frank < srank) {
-        // inequality constraint
-        constraints[cons] = { min: 1 };
-        low[cons] = -1;
-        high[cons] = 1;
+        before("rank", fnode, snode);
       } else {
-        // equality constraint
-        const rcons = r(snode, fnode);
-        constraints[cons] = { min: 0 };
-        constraints[rcons] = { min: 0 };
-        low[cons] = -1;
-        low[rcons] = 1;
-        high[cons] = 1;
-        high[rcons] = -1;
+        equal("rank", fnode, snode);
       }
-
       first = second;
+    }
+
+    // group constraints
+    for (const group of groups.values()) {
+      let [first, ...rest] = group;
+      for (const second of rest) {
+        equal("group", first, second);
+        first = second;
+      }
     }
 
     const { feasible, ...assignment } = Solve({
@@ -138,9 +171,9 @@ function buildOperator<
     });
     if (!feasible) {
       /* istanbul ignore else */
-      if (ranks.length) {
+      if (ranks.length || groups.size) {
         throw new Error(
-          "could not find a feasbile simplex layout, check that rank accessors are not ill-defined"
+          "could not find a feasbile simplex layout, check that rank or group accessors are not ill-defined"
         );
       } else {
         throw new Error(
@@ -171,11 +204,27 @@ function buildOperator<
   }
   simplexCall.rank = rank;
 
+  function group<NewGroup extends GroupAccessor<NodeType>>(
+    newGroup: NewGroup
+  ): SimplexOperator<NodeType, Replace<Ops, "group", NewGroup>>;
+  function group(): Ops["group"];
+  function group<NewGroup extends GroupAccessor<NodeType>>(
+    newGroup?: NewGroup
+  ): SimplexOperator<NodeType, Replace<Ops, "group", NewGroup>> | Ops["group"] {
+    if (newGroup === undefined) {
+      return options.group;
+    } else {
+      const { group: _, ...rest } = options;
+      return buildOperator({ ...rest, group: newGroup });
+    }
+  }
+  simplexCall.group = group;
+
   return simplexCall;
 }
 
 /** @internal */
-function defaultRank(): undefined {
+function defaultAccessor(): undefined {
   return undefined;
 }
 
@@ -188,5 +237,5 @@ export function simplex<NodeType extends DagNode>(
       `got arguments to simplex(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ rank: defaultRank });
+  return buildOperator({ rank: defaultAccessor, group: defaultAccessor });
 }

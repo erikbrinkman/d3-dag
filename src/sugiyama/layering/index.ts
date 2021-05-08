@@ -17,10 +17,20 @@ import { Dag, DagNode } from "../../dag/node";
 /**
  * A rank accessor assigns a rank to specific nodes. Layering operators that
  * take a rank accessor should respect the convention that nodes with higher
- * rank should be pushed farther down.
+ * rank should be pushed farther down, and nodes with the same rank should have
+ * the same layer.
  */
 export interface RankAccessor<NodeType extends DagNode> {
   (node: NodeType): number | undefined;
+}
+
+/**
+ * A group accessor assigns a group to specific nodes. Layering operators that
+ * take a group accessor should respect the convention that nodes with the same
+ * group should have the same layer.
+ */
+export interface GroupAccessor<NodeType extends DagNode> {
+  (node: NodeType): string | undefined;
 }
 
 export interface LayerableNode {
