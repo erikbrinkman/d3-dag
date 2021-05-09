@@ -2,7 +2,7 @@ import { HorizableNode, NodeSizeAccessor } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
-import { SafeMap } from "../../utils";
+import { def } from "../../utils";
 import { solveQP } from "quadprog";
 
 /** @internal wrapper for solveQP */
@@ -72,8 +72,8 @@ export function solve(
 /** @internal compute indices used to index arrays */
 export function indices<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][]
-): SafeMap<NodeType | DummyNode, number> {
-  const inds = new SafeMap<NodeType | DummyNode, number>();
+): Map<NodeType | DummyNode, number> {
+  const inds = new Map<NodeType | DummyNode, number>();
   let i = 0;
   for (const layer of layers) {
     for (const node of layer) {
@@ -86,7 +86,7 @@ export function indices<NodeType extends DagNode>(
 /** @interal Compute constraint arrays for layer separation */
 export function init<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][],
-  inds: SafeMap<NodeType | DummyNode, number>,
+  inds: Map<NodeType | DummyNode, number>,
   nodeSize: NodeSizeAccessor<NodeType>
 ): [number[][], number[], number[][], number[]] {
   const n = 1 + Math.max(...inds.values());
@@ -96,8 +96,8 @@ export function init<NodeType extends DagNode>(
   for (const layer of layers) {
     let [first, ...rest] = layer;
     for (const second of rest) {
-      const find = inds.getThrow(first);
-      const sind = inds.getThrow(second);
+      const find = def(inds.get(first));
+      const sind = def(inds.get(second));
       const cons = new Array(n).fill(0);
       cons[find] = 1;
       cons[sind] = -1;
@@ -160,7 +160,7 @@ export function minBend(
 export function layout<NodeType extends DagNode>(
   layers: ((NodeType & HorizableNode) | DummyNode)[][],
   nodeSize: NodeSizeAccessor<NodeType>,
-  inds: SafeMap<NodeType | DummyNode, number>,
+  inds: Map<NodeType | DummyNode, number>,
   solution: number[]
 ): number {
   // find span of solution
@@ -172,18 +172,18 @@ export function layout<NodeType extends DagNode>(
 
     start = Math.min(
       start,
-      solution[inds.getThrow(first)] - nodeSize(first)[0] / 2
+      solution[def(inds.get(first))] - nodeSize(first)[0] / 2
     );
     finish = Math.max(
       finish,
-      solution[inds.getThrow(last)] + nodeSize(last)[0] / 2
+      solution[def(inds.get(last))] + nodeSize(last)[0] / 2
     );
   }
 
   // assign inds based off of span
   for (const layer of layers) {
     for (const node of layer) {
-      node.x = solution[inds.getThrow(node)] - start;
+      node.x = solution[def(inds.get(node))] - start;
     }
   }
 

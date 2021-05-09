@@ -15,7 +15,7 @@
 // better behavior
 
 import { HorizableNode, NodeSizeAccessor, Operator } from ".";
-import { SafeMap, def, js } from "../../utils";
+import { def, js } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
@@ -40,7 +40,7 @@ export function greedy<NodeType extends DagNode>(
     const assignment = meanAssignment;
 
     // assign degrees
-    const degrees = new SafeMap<NodeType | DummyNode, number>();
+    const degrees = new Map<NodeType | DummyNode, number>();
     for (const layer of layers) {
       for (const node of layer) {
         // the -3 at the end ensures that dummy nodes have the lowest priority,
@@ -55,7 +55,7 @@ export function greedy<NodeType extends DagNode>(
     for (const layer of layers) {
       for (const node of layer) {
         for (const child of node.ichildren()) {
-          degrees.set(child, degrees.getThrow(child) + 1);
+          degrees.set(child, def(degrees.get(child)) + 1);
         }
       }
     }
@@ -82,8 +82,8 @@ export function greedy<NodeType extends DagNode>(
             [j, node] as [number, (NodeType & HorizableNode) | DummyNode]
         )
         .sort(([aj, anode], [bj, bnode]) => {
-          const adeg = degrees.getThrow(anode);
-          const bdeg = degrees.getThrow(bnode);
+          const adeg = def(degrees.get(anode));
+          const bdeg = def(degrees.get(bnode));
           return adeg === bdeg ? aj - bj : bdeg - adeg;
         });
       // Iterate over nodes in degree order
@@ -140,7 +140,7 @@ function meanAssignment<NodeType extends (DagNode & HorizableNode) | DummyNode>(
   for (const node of bottomLayer) {
     node.x = 0.0;
   }
-  const counts = new SafeMap<DagNode | DummyNode, number>();
+  const counts = new Map<DagNode | DummyNode, number>();
   for (const node of topLayer) {
     for (const child of node.ichildren()) {
       /* istanbul ignore if */
@@ -149,7 +149,7 @@ function meanAssignment<NodeType extends (DagNode & HorizableNode) | DummyNode>(
           js`internal error: unexpected undefined x for '${child}'`
         );
       }
-      const newCount = counts.getDefault(child, 0) + 1;
+      const newCount = (counts.get(child) || 0) + 1;
       counts.set(child, newCount);
       child.x += (def(node.x) - child.x) / newCount;
     }

@@ -19,7 +19,7 @@
  */
 
 import { FluentIterable, fluent } from "../iters";
-import { SafeMap, setIntersect } from "../utils";
+import { def, setIntersect } from "../utils";
 
 /** @internal */
 export class LayoutChildLink<
@@ -212,10 +212,10 @@ export class LayoutDagRoot<NodeType extends DagNode>
   }
 
   private *ibefore(): Generator<NodeType> {
-    const numBefore = new SafeMap<NodeType, number>();
+    const numBefore = new Map<NodeType, number>();
     for (const node of this) {
       for (const child of node.ichildren()) {
-        numBefore.set(child, numBefore.getDefault(child, 0) + 1);
+        numBefore.set(child, (numBefore.get(child) || 0) + 1);
       }
     }
 
@@ -224,7 +224,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
     while ((node = queue.pop())) {
       yield node;
       for (const child of node.ichildren()) {
-        const before = numBefore.getThrow(child);
+        const before = def(numBefore.get(child));
         if (before > 1) {
           numBefore.set(child, before - 1);
         } else {
@@ -310,13 +310,13 @@ export class LayoutDagRoot<NodeType extends DagNode>
   sum(
     callback: (node: NodeType, index: number) => number
   ): DagRoot<NodeType & ValuedNode> {
-    const descendantVals = new SafeMap<NodeType, SafeMap<NodeType, number>>();
+    const descendantVals = new Map<NodeType, Map<NodeType, number>>();
     for (const [index, node] of this.idescendants("after").entries()) {
       const val = callback(node, index);
-      const nodeVals = new SafeMap<NodeType, number>();
+      const nodeVals = new Map<NodeType, number>();
       nodeVals.set(node, val);
       for (const child of node.ichildren()) {
-        const childMap = descendantVals.getThrow(child);
+        const childMap = def(descendantVals.get(child));
         for (const [child, v] of childMap.entries()) {
           nodeVals.set(child, v);
         }
@@ -336,7 +336,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * This method returns {@link ValuedNode}s that also have a value property.
    */
   count(): DagRoot<NodeType & ValuedNode> {
-    const leaves = new SafeMap<NodeType, Set<NodeType>>();
+    const leaves = new Map<NodeType, Set<NodeType>>();
     for (const node of this.idescendants("after")) {
       if (node.ichildren()[Symbol.iterator]().next().done) {
         leaves.set(node, new Set([node]));
@@ -344,7 +344,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
       } else {
         const nodeLeaves = new Set<NodeType>();
         for (const child of node.ichildren()) {
-          const childLeaves = leaves.getThrow(child);
+          const childLeaves = def(leaves.get(child));
           for (const leaf of childLeaves) {
             nodeLeaves.add(leaf);
           }
@@ -384,16 +384,21 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * This method returns {@link ValuedNode}s that also have a value property.
    */
   depth(): DagRoot<NodeType & ValuedNode> {
-    const parents = new SafeMap<NodeType, NodeType[]>();
+    const parents = new Map<NodeType, NodeType[]>();
     for (const node of this) {
       for (const child of node.ichildren()) {
-        parents.setIfAbsent(child, []).push(node);
+        const pars = parents.get(child);
+        if (pars) {
+          pars.push(node);
+        } else {
+          parents.set(child, [node]);
+        }
       }
     }
     for (const node of this.idescendants("before")) {
       node.value = Math.max(
         0,
-        ...parents.getDefault(node, []).map((par) => {
+        ...(parents.get(node) || []).map((par) => {
           /* istanbul ignore next */
           if (par.value === undefined) {
             throw new Error(
@@ -415,19 +420,19 @@ export class LayoutDagRoot<NodeType extends DagNode>
   split(): Dag<NodeType>[] {
     // construct a graph between root nodes with edges if they share
     // descendants
-    const children = new SafeMap<NodeType, NodeType[]>();
-    const descendants = new SafeMap<NodeType, Set<NodeType>>();
+    const children = new Map<NodeType, NodeType[]>();
+    const descendants = new Map<NodeType, Set<NodeType>>();
     for (const root of this.iroots()) {
       children.set(root, []);
       descendants.set(root, new Set<NodeType>(root.idescendants()));
     }
     for (const [i, source] of this.iroots().entries()) {
-      const sourceCov = descendants.getThrow(source);
+      const sourceCov = def(descendants.get(source));
       for (const target of this.iroots().slice(i + 1)) {
-        const targetCov = descendants.getThrow(target);
+        const targetCov = def(descendants.get(target));
         if (setIntersect(sourceCov, targetCov)) {
-          children.getThrow(source).push(target);
-          children.getThrow(target).push(source);
+          def(children.get(source)).push(target);
+          def(children.get(target)).push(source);
         }
       }
     }
@@ -440,13 +445,13 @@ export class LayoutDagRoot<NodeType extends DagNode>
         seen.add(root);
         const connected = [root];
         splitRoots.push(connected);
-        const queue = children.getThrow(root).slice();
+        const queue = def(children.get(root)).slice();
         let node;
         while ((node = queue.pop())) {
           if (!seen.has(node)) {
             seen.add(node);
             connected.push(node);
-            queue.push(...children.getThrow(node));
+            queue.push(...def(children.get(node)));
           }
         }
       }

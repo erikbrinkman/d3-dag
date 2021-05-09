@@ -9,8 +9,8 @@
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { Operator } from ".";
-import { SafeMap } from "../../utils";
 import { median as arrayMedian } from "d3-array";
+import { def } from "../../utils";
 
 export type MedianOperator<NodeType extends DagNode> = Operator<NodeType>;
 
@@ -27,16 +27,21 @@ export function median<NodeType extends DagNode>(
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
   ): void {
-    const positions = new SafeMap<NodeType | DummyNode, number[]>();
+    const positions = new Map<NodeType | DummyNode, number[]>();
     for (const [i, node] of topLayer.entries()) {
       for (const child of node.ichildren()) {
-        positions.setIfAbsent(child, []).push(i);
+        const pos = positions.get(child);
+        if (pos) {
+          pos.push(i);
+        } else {
+          positions.set(child, [i]);
+        }
       }
     }
-    const medians = new SafeMap<NodeType | DummyNode, number>();
+    const medians = new Map<NodeType | DummyNode, number>();
     let otherwise = -1;
     for (const node of bottomLayer) {
-      const med = arrayMedian(positions.getDefault(node, []));
+      const med = arrayMedian(positions.get(node) || []);
       if (med === undefined) {
         medians.set(node, otherwise);
         otherwise =
@@ -46,7 +51,7 @@ export function median<NodeType extends DagNode>(
         medians.set(node, med);
       }
     }
-    bottomLayer.sort((a, b) => medians.getThrow(a) - medians.getThrow(b));
+    bottomLayer.sort((a, b) => def(medians.get(a)) - def(medians.get(b)));
   }
 
   return medianCall;

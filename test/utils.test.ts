@@ -1,11 +1,4 @@
-import { SafeMap, assert } from "../src/utils";
-
-test("getThrow throws", () => {
-  const map = new SafeMap<string, number>();
-  expect(() => {
-    map.getThrow("");
-  }).toThrow("map doesn't contain key: ");
-});
+import { assert } from "../src/utils";
 
 test("assert throws", () => {
   expect(() => assert(false)).toThrow("internal error: failed assert");

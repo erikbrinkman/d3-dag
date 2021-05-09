@@ -13,9 +13,9 @@
 
 import { Dag, DagNode } from "../../dag/node";
 import { LayerableNode, Operator } from ".";
-import { SafeMap, def } from "../../utils";
 
 import FastPriorityQueue from "fastpriorityqueue";
+import { def } from "../../utils";
 
 export interface CoffmanGrahamOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
@@ -44,19 +44,19 @@ function buildOperator<NodeType extends DagNode>(options: {
     const maxWidth = options.width || Math.floor(Math.sqrt(dag.size() + 0.5));
 
     // initialize node data
-    const data = new SafeMap<NodeType, Data<N>>(
+    const data = new Map<NodeType, Data<N>>(
       dag.idescendants().map((node) => [node, new Data<N>()])
     );
     for (const node of dag) {
       for (const child of node.ichildren()) {
-        data.getThrow(child).parents.push(node);
+        def(data.get(child)).parents.push(node);
       }
     }
 
     // create queue
     function comp(left: N, right: N): boolean {
-      const leftBefore = data.getThrow(left).before;
-      const rightBefore = data.getThrow(right).before;
+      const leftBefore = def(data.get(left)).before;
+      const rightBefore = def(data.get(right)).before;
       for (const [i, leftb] of leftBefore.entries()) {
         const rightb = rightBefore[i];
         if (rightb === undefined) {
@@ -83,7 +83,7 @@ function buildOperator<NodeType extends DagNode>(options: {
     while ((node = queue.poll())) {
       if (
         width < maxWidth &&
-        data.getThrow(node).parents.every((p) => def(p.layer) < layer)
+        def(data.get(node)).parents.every((p) => def(p.layer) < layer)
       ) {
         node.layer = layer;
         width++;
@@ -92,7 +92,7 @@ function buildOperator<NodeType extends DagNode>(options: {
         width = 1;
       }
       for (const child of node.ichildren()) {
-        const { before, parents } = data.getThrow(child);
+        const { before, parents } = def(data.get(child));
         before.push(i);
         if (before.length === parents.length) {
           before.sort((a, b) => b - a);

@@ -11,7 +11,7 @@ import { init, layout, minBend, solve } from "./utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
-import { SafeMap } from "../../utils";
+import { def } from "../../utils";
 
 export type TopologicalOperator<NodeType extends DagNode> = Operator<NodeType>;
 
@@ -39,7 +39,7 @@ export function topological<NodeType extends DagNode>(
       }
     }
 
-    const inds = new SafeMap<NodeType | DummyNode, number>();
+    const inds = new Map<NodeType | DummyNode, number>();
     let i = 0;
     for (const layer of layers) {
       for (const node of layer) {
@@ -61,12 +61,12 @@ export function topological<NodeType extends DagNode>(
 
     for (const layer of layers) {
       for (const par of layer) {
-        const pind = inds.getThrow(par);
+        const pind = def(inds.get(par));
         for (const node of par.ichildren()) {
-          const nind = inds.getThrow(node);
+          const nind = def(inds.get(node));
           if (node instanceof DummyNode) {
             for (const child of node.ichildren()) {
-              const cind = inds.getThrow(child);
+              const cind = def(inds.get(child));
               minBend(Q, pind, nind, cind, 1);
             }
           }

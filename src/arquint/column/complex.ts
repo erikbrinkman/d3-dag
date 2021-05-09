@@ -14,7 +14,7 @@ import { IndexableNode, Operator } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
-import { SafeMap } from "../../utils";
+import { def } from "../../utils";
 
 export interface ComplexOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
@@ -35,18 +35,18 @@ function buildOperator<NodeType extends DagNode>(
     layers: ((NodeType & IndexableNode) | DummyNode)[][]
   ): void {
     // find all root nodes and subtree widths
-    const rootMap = new SafeMap<
+    const rootMap = new Map<
       NodeType | DummyNode,
       (NodeType & IndexableNode) | DummyNode
     >();
-    const subtreeWidths = new SafeMap<NodeType | DummyNode, number>();
+    const subtreeWidths = new Map<NodeType | DummyNode, number>();
     for (const layer of layers.slice().reverse()) {
       for (const node of layer) {
         rootMap.set(node, node);
         let subtreeWidth = 0;
         for (const child of node.ichildren()) {
           rootMap.delete(child);
-          subtreeWidth += subtreeWidths.getThrow(child);
+          subtreeWidth += def(subtreeWidths.get(child));
         }
         subtreeWidths.set(node, Math.max(subtreeWidth, 1));
       }
@@ -59,7 +59,7 @@ function buildOperator<NodeType extends DagNode>(
     // not clear how that would look
     let startColumnIndex = 0;
     for (const node of rootMap.values()) {
-      const subtreeWidth = subtreeWidths.getThrow(node);
+      const subtreeWidth = def(subtreeWidths.get(node));
       node.columnIndex =
         startColumnIndex + (centerVal ? Math.floor((subtreeWidth - 1) / 2) : 0);
       assignColumnIndexToChildren(node, startColumnIndex);
@@ -76,7 +76,7 @@ function buildOperator<NodeType extends DagNode>(
           // stop recursion, this child was already visited
           return;
         }
-        const width = subtreeWidths.getThrow(child);
+        const width = def(subtreeWidths.get(child));
         child.columnIndex =
           childColumnIndex + (centerVal ? Math.floor((width - 1) / 2) : 0);
         assignColumnIndexToChildren<N>(child, childColumnIndex);

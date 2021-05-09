@@ -15,10 +15,10 @@
  * @module
  */
 import { IndexableNode, Operator } from ".";
-import { SafeMap, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
+import { def } from "../../utils";
 
 export interface AdjacentOperator<NodeType extends DagNode>
   extends Operator<NodeType> {
@@ -43,14 +43,19 @@ function buildOperator<NodeType extends DagNode>(
     // although they do not have a children/parents relation with each other
 
     // create parents
-    const parentMap = new SafeMap<
+    const parentMap = new Map<
       NodeType | DummyNode,
       ((NodeType & IndexableNode) | DummyNode)[]
     >();
     for (const layer of layers) {
       for (const node of layer) {
         for (const child of node.ichildren()) {
-          parentMap.setIfAbsent(child, []).push(node);
+          const parents = parentMap.get(child);
+          if (parents) {
+            parents.push(node);
+          } else {
+            parentMap.set(child, [node]);
+          }
         }
       }
     }
@@ -126,8 +131,8 @@ function buildOperator<NodeType extends DagNode>(
       } else {
         // map each node to its desired location:
         const desiredColumnIndices = layer.map((node, index) => {
-          const parents = parentMap.getDefault(node, []);
-          if (parents.length === 0) {
+          const parents = parentMap.get(node);
+          if (!parents) {
             return index;
           }
           const parentColumnIndices = parents.map((par) =>

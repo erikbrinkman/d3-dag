@@ -29,9 +29,9 @@ import {
   LongestPathOperator,
   longestPath
 } from "../sugiyama/layering/longest-path";
-import { SafeMap, assert } from "../utils";
 import { SpreadOperator, spread } from "./coord/spread";
 import { TwoLayerOperator, twoLayer } from "../sugiyama/decross/two-layer";
+import { assert, def } from "../utils";
 
 import { Operator as DecrossOperator } from "../sugiyama/decross";
 import { DummyNode } from "../arquint/dummy";
@@ -307,12 +307,12 @@ function buildOperator<
   HeightRat
 > {
   // TODO it'd be good to see this wrapped up in height somehow
-  function getLongestPaths(dag: Dag<NodeType>): SafeMap<NodeType, number> {
-    const longestPaths = new SafeMap<NodeType, number>();
+  function getLongestPaths(dag: Dag<NodeType>): Map<NodeType, number> {
+    const longestPaths = new Map<NodeType, number>();
     for (const node of dag.idescendants("after")) {
       const childPaths = Math.max(
         0,
-        ...node.ichildren().map((child) => longestPaths.getThrow(child))
+        ...node.ichildren().map((child) => def(longestPaths.get(child)))
       );
       longestPaths.set(node, heightRatioOp(node) + childPaths);
     }
@@ -322,16 +322,13 @@ function buildOperator<
   // TODO it'd be good to see this wrapped up in depth somehow
   function getLongestPathsRoot(
     dag: Dag<NodeType | DummyNode>
-  ): SafeMap<NodeType | DummyNode, number> {
-    const longestPaths = new SafeMap<NodeType | DummyNode, number>();
+  ): Map<NodeType | DummyNode, number> {
+    const longestPaths = new Map<NodeType | DummyNode, number>();
     for (const node of dag.idescendants("before")) {
-      const pathLength = longestPaths.getDefault(node, 0) + heightRatioOp(node);
+      const pathLength = (longestPaths.get(node) || 0) + heightRatioOp(node);
       longestPaths.set(node, pathLength);
       for (const child of node.ichildren()) {
-        const childLength = Math.max(
-          pathLength,
-          longestPaths.getDefault(child, 0)
-        );
+        const childLength = Math.max(pathLength, longestPaths.get(child) || 0);
         longestPaths.set(child, childLength);
       }
     }
@@ -468,18 +465,18 @@ function buildOperator<
       const maxPathLength = Math.max(
         ...last.map((node) => {
           assert(!(node instanceof DummyNode));
-          return longestPaths.getThrow(node);
+          return def(longestPaths.get(node));
         })
       );
       for (const node of last) {
-        const y1 = (node.y1 = longestToRoot.getThrow(node));
+        const y1 = (node.y1 = def(longestToRoot.get(node)));
         node.y0 = y1 - heightRatioOp(node);
       }
       totalPathLength = 0;
       for (const [i, layer] of layers.slice(1).entries()) {
         totalPathLength += layerSep(last, layer, i);
         for (const node of layer) {
-          const y1 = (node.y1 = totalPathLength + longestToRoot.getThrow(node));
+          const y1 = (node.y1 = totalPathLength + def(longestToRoot.get(node)));
           node.y0 = y1 - heightRatioOp(node);
         }
         last = layer;

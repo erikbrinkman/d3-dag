@@ -7,7 +7,7 @@
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { Operator } from ".";
-import { SafeMap } from "../../utils";
+import { def } from "../../utils";
 
 export type MeanOperator<NodeType extends DagNode> = Operator<NodeType>;
 
@@ -34,15 +34,15 @@ export function mean<NodeType extends DagNode>(
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[]
   ): void {
-    const means = new SafeMap<NodeType | DummyNode, Mean>(
+    const means = new Map<NodeType | DummyNode, Mean>(
       bottomLayer.map((node) => [node, new Mean()])
     );
     for (const [i, node] of topLayer.entries()) {
       for (const child of node.ichildren()) {
-        means.getThrow(child).add(i);
+        def(means.get(child)).add(i);
       }
     }
-    bottomLayer.sort((a, b) => means.getThrow(a).mean - means.getThrow(b).mean);
+    bottomLayer.sort((a, b) => def(means.get(a)).mean - def(means.get(b)).mean);
   }
 
   return meanCall;
