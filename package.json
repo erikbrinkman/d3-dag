@@ -18,10 +18,10 @@
     "email": "erik.brinkman@gmail.com"
   },
   "license": "MIT",
-  "module": "bundle/d3-dag.esm.js",
+  "module": "bundle/d3-dag.esm.min.js",
   "types": "dist/index.d.ts",
-  "main": "bundle/d3-dag.umd.js",
-  "unpkg": "bundle/d3-dag.umd.min.js",
+  "main": "bundle/d3-dag.cjs.min.js",
+  "unpkg": "bundle/d3-dag.iife.min.js",
   "files": [
     "/bundle/*.js",
     "/dist/**/*.js",
@@ -36,10 +36,10 @@
     ]
   },
   "scripts": {
-    "format": "prettier --write {src,test,types}/**/*.ts {,.}*.json rollup.config.js && import-sort --write {src,test,types}/**/*.ts rollup.config.js",
-    "lint": "prettier --check {src,test,types}/**/*.ts {,.}*.json rollup.config.js && tsc --noEmit && eslint {src,test,types}/**/*.ts",
+    "format": "prettier --write {src,test,types}/**/*.ts {,.}*.json && import-sort --write {src,test,types}/**/*.ts",
+    "lint": "prettier --check {src,test,types}/**/*.ts {,.}*.json && tsc --noEmit && eslint {src,test,types}/**/*.ts",
     "fix": "eslint --fix {src,test,types}/**/*.ts",
-    "build": "tsc && rollup --banner \"$(preamble)\" --failAfterWarnings --config",
+    "build": "tsc && esbuild dist/index.js --bundle --minify --external:fs --external:child_process --global-name=d3 --banner:js=\"$(preamble)\nvar d3 = Object.assign(d3 || {}, (() => {\" --footer:js='return d3; })())' --outfile=bundle/d3-dag.iife.min.js && esbuild dist/index.js --bundle --minify --format=cjs --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js && esbuild dist/index.js --bundle --minify --format=esm --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
     "test": "jest --coverage && yarn lint",
     "prepare": "yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
@@ -53,15 +53,12 @@
   },
   "devDependencies": {
     "@babel/types": "^7.13.17",
-    "@rollup/plugin-alias": "^3.1.2",
-    "@rollup/plugin-commonjs": "^18.0.0",
-    "@rollup/plugin-node-resolve": "^11.2.1",
-    "@rollup/plugin-replace": "^2.4.2",
     "@types/d3-array": "^2.9.0",
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.41",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "esbuild": "^0.11.20",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^24.3.5",
@@ -69,8 +66,6 @@
     "jest": "^26.6.3",
     "package-preamble": "^0.1.0",
     "prettier": "^2.2.1",
-    "rollup": "^2.45.2",
-    "rollup-plugin-terser": "^7.0.2",
     "ts-jest": "^26.5.5",
     "typedoc": "^0.20.36",
     "typescript": "^4.2.4"
