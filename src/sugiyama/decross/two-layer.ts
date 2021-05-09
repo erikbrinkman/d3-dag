@@ -10,12 +10,12 @@
  */
 
 import { MedianOperator, median } from "../twolayer/median";
+import { Replace, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { Operator } from ".";
 import { Operator as OrderOperator } from "../twolayer";
-import { Replace } from "../../utils";
 
 interface Operators<NodeType extends DagNode> {
   order: OrderOperator<NodeType>;
@@ -37,9 +37,18 @@ export interface TwoLayerOperator<
    * Get the current {@link OrderOperator} which defaults to {@link median}.
    */
   order(): Ops["order"];
+
+  /**
+   * Sets the number of passes to make, more takes longer, but might result in
+   * a better output. (default: 1)
+   */
+  passes(val: number): TwoLayerOperator<NodeType, Ops>;
+  /**
+   * Get the current number of passes
+   */
+  passes(): number;
 }
 
-// TODO Add number of passes, with 0 being keep passing up and down until no changes (is this guaranteed to never change?, maybe always terminate if no changes, so this can be set very high to almost achieve that effect)
 // TODO Add optional greedy swapping of nodes after assignment
 // TODO Add two layer noop. This only makes sense if there's a greedy swapping ability
 
@@ -47,11 +56,32 @@ export interface TwoLayerOperator<
 function buildOperator<
   NodeType extends DagNode,
   Ops extends Operators<NodeType>
->(options: Ops): TwoLayerOperator<NodeType, Ops> {
+>(options: Ops & { passes: number }): TwoLayerOperator<NodeType, Ops> {
   function twoLayerCall(layers: (NodeType | DummyNode)[][]): void {
-    layers
-      .slice(0, layers.length - 1)
-      .forEach((layer, i) => options.order(layer, layers[i + 1]));
+    const reversed = layers.slice().reverse();
+
+    let changed = true;
+    for (let i = 0; i < options.passes && changed; ++i) {
+      changed = false;
+
+      // top down
+      let [upper, ...bottoms] = layers;
+      for (const bottom of bottoms) {
+        const init = new Map(bottom.map((node, i) => [node, i] as const));
+        options.order(upper, bottom, true);
+        changed ||= bottom.some((node, i) => def(init.get(node)) !== i);
+        upper = bottom;
+      }
+
+      // bottom up
+      let [lower, ...tops] = reversed;
+      for (const topl of tops) {
+        const init = new Map(topl.map((node, i) => [node, i] as const));
+        options.order(topl, lower, false);
+        changed ||= topl.some((node, i) => def(init.get(node)) !== i);
+        lower = topl;
+      }
+    }
   }
 
   function order(): Ops["order"];
@@ -73,17 +103,31 @@ function buildOperator<
   }
   twoLayerCall.order = order;
 
+  function passes(val: number): TwoLayerOperator<NodeType, Ops>;
+  function passes(): number;
+  function passes(val?: number): TwoLayerOperator<NodeType, Ops> | number {
+    if (val === undefined) {
+      return options.passes;
+    } else if (val <= 0) {
+      throw new Error("number of passes must be positive");
+    } else {
+      const localVal = val;
+      return buildOperator({ ...options, passes: localVal });
+    }
+  }
+  twoLayerCall.passes = passes;
+
   return twoLayerCall;
 }
 
 /** Create a default {@link TwoLayerOperator}. */
 export function twoLayer<NodeType extends DagNode>(
   ...args: never[]
-): TwoLayerOperator<NodeType, { order: MedianOperator<NodeType> }> {
+): TwoLayerOperator<NodeType, { order: MedianOperator }> {
   if (args.length) {
     throw new Error(
       `got arguments to twoLayer(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ order: median() });
+  return buildOperator({ order: median(), passes: 1 });
 }

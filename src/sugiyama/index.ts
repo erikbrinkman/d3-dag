@@ -421,7 +421,7 @@ export function sugiyama<NodeType extends DagNode>(
   NodeType,
   {
     layering: SimplexOperator<NodeType>;
-    decross: TwoLayerOperator<NodeType, { order: MedianOperator<NodeType> }>;
+    decross: TwoLayerOperator<NodeType, { order: MedianOperator }>;
     coord: QuadOperator<NodeType>;
     nodeSize: NodeSizeAccessor<NodeType>;
   }

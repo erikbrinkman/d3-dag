@@ -41,10 +41,8 @@ test("createLayers() throws on empty", () => {
   );
 });
 
-test("createLayers() throws on unfinished last layer", () => {
-  expect(() => createLayers([[[0], [2]]])).toThrow(
-    "child ids must be ascending from zero"
-  );
+test("createLayers() throws on negative last layer", () => {
+  expect(() => createLayers([[[-1]]])).toThrow("invalid last layer ids");
 });
 
 test("createLayers() throws on out of range", () => {

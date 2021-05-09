@@ -42,19 +42,22 @@ function buildOperator<NodeType extends DagNode>(options: {
 
   function optCall(layers: (NodeType | DummyNode)[][]): void {
     // check for large input
-    const nodeCost = layers.reduce((t, l) => t + l.length * l.length, 0);
-    const edgeCost = layers.reduce(
+    const numVars = layers.reduce(
+      (t, l) => t + (l.length * Math.max(l.length - 1, 0)) / 2,
+      0
+    );
+    const numEdges = layers.reduce(
       (t, l) => t + l.reduce((s, n) => s + n.ichildren().length, 0),
       0
     );
-    if (options.large !== "large" && nodeCost > 2500) {
+    if (options.large !== "large" && numVars > 1200) {
       throw new Error(
         `size of dag to decrossOpt is too large and will likely crash instead of complete, enable "large" grahps to run anyway`
       );
     } else if (
       options.large !== "large" &&
       options.large !== "medium" &&
-      (nodeCost > 900 || edgeCost > 100)
+      (numVars > 400 || numEdges > 100)
     ) {
       throw new Error(
         `size of dag to decrossOpt is too large and will likely not complete, enable "medium" grahps to run anyway`
@@ -65,16 +68,20 @@ function buildOperator<NodeType extends DagNode>(options: {
     const model: Model = {
       optimize: "opt",
       opType: "min",
-      constraints: Object.create(null),
-      variables: Object.create(null),
-      ints: Object.create(null)
+      constraints: {},
+      variables: {},
+      ints: {}
     };
 
-    // initialize map to create "ids"
-    const ids = new Map<NodeType | DummyNode, string>();
-    for (const [i, layer] of layers.entries()) {
-      for (const [j, node] of layer.entries()) {
-        ids.set(node, `(${i} ${j})`);
+    // map every node to an id for quick access, if one nodes id is less than
+    // another it must come before it on the layer, or in a previous layer
+    const ids = new Map<NodeType | DummyNode, number>();
+    {
+      let i = 0;
+      for (const layer of layers) {
+        for (const node of layer) {
+          ids.set(node, i++);
+        }
       }
     }
 
@@ -82,31 +89,25 @@ function buildOperator<NodeType extends DagNode>(options: {
     function key(...nodes: (NodeType | DummyNode)[]): string {
       return nodes
         .map((n) => def(ids.get(n)))
-        .sort()
+        .sort((a, b) => a - b)
         .join(" => ");
     }
 
-    /** compare nodes by id */
-    function comp(n1: NodeType | DummyNode, n2: NodeType | DummyNode): number {
-      return def(ids.get(n1)).localeCompare(def(ids.get(n2)));
-    }
-
     function perms(model: Model, layer: (NodeType | DummyNode)[]): void {
-      layer.sort(comp);
-
       // add variables for each pair of bottom later nodes indicating if they
       // should be flipped
       for (const [i, n1] of layer.slice(0, layer.length - 1).entries()) {
         for (const n2 of layer.slice(i + 1)) {
           const pair = key(n1, n2);
           model.ints[pair] = 1;
-          model.constraints[pair] = Object.assign(Object.create(null), {
+          model.constraints[pair] = {
             max: 1
-          });
-          model.variables[pair] = Object.assign(Object.create(null), {
-            opt: 0,
+          };
+          model.variables[pair] = {
+            // add small value to objective for preserving the original order of nodes
+            opt: -1 / (numVars + 1),
             [pair]: 1
-          });
+          };
         }
       }
 
@@ -121,20 +122,17 @@ function buildOperator<NodeType extends DagNode>(options: {
             const triangle = key(n1, n2, n3);
 
             const triangleUp = triangle + "+";
-            model.constraints[triangleUp] = Object.assign(Object.create(null), {
+            model.constraints[triangleUp] = {
               max: 1
-            });
+            };
             model.variables[pair1][triangleUp] = 1;
             model.variables[pair2][triangleUp] = -1;
             model.variables[pair3][triangleUp] = 1;
 
             const triangleDown = triangle + "-";
-            model.constraints[triangleDown] = Object.assign(
-              Object.create(null),
-              {
-                min: 0
-              }
-            );
+            model.constraints[triangleDown] = {
+              min: 0
+            };
             model.variables[pair1][triangleDown] = 1;
             model.variables[pair2][triangleDown] = -1;
             model.variables[pair3][triangleDown] = 1;
@@ -156,27 +154,24 @@ function buildOperator<NodeType extends DagNode>(options: {
               const slack = `slack (${pairp}) (${pairc})`;
               const slackUp = `${slack} +`;
               const slackDown = `${slack} -`;
-              model.variables[slack] = Object.assign(Object.create(null), {
+              model.variables[slack] = {
                 opt: 1,
                 [slackUp]: 1,
                 [slackDown]: 1
-              });
+              };
 
-              const sign = comp(c1, c2);
+              const sign = Math.sign(def(ids.get(c1)) - def(ids.get(c2)));
               const flip = Math.max(sign, 0);
 
-              model.constraints[slackUp] = Object.assign(Object.create(null), {
+              model.constraints[slackUp] = {
                 min: flip
-              });
+              };
               model.variables[pairp][slackUp] = 1;
               model.variables[pairc][slackUp] = sign;
 
-              model.constraints[slackDown] = Object.assign(
-                Object.create(null),
-                {
-                  min: -flip
-                }
-              );
+              model.constraints[slackDown] = {
+                min: -flip
+              };
               model.variables[pairp][slackDown] = -1;
               model.variables[pairc][slackDown] = -sign;
             }
@@ -202,7 +197,7 @@ function buildOperator<NodeType extends DagNode>(options: {
     for (const layer of layers) {
       layer.sort(
         /* istanbul ignore next */
-        (n1, n2) => comp(n1, n2) * (ordering[key(n1, n2)] || -1)
+        (n1, n2) => ordering[key(n1, n2)] || -1
       );
     }
   }

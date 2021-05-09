@@ -59,16 +59,17 @@ export function createLayers(
   if (lastLayer === undefined) {
     throw new Error("must pass at least one layer of children");
   }
-  const lastIds = new Set<number>();
-  for (const node of lastLayer) {
-    for (const child of iter(node)) {
-      lastIds.add(child);
-    }
+  const maxLastId = Math.max(
+    ...lastLayer.map((node) => Math.max(...iter(node)))
+  );
+  if (maxLastId < 0) {
+    throw new Error("invalid last layer ids");
   }
-  if (![...lastIds].every((_, i) => lastIds.has(i))) {
-    throw new Error(`child ids must be ascending from zero but got ${lastIds}`);
-  }
-  result.push([...lastIds].map((_, j) => new TestNode(children.length, j)));
+  result.push(
+    new Array(maxLastId + 1)
+      .fill(null)
+      .map((_, j) => new TestNode(children.length, j))
+  );
 
   for (const [i, nodes] of children.entries()) {
     const currentLayer = def(result[i]);

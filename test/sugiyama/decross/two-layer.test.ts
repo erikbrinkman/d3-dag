@@ -32,8 +32,9 @@ test("decrossTwoLayer() can be set", () => {
     [[0], [1]]
   ]);
   const twolayer = twolayerMedian();
-  const decross = decrossTwoLayer().order(twolayer);
+  const decross = decrossTwoLayer().order(twolayer).passes(2);
   expect(decross.order()).toBe(twolayer);
+  expect(decross.passes()).toBe(2);
   decross(layers);
   const inds = layers.map((layer) => layer.map((node) => node.data?.index));
   expect(inds).toEqual([
@@ -57,4 +58,10 @@ test("decrossTwoLayer() can be set with all built in methods", () => {
 test("decrossTwoLayer() fails passing an arg to constructor", () => {
   // @ts-expect-error two-layer takes no arguments
   expect(() => decrossTwoLayer(undefined)).toThrow("got arguments to twoLayer");
+});
+
+test("decrossTwoLayer() fails passing 0 to passes", () => {
+  expect(() => decrossTwoLayer().passes(0)).toThrow(
+    "number of passes must be positive"
+  );
 });

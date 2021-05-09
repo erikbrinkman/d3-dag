@@ -35,7 +35,7 @@ import { assert, def } from "../utils";
 
 import { Operator as DecrossOperator } from "../sugiyama/decross";
 import { DummyNode } from "../arquint/dummy";
-import { MeanOperator } from "../sugiyama/twolayer/mean";
+import { MedianOperator } from "../sugiyama/twolayer/median";
 
 /** The operator that gets a height ratio from a node. */
 export interface HeightRatio<NodeType extends DagNode> {
@@ -1043,7 +1043,7 @@ export function arquint<NodeType extends DagNode>(
 ): Operator<
   NodeType,
   LongestPathOperator<NodeType>,
-  TwoLayerOperator<NodeType, { order: MeanOperator<NodeType> }>,
+  TwoLayerOperator<NodeType, { order: MedianOperator }>,
   ComplexOperator<NodeType>,
   SpreadOperator<NodeType>
 > {
