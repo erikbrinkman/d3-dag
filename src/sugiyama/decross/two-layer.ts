@@ -115,8 +115,7 @@ function buildOperator<
     } else if (val <= 0) {
       throw new Error("number of passes must be positive");
     } else {
-      const localVal = val;
-      return buildOperator({ ...options, passes: localVal });
+      return buildOperator({ ...options, passes: val });
     }
   }
   twoLayerCall.passes = passes;

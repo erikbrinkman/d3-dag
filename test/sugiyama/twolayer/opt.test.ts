@@ -2,9 +2,10 @@ import { createLayers, crossings } from "../utils";
 
 import { twolayerOpt } from "../../../src";
 
-test("twolayerOpt() allows setting large", () => {
-  const layering = twolayerOpt().large("large");
+test("twolayerOpt() allows setting options", () => {
+  const layering = twolayerOpt().large("large").dist(true);
   expect(layering.large()).toEqual("large");
+  expect(layering.dist()).toBeTruthy();
 });
 
 test("twolayerOpt() works for very simple case", () => {
@@ -85,6 +86,27 @@ test("twolayerOpt() preserves order of unconstrained nodes to back", () => {
   twolayerOpt()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map((n) => n.data?.index);
   expect(inds).toEqual([3, 1, 0, 2]);
+});
+
+test("twolayerOpt() doesn't optimize for distance", () => {
+  const [topLayer, bottomLayer] = createLayers([[[0, 2]]]);
+  twolayerOpt()(topLayer, bottomLayer, true);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 1, 2]);
+});
+
+test("twolayerOpt() can optimize for distance", () => {
+  const [topLayer, bottomLayer] = createLayers([[[0, 2]]]);
+  twolayerOpt().dist(true)(topLayer, bottomLayer, true);
+  const inds = bottomLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 2, 1]);
+});
+
+test("twolayerOpt() can optimize for distance bottom-up", () => {
+  const [topLayer, bottomLayer] = createLayers([[[0], [], [0]]]);
+  twolayerOpt().dist(true)(topLayer, bottomLayer, false);
+  const inds = topLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 2, 1]);
 });
 
 test("twolayerOpt() fails for large inputs", () => {

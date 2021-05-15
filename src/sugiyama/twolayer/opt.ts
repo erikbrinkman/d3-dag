@@ -26,10 +26,22 @@ export interface OptOperator extends Operator<DagNode> {
   large(val: LargeHandling): OptOperator;
   /** Return the handling of large graphs. */
   large(): LargeHandling;
+
+  /** set whether to also minimize distance between nodes that share a parent / child
+   *
+   * This adds more variables and constraints so will take longer, but will
+   * likely produce a better layout.
+   */
+  dist(val: boolean): OptOperator;
+  /** get whether the current layout minimized distance */
+  dist(): boolean;
 }
 
 /** @internal */
-function buildOperator(options: { large: LargeHandling }): OptOperator {
+function buildOperator(options: {
+  large: LargeHandling;
+  dist: boolean;
+}): OptOperator {
   function optCall(
     topLayer: DagNode[],
     bottomLayer: DagNode[],
@@ -73,6 +85,36 @@ function buildOperator(options: { large: LargeHandling }): OptOperator {
         .join(" => ");
     }
 
+    let unconstrained, groups;
+    if (topDown) {
+      const withParents = new Set(topLayer.flatMap((node) => node.children()));
+      unconstrained = bottomLayer.filter((node) => !withParents.has(node));
+      groups = topLayer
+        .map((node) => node.children())
+        .filter((cs) => cs.length > 1);
+    } else {
+      unconstrained = topLayer.filter((n) => !n.ichildren().length);
+      const parents = new Map<DagNode, DagNode[]>();
+      for (const node of topLayer) {
+        for (const child of node.ichildren()) {
+          const group = parents.get(child);
+          if (group) {
+            group.push(node);
+          } else {
+            parents.set(child, [node]);
+          }
+        }
+      }
+      groups = [...parents.values()];
+    }
+    // NOTE distance cost for an unconstrained node ina group can't violate
+    // all pairs at once, so cose is ~(n/2)^2 not n(n-1)/2
+    const groupSize = groups.reduce((t, cs) => t + cs.length * cs.length, 0);
+    const maxDistCost = (groupSize * unconstrained.length) / 4;
+    const distWeight = 1 / (maxDistCost + 1);
+    // add small value to objective for preserving the original order of nodes
+    const preserveWeight = distWeight / (numVars + 1);
+
     // need a function that returns whether one child originally came before
     // another, which means we need a reverse map from node to original index
     const cinds = new Map(bottomLayer.map((node, i) => [node, i] as const));
@@ -87,8 +129,7 @@ function buildOperator(options: { large: LargeHandling }): OptOperator {
           max: 1
         };
         model.variables[pair] = {
-          // add small value to objective for preserving the original order of nodes
-          opt: -1 / (numVars + 1),
+          opt: -preserveWeight,
           [pair]: 1
         };
       }
@@ -140,6 +181,59 @@ function buildOperator(options: { large: LargeHandling }): OptOperator {
       }
     }
 
+    // add distance minimization
+    if (options.dist) {
+      // NOTE this works by looking at tripples of nodes with a common ancestor
+      // (parent / child) and an unconstrained node. We add a slack variable
+      // responsible for the cost to the objective with a weight such that if
+      // all constraints are violated, it's still less than one crossing. We
+      // then add constraints that say the slack variable must be one if the
+      // unconstrained node is inside of the two nodes with a common ancestor.
+
+      for (const node of unconstrained) {
+        for (const group of groups) {
+          for (const [i, start] of group.entries()) {
+            for (const end of group.slice(i + 1)) {
+              // want to minimize node being between start and end
+              // NOTE we don't sort because we care which is in the center
+              const base = [start, node, end]
+                .map((n) => def(inds.get(n)))
+                .join(" => ");
+              const slack = `dist ${base}`;
+              const normal = `${slack} normal`;
+              const reversed = `${slack} reversed`;
+
+              model.variables[slack] = {
+                opt: distWeight,
+                [normal]: 1,
+                [reversed]: 1
+              };
+
+              let pos = 0;
+              for (const [n1, n2] of [
+                [start, node],
+                [start, end],
+                [node, end]
+              ]) {
+                const pair = key(n1, n2);
+                const sign = Math.sign(def(inds.get(n1)) - def(inds.get(n2)));
+                pos += +(sign > 0);
+                model.variables[pair][normal] = -sign;
+                model.variables[pair][reversed] = sign;
+              }
+
+              model.constraints[normal] = {
+                min: 1 - pos
+              };
+              model.constraints[reversed] = {
+                min: pos - 2
+              };
+            }
+          }
+        }
+      }
+    }
+
     // solve objective
     const ordering = Solve(model);
 
@@ -161,6 +255,17 @@ function buildOperator(options: { large: LargeHandling }): OptOperator {
   }
   optCall.large = large;
 
+  function dist(): boolean;
+  function dist(val: boolean): OptOperator;
+  function dist(val?: boolean): boolean | OptOperator {
+    if (val === undefined) {
+      return options.dist;
+    } else {
+      return buildOperator({ ...options, dist: val });
+    }
+  }
+  optCall.dist = dist;
+
   return optCall;
 }
 
@@ -171,5 +276,5 @@ export function opt(...args: never[]): OptOperator {
       `got arguments to opt(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ large: "small" });
+  return buildOperator({ large: "small", dist: false });
 }
