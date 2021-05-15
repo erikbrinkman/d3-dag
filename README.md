@@ -15,7 +15,6 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 - [Examples with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout.
 - [Examples with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
 - [Example with Arrows](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows) - This example shows a simple, if inexact, way to render edge arrows with d3.
-- [Examples with Arquint Layout](https://observablehq.com/@arquintl/d3-dag-arquint) - Allows you to experiment with different layouts and different datasets for the arquint layout.
 - [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
 
@@ -48,7 +47,6 @@ var dag = d3.sugiyama();
 * Layout algorithms
   * [Sugiyama](https://erikbrinkman.github.io/d3-dag/modules/sugiyama.html) - standard layout
   * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/zherebko.html) - topological layout
-  * [Arquint](https://erikbrinkman.github.io/d3-dag/modules/arquint.html) - variable sized nodes
 
 ## Experimental ES6 Imports
 

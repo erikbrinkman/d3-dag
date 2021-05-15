@@ -51,10 +51,3 @@ export {
 } from "./sugiyama/twolayer/opt";
 export { DummyNode as SugiDummyNode } from "./sugiyama/dummy";
 export { zherebko, ZherebkoOperator } from "./zherebko";
-export { arquint, Operator as ArquintOperator } from "./arquint";
-export { DummyNode as ArqDummyNode } from "./arquint/dummy";
-export { spread as arqcoordSpread } from "./arquint/coord/spread";
-export { adjacent as columnAdjacent } from "./arquint/column/adjacent";
-export { complex as columnComplex } from "./arquint/column/complex";
-export { center as columnCenter } from "./arquint/column/center";
-export { left as columnLeft } from "./arquint/column/left";
