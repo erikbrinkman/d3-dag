@@ -69,7 +69,9 @@ function buildOperator<
       for (const bottom of bottoms) {
         const init = new Map(bottom.map((node, i) => [node, i] as const));
         options.order(upper, bottom, true);
-        changed ||= bottom.some((node, i) => def(init.get(node)) !== i);
+        if (bottom.some((node, i) => def(init.get(node)) !== i)) {
+          changed = true;
+        }
         upper = bottom;
       }
 
@@ -78,7 +80,9 @@ function buildOperator<
       for (const topl of tops) {
         const init = new Map(topl.map((node, i) => [node, i] as const));
         options.order(topl, lower, false);
-        changed ||= topl.some((node, i) => def(init.get(node)) !== i);
+        if (topl.some((node, i) => def(init.get(node)) !== i)) {
+          changed = true;
+        }
         lower = topl;
       }
     }
