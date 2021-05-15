@@ -2,6 +2,12 @@ import { createLayers, crossings } from "../utils";
 
 import { decrossOpt } from "../../../src";
 
+test("descrossOpt() allows setting options", () => {
+  const decross = decrossOpt().large("large").dist(true);
+  expect(decross.large()).toEqual("large");
+  expect(decross.dist()).toBeTruthy();
+});
+
 test("decrossOpt() propogates to both layers", () => {
   // o o    o o
   //  X     | |
@@ -14,19 +20,11 @@ test("decrossOpt() propogates to both layers", () => {
   ]);
   decrossOpt()(layers);
   const inds = layers.map((layer) => layer.map((node) => node.data?.index));
-  // reversing all layers is always valid
-  expect([
-    [
-      [0, 1],
-      [1, 0],
-      [1, 0]
-    ],
-    [
-      [1, 0],
-      [0, 1],
-      [0, 1]
-    ]
-  ]).toContainEqual(inds);
+  expect(inds).toEqual([
+    [1, 0],
+    [0, 1],
+    [0, 1]
+  ]);
 });
 
 test("decrossOpt() is optimal", () => {
@@ -47,6 +45,33 @@ test("decrossOpt() is optimal", () => {
   expect(decross.large()).toEqual("large");
   decross(layers);
   expect(crossings(layers)).toBeCloseTo(1);
+});
+
+test("decrossOpt() does not optimize distance", () => {
+  const layers = createLayers([[[0, 2]]]);
+  decrossOpt()(layers);
+  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  expect(inds).toEqual([[0], [0, 1, 2]]);
+});
+
+test("decrossOpt() can optimize distance", () => {
+  const layers = createLayers([[[0, 2]]]);
+  decrossOpt().dist(true)(layers);
+  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  expect(inds).toEqual([[0], [0, 2, 1]]);
+});
+
+test("decrossOpt() can optimize complex distance", () => {
+  // family tree style
+  //   ---o--
+  //  /    \ \
+  // o  o o o o
+  //    |/ \ /
+  //    o   o
+  const layers = createLayers([[[0, 3, 4]], [[], [0], [0, 1], [], [1]]]);
+  decrossOpt().dist(true)(layers);
+  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  expect(inds).toEqual([[0], [1, 2, 4, 0, 3], [0, 1]]);
 });
 
 test("decrossOpt() fails for large inputs", () => {
