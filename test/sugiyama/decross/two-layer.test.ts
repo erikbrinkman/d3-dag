@@ -26,6 +26,16 @@ test("decrossTwoLayer() propogates to both layers", () => {
   ]);
 });
 
+test("decrossTwoLayer() propogates down and up", () => {
+  const layers = createLayers([[[1], [1], [0], [1]]]);
+  decrossTwoLayer()(layers);
+  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  expect(inds).toEqual([
+    [0, 1, 3, 2],
+    [1, 0]
+  ]);
+});
+
 test("decrossTwoLayer() can be set", () => {
   const layers = createLayers([
     [[1], [0]],

@@ -18,16 +18,33 @@ export function order(
   layer: DagNode[],
   poses: Map<DagNode, number | undefined>
 ): void {
-  const ordered = [...poses.entries()]
-    .filter((ent): ent is [DagNode, number] => ent[1] !== undefined)
-    .sort(([, a], [, b]) => a - b)
-    .map(([n]) => n);
+  // first group by number and preserve order, this makes ties resolve to the
+  // same order as layer
+  const orderMap = new Map<number, DagNode[]>();
+  for (const node of layer) {
+    const val = poses.get(node);
+    if (val === undefined) {
+      continue;
+    }
+    const nodes = orderMap.get(val);
+    if (nodes === undefined) {
+      orderMap.set(val, [node]);
+    } else {
+      nodes.push(node);
+    }
+  }
+  const ordered = [...orderMap.entries()]
+    .sort(([a], [b]) => a - b)
+    .flatMap(([, nodes]) => nodes);
+
+  // initialize gaps for unassigned nodes
   const gaps = Array(ordered.length + 1)
     .fill(null)
     .map(() => [] as DagNode[]);
   let start = 0;
   const left = new Set<DagNode>();
 
+  // find gap for each unassigned node with minimal decrossings
   for (const node of layer) {
     if (poses.get(node) !== undefined) {
       left.add(node);
@@ -44,9 +61,8 @@ export function order(
   }
 
   // merge gaps with ordered, and replace layer
-  layer.splice(
-    0,
-    layer.length,
-    ...gaps.flatMap((g, i) => (i === ordered.length ? g : [...g, ordered[i]]))
+  const result = gaps.flatMap((g, i) =>
+    i === ordered.length ? g : [...g, ordered[i]]
   );
+  layer.splice(0, layer.length, ...result);
 }
