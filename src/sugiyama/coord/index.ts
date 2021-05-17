@@ -31,8 +31,8 @@ export interface HorizableNode {
  * limitations of layered layouts, that means that layers will be separated by
  * the maximum height nodes in each layer.
  */
-export interface NodeSizeAccessor<NodeType extends DagNode> {
-  (node: NodeType | DummyNode): [number, number];
+export interface NodeSizeAccessor<NodeType extends DagNode = DagNode> {
+  (node: NodeType | DummyNode): readonly [number, number];
 }
 
 /**
@@ -41,9 +41,10 @@ export interface NodeSizeAccessor<NodeType extends DagNode> {
  * coordinates should satisfy the node size accessor, and all be between zero
  * and the returned width.
  */
-export interface Operator<NodeType extends DagNode> {
-  (
-    layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<NodeType>
+export interface CoordOperator<NodeType extends DagNode> {
+  <N extends NodeType>(
+    layers: ((N & HorizableNode) | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N> &
+      ((node: N | DummyNode) => readonly [number, number])
   ): number;
 }

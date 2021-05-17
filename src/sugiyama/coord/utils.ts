@@ -70,10 +70,8 @@ export function solve(
 }
 
 /** @internal compute indices used to index arrays */
-export function indices<NodeType extends DagNode>(
-  layers: (NodeType | DummyNode)[][]
-): Map<NodeType | DummyNode, number> {
-  const inds = new Map<NodeType | DummyNode, number>();
+export function indices(layers: DagNode[][]): Map<DagNode, number> {
+  const inds = new Map<DagNode, number>();
   let i = 0;
   for (const layer of layers) {
     for (const node of layer) {
@@ -86,7 +84,7 @@ export function indices<NodeType extends DagNode>(
 /** @interal Compute constraint arrays for layer separation */
 export function init<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][],
-  inds: Map<NodeType | DummyNode, number>,
+  inds: Map<DagNode, number>,
   nodeSize: NodeSizeAccessor<NodeType>
 ): [number[][], number[], number[][], number[]] {
   const n = 1 + Math.max(...inds.values());
@@ -160,7 +158,7 @@ export function minBend(
 export function layout<NodeType extends DagNode>(
   layers: ((NodeType & HorizableNode) | DummyNode)[][],
   nodeSize: NodeSizeAccessor<NodeType>,
-  inds: Map<NodeType | DummyNode, number>,
+  inds: Map<DagNode, number>,
   solution: number[]
 ): number {
   // find span of solution

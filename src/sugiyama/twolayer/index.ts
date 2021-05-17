@@ -14,7 +14,7 @@
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 
-export interface Operator<NodeType extends DagNode> {
+export interface TwolayerOperator<NodeType extends DagNode> {
   (
     topLayer: (NodeType | DummyNode)[],
     bottomLayer: (NodeType | DummyNode)[],

@@ -12,12 +12,12 @@
 import { Model, Solve } from "javascript-lp-solver";
 
 import { DagNode } from "../../dag/node";
-import { Operator } from ".";
+import { DecrossOperator } from ".";
 import { def } from "../../utils";
 
 export type LargeHandling = "small" | "medium" | "large";
 
-export interface OptOperator extends Operator<DagNode> {
+export interface OptOperator extends DecrossOperator<DagNode> {
   /**
    * Set the large dag handling, which will error if you try to decross DAGs
    * that are too large. Since this operator is so expensive, this exists

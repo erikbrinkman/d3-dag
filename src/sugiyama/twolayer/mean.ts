@@ -5,11 +5,11 @@
  * @module
  */
 import { DagNode } from "../../dag/node";
-import { Operator } from ".";
+import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 import { order } from "./utils";
 
-export type MeanOperator = Operator<DagNode>;
+export type MeanOperator = TwolayerOperator<DagNode>;
 
 /** @internal */
 class Mean {

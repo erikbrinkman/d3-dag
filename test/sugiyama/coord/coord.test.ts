@@ -4,7 +4,7 @@ import {
   coordGreedy,
   coordQuad
 } from "../../../src";
-import { TestNode, createLayers, nodeSize } from "../utils";
+import { createLayers, nodeSize } from "../utils";
 
 import { DagNode } from "../../../src/dag/node";
 
@@ -29,11 +29,7 @@ function idLayerSize(
   return [(node.data?.index || 0) + 1, 1];
 }
 
-for (const method of [
-  coordCenter<TestNode>(),
-  coordGreedy<TestNode>(),
-  coordQuad<TestNode>()
-]) {
+for (const method of [coordCenter(), coordGreedy(), coordQuad()]) {
   for (const dat of [square, ccoz, dtopo, doub, vee, ex]) {
     test(`invariants apply to ${dat.name} assigned by ${method.name}`, () => {
       const layered = dat();

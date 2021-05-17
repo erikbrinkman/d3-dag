@@ -1,9 +1,6 @@
+import { CoordOperator, NodeSizeAccessor } from "../../src/sugiyama/coord";
 import {
-  Operator as CoordOperator,
-  NodeSizeAccessor
-} from "../../src/sugiyama/coord";
-import { SimpleDatum, doub, dummy, single, three, trip } from "../examples";
-import {
+  Dag,
   SugiDummyNode,
   coordCenter,
   coordGreedy,
@@ -17,12 +14,64 @@ import {
   layeringTopological,
   sugiyama
 } from "../../src";
+import {
+  SimpleDatum,
+  doub,
+  dummy,
+  single,
+  square,
+  three,
+  trip
+} from "../examples";
 
 import { DagNode } from "../../src/dag/node";
-import { Operator as DecrossOperator } from "../../src/sugiyama/decross";
-import { Operator as LayeringOperator } from "../../src/sugiyama/layering";
+import { DecrossOperator } from "../../src/sugiyama/decross";
+import { LayeringOperator } from "../../src/sugiyama/layering";
 
 type SimpleNode = DagNode<SimpleDatum>;
+
+test("sugiyama() correctly adapts to types", () => {
+  const dag = square();
+  const unks = dag as Dag;
+
+  const init = sugiyama();
+  init(dag);
+  init(unks);
+
+  // narrowed for custom
+  const customLayering = layeringSimplex().rank(
+    (() => undefined) as (node: SimpleNode) => undefined
+  );
+  const custom = init.layering(customLayering);
+  custom(dag);
+  // @ts-expect-error custom only takes SimpleNode
+  custom(unks);
+
+  // works for group too
+  const acc = custom.nodeSize((() => [1, 1]) as (
+    node: SimpleNode | SugiDummyNode
+  ) => [1, 1]);
+  acc(dag);
+  // @ts-expect-error cast only takes TestNodes
+  acc(unks);
+
+  // still works for more general options
+  const opt = acc.decross(decrossOpt());
+  opt(dag);
+  // @ts-expect-error opt only takes TestNodes
+  opt(unks);
+
+  // but we can still get original operator and operate on it
+  const decross = opt.decross().large("large");
+  expect(decross.large()).toBe("large");
+
+  const unrelated: (
+    node: DagNode<{ id: boolean }> | SugiDummyNode
+  ) => [1, 1] = () => [1, 1];
+  init.nodeSize(unrelated);
+  // @ts-expect-error unrelated is unrelated to SimpleDatum
+  opt.nodeSize(unrelated);
+});
 
 test("sugiyama() works for single node", () => {
   const dag = single();
@@ -92,7 +141,7 @@ test("sugiyama() allows changing nodeSize", () => {
     }
   }
 
-  const layout = sugiyama<DagNode<SimpleDatum>>().nodeSize(nodeSize);
+  const layout = sugiyama().nodeSize(nodeSize);
   expect(layout.nodeSize()).toEqual(nodeSize);
   const { dag, width, height } = layout(base);
   expect(width).toBeCloseTo(9);
@@ -130,7 +179,7 @@ test("sugiyama() allows changing operators", () => {
     return 1;
   };
   const nodeSize: NodeSizeAccessor<SimpleNode> = () => [2, 2];
-  const layout = sugiyama<SimpleNode>()
+  const layout = sugiyama()
     .layering(layering)
     .decross(decross)
     .coord(coord)

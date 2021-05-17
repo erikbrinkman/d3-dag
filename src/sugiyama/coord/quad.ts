@@ -1,3 +1,4 @@
+import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
 /**
  * This accessor positions nodes to minimize aspect of curvature and distance
  * between nodes. The coordinates are assigned by solving a quadratic program,
@@ -8,7 +9,6 @@
  * @module
  */
 import { DagNode, LayoutDagRoot } from "../../dag/node";
-import { HorizableNode, NodeSizeAccessor, Operator } from ".";
 import { def, setIntersect } from "../../utils";
 import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
@@ -19,13 +19,11 @@ import { DummyNode } from "../dummy";
  * to quickly compare if two nodes are in the same connected component.
  * @internal
  */
-function componentMap<NodeType extends DagNode>(
-  layers: (NodeType | DummyNode)[][]
-): Map<NodeType | DummyNode, number> {
+function componentMap(layers: DagNode[][]): Map<DagNode, number> {
   // Note computing connected components is generally difficult, and with the
   // layer representation, we lost access to convenient dag methods. Thus, we
   // first reconstruct a mock dag to get connected components, then add them.
-  const roots = new Map<NodeType | DummyNode, NodeType | DummyNode>();
+  const roots = new Map<DagNode, DagNode>();
   // We iterate in reverse order because we pop children, thus we're guaranteed
   // to only have roots after we're done.
   for (const layer of layers.slice().reverse()) {
@@ -40,7 +38,7 @@ function componentMap<NodeType extends DagNode>(
   // create a fake dag, and use it to get components
   const components = new LayoutDagRoot([...roots.values()]).split();
   // assign each node it's component id for fast checking if they're identical
-  const compMap = new Map<NodeType | DummyNode, number>();
+  const compMap = new Map<DagNode, number>();
   for (const [i, comp] of components.entries()) {
     for (const node of comp) {
       compMap.set(node, i);
@@ -58,7 +56,7 @@ function componentMap<NodeType extends DagNode>(
  */
 function splitComponentLayers<NodeType extends DagNode>(
   layers: (NodeType | DummyNode)[][],
-  compMap: Map<NodeType | DummyNode, number>
+  compMap: Map<DagNode, number>
 ): (NodeType | DummyNode)[][][] {
   // Because of dummy nodes, there's no way for a component to skip a layer,
   // thus for layers to share no common components, there must be a clear
@@ -83,8 +81,7 @@ function splitComponentLayers<NodeType extends DagNode>(
  * nodes (longer edges). The total weight for that node type must be greater
  * than zero otherwise the optimization will not be well formed.
  */
-export interface QuadOperator<NodeType extends DagNode>
-  extends Operator<NodeType> {
+export interface QuadOperator extends CoordOperator<DagNode> {
   /**
    * Set the weight for verticality. Higher weights mean connected nodes should
    * be closer together, or corollarily edges should be closer to vertical
@@ -95,7 +92,7 @@ export interface QuadOperator<NodeType extends DagNode>
    * setting a weight to zero doesn't peanalize edges between those types of
    * nodes.
    */
-  vertical(val: [number, number]): QuadOperator<NodeType>;
+  vertical(val: [number, number]): QuadOperator;
   /**
    * Get the current vertical weights which defaults to [1, 0]. By setting the
    * weight of dummy nodes to zero, longer edges aren't penalized to be
@@ -111,7 +108,7 @@ export interface QuadOperator<NodeType extends DagNode>
    * node, while setting dummy nodes will enforce the longer edges should try
    * to be stright.
    */
-  curve(val: [number, number]): QuadOperator<NodeType>;
+  curve(val: [number, number]): QuadOperator;
   /**
    * Get the current vertical weights which defaults to [0, 1]. By setting the
    * weight of non-dummy nodes to zero, we only care about the curvature of
@@ -126,23 +123,23 @@ export interface QuadOperator<NodeType extends DagNode>
    * than zero to make the objective sound when there are disconnected
    * components, but otherwise should probably be very small.
    */
-  component(val: number): QuadOperator<NodeType>;
+  component(val: number): QuadOperator;
   /** Get the current component weight, which defaults to one. */
   component(): number;
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(options: {
+function buildOperator(options: {
   vertNode: number;
   vertDummy: number;
   curveNode: number;
   curveDummy: number;
   comp: number;
-}): QuadOperator<NodeType> {
-  function quadComponent(
-    layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<NodeType>,
-    compMap: Map<NodeType | DummyNode, number>
+}): QuadOperator {
+  function quadComponent<N extends DagNode>(
+    layers: ((N & HorizableNode) | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N>,
+    compMap: Map<DagNode, number>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy, comp } = options;
     const inds = indices(layers);
@@ -180,9 +177,9 @@ function buildOperator<NodeType extends DagNode>(options: {
     return layout(layers, nodeSize, inds, solution);
   }
 
-  function quadCall(
-    layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<NodeType>
+  function quadCall<N extends DagNode>(
+    layers: ((N & HorizableNode) | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy } = options;
     if (vertNode === 0 && curveNode === 0) {
@@ -222,10 +219,8 @@ function buildOperator<NodeType extends DagNode>(options: {
   }
 
   function vertical(): [number, number];
-  function vertical(val: [number, number]): QuadOperator<NodeType>;
-  function vertical(
-    val?: [number, number]
-  ): [number, number] | QuadOperator<NodeType> {
+  function vertical(val: [number, number]): QuadOperator;
+  function vertical(val?: [number, number]): [number, number] | QuadOperator {
     if (val === undefined) {
       const { vertNode, vertDummy } = options;
       return [vertNode, vertDummy];
@@ -242,10 +237,8 @@ function buildOperator<NodeType extends DagNode>(options: {
   quadCall.vertical = vertical;
 
   function curve(): [number, number];
-  function curve(val: [number, number]): QuadOperator<NodeType>;
-  function curve(
-    val?: [number, number]
-  ): [number, number] | QuadOperator<NodeType> {
+  function curve(val: [number, number]): QuadOperator;
+  function curve(val?: [number, number]): [number, number] | QuadOperator {
     if (val === undefined) {
       const { curveNode, curveDummy } = options;
       return [curveNode, curveDummy];
@@ -262,8 +255,8 @@ function buildOperator<NodeType extends DagNode>(options: {
   quadCall.curve = curve;
 
   function component(): number;
-  function component(val: number): QuadOperator<NodeType>;
-  function component(val?: number): number | QuadOperator<NodeType> {
+  function component(val: number): QuadOperator;
+  function component(val?: number): number | QuadOperator {
     if (val === undefined) {
       return options.comp;
     } else if (val <= 0) {
@@ -278,9 +271,7 @@ function buildOperator<NodeType extends DagNode>(options: {
 }
 
 /** Create a default {@link QuadOperator}. */
-export function quad<NodeType extends DagNode>(
-  ...args: never[]
-): QuadOperator<NodeType> {
+export function quad(...args: never[]): QuadOperator {
   if (args.length) {
     throw new Error(
       `got arguments to quad(${args}), but constructor takes no aruguments.`

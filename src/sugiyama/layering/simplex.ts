@@ -14,7 +14,12 @@
 
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode } from "../../dag/node";
-import { GroupAccessor, LayerableNode, Operator, RankAccessor } from ".";
+import {
+  GroupAccessor,
+  LayerableNode,
+  LayeringOperator,
+  RankAccessor
+} from ".";
 import { Replace, def } from "../../utils";
 
 interface Operators<NodeType extends DagNode> {
@@ -23,17 +28,18 @@ interface Operators<NodeType extends DagNode> {
 }
 
 export interface SimplexOperator<
-  NodeType extends DagNode,
+  NodeType extends DagNode = DagNode,
   Ops extends Operators<NodeType> = Operators<NodeType>
-> extends Operator<NodeType> {
+> extends LayeringOperator<NodeType> {
   /**
    * Set the {@link RankAccessor}. Any node with a rank assigned will have a second
    * ordering enforcing ordering of the ranks. Note, this can cause the simplex
    * optimization to be ill-defined, and may result in an error during layout.
    */
-  rank<NewRank extends RankAccessor<NodeType>>(
-    newRank: NewRank
-  ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>>;
+  rank<NewNode extends NodeType, NewRank extends RankAccessor<NewNode>>(
+    // NOTE this is necessary for type inference
+    newRank: NewRank & ((node: NewNode) => number | undefined)
+  ): SimplexOperator<NewNode, Replace<Ops, "rank", NewRank>>;
   /**
    * Get the current {@link RankAccessor}.
    */
@@ -45,9 +51,9 @@ export interface SimplexOperator<
    * Note, this can cause the simplex optimization to be ill-defined, and may
    * result in an error during layout.
    */
-  group<NewGroup extends GroupAccessor<NodeType>>(
-    newGroup: NewGroup
-  ): SimplexOperator<NodeType, Replace<Ops, "group", NewGroup>>;
+  group<NewNode extends NodeType, NewGroup extends GroupAccessor<NewNode>>(
+    newGroup: NewGroup & ((node: NewNode) => string | undefined)
+  ): SimplexOperator<NewNode, Replace<Ops, "group", NewGroup>>;
   /**
    * Get the current {@link GroupAccessor}.
    */
@@ -192,13 +198,17 @@ function buildOperator<
     }
   }
 
-  function rank<NewRank extends RankAccessor<NodeType>>(
-    newRank: NewRank
-  ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>>;
+  function rank<
+    NewNode extends NodeType,
+    NewRank extends RankAccessor<NewNode>
+  >(newRank: NewRank): SimplexOperator<NewNode, Replace<Ops, "rank", NewRank>>;
   function rank(): Ops["rank"];
-  function rank<NewRank extends RankAccessor<NodeType>>(
+  function rank<
+    NewNode extends NodeType,
+    NewRank extends RankAccessor<NewNode>
+  >(
     newRank?: NewRank
-  ): SimplexOperator<NodeType, Replace<Ops, "rank", NewRank>> | Ops["rank"] {
+  ): SimplexOperator<NewNode, Replace<Ops, "rank", NewRank>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
     } else {
@@ -208,13 +218,19 @@ function buildOperator<
   }
   simplexCall.rank = rank;
 
-  function group<NewGroup extends GroupAccessor<NodeType>>(
+  function group<
+    NewNode extends NodeType,
+    NewGroup extends GroupAccessor<NewNode>
+  >(
     newGroup: NewGroup
-  ): SimplexOperator<NodeType, Replace<Ops, "group", NewGroup>>;
+  ): SimplexOperator<NewNode, Replace<Ops, "group", NewGroup>>;
   function group(): Ops["group"];
-  function group<NewGroup extends GroupAccessor<NodeType>>(
+  function group<
+    NewNode extends NodeType,
+    NewGroup extends GroupAccessor<NewNode>
+  >(
     newGroup?: NewGroup
-  ): SimplexOperator<NodeType, Replace<Ops, "group", NewGroup>> | Ops["group"] {
+  ): SimplexOperator<NewNode, Replace<Ops, "group", NewGroup>> | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;
     } else {
@@ -233,9 +249,7 @@ function defaultAccessor(): undefined {
 }
 
 /** Create a default {@link SimplexOperator}. */
-export function simplex<NodeType extends DagNode>(
-  ...args: never[]
-): SimplexOperator<NodeType> {
+export function simplex(...args: never[]): SimplexOperator<DagNode> {
   if (args.length) {
     throw new Error(
       `got arguments to simplex(${args}), but constructor takes no aruguments.`

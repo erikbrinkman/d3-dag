@@ -14,33 +14,31 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 
-import { HorizableNode, NodeSizeAccessor, Operator } from ".";
+import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
 import { def, js } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 
-export type GreedyOperator<NodeType extends DagNode> = Operator<NodeType>;
+export type GreedyOperator = CoordOperator<DagNode>;
 
 /** Create a greedy coordinate assignment operator. */
-export function greedy<NodeType extends DagNode>(
-  ...args: never[]
-): GreedyOperator<NodeType> {
+export function greedy(...args: never[]): GreedyOperator {
   if (args.length) {
     throw new Error(
       `got arguments to greedy(${args}), but constructor takes no aruguments.`
     );
   }
 
-  function greedyCall(
-    layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<NodeType>
+  function greedyCall<N extends DagNode>(
+    layers: ((N & HorizableNode) | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N>
   ): number {
     // TODO other initial assignments
     const assignment = meanAssignment;
 
     // assign degrees
-    const degrees = new Map<NodeType | DummyNode, number>();
+    const degrees = new Map<DagNode, number>();
     for (const layer of layers) {
       for (const node of layer) {
         // the -3 at the end ensures that dummy nodes have the lowest priority,
@@ -78,8 +76,7 @@ export function greedy<NodeType extends DagNode>(
       // order nodes nodes by degree and start with highest degree
       const ordered = layer
         .map(
-          (node, j) =>
-            [j, node] as [number, (NodeType & HorizableNode) | DummyNode]
+          (node, j) => [j, node] as [number, (N & HorizableNode) | DummyNode]
         )
         .sort(([aj, anode], [bj, bnode]) => {
           const adeg = def(degrees.get(anode));
@@ -140,7 +137,7 @@ function meanAssignment<NodeType extends (DagNode & HorizableNode) | DummyNode>(
   for (const node of bottomLayer) {
     node.x = 0.0;
   }
-  const counts = new Map<DagNode | DummyNode, number>();
+  const counts = new Map<DagNode, number>();
   for (const node of topLayer) {
     for (const child of node.ichildren()) {
       /* istanbul ignore if */

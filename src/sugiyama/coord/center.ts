@@ -7,27 +7,25 @@
  * @module
  */
 
-import { HorizableNode, NodeSizeAccessor, Operator } from ".";
+import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { def } from "../../utils";
 
-export type CenterOperator<NodeType extends DagNode> = Operator<NodeType>;
+export type CenterOperator = CoordOperator<DagNode>;
 
 /** Create a new center assignment operator. */
-export function center<NodeType extends DagNode>(
-  ...args: never[]
-): CenterOperator<NodeType> {
+export function center(...args: never[]): CenterOperator {
   if (args.length) {
     throw new Error(
       `got arguments to center(${args}), but constructor takes no aruguments.`
     );
   }
 
-  function centerCall(
-    layers: ((NodeType & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<NodeType>
+  function centerCall<N extends DagNode>(
+    layers: ((N & HorizableNode) | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N>
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;

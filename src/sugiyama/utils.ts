@@ -11,9 +11,9 @@ import { js } from "../utils";
 export function cachedNodeSize<NodeType extends DagNode>(
   nodeSize: NodeSizeAccessor<NodeType>
 ): NodeSizeAccessor<NodeType> {
-  const cache = new Map<NodeType | DummyNode, [number, number]>();
+  const cache = new Map<NodeType | DummyNode, readonly [number, number]>();
 
-  function cached(node: NodeType | DummyNode): [number, number] {
+  function cached(node: NodeType | DummyNode): readonly [number, number] {
     let val = cache.get(node);
     if (val === undefined) {
       val = nodeSize(node);

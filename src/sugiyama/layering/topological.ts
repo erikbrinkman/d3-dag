@@ -12,23 +12,21 @@
  */
 
 import { Dag, DagNode } from "../../dag/node";
-import { LayerableNode, Operator } from ".";
+import { LayerableNode, LayeringOperator } from ".";
 
-export type TopologicalOperator<NodeType extends DagNode> = Operator<NodeType>;
+export type TopologicalOperator = LayeringOperator<DagNode>;
 
 /**
  * Create a topological layering.
  */
-export function topological<NodeType extends DagNode>(
-  ...args: never[]
-): TopologicalOperator<NodeType> {
+export function topological(...args: never[]): TopologicalOperator {
   if (args.length) {
     throw new Error(
       `got arguments to topological(${args}), but constructor takes no aruguments.`
     );
   }
 
-  function topologicalCall<N extends NodeType & LayerableNode>(
+  function topologicalCall<N extends DagNode & LayerableNode>(
     dag: Dag<N>
   ): void {
     for (const [layer, node] of dag.idescendants("before").entries()) {

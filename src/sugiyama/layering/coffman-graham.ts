@@ -12,40 +12,36 @@
  */
 
 import { Dag, DagNode } from "../../dag/node";
-import { LayerableNode, Operator } from ".";
+import { LayerableNode, LayeringOperator } from ".";
 
 import FastPriorityQueue from "fastpriorityqueue";
 import { def } from "../../utils";
 
-export interface CoffmanGrahamOperator<NodeType extends DagNode>
-  extends Operator<NodeType> {
+export interface CoffmanGrahamOperator extends LayeringOperator<DagNode> {
   /**
    * Set the maximum width of any layer. If set to 0 (the default), the width
    * is set to the rounded square root of the number of nodes.
    */
-  width(maxWidth: number): CoffmanGrahamOperator<NodeType>;
+  width(maxWidth: number): CoffmanGrahamOperator;
   /** Get the operators maximum width. */
   width(): number;
 }
 
 /** @internal */
-class Data<NodeType> {
-  before: number[] = [];
-  parents: NodeType[] = [];
-}
-
-/** @internal */
-function buildOperator<NodeType extends DagNode>(options: {
-  width: number;
-}): CoffmanGrahamOperator<NodeType> {
-  function coffmanGrahamCall<N extends NodeType & LayerableNode>(
+function buildOperator(options: { width: number }): CoffmanGrahamOperator {
+  function coffmanGrahamCall<N extends DagNode & LayerableNode>(
     dag: Dag<N>
   ): void {
     const maxWidth = options.width || Math.floor(Math.sqrt(dag.size() + 0.5));
 
+    class Data {
+      before: number[] = [];
+      parents: N[] = [];
+    }
+
     // initialize node data
-    const data = new Map<NodeType, Data<N>>(
-      dag.idescendants().map((node) => [node, new Data<N>()])
+    const data = new Map<DagNode, Data>(
+      dag.idescendants().map((node) => [node, new Data()])
     );
     for (const node of dag) {
       for (const child of node.ichildren()) {
@@ -54,7 +50,7 @@ function buildOperator<NodeType extends DagNode>(options: {
     }
 
     // create queue
-    function comp(left: N, right: N): boolean {
+    function comp(left: DagNode, right: DagNode): boolean {
       const leftBefore = def(data.get(left)).before;
       const rightBefore = def(data.get(right)).before;
       for (const [i, leftb] of leftBefore.entries()) {
@@ -104,8 +100,8 @@ function buildOperator<NodeType extends DagNode>(options: {
   }
 
   function width(): number;
-  function width(maxWidth: number): CoffmanGrahamOperator<NodeType>;
-  function width(maxWidth?: number): number | CoffmanGrahamOperator<NodeType> {
+  function width(maxWidth: number): CoffmanGrahamOperator;
+  function width(maxWidth?: number): number | CoffmanGrahamOperator {
     if (maxWidth === undefined) {
       return options.width;
     } else if (maxWidth < 0) {
@@ -120,9 +116,7 @@ function buildOperator<NodeType extends DagNode>(options: {
 }
 
 /** Create a default {@link CoffmanGrahamOperator}. */
-export function coffmanGraham<NodeType extends DagNode>(
-  ...args: never[]
-): CoffmanGrahamOperator<NodeType> {
+export function coffmanGraham(...args: never[]): CoffmanGrahamOperator {
   if (args.length) {
     throw new Error(
       `got arguments to coffmanGraham(${args}), but constructor takes no aruguments.`

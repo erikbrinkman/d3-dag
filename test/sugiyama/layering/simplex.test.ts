@@ -1,8 +1,54 @@
+import { Dag, DagNode } from "../../../src/dag/node";
 import { SimpleDatum, doub, ex, square } from "../../examples";
 
-import { DagNode } from "../../../src/dag/node";
 import { layeringSimplex } from "../../../src";
 import { toLayers } from "../utils";
+
+test("layeringSimplex() correctly adapts to types", () => {
+  const dag = square();
+  const unks = dag as Dag;
+
+  const init = layeringSimplex();
+  init(dag);
+  init(unks);
+
+  // narrowed for custom
+  function customRank(node: DagNode<SimpleDatum>): number | undefined {
+    void node;
+    return undefined;
+  }
+  const custom = init.rank(customRank);
+  custom(dag);
+  // @ts-expect-error custom only takes TestNodes
+  custom(unks);
+
+  // works for group too
+  function customGroup(node: DagNode<SimpleDatum>): string | undefined {
+    void node;
+    return undefined;
+  }
+  const group = custom.group(customGroup);
+  group(dag);
+  // @ts-expect-error cast only takes TestNodes
+  group(unks);
+
+  // still works for more general two layers
+  const rank = group.rank(() => undefined);
+  rank(dag);
+  // @ts-expect-error opt only takes TestNodes
+  rank(unks);
+
+  // but we can still get original operator and operate on it
+  expect(rank.group()).toBe(customGroup);
+
+  function unrelated(node: DagNode<{ misc: string }>): string | undefined {
+    void node;
+    return undefined;
+  }
+  init.group(unrelated);
+  // @ts-expect-error unrelated is unrelated to SimpleDatum
+  rank.group(unrelated);
+});
 
 test("layeringSimplex() works for square", () => {
   const dag = square();
@@ -22,7 +68,7 @@ test("layeringSimplex() respects ranks and gets them", () => {
       return undefined;
     }
   }
-  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank(ranker);
+  const layout = layeringSimplex().rank(ranker);
   expect(layout.rank()).toBe(ranker);
   layout(dag);
   const layers = toLayers(dag);
@@ -40,7 +86,7 @@ test("layeringSimplex() works for X", () => {
 
 test("layeringSimplex() respects equality rank", () => {
   const dag = ex();
-  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank((node) =>
+  const layout = layeringSimplex().rank((node: DagNode<SimpleDatum>) =>
     node.data.id === "0" || node.data.id === "2" ? 0 : undefined
   );
   layout(dag);
@@ -52,7 +98,7 @@ test("layeringSimplex() respects groups", () => {
   const dag = ex();
   const grp = (node: DagNode<SimpleDatum>) =>
     node.data.id === "0" || node.data.id === "2" ? "group" : undefined;
-  const layout = layeringSimplex<DagNode<SimpleDatum>>().group(grp);
+  const layout = layeringSimplex().group(grp);
   expect(layout.group()).toBe(grp);
   layout(dag);
   const layers = toLayers(dag);
@@ -73,7 +119,7 @@ test("layeringSimplex() fails passing an arg to constructor", () => {
 
 test("layeringSimplex() fails with ill-defined ranks", () => {
   const dag = square();
-  const layout = layeringSimplex<DagNode<SimpleDatum>>().rank((node) => {
+  const layout = layeringSimplex().rank((node: DagNode<SimpleDatum>) => {
     if (node.data.id === "0") {
       return 1;
     } else if (node.data.id === "3") {
@@ -89,7 +135,7 @@ test("layeringSimplex() fails with ill-defined ranks", () => {
 
 test("layeringSimplex() fails with ill-defined group", () => {
   const dag = square();
-  const layout = layeringSimplex<DagNode<SimpleDatum>>().group((node) =>
+  const layout = layeringSimplex().group((node: DagNode<SimpleDatum>) =>
     node.data.id === "0" || node.data.id === "3" ? "group" : undefined
   );
   expect(() => layout(dag)).toThrow(

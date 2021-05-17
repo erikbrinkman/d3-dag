@@ -10,12 +10,12 @@
 import { Model, Solve } from "javascript-lp-solver";
 
 import { DagNode } from "../../dag/node";
-import { Operator } from ".";
+import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 
 export type LargeHandling = "small" | "medium" | "large";
 
-export interface OptOperator extends Operator<DagNode> {
+export interface OptOperator extends TwolayerOperator<DagNode> {
   /**
    * Set the large dag handling which will error if you try to decross a dag
    * that is too large. `"small"` the default only allows small graphs.

@@ -7,12 +7,12 @@
  * @module
  */
 import { DagNode } from "../../dag/node";
-import { Operator } from ".";
+import { TwolayerOperator } from ".";
 import { median as arrayMedian } from "d3-array";
 import { def } from "../../utils";
 import { order } from "./utils";
 
-export type MedianOperator = Operator<DagNode>;
+export type MedianOperator = TwolayerOperator<DagNode>;
 
 /** Create a median two layer ordering operator. */
 export function median(...args: never[]): MedianOperator {

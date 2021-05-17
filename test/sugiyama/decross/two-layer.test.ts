@@ -1,11 +1,52 @@
 import {
+  DagNode,
+  SugiDummyNode,
   decrossTwoLayer,
   twolayerMean,
   twolayerMedian,
   twolayerOpt
 } from "../../../src";
+import { TestNode, createLayers } from "../utils";
 
-import { createLayers } from "../utils";
+import { TwolayerOperator } from "../../../src/sugiyama/twolayer";
+
+test("decrossTwoLayer() correctly adapts to types", () => {
+  const layers = createLayers([[[], 0]]);
+  const unks = layers as (DagNode | SugiDummyNode)[][];
+
+  const init = decrossTwoLayer();
+  init(layers);
+  init(unks);
+
+  // narrowed for custom
+  function customTwolayer(
+    topLayer: (TestNode | SugiDummyNode)[],
+    bottomLayer: (TestNode | SugiDummyNode)[],
+    topDown: boolean
+  ): void {
+    void [topLayer, bottomLayer, topDown];
+  }
+  const custom = init.order(customTwolayer);
+  custom(layers);
+  // @ts-expect-error custom only takes TestNodes
+  custom(unks);
+
+  // still works for cast
+  const cast = custom.order(twolayerMean() as TwolayerOperator<TestNode>);
+  cast(layers);
+  // @ts-expect-error cast only takes TestNodes
+  cast(unks);
+
+  // still works for more general two layers
+  const opt = cast.order(twolayerOpt());
+  opt(layers);
+  // @ts-expect-error opt only takes TestNodes
+  opt(unks);
+
+  // but we can still get original operator and operate on it
+  const newOrder = opt.order().dist(true);
+  expect(newOrder.dist()).toBeTruthy();
+});
 
 test("decrossTwoLayer() propogates to both layers", () => {
   // o o    o o

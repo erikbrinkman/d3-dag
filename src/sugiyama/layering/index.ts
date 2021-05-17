@@ -37,6 +37,6 @@ export interface LayerableNode {
   layer?: number;
 }
 
-export interface Operator<NodeType extends DagNode> {
+export interface LayeringOperator<NodeType extends DagNode> {
   (dag: Dag<NodeType & LayerableNode>): void;
 }

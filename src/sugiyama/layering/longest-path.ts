@@ -9,35 +9,25 @@
  *
  * @module
  */
-import { Dag, DagNode, ValuedNode } from "../../dag/node";
-import { LayerableNode, Operator } from ".";
+import { Dag, DagNode } from "../../dag/node";
+import { LayerableNode, LayeringOperator } from ".";
 
-export interface LongestPathOperator<NodeType extends DagNode>
-  extends Operator<NodeType> {
+import { def } from "../../utils";
+
+export interface LongestPathOperator extends LayeringOperator<DagNode> {
   /**
    * Set whether longest path should go top down or not. If set to true (the
    * default), longest path will start at the top, putting nodes as close to
    * the top as possible.
    */
-  topDown(val: boolean): LongestPathOperator<NodeType>;
+  topDown(val: boolean): LongestPathOperator;
   /** Get whether or not this is using topDown. */
   topDown(): boolean;
 }
 
 /** @internal */
-function buildOperator<NodeType extends DagNode>(options: {
-  topDown: boolean;
-}): LongestPathOperator<NodeType> {
-  function bottomUp<N extends NodeType & ValuedNode & LayerableNode>(
-    dag: Dag<N>
-  ): void {
-    const maxHeight = Math.max(...dag.iroots().map((d) => d.value));
-    for (const node of dag) {
-      node.layer = maxHeight - node.value;
-    }
-  }
-
-  function longestPathCall<N extends NodeType & LayerableNode>(
+function buildOperator(options: { topDown: boolean }): LongestPathOperator {
+  function longestPathCall<N extends DagNode & LayerableNode>(
     dag: Dag<N>
   ): void {
     if (options.topDown) {
@@ -45,13 +35,17 @@ function buildOperator<NodeType extends DagNode>(options: {
         node.layer = node.value;
       }
     } else {
-      bottomUp(dag.height());
+      dag.height();
+      const maxHeight = Math.max(...dag.iroots().map((d) => def(d.value)));
+      for (const node of dag) {
+        node.layer = maxHeight - def(node.value);
+      }
     }
   }
 
   function topDown(): boolean;
-  function topDown(val: boolean): LongestPathOperator<NodeType>;
-  function topDown(val?: boolean): boolean | LongestPathOperator<NodeType> {
+  function topDown(val: boolean): LongestPathOperator;
+  function topDown(val?: boolean): boolean | LongestPathOperator {
     if (val === undefined) {
       return options.topDown;
     } else {
@@ -64,9 +58,7 @@ function buildOperator<NodeType extends DagNode>(options: {
 }
 
 /** Create a default {@link LongestPathOperator}. */
-export function longestPath<NodeType extends DagNode>(
-  ...args: never[]
-): LongestPathOperator<NodeType> {
+export function longestPath(...args: never[]): LongestPathOperator {
   if (args.length) {
     throw new Error(
       `got arguments to longestPath(${args}), but constructor takes no aruguments.`

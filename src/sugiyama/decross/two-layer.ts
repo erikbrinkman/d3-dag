@@ -13,26 +13,32 @@ import { MedianOperator, median } from "../twolayer/median";
 import { Replace, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
+import { DecrossOperator } from ".";
 import { DummyNode } from "../dummy";
-import { Operator } from ".";
-import { Operator as OrderOperator } from "../twolayer";
+import { TwolayerOperator as OrderOperator } from "../twolayer";
 
 interface Operators<NodeType extends DagNode> {
   order: OrderOperator<NodeType>;
 }
 
 export interface TwoLayerOperator<
-  NodeType extends DagNode,
+  NodeType extends DagNode = DagNode,
   Ops extends Operators<NodeType> = Operators<NodeType>
-> extends Operator<NodeType> {
+> extends DecrossOperator<NodeType> {
   /**
    * Sets the order accessor to the specified {@link OrderOperator} and returns
    * this {@link TwoLayerOperator}. See the {@link "sugiyama/twolayer/index" | two
    * layer} module for more information on order operators.
    */
-  order<NewOrder extends OrderOperator<NodeType>>(
-    ord: NewOrder
-  ): TwoLayerOperator<NodeType, Replace<Ops, "order", NewOrder>>;
+  order<NewNode extends NodeType, NewOrder extends OrderOperator<NewNode>>(
+    ord: NewOrder &
+      // NOTE this is necessary for type inference
+      ((
+        topLayer: (NewNode | DummyNode)[],
+        bottomLayer: (NewNode | DummyNode)[],
+        topDown: boolean
+      ) => void)
+  ): TwoLayerOperator<NewNode, Replace<Ops, "order", NewOrder>>;
   /**
    * Get the current {@link OrderOperator} which defaults to {@link median}.
    */
@@ -88,15 +94,17 @@ function buildOperator<
     }
   }
 
+  function order<
+    NewNode extends NodeType,
+    NewOrder extends OrderOperator<NewNode>
+  >(ord: NewOrder): TwoLayerOperator<NewNode, Replace<Ops, "order", NewOrder>>;
   function order(): Ops["order"];
-  function order<NewOrder extends OrderOperator<NodeType>>(
-    ord: NewOrder
-  ): TwoLayerOperator<NodeType, Replace<Ops, "order", NewOrder>>;
-  function order<NewOrder extends OrderOperator<NodeType>>(
+  function order<
+    NewNode extends NodeType,
+    NewOrder extends OrderOperator<NewNode>
+  >(
     ord?: NewOrder
-  ):
-    | Ops["order"]
-    | TwoLayerOperator<NodeType, Replace<Ops, "order", NewOrder>> {
+  ): Ops["order"] | TwoLayerOperator<NewNode, Replace<Ops, "order", NewOrder>> {
     if (ord === undefined) {
       return options.order;
     } else {
@@ -124,9 +132,9 @@ function buildOperator<
 }
 
 /** Create a default {@link TwoLayerOperator}. */
-export function twoLayer<NodeType extends DagNode>(
+export function twoLayer(
   ...args: never[]
-): TwoLayerOperator<NodeType, { order: MedianOperator }> {
+): TwoLayerOperator<DagNode, { order: MedianOperator }> {
   if (args.length) {
     throw new Error(
       `got arguments to twoLayer(${args}), but constructor takes no aruguments.`

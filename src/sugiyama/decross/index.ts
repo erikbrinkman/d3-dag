@@ -15,6 +15,6 @@
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 
-export interface Operator<NodeType extends DagNode> {
+export interface DecrossOperator<NodeType extends DagNode> {
   (layers: (NodeType | DummyNode)[][]): void;
 }
