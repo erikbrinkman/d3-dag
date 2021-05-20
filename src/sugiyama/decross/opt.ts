@@ -293,7 +293,8 @@ function buildOperator(options: {
     }
 
     // solve objective
-    const ordering = Solve(model);
+    // NOTE bundling sets this to undefined, and we need it to be setable
+    const ordering = Solve.call({}, model);
 
     // sort layers
     for (const layer of layers) {

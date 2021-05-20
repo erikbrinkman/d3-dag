@@ -162,13 +162,17 @@ function buildOperator<
       }
     }
 
-    const { feasible, ...assignment } = Solve({
-      optimize: "opt",
-      opType: "max",
-      constraints: constraints,
-      variables: variables,
-      ints: ints
-    });
+    // NOTE bundling sets this to undefined, and we need it to be setable
+    const { feasible, ...assignment } = Solve.call(
+      {},
+      {
+        optimize: "opt",
+        opType: "max",
+        constraints: constraints,
+        variables: variables,
+        ints: ints
+      }
+    );
     if (!feasible) {
       /* istanbul ignore else */
       if (ranks.length || groups.size) {
