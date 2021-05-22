@@ -1,20 +1,20 @@
 import { SimpleDatum } from "../examples";
 import { dagStratify } from "../../src/";
 
-const single: SimpleDatum[] = [
+const single = [
   {
     id: "0"
   }
-];
-const doub: SimpleDatum[] = [
+] as const;
+const doub = [
   {
     id: "0"
   },
   {
     id: "1"
   }
-];
-const square: SimpleDatum[] = [
+] as const;
+const square = [
   {
     id: "0"
   },
@@ -30,8 +30,8 @@ const square: SimpleDatum[] = [
     id: "3",
     parentIds: ["1", "2"]
   }
-];
-const spaces: SimpleDatum[] = [
+] as const;
+const spaces = [
   {
     id: "0 0"
   },
@@ -39,7 +39,7 @@ const spaces: SimpleDatum[] = [
     id: "1 1",
     parentIds: ["0 0"]
   }
-];
+] as const;
 
 function alter(id: string): string {
   return `a${id}`;
@@ -80,10 +80,10 @@ test("dagStratify() parses a square with altered ids", () => {
   function newId(d: SimpleDatum): string {
     return alter(d.id);
   }
-  function newParentIds(d: SimpleDatum): string[] {
+  function newParentIds(d: SimpleDatum): readonly string[] {
     return (d.parentIds || []).map(alter);
   }
-  const layout = dagStratify<SimpleDatum>().id(newId).parentIds(newParentIds);
+  const layout = dagStratify().id(newId).parentIds(newParentIds);
   expect(layout.id()).toBe(newId);
   expect(layout.parentIds()).toBe(newParentIds);
   expect(layout.parentData().wrapped).toBe(newParentIds);
@@ -96,7 +96,9 @@ test("dagStratify() parses a square with altered ids", () => {
 });
 
 test("dagStratify() works with data accessor", () => {
-  function newParentData(d: SimpleDatum): [string, string][] | undefined {
+  function newParentData(
+    d: SimpleDatum
+  ): readonly (readonly [string, string])[] | undefined {
     // NOTE this is a poor implementation, but it gets edge cases
     if (d.parentIds === undefined) {
       return undefined;
@@ -104,13 +106,17 @@ test("dagStratify() works with data accessor", () => {
       return d.parentIds.map((pid) => [pid, `${d.id} -> ${pid}`]);
     }
   }
-  const layout = dagStratify<SimpleDatum>().parentData(newParentData);
+  const layout = dagStratify().parentData(newParentData);
   expect(layout.parentData()).toBe(newParentData);
   expect(layout.parentIds().wrapped).toBe(newParentData);
+
+  // @ts-expect-error can't make unrelated
+  layout.parentIds((ps: string[]): string[] => ps);
+
   const justIds = layout.parentIds();
   for (const data of square) {
-    expect(justIds(data, 0).sort()).toEqual(
-      (data.parentIds || []).slice().sort()
+    expect(justIds(data, 0).slice().sort()).toEqual(
+      ("parentIds" in data ? data.parentIds : []).slice().sort()
     );
   }
 

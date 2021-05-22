@@ -34,7 +34,7 @@ export interface IdOperator<LinkDatum> {
  * The operator that constructs a {@link Dag} from link data.
  */
 export interface ConnectOperator<
-  LinkDatum,
+  LinkDatum = unknown,
   SourceId extends IdOperator<LinkDatum> = IdOperator<LinkDatum>,
   TargetId extends IdOperator<LinkDatum> = IdOperator<LinkDatum>
 > {
@@ -65,9 +65,9 @@ export interface ConnectOperator<
    * }
    * ```
    */
-  sourceId<NewId extends IdOperator<LinkDatum>>(
-    id: NewId
-  ): ConnectOperator<LinkDatum, NewId, TargetId>;
+  sourceId<NewLink extends LinkDatum, NewId extends IdOperator<NewLink>>(
+    id: NewId & ((d: NewLink, i: number) => string)
+  ): ConnectOperator<NewLink, NewId, TargetId>;
   /** Gets the current sourceId accessor. */
   sourceId(): SourceId;
 
@@ -81,8 +81,8 @@ export interface ConnectOperator<
    * }
    * ```
    */
-  targetId<NewId extends IdOperator<LinkDatum>>(
-    id: NewId
+  targetId<NewLink extends LinkDatum, NewId extends IdOperator<LinkDatum>>(
+    id: NewId & ((d: NewLink, i: number) => string)
   ): ConnectOperator<LinkDatum, SourceId, NewId>;
   /** Gets the current targetId accessor. */
   targetId(): TargetId;
@@ -137,12 +137,14 @@ function buildOperator<
   }
 
   function sourceId(): SourceId;
-  function sourceId<NewId extends IdOperator<LinkDatum>>(
-    id: NewId
-  ): ConnectOperator<LinkDatum, NewId, TargetId>;
-  function sourceId<NewId extends IdOperator<LinkDatum>>(
-    id?: NewId
-  ): SourceId | ConnectOperator<LinkDatum, NewId, TargetId> {
+  function sourceId<
+    NewLink extends LinkDatum,
+    NewId extends IdOperator<NewLink>
+  >(id: NewId): ConnectOperator<NewLink, NewId, TargetId>;
+  function sourceId<
+    NewLink extends LinkDatum,
+    NewId extends IdOperator<NewLink>
+  >(id?: NewId): SourceId | ConnectOperator<NewLink, NewId, TargetId> {
     if (id === undefined) {
       return sourceIdOp;
     } else {
@@ -152,12 +154,14 @@ function buildOperator<
   connect.sourceId = sourceId;
 
   function targetId(): TargetId;
-  function targetId<NewId extends IdOperator<LinkDatum>>(
-    id: NewId
-  ): ConnectOperator<LinkDatum, SourceId, NewId>;
-  function targetId<NewId extends IdOperator<LinkDatum>>(
-    id?: NewId
-  ): TargetId | ConnectOperator<LinkDatum, SourceId, NewId> {
+  function targetId<
+    NewLink extends LinkDatum,
+    NewId extends IdOperator<NewLink>
+  >(id: NewId): ConnectOperator<NewLink, SourceId, NewId>;
+  function targetId<
+    NewLink extends LinkDatum,
+    NewId extends IdOperator<NewLink>
+  >(id?: NewId): TargetId | ConnectOperator<NewLink, SourceId, NewId> {
     if (id === undefined) {
       return targetIdOp;
     } else {
@@ -222,9 +226,7 @@ function defaultTargetId(d: unknown): string {
 /**
  * Constructs a new {@link ConnectOperator} with the default settings.
  */
-export function connect<LinkDatum>(
-  ...args: never[]
-): ConnectOperator<LinkDatum> {
+export function connect(...args: never[]): ConnectOperator {
   if (args.length) {
     throw new Error(
       `got arguments to dagConnect(${args}), but constructor takes no aruguments. ` +

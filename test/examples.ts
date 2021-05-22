@@ -4,8 +4,8 @@ import { dagConnect, dagStratify } from "../src";
 import { ConnectDatum } from "../src/dag/connect";
 
 export interface SimpleDatum {
-  id: string;
-  parentIds?: string[];
+  readonly id: string;
+  readonly parentIds?: readonly string[];
 }
 
 export type SimpleLinkDatum = [string, string];
@@ -13,7 +13,7 @@ export type SimpleLinkDatum = [string, string];
 // single node
 // 0
 export function single(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     }
@@ -23,7 +23,7 @@ export function single(): Dag<DagNode<SimpleDatum>> {
 // two independent nodes
 // 0 1
 export function doub(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -36,7 +36,7 @@ export function doub(): Dag<DagNode<SimpleDatum>> {
 // three independent nodes
 // 0 1 2
 export function trip(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -56,7 +56,7 @@ export function trip(): Dag<DagNode<SimpleDatum>> {
 //  \ /
 //   3
 export function square(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -82,7 +82,7 @@ export function square(): Dag<DagNode<SimpleDatum>> {
 // |/
 // 2
 export function dummy(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -104,7 +104,7 @@ export function dummy(): Dag<DagNode<SimpleDatum>> {
 //  \|/
 //   4
 export function three(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -132,7 +132,7 @@ export function three(): Dag<DagNode<SimpleDatum>> {
 // |\|
 // 2 3
 export function en(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -155,7 +155,7 @@ export function en(): Dag<DagNode<SimpleDatum>> {
 //  \ /
 //   2
 export function vee(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -174,7 +174,7 @@ export function vee(): Dag<DagNode<SimpleDatum>> {
 //  \ / \ /
 //   3   4
 export function doubleYou(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -200,7 +200,7 @@ export function doubleYou(): Dag<DagNode<SimpleDatum>> {
 //  \ /     \ /
 //   4       5
 export function doubleVee(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -235,7 +235,7 @@ export function doubleVee(): Dag<DagNode<SimpleDatum>> {
 //     |
 //     6
 export function ex(): Dag<DagNode<SimpleDatum>> {
-  return dagStratify<SimpleDatum>()([
+  return dagStratify()([
     {
       id: "0"
     },
@@ -274,7 +274,7 @@ export function ex(): Dag<DagNode<SimpleDatum>> {
 //     |
 //     6
 export function ccoz(): Dag<DagNode<ConnectDatum, SimpleLinkDatum>> {
-  return dagConnect<SimpleLinkDatum>()([
+  return dagConnect()([
     ["0", "3"],
     ["0", "7"],
     ["1", "2"],

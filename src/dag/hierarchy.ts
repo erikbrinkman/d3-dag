@@ -24,7 +24,7 @@ import { verifyDag } from "./verify";
  * increment for each node processed.
  */
 interface ChildrenOperator<NodeDatum> {
-  (d: NodeDatum, i: number): NodeDatum[] | undefined;
+  (d: NodeDatum, i: number): readonly NodeDatum[] | undefined;
 }
 
 /**
@@ -33,7 +33,9 @@ interface ChildrenOperator<NodeDatum> {
  * data for link between the two. `i` will increment for each node processesed.
  */
 interface ChildrenDataOperator<NodeDatum, LinkDatum> {
-  (d: NodeDatum, i: number): [NodeDatum, LinkDatum][] | undefined;
+  (d: NodeDatum, i: number):
+    | readonly (readonly [NodeDatum, LinkDatum])[]
+    | undefined;
 }
 
 /**
@@ -43,7 +45,7 @@ interface WrappedChildrenOperator<
   NodeDatum,
   Children extends ChildrenOperator<NodeDatum> = ChildrenOperator<NodeDatum>
 > extends ChildrenDataOperator<NodeDatum, undefined> {
-  (d: NodeDatum, i: number): [NodeDatum, undefined][];
+  (d: NodeDatum, i: number): readonly (readonly [NodeDatum, undefined])[];
   wrapped: Children;
 }
 
@@ -58,7 +60,7 @@ interface WrappedChildrenDataOperator<
     LinkDatum
   > = ChildrenDataOperator<NodeDatum, LinkDatum>
 > extends ChildrenOperator<NodeDatum> {
-  (d: NodeDatum, i: number): NodeDatum[];
+  (d: NodeDatum, i: number): readonly NodeDatum[];
   wrapped: ChildrenData;
 }
 
@@ -66,8 +68,8 @@ interface WrappedChildrenDataOperator<
  * The operator that constructs a {@link Dag} from hierarchy data.
  */
 export interface HierarchyOperator<
-  NodeDatum,
-  LinkDatum,
+  NodeDatum = unknown,
+  LinkDatum = unknown,
   Children extends ChildrenOperator<NodeDatum> = ChildrenOperator<NodeDatum>,
   ChildrenData extends ChildrenDataOperator<
     NodeDatum,
@@ -117,7 +119,7 @@ export interface HierarchyOperator<
    */
   // NOTE we can't infer data type for hierarchy generator because the children
   // and children data method also has to be typed
-  (...data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>>;
+  (...data: readonly NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>>;
 
   /**
    * Sets the children accessor to the given {@link ChildrenOperator} and returns
@@ -129,13 +131,14 @@ export interface HierarchyOperator<
    * }
    * ```
    */
-  children<NewChildren extends ChildrenOperator<NodeDatum>>(
-    ids: NewChildren
+  children<NewDatum, NewChildren extends ChildrenOperator<NewDatum>>(
+    ids: NewChildren &
+      ((d: NewDatum, i: number) => readonly NewDatum[] | undefined)
   ): HierarchyOperator<
-    NodeDatum,
+    NewDatum,
     undefined,
     NewChildren,
-    WrappedChildrenOperator<NodeDatum, NewChildren>
+    WrappedChildrenOperator<NewDatum, NewChildren>
   >;
   /**
    * Gets the current {@link ChildrenOperator}, If {@link childrenData} was specified,
@@ -149,14 +152,19 @@ export interface HierarchyOperator<
    * returns this {@link HierarchyOperator}.
    */
   childrenData<
+    NewDatum,
     NewLinkDatum,
-    NewChildrenData extends ChildrenDataOperator<NodeDatum, NewLinkDatum>
+    NewChildrenData extends ChildrenDataOperator<NewDatum, NewLinkDatum>
   >(
-    data: NewChildrenData
+    data: NewChildrenData &
+      ((
+        d: NewDatum,
+        i: number
+      ) => readonly (readonly [NewDatum, NewLinkDatum])[] | undefined)
   ): HierarchyOperator<
-    NodeDatum,
+    NewDatum,
     NewLinkDatum,
-    WrappedChildrenDataOperator<NodeDatum, NewLinkDatum, NewChildrenData>,
+    WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
     NewChildrenData
   >;
   /**
@@ -217,61 +225,73 @@ function buildOperator<
   }
 
   function children(): Children;
-  function children<NewChildren extends ChildrenOperator<NodeDatum>>(
+  function children<NewDatum, NewChildren extends ChildrenOperator<NewDatum>>(
     childs: NewChildren
   ): HierarchyOperator<
-    NodeDatum,
+    NewDatum,
     undefined,
     NewChildren,
-    WrappedChildrenOperator<NodeDatum, NewChildren>
+    WrappedChildrenOperator<NewDatum, NewChildren>
   >;
-  function children<NewChildren extends ChildrenOperator<NodeDatum>>(
+  function children<NewDatum, NewChildren extends ChildrenOperator<NewDatum>>(
     childs?: NewChildren
   ):
     | Children
     | HierarchyOperator<
-        NodeDatum,
+        NewDatum,
         undefined,
         NewChildren,
-        WrappedChildrenOperator<NodeDatum, NewChildren>
+        WrappedChildrenOperator<NewDatum, NewChildren>
       > {
     if (childs === undefined) {
       return childrenOp;
     } else {
-      return buildOperator(childs, wrapChildren(childs));
+      return buildOperator<
+        NewDatum,
+        undefined,
+        NewChildren,
+        WrappedChildrenOperator<NewDatum, NewChildren>
+      >(childs, wrapChildren(childs));
     }
   }
   hierarchy.children = children;
 
   function childrenData(): ChildrenData;
   function childrenData<
+    NewDatum,
     NewLinkDatum,
-    NewChildrenData extends ChildrenDataOperator<NodeDatum, NewLinkDatum>
+    NewChildrenData extends ChildrenDataOperator<NewDatum, NewLinkDatum>
   >(
     data: NewChildrenData
   ): HierarchyOperator<
-    NodeDatum,
+    NewDatum,
     NewLinkDatum,
-    WrappedChildrenDataOperator<NodeDatum, NewLinkDatum, NewChildrenData>,
+    WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
     NewChildrenData
   >;
   function childrenData<
+    NewDatum,
     NewLinkDatum,
-    NewChildrenData extends ChildrenDataOperator<NodeDatum, NewLinkDatum>
+    NewChildrenData extends ChildrenDataOperator<NewDatum, NewLinkDatum>
   >(
     data?: NewChildrenData
   ):
     | ChildrenData
     | HierarchyOperator<
-        NodeDatum,
+        NewDatum,
         NewLinkDatum,
-        WrappedChildrenDataOperator<NodeDatum, NewLinkDatum, NewChildrenData>,
+        WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
         NewChildrenData
       > {
     if (data === undefined) {
       return childrenDataOp;
     } else {
-      return buildOperator(wrapChildrenData(data), data);
+      return buildOperator<
+        NewDatum,
+        NewLinkDatum,
+        WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
+        NewChildrenData
+      >(wrapChildrenData(data), data);
     }
   }
   hierarchy.childrenData = childrenData;
@@ -339,13 +359,13 @@ function defaultChildren<NodeDatum>(d: NodeDatum): NodeDatum[] | undefined {
  * valid, forgetting to set children properly will result in a dag with only a
  * single node.
  */
-export function hierarchy<NodeDatum>(
+export function hierarchy(
   ...args: never[]
 ): HierarchyOperator<
-  NodeDatum,
+  unknown,
   undefined,
-  ChildrenOperator<NodeDatum>,
-  WrappedChildrenOperator<NodeDatum, ChildrenOperator<NodeDatum>>
+  ChildrenOperator<unknown>,
+  WrappedChildrenOperator<unknown, ChildrenOperator<unknown>>
 > {
   if (args.length) {
     throw Error(

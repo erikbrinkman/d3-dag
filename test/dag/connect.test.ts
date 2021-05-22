@@ -1,4 +1,3 @@
-import { SimpleLinkDatum } from "../examples";
 import { dagConnect } from "../../src/";
 
 interface ComplexLinkDatum {
@@ -6,16 +5,16 @@ interface ComplexLinkDatum {
   target: string;
 }
 
-const simpleSquare: SimpleLinkDatum[] = [
+const simpleSquare = [
   ["a", "b"],
   ["a", "c"],
   ["b", "d"],
   ["c", "d"]
-];
-const simpleVee: SimpleLinkDatum[] = [
+] as const;
+const simpleVee = [
   ["a", "c"],
   ["b", "c"]
-];
+] as const;
 const complexSquare: ComplexLinkDatum[] = [
   { source: "a", target: "b" },
   { source: "a", target: "c" },
@@ -23,7 +22,7 @@ const complexSquare: ComplexLinkDatum[] = [
   { source: "c", target: "d" }
 ];
 
-const zherebko: SimpleLinkDatum[] = [
+const zherebko = [
   ["1", "2"],
   ["1", "5"],
   ["1", "7"],
@@ -42,7 +41,7 @@ const zherebko: SimpleLinkDatum[] = [
   ["7", "8"],
   ["9", "10"],
   ["9", "11"]
-];
+] as const;
 
 test("dagConnect() parses a simple square", () => {
   const dag = dagConnect()(simpleSquare);
@@ -67,11 +66,12 @@ test("dagConnect() parses a more complex square", () => {
     return datum.target;
   }
 
-  const layout = dagConnect<ComplexLinkDatum>()
-    .sourceId(newSource)
-    .targetId(newTarget);
+  const layout = dagConnect().sourceId(newSource).targetId(newTarget);
   expect(layout.sourceId()).toBe(newSource);
   expect(layout.targetId()).toBe(newTarget);
+
+  // @ts-expect-error can't widen type
+  layout.sourceId((src: string): string => src);
 
   const dag = layout(complexSquare);
   expect(dag.size()).toBeCloseTo(4);

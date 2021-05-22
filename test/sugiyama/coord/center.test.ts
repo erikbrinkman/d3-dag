@@ -20,7 +20,7 @@ test("coordCenter() fails passing an arg to constructor", () => {
 
 test("coordCenter() throws for zero width", () => {
   const layers = createLayers([[[0]]]);
-  expect(() => coordCenter()(layers, () => [0, 1])).toThrow(
+  expect(() => coordCenter()(layers, () => [0, 1] as const)).toThrow(
     "must assign nonzero width to at least one node"
   );
 });

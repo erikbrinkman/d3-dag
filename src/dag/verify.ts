@@ -6,7 +6,7 @@
  */
 import { DagNode, LayoutDagRoot } from "./node";
 
-import { getCircularReplacer } from "../utils";
+import { js } from "../utils";
 
 /** @internal Verify an ID is a valid ID. */
 export function verifyId(id: string): string {
@@ -57,9 +57,7 @@ export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
         "dag contained a cycle: " +
           msg
             .reverse()
-            .map(
-              ({ data }) => `'${JSON.stringify(data, getCircularReplacer())}'`
-            )
+            .map(({ data }) => js`'${data}'`)
             .join(" -> ")
       );
     }

@@ -3,8 +3,8 @@ import { createLayers, nodeSize } from "../utils";
 import { coordQuad } from "../../../src";
 
 test("coordQuad() modifiers work", () => {
-  const vert: [number, number] = [0.1, 0.2];
-  const curv: [number, number] = [0.3, 0.4];
+  const vert = [0.1, 0.2] as const;
+  const curv = [0.3, 0.4] as const;
   const comp = 0.5;
   const layout = coordQuad().vertical(vert).curve(curv).component(comp);
   expect(layout.vertical()).toEqual(vert);

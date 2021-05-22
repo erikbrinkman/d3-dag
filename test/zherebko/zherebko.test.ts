@@ -3,7 +3,7 @@ import { doub, single } from "../examples";
 
 test("zherebko() works for a point", () => {
   const dag = single();
-  const layout = zherebko().size([2, 2]);
+  const layout = zherebko().size([2, 2] as const);
   const [width, height] = layout.size();
   expect(width).toBeCloseTo(2);
   expect(height).toBeCloseTo(2);

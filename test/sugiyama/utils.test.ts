@@ -2,14 +2,8 @@ import { createLayers, crossings, toLayers } from "./utils";
 
 import { dagStratify } from "../../src";
 
-interface Layered {
-  id: string;
-  parentIds?: string[];
-  layer?: number;
-}
-
 test("toLayers() throws when not all nodes have a layer", () => {
-  const dag = dagStratify<Layered>()([
+  const dag = dagStratify()([
     {
       id: "a",
       layer: 0
@@ -55,7 +49,7 @@ test("createLayers() throws on out of range", () => {
 });
 
 test("toLayers() throws with empty layer", () => {
-  const dag = dagStratify<Layered>()([
+  const dag = dagStratify()([
     {
       id: "a",
       layer: 1

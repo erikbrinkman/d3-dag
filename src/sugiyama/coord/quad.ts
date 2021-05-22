@@ -92,7 +92,7 @@ export interface QuadOperator extends CoordOperator<DagNode> {
    * setting a weight to zero doesn't peanalize edges between those types of
    * nodes.
    */
-  vertical(val: [number, number]): QuadOperator;
+  vertical(val: readonly [number, number]): QuadOperator;
   /**
    * Get the current vertical weights which defaults to [1, 0]. By setting the
    * weight of dummy nodes to zero, longer edges aren't penalized to be
@@ -108,7 +108,7 @@ export interface QuadOperator extends CoordOperator<DagNode> {
    * node, while setting dummy nodes will enforce the longer edges should try
    * to be stright.
    */
-  curve(val: [number, number]): QuadOperator;
+  curve(val: readonly [number, number]): QuadOperator;
   /**
    * Get the current vertical weights which defaults to [0, 1]. By setting the
    * weight of non-dummy nodes to zero, we only care about the curvature of
@@ -219,8 +219,10 @@ function buildOperator(options: {
   }
 
   function vertical(): [number, number];
-  function vertical(val: [number, number]): QuadOperator;
-  function vertical(val?: [number, number]): [number, number] | QuadOperator {
+  function vertical(val: readonly [number, number]): QuadOperator;
+  function vertical(
+    val?: readonly [number, number]
+  ): [number, number] | QuadOperator {
     if (val === undefined) {
       const { vertNode, vertDummy } = options;
       return [vertNode, vertDummy];
@@ -237,8 +239,10 @@ function buildOperator(options: {
   quadCall.vertical = vertical;
 
   function curve(): [number, number];
-  function curve(val: [number, number]): QuadOperator;
-  function curve(val?: [number, number]): [number, number] | QuadOperator {
+  function curve(val: readonly [number, number]): QuadOperator;
+  function curve(
+    val?: readonly [number, number]
+  ): [number, number] | QuadOperator {
     if (val === undefined) {
       const { curveNode, curveDummy } = options;
       return [curveNode, curveDummy];

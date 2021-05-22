@@ -1,6 +1,6 @@
 import { dagHierarchy } from "../../src";
 
-const tail = { id: "d" };
+const tail = { id: "d" } as const;
 const square = {
   id: "a",
   children: [
@@ -13,17 +13,22 @@ const square = {
       children: [tail]
     }
   ]
-};
+} as const;
+
+interface SimpleDatum {
+  readonly id: string;
+  readonly children?: readonly SimpleDatum[];
+}
+
+function typedChildren(datum: SimpleDatum): readonly SimpleDatum[] | undefined {
+  return datum.children;
+}
 
 test("dagHierarchy() parses minimal dag", () => {
   const single = { id: "a" };
 
-  function empty(): undefined {
-    return undefined;
-  }
-
-  const layout = dagHierarchy<{ id: string }>().children(empty);
-  expect(layout.children()).toBe(empty);
+  const layout = dagHierarchy().children(typedChildren);
+  expect(layout.children()).toBe(typedChildren);
   expect(layout.childrenData()(single, 0)).toHaveLength(0);
   const dag = layout(single);
   expect(dag.size()).toBeCloseTo(1);
@@ -33,7 +38,7 @@ test("dagHierarchy() parses minimal dag", () => {
 });
 
 test("dagHierarchy() parses a simple square", () => {
-  const dag = dagHierarchy<{ id: string }>()(square);
+  const dag = dagHierarchy().children(typedChildren)(square);
   const [root] = dag.iroots();
   expect(root).toBe(dag);
   expect(root.data.id).toBe("a");
@@ -76,11 +81,13 @@ test("dagHierarchy() works with custom operators", () => {
     ]
   };
 
-  function newChildData(d: ComplexDatum): [ComplexDatum, string][] | undefined {
+  function newChildData(
+    d: ComplexDatum
+  ): readonly (readonly [ComplexDatum, string])[] | undefined {
     return d.c;
   }
 
-  const layout = dagHierarchy<ComplexDatum>().childrenData(newChildData);
+  const layout = dagHierarchy().childrenData(newChildData);
   expect(layout.children().wrapped).toBe(newChildData);
   expect(layout.childrenData()).toBe(newChildData);
   expect(layout.children()(s, 0)).toHaveLength(2);

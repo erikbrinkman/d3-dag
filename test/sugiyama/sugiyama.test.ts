@@ -48,9 +48,11 @@ test("sugiyama() correctly adapts to types", () => {
   custom(unks);
 
   // works for group too
-  const acc = custom.nodeSize((() => [1, 1]) as (
-    node: SimpleNode | SugiDummyNode
-  ) => [1, 1]);
+  const acc = custom.nodeSize(
+    (() => [1, 1] as const) as (
+      node: SimpleNode | SugiDummyNode
+    ) => readonly [1, 1]
+  );
   acc(dag);
   // @ts-expect-error cast only takes TestNodes
   acc(unks);
