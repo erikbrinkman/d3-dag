@@ -86,6 +86,17 @@ export interface ConnectOperator<
   ): ConnectOperator<LinkDatum, SourceId, NewId>;
   /** Gets the current targetId accessor. */
   targetId(): TargetId;
+
+  /**
+   * Sets the allowance for single nodes. If enabled and the source id equals
+   * the target id, then a single node with no parents will be created.
+   * Otherwise a self loop will be created which will result in an error. Note
+   * only single nodes without parents or children need to be specified this
+   * way, otherwise any other connection will work. (default: false)
+   */
+  single(val: boolean): ConnectOperator<LinkDatum, SourceId, TargetId>;
+  /** get the current single node setting. */
+  single(): boolean;
 }
 
 /** @internal */
@@ -95,7 +106,8 @@ function buildOperator<
   TargetId extends IdOperator<LinkDatum>
 >(
   sourceIdOp: SourceId,
-  targetIdOp: TargetId
+  targetIdOp: TargetId,
+  singleVal: boolean
 ): ConnectOperator<LinkDatum, SourceId, TargetId> {
   function connect<L extends LinkDatum>(
     data: readonly L[]
@@ -119,11 +131,16 @@ function buildOperator<
         targetNode = new LayoutDagNode<ConnectDatum, L>({ id: target });
         nodes.set(target, targetNode);
       }
-      sourceNode.dataChildren.push(new LayoutChildLink(targetNode, datum));
 
-      // update roots
-      hasParents.set(source, hasParents.get(source) || false);
-      hasParents.set(target, true);
+      if (source === target && singleVal) {
+        hasParents.set(source, hasParents.get(source) || false);
+      } else {
+        sourceNode.dataChildren.push(new LayoutChildLink(targetNode, datum));
+
+        // update roots
+        hasParents.set(source, hasParents.get(source) || false);
+        hasParents.set(target, true);
+      }
     }
 
     const roots: DagNode<ConnectDatum, L>[] = [];
@@ -148,7 +165,7 @@ function buildOperator<
     if (id === undefined) {
       return sourceIdOp;
     } else {
-      return buildOperator(id, targetIdOp);
+      return buildOperator(id, targetIdOp, singleVal);
     }
   }
   connect.sourceId = sourceId;
@@ -165,10 +182,23 @@ function buildOperator<
     if (id === undefined) {
       return targetIdOp;
     } else {
-      return buildOperator(sourceIdOp, id);
+      return buildOperator(sourceIdOp, id, singleVal);
     }
   }
   connect.targetId = targetId;
+
+  function single(): boolean;
+  function single(val: boolean): ConnectOperator<LinkDatum, SourceId, TargetId>;
+  function single(
+    val?: boolean
+  ): boolean | ConnectOperator<LinkDatum, SourceId, TargetId> {
+    if (val === undefined) {
+      return singleVal;
+    } else {
+      return buildOperator(sourceIdOp, targetIdOp, val);
+    }
+  }
+  connect.single = single;
 
   return connect;
 }
@@ -233,5 +263,5 @@ export function connect(...args: never[]): ConnectOperator {
         "These were probably meant as data which should be called as dagConnect()(...)"
     );
   }
-  return buildOperator(defaultSourceId, defaultTargetId);
+  return buildOperator(defaultSourceId, defaultTargetId, false);
 }

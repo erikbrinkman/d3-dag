@@ -58,6 +58,23 @@ test("dagConnect() parses a simple square", () => {
   ]).toContainEqual([...dag.idescendants("before").map((n) => n.data.id)]);
 });
 
+test("dagConnect() handles single nodes", () => {
+  expect(() =>
+    dagConnect()([
+      ["b", "a"],
+      ["a", "a"]
+    ])
+  ).toThrow("cycle");
+
+  const build = dagConnect().single(true);
+  expect(build.single()).toBeTruthy();
+
+  const dag = build([["a", "a"]]);
+  expect(dag.size()).toBeCloseTo(1);
+  const ids = [...dag.idescendants("before").map((n) => n.data.id)];
+  expect(ids).toEqual(["a"]);
+});
+
 test("dagConnect() parses a more complex square", () => {
   function newSource(datum: ComplexLinkDatum): string {
     return datum.source;
