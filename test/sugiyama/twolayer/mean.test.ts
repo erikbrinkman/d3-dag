@@ -69,6 +69,47 @@ test("twolayerMean() preserves order of multiple easy unconstrained nodes", () =
   expect(inds).toEqual([0, 1, 2, 3]);
 });
 
+test("twolayerMean() preserves order of multiple middle unconstrained nodes bottom-up", () => {
+  const [topLayer, bottomLayer] = createLayers([[[0], [], [], [], [1]]]);
+  twolayerMean()(topLayer, bottomLayer, false);
+  const inds = topLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 1, 2, 3, 4]);
+});
+
+test("twolayerMean() preserves order of multiple edge unconstrained nodes bottom-up", () => {
+  const [topLayer, bottomLayer] = createLayers([[[], [0], [], [1], []]]);
+  twolayerMean()(topLayer, bottomLayer, false);
+  const inds = topLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 1, 2, 3, 4]);
+});
+
+test("twolayerMean() preserves order of multiple middle-middle unconstrained nodes bottom-up", () => {
+  const [topLayer, bottomLayer] = createLayers([
+    [[0], [], [1], [], [2], [], [3], []]
+  ]);
+  twolayerMean()(topLayer, bottomLayer, false);
+  const inds = topLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+});
+
+test("twolayerMean() preserves order of multiple middle-front unconstrained nodes bottom-up", () => {
+  const [topLayer, bottomLayer] = createLayers([
+    [[0], [], [], [1], [2], [], [3], []]
+  ]);
+  twolayerMean()(topLayer, bottomLayer, false);
+  const inds = topLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+});
+
+test("twolayerMean() preserves order of multiple middle-back unconstrained nodes bottom-up", () => {
+  const [topLayer, bottomLayer] = createLayers([
+    [[0], [], [1], [2], [], [], [3], []]
+  ]);
+  twolayerMean()(topLayer, bottomLayer, false);
+  const inds = topLayer.map((n) => n.data?.index);
+  expect(inds).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+});
+
 test("twolayerMean() preserves order of unconstrained nodes to front", () => {
   const [topLayer, bottomLayer] = createLayers([[[3], [2], [0]]]);
   twolayerMean()(topLayer, bottomLayer, true);

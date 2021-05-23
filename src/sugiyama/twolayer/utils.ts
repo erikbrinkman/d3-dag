@@ -1,4 +1,5 @@
 import { DagNode } from "../../dag/node";
+import { def } from "../../utils";
 
 /** order a layer with respect to numeric values
  *
@@ -8,11 +9,9 @@ import { DagNode } from "../../dag/node";
  *
  * @remarks
  *
- * This is currently worst case O(n^2), and therefore the bottleneck for
- * otherwise fast twolayer algorithms. This worst case seems unlikely to be
- * reached, so it's not a matter of active concern. This {@link
+ * See this {@link
  * https://cs.stackexchange.com/questions/140295/complexity-to-insert-subset-of-array-to-minimize-order-inversions
- * | Stack Exchange} post is looking for faster alternative.
+ * | Stack Exchange} post for algorithmic details.
  */
 export function order(
   layer: DagNode[],
@@ -38,31 +37,48 @@ export function order(
     .flatMap(([, nodes]) => nodes);
 
   // initialize gaps for unassigned nodes
-  const gaps = Array(ordered.length + 1)
-    .fill(null)
-    .map(() => [] as DagNode[]);
-  let start = 0;
-  const left = new Set<DagNode>();
+  const inds = new Map(layer.map((n, i) => [n, i] as const));
+  const unassigned = layer.filter((n) => poses.get(n) === undefined);
+  const placements = new Array(unassigned.length).fill(null);
 
-  // find gap for each unassigned node with minimal decrossings
-  for (const node of layer) {
-    if (poses.get(node) !== undefined) {
-      left.add(node);
-    } else {
-      let last = left.size;
-      const inversions = [last];
-      for (const ord of ordered.slice(start)) {
-        last += left.has(ord) ? -1 : 1;
-        inversions.push(last);
-      }
-      start += inversions.indexOf(Math.min(...inversions));
-      gaps[start].push(node);
+  // recursively split optimal placement
+  function recurse(
+    ustart: number,
+    uend: number,
+    ostart: number,
+    oend: number
+  ): void {
+    if (uend <= ustart) return;
+    const umid = Math.floor((ustart + uend) / 2);
+    const node = unassigned[umid];
+    const nind = def(inds.get(node));
+
+    let last = 0;
+    const inversions = [last];
+    for (let i = ostart; i < oend; ++i) {
+      last += def(inds.get(ordered[i])) < nind ? -1 : 1;
+      inversions.push(last);
     }
+    const placement = ostart + inversions.indexOf(Math.min(...inversions));
+    placements[umid] = placement;
+
+    recurse(ustart, umid, ostart, placement);
+    recurse(umid + 1, uend, placement, oend);
   }
 
-  // merge gaps with ordered, and replace layer
-  const result = gaps.flatMap((g, i) =>
-    i === ordered.length ? g : [...g, ordered[i]]
-  );
-  layer.splice(0, layer.length, ...result);
+  recurse(0, unassigned.length, 0, ordered.length);
+
+  // place nodes
+  placements.push(ordered.length + 1); // sentinel
+  let insert = 0;
+  let uind = 0;
+  for (const [i, node] of ordered.entries()) {
+    while (placements[uind] == i) {
+      layer[insert++] = unassigned[uind++];
+    }
+    layer[insert++] = node;
+  }
+  while (placements[uind] == ordered.length) {
+    layer[insert++] = unassigned[uind++];
+  }
 }
