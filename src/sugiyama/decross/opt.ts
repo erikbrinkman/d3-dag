@@ -10,14 +10,14 @@
  * @module
  */
 import { Model, Solve } from "javascript-lp-solver";
+import { bigrams, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DecrossOperator } from ".";
-import { def } from "../../utils";
 
 export type LargeHandling = "small" | "medium" | "large";
 
-export interface OptOperator extends DecrossOperator<DagNode> {
+export interface OptOperator extends DecrossOperator {
   /**
    * Set the large dag handling, which will error if you try to decross DAGs
    * that are too large. Since this operator is so expensive, this exists
@@ -73,8 +73,7 @@ function buildOperator(options: {
     }
 
     const distanceConstraints: [DagNode[], DagNode[][]][] = [];
-    let [topLayer, ...rest] = layers;
-    for (const bottomLayer of rest) {
+    for (const [topLayer, bottomLayer] of bigrams(layers)) {
       const withParents = new Set(topLayer.flatMap((node) => node.children()));
       const topUnconstrained = bottomLayer.filter(
         (node) => !withParents.has(node)
@@ -98,8 +97,6 @@ function buildOperator(options: {
       }
       const bottomGroups = [...parents.values()];
       distanceConstraints.push([bottomUnconstrained, bottomGroups]);
-
-      topLayer = bottomLayer;
     }
 
     // NOTE distance cost for an unconstrained node ina group can't violate

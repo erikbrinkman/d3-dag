@@ -1,19 +1,5 @@
 import { CoordOperator, NodeSizeAccessor } from "../../src/sugiyama/coord";
-import {
-  Dag,
-  SugiDummyNode,
-  coordCenter,
-  coordGreedy,
-  coordQuad,
-  coordTopological,
-  decrossOpt,
-  decrossTwoLayer,
-  layeringCoffmanGraham,
-  layeringLongestPath,
-  layeringSimplex,
-  layeringTopological,
-  sugiyama
-} from "../../src";
+import { Dag, DagNode } from "../../src/dag/node";
 import {
   SimpleDatum,
   doub,
@@ -24,9 +10,21 @@ import {
   trip
 } from "../examples";
 
-import { DagNode } from "../../src/dag/node";
 import { DecrossOperator } from "../../src/sugiyama/decross";
+import { DummyNode } from "../../src/sugiyama/dummy";
 import { LayeringOperator } from "../../src/sugiyama/layering";
+import { center } from "../../src/sugiyama/coord/center";
+import { coffmanGraham } from "../../src/sugiyama/layering/coffman-graham";
+import { topological as coordTopological } from "../../src/sugiyama/coord/topological";
+import { def } from "../../src/utils";
+import { greedy } from "../../src/sugiyama/coord/greedy";
+import { topological as layeringTopological } from "../../src/sugiyama/layering/topological";
+import { longestPath } from "../../src/sugiyama/layering/longest-path";
+import { opt } from "../../src/sugiyama/decross/opt";
+import { quad } from "../../src/sugiyama/coord/quad";
+import { simplex } from "../../src/sugiyama/layering/simplex";
+import { sugiyama } from "../../src/sugiyama";
+import { twoLayer } from "../../src/sugiyama/decross/two-layer";
 
 type SimpleNode = DagNode<SimpleDatum>;
 
@@ -39,7 +37,7 @@ test("sugiyama() correctly adapts to types", () => {
   init(unks);
 
   // narrowed for custom
-  const customLayering = layeringSimplex().rank(
+  const customLayering = simplex().rank(
     (() => undefined) as (node: SimpleNode) => undefined
   );
   const custom = init.layering(customLayering);
@@ -49,42 +47,42 @@ test("sugiyama() correctly adapts to types", () => {
 
   // works for group too
   const acc = custom.nodeSize(
-    (() => [1, 1] as const) as (
-      node: SimpleNode | SugiDummyNode
-    ) => readonly [1, 1]
+    (() => [1, 1] as const) as (node: SimpleNode | DummyNode) => readonly [1, 1]
   );
   acc(dag);
   // @ts-expect-error cast only takes TestNodes
   acc(unks);
 
   // still works for more general options
-  const opt = acc.decross(decrossOpt());
-  opt(dag);
+  const optimal = acc.decross(opt());
+  optimal(dag);
   // @ts-expect-error opt only takes TestNodes
-  opt(unks);
+  optimal(unks);
 
   // but we can still get original operator and operate on it
-  const decross = opt.decross().large("large");
-  expect(decross.large()).toBe("large");
+  const decrossing = optimal.decross().large("large");
+  expect(decrossing.large()).toBe("large");
 
   const unrelated: (
-    node: DagNode<{ id: boolean }> | SugiDummyNode
+    node: DagNode<{ id: boolean }> | DummyNode
   ) => [1, 1] = () => [1, 1];
   init.nodeSize(unrelated);
   // @ts-expect-error unrelated is unrelated to SimpleDatum
-  opt.nodeSize(unrelated);
+  optimal.nodeSize(unrelated);
 });
 
 test("sugiyama() works for single node", () => {
   const dag = single();
-  const [node] = sugiyama()(dag).dag;
+  const [node] = dag;
+  sugiyama()(dag);
   expect(node.x).toBeCloseTo(0.5);
   expect(node.y).toBeCloseTo(0.5);
 });
 
 test("sugiyama() works for double node vertically", () => {
   const dag = doub();
-  const [first, second] = sugiyama().layering(layeringTopological())(dag).dag;
+  const [first, second] = dag;
+  sugiyama().layering(layeringTopological())(dag);
   expect(first.x).toBeCloseTo(0.5);
   expect(first.y).toBeCloseTo(0.5);
   expect(second.x).toBeCloseTo(0.5);
@@ -93,7 +91,8 @@ test("sugiyama() works for double node vertically", () => {
 
 test("sugiyama() works for triple node horizontally", () => {
   const dag = trip();
-  const [first, second, third] = sugiyama()(dag).dag;
+  const [first, second, third] = dag;
+  sugiyama()(dag);
   expect(first.x).toBeCloseTo(0.5);
   expect(first.y).toBeCloseTo(0.5);
   expect(second.x).toBeCloseTo(1.5);
@@ -104,7 +103,8 @@ test("sugiyama() works for triple node horizontally", () => {
 
 test("sugiyama() works for triple node horizontally sized", () => {
   const dag = trip();
-  const [first, second, third] = sugiyama().size([6, 2])(dag).dag;
+  const [first, second, third] = dag;
+  sugiyama().size([6, 2])(dag);
   expect(first.x).toBeCloseTo(1.0);
   expect(first.y).toBeCloseTo(1.0);
   expect(second.x).toBeCloseTo(3.0);
@@ -115,7 +115,8 @@ test("sugiyama() works for triple node horizontally sized", () => {
 
 test("sugiyama() works with a dummy node", () => {
   const dag = dummy();
-  const [first, second, third] = sugiyama()(dag).dag.idescendants("before");
+  const [first, second, third] = dag.idescendants("before");
+  sugiyama()(dag);
   expect(first.y).toBeCloseTo(0.5);
   expect(second.y).toBeCloseTo(1.5);
   expect(third.y).toBeCloseTo(2.5);
@@ -124,18 +125,16 @@ test("sugiyama() works with a dummy node", () => {
   expect(first.x).toBeLessThan(1.0);
   expect(third.x).toBeGreaterThanOrEqual(0.5);
   expect(third.x).toBeLessThan(1.0);
-  expect(first.x).toBeCloseTo(third.x);
-  expect(first.x).not.toBeCloseTo(second.x);
-  expect(Math.abs(first.x - second.x)).toBeLessThan(0.5);
+  expect(first.x).toBeCloseTo(def(third.x));
+  expect(first.x).not.toBeCloseTo(def(second.x));
+  expect(Math.abs(def(first.x) - def(second.x))).toBeLessThan(0.5);
 });
 
 test("sugiyama() allows changing nodeSize", () => {
-  const base = three();
+  const dag = three();
 
-  function nodeSize(
-    node: DagNode<SimpleDatum> | SugiDummyNode
-  ): [number, number] {
-    if (node instanceof SugiDummyNode) {
+  function nodeSize(node: SimpleNode | DummyNode): [number, number] {
+    if (node instanceof DummyNode) {
       return [1, 1];
     } else {
       const size = parseInt(node.data.id) + 1;
@@ -145,7 +144,7 @@ test("sugiyama() allows changing nodeSize", () => {
 
   const layout = sugiyama().nodeSize(nodeSize);
   expect(layout.nodeSize()).toEqual(nodeSize);
-  const { dag, width, height } = layout(base);
+  const { width, height } = layout(dag);
   expect(width).toBeCloseTo(9);
   expect(height).toBeCloseTo(10);
   const [head, ...rest] = dag.idescendants("before");
@@ -165,13 +164,13 @@ test("sugiyama() allows changing nodeSize", () => {
 
 test("sugiyama() allows changing operators", () => {
   const dag = dummy();
-  const layering: LayeringOperator<SimpleNode> = (dag) => {
+  const layering: LayeringOperator<SimpleDatum> = (dag) => {
     for (const [i, node] of dag.idescendants("before").entries()) {
-      node.layer = i;
+      node.value = i;
     }
   };
-  const decross: DecrossOperator<SimpleNode> = () => undefined;
-  const coord: CoordOperator<SimpleNode> = (layers): number => {
+  const decross: DecrossOperator<SimpleDatum> = () => undefined;
+  const coord: CoordOperator<SimpleDatum> = (layers): number => {
     for (const layer of layers) {
       const div = Math.max(1, layer.length);
       layer.forEach((node, i) => {
@@ -180,7 +179,7 @@ test("sugiyama() allows changing operators", () => {
     }
     return 1;
   };
-  const nodeSize: NodeSizeAccessor<SimpleNode> = () => [2, 2];
+  const nodeSize: NodeSizeAccessor<SimpleDatum> = () => [2, 2];
   const layout = sugiyama()
     .layering(layering)
     .decross(decross)
@@ -198,20 +197,21 @@ test("sugiyama() allows changing operators", () => {
 
 test("sugiyama() allows setting all builtin operators", () => {
   const dag = single();
+  const [root] = dag;
   // mostly a type check
   const layout = sugiyama()
     .layering(layeringTopological())
-    .layering(layeringSimplex())
-    .layering(layeringLongestPath())
-    .layering(layeringCoffmanGraham())
-    .coord(coordCenter())
-    .coord(coordQuad())
-    .coord(coordGreedy())
+    .layering(simplex())
+    .layering(longestPath())
+    .layering(coffmanGraham())
+    .coord(center())
+    .coord(quad())
+    .coord(greedy())
     .coord(coordTopological())
-    .decross(decrossTwoLayer())
-    .decross(decrossOpt());
+    .decross(twoLayer())
+    .decross(opt());
   // still runs, although it won't actually run much of this
-  const [root] = layout(dag).dag;
+  layout(dag);
   expect(root.x).toBeCloseTo(0.5);
   expect(root.y).toBeCloseTo(0.5);
 });
@@ -229,7 +229,7 @@ test("sugiyama() throws with invalid layers", () => {
   const dag = dummy();
   const layout = sugiyama().layering((dag) => {
     for (const node of dag) {
-      node.layer = -1;
+      node.value = -1;
     }
   });
   expect(() => layout(dag)).toThrow(
@@ -242,7 +242,7 @@ test("sugiyama() throws with flat layering", () => {
   const dag = dummy();
   const layout = sugiyama().layering((dag) => {
     for (const node of dag) {
-      node.layer = 0;
+      node.value = 0;
     }
   });
   expect(() => layout(dag)).toThrow(
@@ -260,16 +260,14 @@ test("sugiyama() throws with noop coord", () => {
 
 test("sugiyama() throws with bad coord width", () => {
   const dag = dummy();
-  const layout = sugiyama().coord(
-    (layers: (DagNode & { x?: number })[][]): number => {
-      for (const layer of layers) {
-        for (const node of layer) {
-          node.x = 2;
-        }
+  const layout = sugiyama().coord((layers: DagNode[][]): number => {
+    for (const layer of layers) {
+      for (const node of layer) {
+        node.x = 2;
       }
-      return 1; // 1 < 2
     }
-  );
+    return 1; // 1 < 2
+  });
   expect(() => layout(dag)).toThrow(
     "coord assgined an x (2) outside of [0, 1]"
   );

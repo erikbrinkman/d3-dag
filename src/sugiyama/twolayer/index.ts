@@ -14,10 +14,10 @@
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 
-export interface TwolayerOperator<NodeType extends DagNode> {
+export interface TwolayerOperator<NodeDatum = unknown, LinkDatum = unknown> {
   (
-    topLayer: (NodeType | DummyNode)[],
-    bottomLayer: (NodeType | DummyNode)[],
+    topLayer: (DagNode<NodeDatum, LinkDatum> | DummyNode)[],
+    bottomLayer: (DagNode<NodeDatum, LinkDatum> | DummyNode)[],
     topDown: boolean
   ): void;
 }

@@ -20,10 +20,6 @@
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 
-export interface HorizableNode {
-  x?: number;
-}
-
 /**
  * The node size accessor takes a node and returns its size as a tuple of
  * [`width`, `height`]. In the layout, the nodes will positioned such that they
@@ -31,8 +27,8 @@ export interface HorizableNode {
  * limitations of layered layouts, that means that layers will be separated by
  * the maximum height nodes in each layer.
  */
-export interface NodeSizeAccessor<NodeType extends DagNode = DagNode> {
-  (node: NodeType | DummyNode): readonly [number, number];
+export interface NodeSizeAccessor<NodeDatum = unknown, LinkDatum = unknown> {
+  (node: DagNode<NodeDatum, LinkDatum> | DummyNode): readonly [number, number];
 }
 
 /**
@@ -41,10 +37,10 @@ export interface NodeSizeAccessor<NodeType extends DagNode = DagNode> {
  * coordinates should satisfy the node size accessor, and all be between zero
  * and the returned width.
  */
-export interface CoordOperator<NodeType extends DagNode> {
-  <N extends NodeType>(
-    layers: ((N & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N> &
-      ((node: N | DummyNode) => readonly [number, number])
+export interface CoordOperator<NodeDatum = unknown, LinkDatum = unknown> {
+  <N extends NodeDatum, L extends LinkDatum>(
+    layers: (DagNode<N, L> | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N, L> &
+      ((node: DagNode<N, L> | DummyNode) => readonly [number, number])
   ): number;
 }

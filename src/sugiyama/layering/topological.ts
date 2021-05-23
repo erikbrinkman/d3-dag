@@ -11,10 +11,10 @@
  * @module
  */
 
-import { Dag, DagNode } from "../../dag/node";
-import { LayerableNode, LayeringOperator } from ".";
+import { Dag } from "../../dag/node";
+import { LayeringOperator } from ".";
 
-export type TopologicalOperator = LayeringOperator<DagNode>;
+export type TopologicalOperator = LayeringOperator;
 
 /**
  * Create a topological layering.
@@ -26,11 +26,9 @@ export function topological(...args: never[]): TopologicalOperator {
     );
   }
 
-  function topologicalCall<N extends DagNode & LayerableNode>(
-    dag: Dag<N>
-  ): void {
+  function topologicalCall(dag: Dag): void {
     for (const [layer, node] of dag.idescendants("before").entries()) {
-      node.layer = layer;
+      node.value = layer;
     }
   }
 

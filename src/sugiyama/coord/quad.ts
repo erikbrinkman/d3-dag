@@ -1,4 +1,4 @@
-import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
+import { CoordOperator, NodeSizeAccessor } from ".";
 /**
  * This accessor positions nodes to minimize aspect of curvature and distance
  * between nodes. The coordinates are assigned by solving a quadratic program,
@@ -9,7 +9,7 @@ import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
  * @module
  */
 import { DagNode, LayoutDagRoot } from "../../dag/node";
-import { def, setIntersect } from "../../utils";
+import { bigrams, def, setIntersect } from "../../utils";
 import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
 import { DummyNode } from "../dummy";
@@ -23,7 +23,7 @@ function componentMap(layers: DagNode[][]): Map<DagNode, number> {
   // Note computing connected components is generally difficult, and with the
   // layer representation, we lost access to convenient dag methods. Thus, we
   // first reconstruct a mock dag to get connected components, then add them.
-  const roots = new Map<DagNode, DagNode>();
+  const roots = new Set<DagNode>();
   // We iterate in reverse order because we pop children, thus we're guaranteed
   // to only have roots after we're done.
   for (const layer of layers.slice().reverse()) {
@@ -31,12 +31,12 @@ function componentMap(layers: DagNode[][]): Map<DagNode, number> {
       for (const child of node.ichildren()) {
         roots.delete(child);
       }
-      roots.set(node, node);
+      roots.add(node);
     }
   }
 
   // create a fake dag, and use it to get components
-  const components = new LayoutDagRoot([...roots.values()]).split();
+  const components = new LayoutDagRoot([...roots]).split();
   // assign each node it's component id for fast checking if they're identical
   const compMap = new Map<DagNode, number>();
   for (const [i, comp] of components.entries()) {
@@ -54,10 +54,10 @@ function componentMap(layers: DagNode[][]): Map<DagNode, number> {
  * x coordinates and should be solved separately.
  * @internal
  */
-function splitComponentLayers<NodeType extends DagNode>(
-  layers: (NodeType | DummyNode)[][],
+function splitComponentLayers<N, L>(
+  layers: (DagNode<N, L> | DummyNode)[][],
   compMap: Map<DagNode, number>
-): (NodeType | DummyNode)[][][] {
+): (DagNode<N, L> | DummyNode)[][][] {
   // Because of dummy nodes, there's no way for a component to skip a layer,
   // thus for layers to share no common components, there must be a clear
   // boundary between any two.
@@ -81,7 +81,7 @@ function splitComponentLayers<NodeType extends DagNode>(
  * nodes (longer edges). The total weight for that node type must be greater
  * than zero otherwise the optimization will not be well formed.
  */
-export interface QuadOperator extends CoordOperator<DagNode> {
+export interface QuadOperator extends CoordOperator {
   /**
    * Set the weight for verticality. Higher weights mean connected nodes should
    * be closer together, or corollarily edges should be closer to vertical
@@ -136,9 +136,9 @@ function buildOperator(options: {
   curveDummy: number;
   comp: number;
 }): QuadOperator {
-  function quadComponent<N extends DagNode>(
-    layers: ((N & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N>,
+  function quadComponent<N, L>(
+    layers: (DagNode<N, L> | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N, L>,
     compMap: Map<DagNode, number>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy, comp } = options;
@@ -163,13 +163,11 @@ function buildOperator(options: {
     }
 
     // for disconnected dags, add loss for being too far apart
-    for (let [first, ...rest] of layers) {
-      for (const second of rest) {
+    for (const layer of layers) {
+      for (const [first, second] of bigrams(layer)) {
         if (def(compMap.get(first)) !== def(compMap.get(second))) {
           minDist(Q, def(inds.get(first)), def(inds.get(second)), comp);
         }
-
-        first = second;
       }
     }
 
@@ -177,9 +175,9 @@ function buildOperator(options: {
     return layout(layers, nodeSize, inds, solution);
   }
 
-  function quadCall<N extends DagNode>(
-    layers: ((N & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N>
+  function quadCall<N, L>(
+    layers: (DagNode<N, L> | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N, L>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy } = options;
     if (vertNode === 0 && curveNode === 0) {

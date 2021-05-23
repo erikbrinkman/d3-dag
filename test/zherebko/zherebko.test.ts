@@ -1,5 +1,7 @@
-import { dagConnect, zherebko } from "../../src";
 import { doub, single } from "../examples";
+
+import { connect } from "../../src/dag/connect";
+import { zherebko } from "../../src/zherebko";
 
 test("zherebko() works for a point", () => {
   const dag = single();
@@ -7,15 +9,16 @@ test("zherebko() works for a point", () => {
   const [width, height] = layout.size();
   expect(width).toBeCloseTo(2);
   expect(height).toBeCloseTo(2);
-  const laidout = layout(dag);
-  const [root] = laidout.iroots();
+  layout(dag);
+  const [root] = dag.iroots();
   expect(root.x).toBeCloseTo(1);
   expect(root.y).toBeCloseTo(1);
 });
 
 test("zherebko() works for a line", () => {
-  const dag = dagConnect()([["0", "1"]]);
-  const [head, tail] = zherebko()(dag);
+  const dag = connect()([["0", "1"]]);
+  zherebko()(dag);
+  const [head, tail] = dag;
   expect(head.x).toBeCloseTo(0.5);
   expect(head.y).toBeCloseTo(0.0);
   expect(tail.x).toBeCloseTo(0.5);
@@ -23,7 +26,7 @@ test("zherebko() works for a line", () => {
 });
 
 test("zherebko() works specific case", () => {
-  const dag = dagConnect()([
+  const dag = connect()([
     ["0", "1"],
     ["0", "2"],
     ["0", "3"],
@@ -32,12 +35,12 @@ test("zherebko() works specific case", () => {
     ["2", "4"],
     ["3", "4"]
   ]);
-  const laidout = zherebko()(dag);
-  for (const node of laidout) {
+  zherebko()(dag);
+  for (const node of dag) {
     expect(node.x).toBeCloseTo(0.5);
     expect(node.y).toBeCloseTo(parseFloat(node.data.id) / 4);
   }
-  const [zero, , two] = laidout.idescendants("before");
+  const [zero, , two] = dag.idescendants("before");
 
   {
     expect(zero.data.id).toBe("0");
@@ -82,28 +85,30 @@ test("zherebko() works specific case", () => {
 
 test("zherebko() works on disconnected dag", () => {
   const dag = doub();
-  const laidout = zherebko().size([2, 2])(dag);
+  zherebko().size([2, 2])(dag);
   expect([
-    ...laidout
+    ...dag
       .idescendants()
       .map((n) => n.y)
       .sort()
   ]).toEqual([0, 2]);
-  for (const node of laidout) {
+  for (const node of dag) {
     expect(node.x).toEqual(1);
   }
 });
 
 test("zherebko() works on sink", () => {
-  const dag = dagConnect()([
+  const dag = connect()([
     ["0", "3"],
     ["1", "3"],
     ["2", "3"]
   ]);
-  const laidout = zherebko().size([2, 3])(dag);
-  for (const node of laidout) {
+  zherebko().size([2, 3])(dag);
+  for (const node of dag) {
     expect(node.x).toEqual(1);
-    expect(node.data.id === "3" ? node.y === 3 : node.y < 3).toBeTruthy();
+    expect(
+      node.data.id === "3" ? node.y === 3 : node.y !== undefined && node.y < 3
+    ).toBeTruthy();
     const [{ points = [] } = {}] = node.ichildLinks();
     const exes = new Set(points.slice(1, -1).map(({ x }) => x));
     expect(exes.size).toBeLessThan(2);

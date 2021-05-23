@@ -1,12 +1,12 @@
 import { createLayers, nodeSize } from "../utils";
 
-import { coordGreedy } from "../../../src";
+import { greedy } from "../../../src/sugiyama/coord/greedy";
 
-test("coordGreedy() works for N", () => {
+test("greedy() works for N", () => {
   // degree matters
   const layers = createLayers([[[0, 1], [1]]]);
   const [[topLeft, topRight], [bottomLeft, bottomRight]] = layers;
-  coordGreedy()(layers, nodeSize);
+  greedy()(layers, nodeSize);
 
   expect(topLeft.x).toBeCloseTo(1.0, 7);
   expect(topRight.x).toBeCloseTo(2.0, 7);
@@ -14,22 +14,22 @@ test("coordGreedy() works for N", () => {
   expect(bottomRight.x).toBeCloseTo(1.5, 7);
 });
 
-test("coordGreedy() works for carat", () => {
+test("greedy() works for carat", () => {
   // index fallback if not degree
   const layers = createLayers([[[0, 1]]]);
   const [[head], [left, right]] = layers;
-  coordGreedy()(layers, nodeSize);
+  greedy()(layers, nodeSize);
 
   expect(head.x).toBeCloseTo(0.5, 7);
   expect(left.x).toBeCloseTo(0.5, 7);
   expect(right.x).toBeCloseTo(1.5, 7);
 });
 
-test("coordGreedy() works for triangle", () => {
+test("greedy() works for triangle", () => {
   // dummy gets lowest priority
   const layers = createLayers([[[0, 1]], [[0], 0]]);
   const [[one], [two, dummy], [three]] = layers;
-  coordGreedy()(layers, nodeSize);
+  greedy()(layers, nodeSize);
 
   expect(one.x).toBeCloseTo(0.5, 7);
   expect(two.x).toBeCloseTo(0.5, 7);
@@ -37,14 +37,14 @@ test("coordGreedy() works for triangle", () => {
   expect(dummy.x).toBeCloseTo(1.5, 7);
 });
 
-test("coordGreedy() fails passing an arg to constructor", () => {
+test("greedy() fails passing an arg to constructor", () => {
   // @ts-expect-error greedy takes no arguments
-  expect(() => coordGreedy(undefined)).toThrow("got arguments to greedy");
+  expect(() => greedy(undefined)).toThrow("got arguments to greedy");
 });
 
-test("coordGreedy() throws for zero width", () => {
+test("greedy() throws for zero width", () => {
   const layers = createLayers([[[0]]]);
-  expect(() => coordGreedy()(layers, () => [0, 1] as const)).toThrow(
+  expect(() => greedy()(layers, () => [0, 1] as const)).toThrow(
     "must assign nonzero width to at least one node"
   );
 });

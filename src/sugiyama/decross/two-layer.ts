@@ -10,45 +10,43 @@
  */
 
 import { MedianOperator, median } from "../twolayer/median";
-import { Replace, def } from "../../utils";
+import { bigrams, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DecrossOperator } from ".";
 import { DummyNode } from "../dummy";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 
-interface Operators<NodeType extends DagNode> {
-  order: OrderOperator<NodeType>;
-}
-
 export interface TwoLayerOperator<
-  NodeType extends DagNode = DagNode,
-  Ops extends Operators<NodeType> = Operators<NodeType>
-> extends DecrossOperator<NodeType> {
+  NodeDatum = unknown,
+  LinkDatum = unknown,
+  Order extends OrderOperator<NodeDatum, LinkDatum> = OrderOperator<
+    NodeDatum,
+    LinkDatum
+  >
+> extends DecrossOperator<NodeDatum, LinkDatum> {
   /**
    * Sets the order accessor to the specified {@link OrderOperator} and returns
    * this {@link TwoLayerOperator}. See the {@link "sugiyama/twolayer/index" | two
    * layer} module for more information on order operators.
    */
-  order<NewNode extends NodeType, NewOrder extends OrderOperator<NewNode>>(
-    ord: NewOrder &
-      // NOTE this is necessary for type inference
-      ((
-        topLayer: (NewNode | DummyNode)[],
-        bottomLayer: (NewNode | DummyNode)[],
-        topDown: boolean
-      ) => void)
-  ): TwoLayerOperator<NewNode, Replace<Ops, "order", NewOrder>>;
+  order<
+    NewNodeDatum,
+    NewLinkDatum,
+    NewOrder extends OrderOperator<NewNodeDatum, NewLinkDatum>
+  >(
+    ord: NewOrder & OrderOperator<NewNodeDatum, NewLinkDatum>
+  ): TwoLayerOperator<NewNodeDatum, NewLinkDatum, NewOrder>;
   /**
    * Get the current {@link OrderOperator} which defaults to {@link median}.
    */
-  order(): Ops["order"];
+  order(): Order;
 
   /**
    * Sets the number of passes to make, more takes longer, but might result in
    * a better output. (default: 1)
    */
-  passes(val: number): TwoLayerOperator<NodeType, Ops>;
+  passes(val: number): TwoLayerOperator<NodeDatum, LinkDatum, Order>;
   /**
    * Get the current number of passes
    */
@@ -59,11 +57,11 @@ export interface TwoLayerOperator<
 // TODO Add two layer noop. This only makes sense if there's a greedy swapping ability
 
 /** @internal */
-function buildOperator<
-  NodeType extends DagNode,
-  Ops extends Operators<NodeType>
->(options: Ops & { passes: number }): TwoLayerOperator<NodeType, Ops> {
-  function twoLayerCall(layers: (NodeType | DummyNode)[][]): void {
+function buildOperator<N, L, Order extends OrderOperator<N, L>>(options: {
+  order: Order;
+  passes: number;
+}): TwoLayerOperator<N, L, Order> {
+  function twoLayerCall(layers: (DagNode<N, L> | DummyNode)[][]): void {
     const reversed = layers.slice().reverse();
 
     let changed = true;
@@ -71,40 +69,32 @@ function buildOperator<
       changed = false;
 
       // top down
-      let [upper, ...bottoms] = layers;
-      for (const bottom of bottoms) {
+      for (const [upper, bottom] of bigrams(layers)) {
         const init = new Map(bottom.map((node, i) => [node, i] as const));
         options.order(upper, bottom, true);
         if (bottom.some((node, i) => def(init.get(node)) !== i)) {
           changed = true;
         }
-        upper = bottom;
       }
 
       // bottom up
-      let [lower, ...tops] = reversed;
-      for (const topl of tops) {
+      for (const [lower, topl] of bigrams(reversed)) {
         const init = new Map(topl.map((node, i) => [node, i] as const));
         options.order(topl, lower, false);
         if (topl.some((node, i) => def(init.get(node)) !== i)) {
           changed = true;
         }
-        lower = topl;
       }
     }
   }
 
-  function order<
-    NewNode extends NodeType,
-    NewOrder extends OrderOperator<NewNode>
-  >(ord: NewOrder): TwoLayerOperator<NewNode, Replace<Ops, "order", NewOrder>>;
-  function order(): Ops["order"];
-  function order<
-    NewNode extends NodeType,
-    NewOrder extends OrderOperator<NewNode>
-  >(
+  function order<NN, NL, NewOrder extends OrderOperator<NN, NL>>(
+    ord: NewOrder
+  ): TwoLayerOperator<NN, NL, NewOrder>;
+  function order(): Order;
+  function order<NN, NL, NewOrder extends OrderOperator<NN, NL>>(
     ord?: NewOrder
-  ): Ops["order"] | TwoLayerOperator<NewNode, Replace<Ops, "order", NewOrder>> {
+  ): Order | TwoLayerOperator<NN, NL, NewOrder> {
     if (ord === undefined) {
       return options.order;
     } else {
@@ -115,9 +105,9 @@ function buildOperator<
   }
   twoLayerCall.order = order;
 
-  function passes(val: number): TwoLayerOperator<NodeType, Ops>;
+  function passes(val: number): TwoLayerOperator<N, L, Order>;
   function passes(): number;
-  function passes(val?: number): TwoLayerOperator<NodeType, Ops> | number {
+  function passes(val?: number): TwoLayerOperator<N, L, Order> | number {
     if (val === undefined) {
       return options.passes;
     } else if (val <= 0) {
@@ -134,7 +124,7 @@ function buildOperator<
 /** Create a default {@link TwoLayerOperator}. */
 export function twoLayer(
   ...args: never[]
-): TwoLayerOperator<DagNode, { order: MedianOperator }> {
+): TwoLayerOperator<unknown, unknown, MedianOperator> {
   if (args.length) {
     throw new Error(
       `got arguments to twoLayer(${args}), but constructor takes no aruguments.`

@@ -1,25 +1,26 @@
 import { ccoz, square } from "../../examples";
-import { dagConnect, layeringCoffmanGraham } from "../../../src";
 
+import { coffmanGraham } from "../../../src/sugiyama/layering/coffman-graham";
+import { connect } from "../../../src/dag/connect";
 import { toLayers } from "../utils";
 
-test("layeringCoffmanGraham() works for square", () => {
+test("coffmanGraham() works for square", () => {
   const dag = square();
-  layeringCoffmanGraham()(dag);
+  coffmanGraham()(dag);
   const layers = toLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
 });
 
-test("layeringCoffmanGraham() works for a disconnected graph", () => {
+test("coffmanGraham() works for a disconnected graph", () => {
   const dag = ccoz();
-  layeringCoffmanGraham()(dag);
+  coffmanGraham()(dag);
   const layers = toLayers(dag);
   expect(layers.length).toBeTruthy();
 });
 
-test("layeringCoffmanGraham() handles width", () => {
+test("coffmanGraham() handles width", () => {
   const dag = square();
-  const layering = layeringCoffmanGraham().width(1);
+  const layering = coffmanGraham().width(1);
   expect(layering.width()).toBe(1);
   layering(dag);
   const layers = toLayers(dag);
@@ -29,8 +30,8 @@ test("layeringCoffmanGraham() handles width", () => {
   ]).toContainEqual(layers);
 });
 
-test("layeringCoffmanGraham() handles earlier nodes", () => {
-  const dag = dagConnect()([
+test("coffmanGraham() handles earlier nodes", () => {
+  const dag = connect()([
     ["0", "1"],
     ["1", "2"],
     ["0", "3"],
@@ -38,13 +39,13 @@ test("layeringCoffmanGraham() handles earlier nodes", () => {
     ["1", "4"],
     ["2", "4"]
   ]);
-  layeringCoffmanGraham().width(1)(dag);
+  coffmanGraham().width(1)(dag);
   const layers = toLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
 });
 
-test("layeringCoffmanGraham() handles shorter edges", () => {
-  const dag = dagConnect()([
+test("coffmanGraham() handles shorter edges", () => {
+  const dag = connect()([
     ["0", "1"],
     ["1", "2"],
     ["0", "3"],
@@ -53,15 +54,15 @@ test("layeringCoffmanGraham() handles shorter edges", () => {
     ["1", "4"],
     ["2", "4"]
   ]);
-  layeringCoffmanGraham().width(1)(dag);
+  coffmanGraham().width(1)(dag);
   const layers = toLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
 });
 
-test("layeringCoffmanGraham() handles history reverse", () => {
+test("coffmanGraham() handles history reverse", () => {
   // priority queue handles nodes in certain orders, so we reverse to get
   // opposite comparison
-  const dag = dagConnect()([
+  const dag = connect()([
     ["0", "1"],
     ["1", "2"],
     ["1", "4"],
@@ -69,20 +70,18 @@ test("layeringCoffmanGraham() handles history reverse", () => {
     ["0", "3"],
     ["2", "3"]
   ]);
-  layeringCoffmanGraham().width(1)(dag);
+  coffmanGraham().width(1)(dag);
   const layers = toLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
 });
 
-test("layeringCoffmanGraham() requires positive width", () => {
-  expect(() => layeringCoffmanGraham().width(-1)).toThrow(
-    "width must be non-negative"
-  );
+test("coffmanGraham() requires positive width", () => {
+  expect(() => coffmanGraham().width(-1)).toThrow("width must be non-negative");
 });
 
-test("layeringCoffmanGraham() fails passing an arg to constructor", () => {
+test("coffmanGraham() fails passing an arg to constructor", () => {
   // @ts-expect-error coffman-graham takes no arguments
-  expect(() => layeringCoffmanGraham(undefined)).toThrow(
+  expect(() => coffmanGraham(undefined)).toThrow(
     "got arguments to coffmanGraham"
   );
 });

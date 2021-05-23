@@ -6,14 +6,14 @@
  *
  * @module
  */
-import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
+import { CoordOperator, NodeSizeAccessor } from ".";
 import { init, layout, minBend, solve } from "./utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { def } from "../../utils";
 
-export type TopologicalOperator = CoordOperator<DagNode>;
+export type TopologicalOperator = CoordOperator;
 
 /** Create a topological coordinate assignment operator. */
 export function topological(...args: never[]): TopologicalOperator {
@@ -23,9 +23,9 @@ export function topological(...args: never[]): TopologicalOperator {
     );
   }
 
-  function topologicalCall<N extends DagNode>(
-    layers: ((N & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N>
+  function topologicalCall<N, L>(
+    layers: (DagNode<N, L> | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N, L>
   ): number {
     for (const layer of layers) {
       const numNodes = layer.reduce(
@@ -37,7 +37,7 @@ export function topological(...args: never[]): TopologicalOperator {
       }
     }
 
-    const inds = new Map<N | DummyNode, number>();
+    const inds = new Map<DagNode, number>();
     let i = 0;
     for (const layer of layers) {
       for (const node of layer) {

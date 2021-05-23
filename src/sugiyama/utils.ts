@@ -8,12 +8,12 @@ import { js } from "../utils";
  *
  * @internal
  */
-export function cachedNodeSize<NodeType extends DagNode>(
-  nodeSize: NodeSizeAccessor<NodeType>
-): NodeSizeAccessor<NodeType> {
-  const cache = new Map<NodeType | DummyNode, readonly [number, number]>();
+export function cachedNodeSize<N, L>(
+  nodeSize: NodeSizeAccessor<N, L>
+): NodeSizeAccessor<N, L> {
+  const cache = new Map<DagNode, readonly [number, number]>();
 
-  function cached(node: NodeType | DummyNode): readonly [number, number] {
+  function cached(node: DagNode<N, L> | DummyNode): readonly [number, number] {
     let val = cache.get(node);
     if (val === undefined) {
       val = nodeSize(node);

@@ -9,12 +9,11 @@
  *
  * @module
  */
-import { Dag, DagNode } from "../../dag/node";
-import { LayerableNode, LayeringOperator } from ".";
-
+import { Dag } from "../../dag/node";
+import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
-export interface LongestPathOperator extends LayeringOperator<DagNode> {
+export interface LongestPathOperator extends LayeringOperator {
   /**
    * Set whether longest path should go top down or not. If set to true (the
    * default), longest path will start at the top, putting nodes as close to
@@ -27,18 +26,14 @@ export interface LongestPathOperator extends LayeringOperator<DagNode> {
 
 /** @internal */
 function buildOperator(options: { topDown: boolean }): LongestPathOperator {
-  function longestPathCall<N extends DagNode & LayerableNode>(
-    dag: Dag<N>
-  ): void {
+  function longestPathCall(dag: Dag): void {
     if (options.topDown) {
-      for (const node of dag.depth()) {
-        node.layer = node.value;
-      }
+      dag.depth();
     } else {
       dag.height();
       const maxHeight = Math.max(...dag.iroots().map((d) => def(d.value)));
       for (const node of dag) {
-        node.layer = maxHeight - def(node.value);
+        node.value = maxHeight - def(node.value);
       }
     }
   }

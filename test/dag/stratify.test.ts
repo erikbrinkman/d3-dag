@@ -1,5 +1,5 @@
 import { SimpleDatum } from "../examples";
-import { dagStratify } from "../../src/";
+import { stratify } from "../../src/dag/stratify";
 
 const single = [
   {
@@ -45,15 +45,15 @@ function alter(id: string): string {
   return `a${id}`;
 }
 
-test("dagStratify() parses minimal dag", () => {
-  const dag = dagStratify()(single);
+test("stratify() parses minimal dag", () => {
+  const dag = stratify()(single);
   const [node] = dag;
   expect(node.data.id).toBe("0");
   expect(node.children()).toHaveLength(0);
 });
 
-test("dagStratify() parses multi-root dag", () => {
-  const dag = dagStratify()(doub);
+test("stratify() parses multi-root dag", () => {
+  const dag = stratify()(doub);
   const ids = dag
     .descendants()
     .map((d) => d.data.id)
@@ -61,14 +61,14 @@ test("dagStratify() parses multi-root dag", () => {
   expect(ids).toEqual(["0", "1"]);
 });
 
-test("dagStratify() parses ids with spaces", () => {
-  const dag = dagStratify()(spaces);
+test("stratify() parses ids with spaces", () => {
+  const dag = stratify()(spaces);
   const ids = dag.descendants().map((d) => d.data.id);
   expect(ids).toEqual(["0 0", "1 1"]);
 });
 
-test("dagStratify() parses a square", () => {
-  const dag = dagStratify()(square);
+test("stratify() parses a square", () => {
+  const dag = stratify()(square);
   const [root] = dag.iroots();
   expect(root.data.id).toBe("0");
   expect(root.children()).toHaveLength(2);
@@ -76,14 +76,14 @@ test("dagStratify() parses a square", () => {
   expect(left.children()[0]).toBe(right.children()[0]);
 });
 
-test("dagStratify() parses a square with altered ids", () => {
+test("stratify() parses a square with altered ids", () => {
   function newId(d: SimpleDatum): string {
     return alter(d.id);
   }
   function newParentIds(d: SimpleDatum): readonly string[] {
     return (d.parentIds || []).map(alter);
   }
-  const layout = dagStratify().id(newId).parentIds(newParentIds);
+  const layout = stratify().id(newId).parentIds(newParentIds);
   expect(layout.id()).toBe(newId);
   expect(layout.parentIds()).toBe(newParentIds);
   expect(layout.parentData().wrapped).toBe(newParentIds);
@@ -95,7 +95,7 @@ test("dagStratify() parses a square with altered ids", () => {
   expect(left.children()[0]).toBe(right.children()[0]);
 });
 
-test("dagStratify() works with data accessor", () => {
+test("stratify() works with data accessor", () => {
   function newParentData(
     d: SimpleDatum
   ): readonly (readonly [string, string])[] | undefined {
@@ -106,7 +106,7 @@ test("dagStratify() works with data accessor", () => {
       return d.parentIds.map((pid) => [pid, `${d.id} -> ${pid}`]);
     }
   }
-  const layout = dagStratify().parentData(newParentData);
+  const layout = stratify().parentData(newParentData);
   expect(layout.parentData()).toBe(newParentData);
   expect(layout.parentIds().wrapped).toBe(newParentData);
 
@@ -128,13 +128,13 @@ test("dagStratify() works with data accessor", () => {
   expect(left.children()[0]).toBe(right.children()[0]);
 });
 
-test("dagStratify() fails with arguments", () => {
+test("stratify() fails with arguments", () => {
   // @ts-expect-error stratify takes no arguments
-  expect(() => dagStratify(undefined)).toThrow("got arguments to dagStratify");
+  expect(() => stratify(undefined)).toThrow("got arguments to stratify");
 });
 
-test("dagStratify() fails with empty data", () => {
-  expect(() => dagStratify()([])).toThrow("can't stratify empty data");
+test("stratify() fails with empty data", () => {
+  expect(() => stratify()([])).toThrow("can't stratify empty data");
 });
 
 class BadId {
@@ -142,29 +142,29 @@ class BadId {
     throw new Error("bad id");
   }
 }
-test("dagStratify() fails at undefined id", () => {
+test("stratify() fails at undefined id", () => {
   expect(() => {
-    dagStratify()([{}]);
+    stratify()([{}]);
   }).toThrow("default id function expected datum to have an id field but got");
   expect(() => {
-    dagStratify()([new BadId()]);
+    stratify()([new BadId()]);
   }).toThrow("default id function expected datum to have an id field but got");
 });
 
-test("dagStratify() fails without unique ids", () => {
+test("stratify() fails without unique ids", () => {
   const data = [
     { id: "1", parentIds: [] },
     { id: "1", parentIds: [] }
   ];
-  expect(() => dagStratify()(data)).toThrow("duplicate id");
+  expect(() => stratify()(data)).toThrow("duplicate id");
 });
 
-test("dagStratify() fails with missing id", () => {
+test("stratify() fails with missing id", () => {
   const data = [{ id: "1", parentIds: ["2"] }];
-  expect(() => dagStratify()(data)).toThrow("missing id");
+  expect(() => stratify()(data)).toThrow("missing id");
 });
 
-test("dagStratify() fails without root", () => {
+test("stratify() fails without root", () => {
   const data = [
     {
       id: "1",
@@ -175,10 +175,10 @@ test("dagStratify() fails without root", () => {
       parentIds: ["1"]
     }
   ];
-  expect(() => dagStratify()(data)).toThrow("no roots");
+  expect(() => stratify()(data)).toThrow("no roots");
 });
 
-test("dagStratify() fails with cycle", () => {
+test("stratify() fails with cycle", () => {
   const data = [
     {
       id: "1"
@@ -188,12 +188,12 @@ test("dagStratify() fails with cycle", () => {
       parentIds: ["1", "2"]
     }
   ];
-  expect(() => dagStratify()(data)).toThrow(
+  expect(() => stratify()(data)).toThrow(
     /cycle: '{"id":"2",.*}' -> '{"id":"2",.*}'/
   );
 });
 
-test("dagStratify() fails with hard cycle", () => {
+test("stratify() fails with hard cycle", () => {
   const data = [
     {
       id: "1"
@@ -210,14 +210,14 @@ test("dagStratify() fails with hard cycle", () => {
       parentIds: ["1", "3"]
     }
   ];
-  expect(() => dagStratify()(data)).toThrow(
+  expect(() => stratify()(data)).toThrow(
     /cycle: '{"id":"4",.*}' -> '{"id":"3",.*}' -> '{"id":"4".*}'/
   );
 });
 
-test("dagStratify() fails with invalid id type", () => {
+test("stratify() fails with invalid id type", () => {
   expect(() =>
-    dagStratify().id(() => (null as unknown) as string)([null])
+    stratify().id(() => (null as unknown) as string)([null])
   ).toThrow("id is supposed to be string but got type object");
 });
 
@@ -228,17 +228,17 @@ class BadParentIds {
   }
 }
 
-test("dagStratify() fails with incorrect parentIds", () => {
+test("stratify() fails with incorrect parentIds", () => {
   const data = [
     {
       id: "1",
       parentIds: null
     }
   ];
-  expect(() => dagStratify()(data)).toThrow(
+  expect(() => stratify()(data)).toThrow(
     "default parentIds function expected datum to have a parentIds field but got: "
   );
-  expect(() => dagStratify()([new BadParentIds()])).toThrow(
+  expect(() => stratify()([new BadParentIds()])).toThrow(
     "default parentIds function expected datum to have a parentIds field but got: "
   );
 });

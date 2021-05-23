@@ -14,7 +14,7 @@ test("toLayers() throws when not all nodes have a layer", () => {
     }
   ]);
   for (const node of dag) {
-    (node as { layer?: number }).layer = node.data.layer;
+    node.value = node.data.layer;
   }
   expect(() => toLayers(dag)).toThrow(`node with id 'b' was not given a layer`);
 });
@@ -56,7 +56,7 @@ test("toLayers() throws with empty layer", () => {
     }
   ]);
   for (const node of dag) {
-    (node as { layer?: number }).layer = node.data.layer;
+    node.value = node.data.layer;
   }
   expect(() => toLayers(dag)).toThrow("layer 0 was empty");
 });

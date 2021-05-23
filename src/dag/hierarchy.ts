@@ -119,7 +119,7 @@ export interface HierarchyOperator<
    */
   // NOTE we can't infer data type for hierarchy generator because the children
   // and children data method also has to be typed
-  (...data: readonly NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>>;
+  (...data: readonly NodeDatum[]): Dag<NodeDatum, LinkDatum>;
 
   /**
    * Sets the children accessor to the given {@link ChildrenOperator} and returns
@@ -176,23 +176,23 @@ export interface HierarchyOperator<
 
 /** @internal */
 function buildOperator<
-  NodeDatum,
-  LinkDatum,
-  Children extends ChildrenOperator<NodeDatum>,
-  ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
+  N,
+  L,
+  Children extends ChildrenOperator<N>,
+  ChildrenData extends ChildrenDataOperator<N, L>
 >(
   childrenOp: Children,
   childrenDataOp: ChildrenData
-): HierarchyOperator<NodeDatum, LinkDatum, Children, ChildrenData> {
-  function hierarchy(...data: NodeDatum[]): Dag<DagNode<NodeDatum, LinkDatum>> {
+): HierarchyOperator<N, L, Children, ChildrenData> {
+  function hierarchy(...data: N[]): Dag<N, L> {
     if (!data.length) {
       throw new Error("must pass in at least one node");
     }
 
-    const mapping = new Map<NodeDatum, DagNode<NodeDatum, LinkDatum>>();
-    const queue: DagNode<NodeDatum, LinkDatum>[] = [];
+    const mapping = new Map<N, DagNode<N, L>>();
+    const queue: DagNode<N, L>[] = [];
 
-    function nodify(datum: NodeDatum): DagNode<NodeDatum, LinkDatum> {
+    function nodify(datum: N): DagNode<N, L> {
       let node = mapping.get(datum);
       if (node === undefined) {
         node = new LayoutDagNode(datum);
@@ -225,32 +225,32 @@ function buildOperator<
   }
 
   function children(): Children;
-  function children<NewDatum, NewChildren extends ChildrenOperator<NewDatum>>(
+  function children<N, NewChildren extends ChildrenOperator<N>>(
     childs: NewChildren
   ): HierarchyOperator<
-    NewDatum,
+    N,
     undefined,
     NewChildren,
-    WrappedChildrenOperator<NewDatum, NewChildren>
+    WrappedChildrenOperator<N, NewChildren>
   >;
-  function children<NewDatum, NewChildren extends ChildrenOperator<NewDatum>>(
+  function children<N, NewChildren extends ChildrenOperator<N>>(
     childs?: NewChildren
   ):
     | Children
     | HierarchyOperator<
-        NewDatum,
+        N,
         undefined,
         NewChildren,
-        WrappedChildrenOperator<NewDatum, NewChildren>
+        WrappedChildrenOperator<N, NewChildren>
       > {
     if (childs === undefined) {
       return childrenOp;
     } else {
       return buildOperator<
-        NewDatum,
+        N,
         undefined,
         NewChildren,
-        WrappedChildrenOperator<NewDatum, NewChildren>
+        WrappedChildrenOperator<N, NewChildren>
       >(childs, wrapChildren(childs));
     }
   }
@@ -258,38 +258,38 @@ function buildOperator<
 
   function childrenData(): ChildrenData;
   function childrenData<
-    NewDatum,
-    NewLinkDatum,
-    NewChildrenData extends ChildrenDataOperator<NewDatum, NewLinkDatum>
+    N,
+    L,
+    NewChildrenData extends ChildrenDataOperator<N, L>
   >(
     data: NewChildrenData
   ): HierarchyOperator<
-    NewDatum,
-    NewLinkDatum,
-    WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
+    N,
+    L,
+    WrappedChildrenDataOperator<N, L, NewChildrenData>,
     NewChildrenData
   >;
   function childrenData<
-    NewDatum,
-    NewLinkDatum,
-    NewChildrenData extends ChildrenDataOperator<NewDatum, NewLinkDatum>
+    N,
+    L,
+    NewChildrenData extends ChildrenDataOperator<N, L>
   >(
     data?: NewChildrenData
   ):
     | ChildrenData
     | HierarchyOperator<
-        NewDatum,
-        NewLinkDatum,
-        WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
+        N,
+        L,
+        WrappedChildrenDataOperator<N, L, NewChildrenData>,
         NewChildrenData
       > {
     if (data === undefined) {
       return childrenDataOp;
     } else {
       return buildOperator<
-        NewDatum,
-        NewLinkDatum,
-        WrappedChildrenDataOperator<NewDatum, NewLinkDatum, NewChildrenData>,
+        N,
+        L,
+        WrappedChildrenDataOperator<N, L, NewChildrenData>,
         NewChildrenData
       >(wrapChildrenData(data), data);
     }
@@ -300,10 +300,10 @@ function buildOperator<
 }
 
 /** @internal */
-function wrapChildren<NodeDatum, Children extends ChildrenOperator<NodeDatum>>(
+function wrapChildren<N, Children extends ChildrenOperator<N>>(
   children: Children
-): WrappedChildrenOperator<NodeDatum, Children> {
-  function wrapped(d: NodeDatum, i: number): [NodeDatum, undefined][] {
+): WrappedChildrenOperator<N, Children> {
+  function wrapped(d: N, i: number): [N, undefined][] {
     return (children(d, i) || []).map((d) => [d, undefined]);
   }
   wrapped.wrapped = children;
@@ -312,13 +312,11 @@ function wrapChildren<NodeDatum, Children extends ChildrenOperator<NodeDatum>>(
 
 /** @internal */
 function wrapChildrenData<
-  NodeDatum,
-  LinkDatum,
-  ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
->(
-  childrenData: ChildrenData
-): WrappedChildrenDataOperator<NodeDatum, LinkDatum, ChildrenData> {
-  function wrapped(d: NodeDatum, i: number): NodeDatum[] {
+  N,
+  L,
+  ChildrenData extends ChildrenDataOperator<N, L>
+>(childrenData: ChildrenData): WrappedChildrenDataOperator<N, L, ChildrenData> {
+  function wrapped(d: N, i: number): N[] {
     return (childrenData(d, i) || []).map(([d]) => d);
   }
   wrapped.wrapped = childrenData;
@@ -326,14 +324,14 @@ function wrapChildrenData<
 }
 
 /** @internal */
-interface HasChildren<NodeDatum> {
-  children: NodeDatum[] | undefined;
+interface HasChildren<N> {
+  children: N[] | undefined;
 }
 
 /** @internal */
-function hasChildren<NodeDatum>(d: unknown): d is HasChildren<NodeDatum> {
+function hasChildren<N>(d: unknown): d is HasChildren<N> {
   try {
-    const children = (d as HasChildren<NodeDatum>).children;
+    const children = (d as HasChildren<N>).children;
     return children === undefined || children instanceof Array;
   } catch {
     return false;
@@ -341,8 +339,8 @@ function hasChildren<NodeDatum>(d: unknown): d is HasChildren<NodeDatum> {
 }
 
 /** @internal */
-function defaultChildren<NodeDatum>(d: NodeDatum): NodeDatum[] | undefined {
-  if (hasChildren<NodeDatum>(d)) {
+function defaultChildren<N>(d: N): N[] | undefined {
+  if (hasChildren<N>(d)) {
     return d.children;
   } else {
     throw new Error(
@@ -369,8 +367,8 @@ export function hierarchy(
 > {
   if (args.length) {
     throw Error(
-      `got arguments to dagHierarchy(${args}), but constructor takes no aruguments. ` +
-        "These were probably meant as data which should be called as dagHierarchy()(...)"
+      `got arguments to hierarchy(${args}), but constructor takes no aruguments. ` +
+        "These were probably meant as data which should be called as hierarchy()(...)"
     );
   }
   return buildOperator(defaultChildren, wrapChildren(defaultChildren));

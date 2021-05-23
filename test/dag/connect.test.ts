@@ -1,4 +1,4 @@
-import { dagConnect } from "../../src/";
+import { connect } from "../../src/dag/connect";
 
 interface ComplexLinkDatum {
   source: string;
@@ -43,8 +43,8 @@ const zherebko = [
   ["9", "11"]
 ] as const;
 
-test("dagConnect() parses a simple square", () => {
-  const dag = dagConnect()(simpleSquare);
+test("connect() parses a simple square", () => {
+  const dag = connect()(simpleSquare);
   expect(dag.size()).toBeCloseTo(4);
   const [root] = dag.iroots();
   expect(root.data.id).toBe("a");
@@ -58,15 +58,15 @@ test("dagConnect() parses a simple square", () => {
   ]).toContainEqual([...dag.idescendants("before").map((n) => n.data.id)]);
 });
 
-test("dagConnect() handles single nodes", () => {
+test("connect() handles single nodes", () => {
   expect(() =>
-    dagConnect()([
+    connect()([
       ["b", "a"],
       ["a", "a"]
     ])
   ).toThrow("cycle");
 
-  const build = dagConnect().single(true);
+  const build = connect().single(true);
   expect(build.single()).toBeTruthy();
 
   const dag = build([["a", "a"]]);
@@ -75,7 +75,7 @@ test("dagConnect() handles single nodes", () => {
   expect(ids).toEqual(["a"]);
 });
 
-test("dagConnect() parses a more complex square", () => {
+test("connect() parses a more complex square", () => {
   function newSource(datum: ComplexLinkDatum): string {
     return datum.source;
   }
@@ -83,7 +83,7 @@ test("dagConnect() parses a more complex square", () => {
     return datum.target;
   }
 
-  const layout = dagConnect().sourceId(newSource).targetId(newTarget);
+  const layout = connect().sourceId(newSource).targetId(newTarget);
   expect(layout.sourceId()).toBe(newSource);
   expect(layout.targetId()).toBe(newTarget);
 
@@ -94,41 +94,41 @@ test("dagConnect() parses a more complex square", () => {
   expect(dag.size()).toBeCloseTo(4);
 });
 
-test("dagConnect() parses vee", () => {
-  const dag = dagConnect()(simpleVee);
+test("connect() parses vee", () => {
+  const dag = connect()(simpleVee);
   expect(dag.size()).toBeCloseTo(3);
   expect(dag.roots()).toHaveLength(2);
 });
 
-test("dagConnect() parses zherebko", () => {
-  const dag = dagConnect()(zherebko);
+test("connect() parses zherebko", () => {
+  const dag = connect()(zherebko);
   expect(dag.size()).toBeCloseTo(11);
 });
 
-test("dagConnect() fails on empty", () => {
-  expect(() => dagConnect()([])).toThrow("can't connect empty data");
+test("connect() fails on empty", () => {
+  expect(() => connect()([])).toThrow("can't connect empty data");
 });
 
-test("dagConnect() fails passing an arg to dagConnect", () => {
+test("connect() fails passing an arg to connect", () => {
   // @ts-expect-error testing javascript failure case
-  expect(() => dagConnect(null)).toThrow("got arguments to dagConnect");
+  expect(() => connect(null)).toThrow("got arguments to connect");
 });
 
-test("dagConnect() fails with no roots", () => {
+test("connect() fails with no roots", () => {
   const cycle = [
     ["a", "b"],
     ["b", "a"]
   ];
-  expect(() => dagConnect()(cycle)).toThrow("dag contained no roots");
+  expect(() => connect()(cycle)).toThrow("dag contained no roots");
 });
 
-test("dagConnect() fails with cycle", () => {
+test("connect() fails with cycle", () => {
   const cycle = [
     ["c", "a"],
     ["a", "b"],
     ["b", "a"]
   ];
-  expect(() => dagConnect()(cycle)).toThrow(
+  expect(() => connect()(cycle)).toThrow(
     `cycle: '{"id":"a"}' -> '{"id":"b"}' -> '{"id":"a"}'`
   );
 });
@@ -140,11 +140,11 @@ class BadZero {
   ["1"] = "a";
 }
 
-test("dagConnect() fails on non-string source", () => {
-  expect(() => dagConnect()([[null, "a"]])).toThrow(
+test("connect() fails on non-string source", () => {
+  expect(() => connect()([[null, "a"]])).toThrow(
     "default source id expected datum[0] to be a string but got datum: "
   );
-  expect(() => dagConnect()([new BadZero()])).toThrow(
+  expect(() => connect()([new BadZero()])).toThrow(
     "default source id expected datum[0] to be a string but got datum: "
   );
 });
@@ -156,18 +156,18 @@ class BadOne {
   }
 }
 
-test("dagConnect() fails on non-string target", () => {
-  expect(() => dagConnect()([["a", null]])).toThrow(
+test("connect() fails on non-string target", () => {
+  expect(() => connect()([["a", null]])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
-  expect(() => dagConnect()([new BadOne()])).toThrow(
+  expect(() => connect()([new BadOne()])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
 });
 
-test("dagConnect() fails on duplicate edges", () => {
+test("connect() fails on duplicate edges", () => {
   expect(() =>
-    dagConnect()([
+    connect()([
       ["a", "b"],
       ["a", "b"]
     ])

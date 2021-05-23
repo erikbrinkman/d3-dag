@@ -20,8 +20,8 @@ import { Dag, DagNode } from "../../dag/node";
  * rank should be pushed farther down, and nodes with the same rank should have
  * the same layer.
  */
-export interface RankAccessor<NodeType extends DagNode> {
-  (node: NodeType): number | undefined;
+export interface RankAccessor<NodeDatum = unknown, LinkDatum = unknown> {
+  (node: DagNode<NodeDatum, LinkDatum>): number | undefined;
 }
 
 /**
@@ -29,14 +29,14 @@ export interface RankAccessor<NodeType extends DagNode> {
  * take a group accessor should respect the convention that nodes with the same
  * group should have the same layer.
  */
-export interface GroupAccessor<NodeType extends DagNode> {
-  (node: NodeType): string | undefined;
+export interface GroupAccessor<NodeDatum = unknown, LinkDatum = unknown> {
+  (node: DagNode<NodeDatum, LinkDatum>): string | undefined;
 }
 
-export interface LayerableNode {
-  layer?: number;
-}
-
-export interface LayeringOperator<NodeType extends DagNode> {
-  (dag: Dag<NodeType & LayerableNode>): void;
+/**
+ * Layer a dag. After calling a layering operator on a dag, every node's value
+ * should be set to a non-negative integer layer.
+ */
+export interface LayeringOperator<NodeDatum = unknown, LinkDatum = unknown> {
+  (dag: Dag<NodeDatum, LinkDatum>): void;
 }

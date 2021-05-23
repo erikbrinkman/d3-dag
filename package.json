@@ -41,7 +41,7 @@
     "fix": "eslint --fix {src,test,types}/**/*.ts",
     "build": "tsc && esbuild dist/index.js --bundle --minify --external:fs --external:child_process --global-name=d3 --banner:js=\"$(preamble)\nvar d3 = Object.assign(d3 || {}, (() => {\" --footer:js='return d3; })())' --outfile=bundle/d3-dag.iife.min.js && esbuild dist/index.js --bundle --minify --format=cjs --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js && esbuild dist/index.js --bundle --minify --format=esm --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
     "test": "jest --coverage && yarn lint",
-    "prepare": "yarn test && yarn build",
+    "prepare": "yarn jest --clear-cache && yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
     "docs": "typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
   },

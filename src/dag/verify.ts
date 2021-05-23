@@ -17,19 +17,19 @@ export function verifyId(id: string): string {
 }
 
 /** @internal Verify a DAG is valid. */
-export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
+export function verifyDag(roots: DagNode[]): void {
   // test that there are roots
   if (!roots.length) throw new Error("dag contained no roots");
 
   // test that dag is free of cycles
   // we attempt to take every unique path from each root and see if we ever see
   // a node again
-  const seen = new Set<NodeType>(); // already processed
-  const past = new Set<NodeType>(); // seen down this path
-  let rec: NodeType | null = null;
+  const seen = new Set<DagNode>(); // already processed
+  const past = new Set<DagNode>(); // seen down this path
+  let rec: DagNode | null = null;
 
   /** visit nodes returning cycle if found */
-  function visit(node: NodeType): NodeType[] {
+  function visit(node: DagNode): DagNode[] {
     if (seen.has(node)) {
       return [];
     } else if (past.has(node)) {
@@ -37,7 +37,7 @@ export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
       return [node];
     } else {
       past.add(node);
-      let result: NodeType[] = [];
+      let result: DagNode[] = [];
       for (const child of node.ichildren()) {
         result = visit(child);
         if (result.length) break;
@@ -53,13 +53,11 @@ export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
   for (const root of roots) {
     const msg = visit(root);
     if (msg.length) {
-      throw new Error(
-        "dag contained a cycle: " +
-          msg
-            .reverse()
-            .map(({ data }) => js`'${data}'`)
-            .join(" -> ")
-      );
+      const cycle = msg
+        .reverse()
+        .map(({ data }) => js`'${data}'`)
+        .join(" -> ");
+      throw new Error(`dag contained a cycle: ${cycle}`);
     }
   }
 
@@ -67,7 +65,7 @@ export function verifyDag<NodeType extends DagNode>(roots: NodeType[]): void {
   for (const node of new LayoutDagRoot(roots)) {
     const childIdSet = new Set(node.ichildren());
     if (childIdSet.size !== node.dataChildren.length) {
-      throw new Error(`node '${node.data}' contained duplicate children`);
+      throw new Error(js`node '${node.data}' contained duplicate children`);
     }
   }
 }

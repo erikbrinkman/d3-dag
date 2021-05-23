@@ -1,14 +1,14 @@
 import { Dag, DagNode } from "../../../src/dag/node";
 import { SimpleDatum, doub, ex, square } from "../../examples";
 
-import { layeringSimplex } from "../../../src";
+import { simplex } from "../../../src/sugiyama/layering/simplex";
 import { toLayers } from "../utils";
 
-test("layeringSimplex() correctly adapts to types", () => {
+test("simplex() correctly adapts to types", () => {
   const dag = square();
   const unks = dag as Dag;
 
-  const init = layeringSimplex();
+  const init = simplex();
   init(dag);
   init(unks);
 
@@ -50,14 +50,14 @@ test("layeringSimplex() correctly adapts to types", () => {
   rank.group(unrelated);
 });
 
-test("layeringSimplex() works for square", () => {
+test("simplex() works for square", () => {
   const dag = square();
-  layeringSimplex()(dag);
+  simplex()(dag);
   const layers = toLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
 });
 
-test("layeringSimplex() respects ranks and gets them", () => {
+test("simplex() respects ranks and gets them", () => {
   const dag = square();
   function ranker(node: DagNode<SimpleDatum>): undefined | number {
     if (node.data.id === "1") {
@@ -68,25 +68,25 @@ test("layeringSimplex() respects ranks and gets them", () => {
       return undefined;
     }
   }
-  const layout = layeringSimplex().rank(ranker);
+  const layout = simplex().rank(ranker);
   expect(layout.rank()).toBe(ranker);
   layout(dag);
   const layers = toLayers(dag);
   expect([[0], [1], [2], [3]]).toEqual(layers);
 });
 
-test("layeringSimplex() works for X", () => {
-  // NOTE longest path will always produce a dummy node, where layeringSimplex
+test("simplex() works for X", () => {
+  // NOTE longest path will always produce a dummy node, where simplex
   // will not
   const dag = ex();
-  layeringSimplex()(dag);
+  simplex()(dag);
   const layers = toLayers(dag);
   expect([[0], [1, 2], [3], [4, 5], [6]]).toEqual(layers);
 });
 
-test("layeringSimplex() respects equality rank", () => {
+test("simplex() respects equality rank", () => {
   const dag = ex();
-  const layout = layeringSimplex().rank((node: DagNode<SimpleDatum>) =>
+  const layout = simplex().rank((node: DagNode<SimpleDatum>) =>
     node.data.id === "0" || node.data.id === "2" ? 0 : undefined
   );
   layout(dag);
@@ -94,32 +94,32 @@ test("layeringSimplex() respects equality rank", () => {
   expect([[0, 2], [1], [3], [4, 5], [6]]).toEqual(layers);
 });
 
-test("layeringSimplex() respects groups", () => {
+test("simplex() respects groups", () => {
   const dag = ex();
   const grp = (node: DagNode<SimpleDatum>) =>
     node.data.id === "0" || node.data.id === "2" ? "group" : undefined;
-  const layout = layeringSimplex().group(grp);
+  const layout = simplex().group(grp);
   expect(layout.group()).toBe(grp);
   layout(dag);
   const layers = toLayers(dag);
   expect([[0, 2], [1], [3], [4, 5], [6]]).toEqual(layers);
 });
 
-test("layeringSimplex() works for disconnected dag", () => {
+test("simplex() works for disconnected dag", () => {
   const dag = doub();
-  layeringSimplex()(dag);
+  simplex()(dag);
   const layers = toLayers(dag);
   expect([[0, 1]]).toEqual(layers);
 });
 
-test("layeringSimplex() fails passing an arg to constructor", () => {
+test("simplex() fails passing an arg to constructor", () => {
   // @ts-expect-error simplex takes no arguments
-  expect(() => layeringSimplex(undefined)).toThrow("got arguments to simplex");
+  expect(() => simplex(undefined)).toThrow("got arguments to simplex");
 });
 
-test("layeringSimplex() fails with ill-defined ranks", () => {
+test("simplex() fails with ill-defined ranks", () => {
   const dag = square();
-  const layout = layeringSimplex().rank((node: DagNode<SimpleDatum>) => {
+  const layout = simplex().rank((node: DagNode<SimpleDatum>) => {
     if (node.data.id === "0") {
       return 1;
     } else if (node.data.id === "3") {
@@ -133,9 +133,9 @@ test("layeringSimplex() fails with ill-defined ranks", () => {
   );
 });
 
-test("layeringSimplex() fails with ill-defined group", () => {
+test("simplex() fails with ill-defined group", () => {
   const dag = square();
-  const layout = layeringSimplex().group((node: DagNode<SimpleDatum>) =>
+  const layout = simplex().group((node: DagNode<SimpleDatum>) =>
     node.data.id === "0" || node.data.id === "3" ? "group" : undefined
   );
   expect(() => layout(dag)).toThrow(

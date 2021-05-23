@@ -22,12 +22,9 @@ import { FluentIterable, fluent } from "../iters";
 import { def, setIntersect } from "../utils";
 
 /** @internal */
-export class LayoutChildLink<
-  LinkDatum,
-  NodeType extends DagNode<unknown, LinkDatum>
-> {
+export class LayoutChildLink<NodeDatum, LinkDatum> {
   constructor(
-    readonly child: NodeType,
+    readonly child: DagNode<NodeDatum, LinkDatum>,
     public data: LinkDatum,
     public points: { x: number; y: number }[] = []
   ) {}
@@ -36,14 +33,11 @@ export class LayoutChildLink<
 /**
  * The concrete class backing the {@link Link} interface.
  */
-export class LayoutLink<NodeType extends DagNode> {
+export class LayoutLink<NodeDatum, LinkDatum> {
   constructor(
-    readonly source: NodeType,
-    readonly target: NodeType,
-    // NOTE this is a trick to not have to parametrize Links, and therefore
-    // DagRoot, and therefore Dag by LinkDatum, when the NodeType implcitely
-    // defines it
-    readonly data: NodeType["dataChildren"][0]["data"],
+    readonly source: DagNode<NodeDatum, LinkDatum>,
+    readonly target: DagNode<NodeDatum, LinkDatum>,
+    readonly data: LinkDatum,
     readonly points: { x: number; y: number }[]
   ) {}
 }
@@ -54,70 +48,74 @@ export class LayoutLink<NodeType extends DagNode> {
  * {@link DagRoot}s don't have children.
  */
 export class LayoutDagNode<NodeDatum, LinkDatum> {
-  dataChildren: ChildLink<LinkDatum, this>[] = [];
+  dataChildren: ChildLink<NodeDatum, LinkDatum>[] = [];
   value?: number;
+  x?: number;
+  y?: number;
 
   constructor(public data: NodeDatum) {}
 
   /** An iterator of this node. */
-  iroots(): FluentIterable<this> {
+  iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     return fluent([this]);
   }
 
   /** An array of this node. */
-  roots(): this[] {
+  roots(): DagNode<NodeDatum, LinkDatum>[] {
     return [this];
   }
 
-  private *iterChildren(): Iterator<this> {
+  private *iterChildren(): Iterator<DagNode<NodeDatum, LinkDatum>> {
     for (const { child } of this.dataChildren) {
       yield child;
     }
   }
 
   /** An iterator of this node's children. */
-  ichildren(): FluentIterable<this> {
+  ichildren(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     return fluent(this.iterChildren());
   }
 
   /** An array of this node's children. */
-  children(): this[] {
+  children(): DagNode<NodeDatum, LinkDatum>[] {
     return [...this.ichildren()];
   }
 
-  private *iterChildLinks(): Iterator<Link<this>> {
+  private *iterChildLinks(): Iterator<Link<NodeDatum, LinkDatum>> {
     for (const { child, data, points } of this.dataChildren) {
       yield new LayoutLink(this, child, data, points);
     }
   }
 
   /** An iterator of links between this node and its children. */
-  ichildLinks(): FluentIterable<Link<this>> {
+  ichildLinks(): FluentIterable<Link<NodeDatum, LinkDatum>> {
     return fluent(this.iterChildLinks());
   }
 
   /** An array of links between this node and its children. */
-  childLinks(): Link<this>[] {
+  childLinks(): Link<NodeDatum, LinkDatum>[] {
     return [...this.ichildLinks()];
   }
 
-  [Symbol.iterator](): Iterator<this> {
+  [Symbol.iterator](): Iterator<DagNode<NodeDatum, LinkDatum>> {
     return new LayoutDagRoot([this])[Symbol.iterator]();
   }
 
-  idescendants(style: IterStyle = "depth"): FluentIterable<this> {
+  idescendants(
+    style: IterStyle = "depth"
+  ): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     return new LayoutDagRoot([this]).idescendants(style);
   }
 
-  descendants(style: IterStyle = "depth"): this[] {
+  descendants(style: IterStyle = "depth"): DagNode<NodeDatum, LinkDatum>[] {
     return [...this.idescendants(style)];
   }
 
-  ilinks(): FluentIterable<Link<this>> {
+  ilinks(): FluentIterable<Link<NodeDatum, LinkDatum>> {
     return new LayoutDagRoot([this]).ilinks();
   }
 
-  links(): Link<this>[] {
+  links(): Link<NodeDatum, LinkDatum>[] {
     return [...this.ilinks()];
   }
 
@@ -125,27 +123,29 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
     return new LayoutDagRoot([this]).size();
   }
 
-  sum(callback: (node: this, index: number) => number): this & ValuedNode {
+  sum(
+    callback: (node: DagNode<NodeDatum, LinkDatum>, index: number) => number
+  ): this {
     new LayoutDagRoot([this]).sum(callback);
-    return this as this & ValuedNode;
+    return this;
   }
 
-  count(): this & ValuedNode {
+  count(): this {
     new LayoutDagRoot([this]).count();
-    return this as this & ValuedNode;
+    return this;
   }
 
-  height(): this & ValuedNode {
+  height(): this {
     new LayoutDagRoot([this]).height();
-    return this as this & ValuedNode;
+    return this;
   }
 
-  depth(): this & ValuedNode {
+  depth(): this {
     new LayoutDagRoot([this]).depth();
-    return this as this & ValuedNode;
+    return this;
   }
 
-  split(): this[] {
+  split(): DagNode<NodeDatum, LinkDatum>[] {
     return [this];
   }
 
@@ -158,11 +158,11 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
  * The concrete implementation backing {@link DagRoot} which also contains the
  * implementation of most methods in {@link DagNode}.
  */
-export class LayoutDagRoot<NodeType extends DagNode>
-  implements Iterable<NodeType> {
-  constructor(public dagRoots: NodeType[]) {}
+export class LayoutDagRoot<NodeDatum, LinkDatum>
+  implements Iterable<DagNode<NodeDatum, LinkDatum>> {
+  constructor(public dagRoots: DagNode<NodeDatum, LinkDatum>[]) {}
 
-  [Symbol.iterator](): Iterator<NodeType> {
+  [Symbol.iterator](): Iterator<DagNode<NodeDatum, LinkDatum>> {
     return this.idepth();
   }
 
@@ -171,18 +171,18 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * {@link DagNode}s return themselves for this call, this can be an easy way to
    * turn a {@link Dag} into an array of {@link DagNode}s.
    */
-  iroots(): FluentIterable<NodeType> {
+  iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     return fluent(this.dagRoots);
   }
 
   /** Returns an array of roots. */
-  roots(): NodeType[] {
+  roots(): DagNode<NodeDatum, LinkDatum>[] {
     return this.dagRoots.slice();
   }
 
-  private *idepth(): Generator<NodeType> {
+  private *idepth(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const queue = this.roots();
-    const seen = new Set<NodeType>();
+    const seen = new Set<DagNode>();
     let node;
     while ((node = queue.pop())) {
       if (!seen.has(node)) {
@@ -193,10 +193,10 @@ export class LayoutDagRoot<NodeType extends DagNode>
     }
   }
 
-  private *ibreadth(): Generator<NodeType> {
-    const seen = new Set<NodeType>();
+  private *ibreadth(): Generator<DagNode<NodeDatum, LinkDatum>> {
+    const seen = new Set<DagNode>();
     let next = this.roots();
-    let current: NodeType[] = [];
+    let current: DagNode<NodeDatum, LinkDatum>[] = [];
     do {
       current = next.reverse();
       next = [];
@@ -211,8 +211,8 @@ export class LayoutDagRoot<NodeType extends DagNode>
     } while (next.length);
   }
 
-  private *ibefore(): Generator<NodeType> {
-    const numBefore = new Map<NodeType, number>();
+  private *ibefore(): Generator<DagNode<NodeDatum, LinkDatum>> {
+    const numBefore = new Map<DagNode, number>();
     for (const node of this) {
       for (const child of node.ichildren()) {
         numBefore.set(child, (numBefore.get(child) || 0) + 1);
@@ -234,9 +234,9 @@ export class LayoutDagRoot<NodeType extends DagNode>
     }
   }
 
-  private *iafter(): Generator<NodeType> {
+  private *iafter(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const queue = this.roots();
-    const seen = new Set<NodeType>();
+    const seen = new Set<DagNode>();
     let node;
     while ((node = queue.pop())) {
       if (seen.has(node)) {
@@ -267,7 +267,9 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * - 'after' - yield all leaf nodes, progressing upward, never yielding a
    *   node before all of its parents have been yielded.
    */
-  idescendants(style: IterStyle = "depth"): FluentIterable<NodeType> {
+  idescendants(
+    style: IterStyle = "depth"
+  ): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     if (style === "depth") {
       return fluent(this.idepth());
     } else if (style === "breadth") {
@@ -282,17 +284,17 @@ export class LayoutDagRoot<NodeType extends DagNode>
   }
 
   /** Returns an array of {@link idescendants}. */
-  descendants(style: IterStyle = "depth"): NodeType[] {
+  descendants(style: IterStyle = "depth"): DagNode<NodeDatum, LinkDatum>[] {
     return [...this.idescendants(style)];
   }
 
   /** Returns an iterator over every {@link Link} in the DAG. */
-  ilinks(): FluentIterable<Link<NodeType>> {
+  ilinks(): FluentIterable<Link<NodeDatum, LinkDatum>> {
     return this.idescendants().flatMap((node) => node.ichildLinks());
   }
 
   /** Returns an array of {@link ilinks}. */
-  links(): Link<NodeType>[] {
+  links(): Link<NodeDatum, LinkDatum>[] {
     return [...this.ilinks()];
   }
 
@@ -308,12 +310,12 @@ export class LayoutDagRoot<NodeType extends DagNode>
    * This method returns {@link ValuedNode}s that also have a value property.
    */
   sum(
-    callback: (node: NodeType, index: number) => number
-  ): DagRoot<NodeType & ValuedNode> {
-    const descendantVals = new Map<NodeType, Map<NodeType, number>>();
+    callback: (node: DagNode<NodeDatum, LinkDatum>, index: number) => number
+  ): this {
+    const descendantVals = new Map<DagNode, Map<DagNode, number>>();
     for (const [index, node] of this.idescendants("after").entries()) {
       const val = callback(node, index);
-      const nodeVals = new Map<NodeType, number>();
+      const nodeVals = new Map<DagNode, number>();
       nodeVals.set(node, val);
       for (const child of node.ichildren()) {
         const childMap = def(descendantVals.get(child));
@@ -321,12 +323,10 @@ export class LayoutDagRoot<NodeType extends DagNode>
           nodeVals.set(child, v);
         }
       }
-      node.value = fluent(nodeVals.entries())
-        .map(([, v]) => v)
-        .reduce((a, b) => a + b);
+      node.value = fluent(nodeVals.values()).reduce((a, b) => a + b);
       descendantVals.set(node, nodeVals);
     }
-    return this as DagRoot<NodeType & ValuedNode>;
+    return this;
   }
 
   /**
@@ -335,14 +335,14 @@ export class LayoutDagRoot<NodeType extends DagNode>
    *
    * This method returns {@link ValuedNode}s that also have a value property.
    */
-  count(): DagRoot<NodeType & ValuedNode> {
-    const leaves = new Map<NodeType, Set<NodeType>>();
+  count(): this {
+    const leaves = new Map<DagNode, Set<DagNode>>();
     for (const node of this.idescendants("after")) {
       if (node.ichildren()[Symbol.iterator]().next().done) {
         leaves.set(node, new Set([node]));
         node.value = 1;
       } else {
-        const nodeLeaves = new Set<NodeType>();
+        const nodeLeaves = new Set<DagNode>();
         for (const child of node.ichildren()) {
           const childLeaves = def(leaves.get(child));
           for (const leaf of childLeaves) {
@@ -353,7 +353,7 @@ export class LayoutDagRoot<NodeType extends DagNode>
         node.value = nodeLeaves.size;
       }
     }
-    return this as DagRoot<NodeType & ValuedNode>;
+    return this;
   }
 
   /**
@@ -361,21 +361,14 @@ export class LayoutDagRoot<NodeType extends DagNode>
    *
    * This method returns {@link ValuedNode}s that also have a value property.
    */
-  height(): DagRoot<NodeType & ValuedNode> {
+  height(): this {
     for (const node of this.idescendants("after")) {
       node.value = Math.max(
         0,
-        ...node.ichildren().map((child) => {
-          /* istanbul ignore next */
-          if (child.value === undefined) {
-            throw new Error("`after` iteration didn't iterate in after order");
-          } else {
-            return child.value + 1;
-          }
-        })
+        ...node.ichildren().map((child) => def(child.value) + 1)
       );
     }
-    return this as DagRoot<NodeType & ValuedNode>;
+    return this;
   }
 
   /**
@@ -383,8 +376,8 @@ export class LayoutDagRoot<NodeType extends DagNode>
    *
    * This method returns {@link ValuedNode}s that also have a value property.
    */
-  depth(): DagRoot<NodeType & ValuedNode> {
-    const parents = new Map<NodeType, NodeType[]>();
+  depth(): this {
+    const parents = new Map<DagNode, DagNode[]>();
     for (const node of this) {
       for (const child of node.ichildren()) {
         const pars = parents.get(child);
@@ -398,33 +391,27 @@ export class LayoutDagRoot<NodeType extends DagNode>
     for (const node of this.idescendants("before")) {
       node.value = Math.max(
         0,
-        ...(parents.get(node) || []).map((par) => {
-          /* istanbul ignore next */
-          if (par.value === undefined) {
-            throw new Error(
-              "`before` iteration didn't iterate in before order"
-            );
-          } else {
-            return par.value + 1;
-          }
-        })
+        ...(parents.get(node) || []).map((par) => def(par.value) + 1)
       );
     }
-    return this as DagRoot<NodeType & ValuedNode>;
+    return this;
   }
 
   /**
    * Returns an array of connected DAGs, splitting the DAG into several
    * components if its dosconnected.
    */
-  split(): Dag<NodeType>[] {
+  split(): Dag<NodeDatum, LinkDatum>[] {
     // construct a graph between root nodes with edges if they share
     // descendants
-    const children = new Map<NodeType, NodeType[]>();
-    const descendants = new Map<NodeType, Set<NodeType>>();
+    const children = new Map<DagNode, DagNode<NodeDatum, LinkDatum>[]>();
+    const descendants = new Map<DagNode, Set<DagNode>>();
     for (const root of this.iroots()) {
       children.set(root, []);
-      descendants.set(root, new Set<NodeType>(root.idescendants()));
+      descendants.set(
+        root,
+        new Set<DagNode<NodeDatum, LinkDatum>>(root.idescendants())
+      );
     }
     for (const [i, source] of this.iroots().entries()) {
       const sourceCov = def(descendants.get(source));
@@ -438,8 +425,8 @@ export class LayoutDagRoot<NodeType extends DagNode>
     }
 
     // now run dfs to collect connected components
-    const splitRoots: NodeType[][] = [];
-    const seen = new Set<NodeType>();
+    const splitRoots: DagNode<NodeDatum, LinkDatum>[][] = [];
+    const seen = new Set<DagNode>();
     for (const root of this.iroots()) {
       if (!seen.has(root)) {
         seen.add(root);
@@ -470,21 +457,19 @@ export class LayoutDagRoot<NodeType extends DagNode>
 }
 
 /** All available styles of node iteration. */
-type IterStyle = "depth" | "breadth" | "before" | "after";
-
-/** A mixin for when a node is assigned a value property by a method. */
-export interface ValuedNode {
-  value: number;
-}
+export type IterStyle = "depth" | "breadth" | "before" | "after";
 
 /** @internal */
-export type ChildLink<
-  LinkDatum,
-  NodeType extends DagNode<unknown, LinkDatum> = DagNode<unknown, LinkDatum>
-> = LayoutChildLink<LinkDatum, NodeType>;
+export type ChildLink<NodeDatum, LinkDatum> = LayoutChildLink<
+  NodeDatum,
+  LinkDatum
+>;
 
 /** The public facing interface backed by the {@link LayoutLink} implementation. */
-export type Link<NodeType extends DagNode = DagNode> = LayoutLink<NodeType>;
+export type Link<NodeDatum = unknown, LinkDatum = unknown> = LayoutLink<
+  NodeDatum,
+  LinkDatum
+>;
 
 /** The public facing interface backed by the {@link LayoutDagNode} implementation. */
 export type DagNode<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagNode<
@@ -493,9 +478,10 @@ export type DagNode<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagNode<
 >;
 
 /** The public facing interface backed by the {@link LayoutDagRoot} implementation. */
-export type DagRoot<
-  NodeType extends DagNode = DagNode
-> = LayoutDagRoot<NodeType>;
+export type DagRoot<NodeDatum = unknown, LinkDatum = unknown> = LayoutDagRoot<
+  NodeDatum,
+  LinkDatum
+>;
 
 /**
  * The union of a {@link DagNode} and {@link DagRoot}, representing the return value of
@@ -503,6 +489,6 @@ export type DagRoot<
  * is almost identical, this union is mostly inconsequential, and all methods
  * can be fond within {@link LayoutDagRoot}.
  */
-export type Dag<NodeType extends DagNode = DagNode> =
-  | NodeType
-  | DagRoot<NodeType>;
+export type Dag<NodeDatum = unknown, LinkDatum = unknown> =
+  | DagNode<NodeDatum, LinkDatum>
+  | DagRoot<NodeDatum, LinkDatum>;

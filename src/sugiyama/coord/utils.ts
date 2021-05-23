@@ -1,8 +1,8 @@
-import { HorizableNode, NodeSizeAccessor } from ".";
+import { bigrams, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
-import { def } from "../../utils";
+import { NodeSizeAccessor } from ".";
 import { solveQP } from "quadprog";
 
 /** @internal wrapper for solveQP */
@@ -39,7 +39,7 @@ function qp(
   const { solution, message } = solveQP(Dmat, dvec, Amat, bvec, meq);
   /* istanbul ignore next */
   if (message.length) {
-    throw new Error(`quadprog failed with: ${message}`);
+    throw new Error(`internal error: quadprog failed with: ${message}`);
   }
   solution.shift();
   return solution;
@@ -82,18 +82,17 @@ export function indices(layers: DagNode[][]): Map<DagNode, number> {
 }
 
 /** @interal Compute constraint arrays for layer separation */
-export function init<NodeType extends DagNode>(
-  layers: (NodeType | DummyNode)[][],
+export function init<N, L>(
+  layers: (DagNode<N, L> | DummyNode)[][],
   inds: Map<DagNode, number>,
-  nodeSize: NodeSizeAccessor<NodeType>
+  nodeSize: NodeSizeAccessor<N, L>
 ): [number[][], number[], number[][], number[]] {
   const n = 1 + Math.max(...inds.values());
   const A: number[][] = [];
   const b: number[] = [];
 
   for (const layer of layers) {
-    let [first, ...rest] = layer;
-    for (const second of rest) {
+    for (const [first, second] of bigrams(layer)) {
       const find = def(inds.get(first));
       const sind = def(inds.get(second));
       const cons = new Array(n).fill(0);
@@ -101,7 +100,6 @@ export function init<NodeType extends DagNode>(
       cons[sind] = -1;
       A.push(cons);
       b.push(-(nodeSize(first)[0] + nodeSize(second)[0]) / 2);
-      first = second;
     }
   }
 
@@ -155,9 +153,9 @@ export function minBend(
  *
  * @internal
  */
-export function layout<NodeType extends DagNode>(
-  layers: ((NodeType & HorizableNode) | DummyNode)[][],
-  nodeSize: NodeSizeAccessor<NodeType>,
+export function layout<N, L>(
+  layers: (DagNode<N, L> | DummyNode)[][],
+  nodeSize: NodeSizeAccessor<N, L>,
   inds: Map<DagNode, number>,
   solution: number[]
 ): number {

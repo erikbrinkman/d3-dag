@@ -5,21 +5,18 @@ import {
   LayoutChildLink,
   LayoutDagNode
 } from "../../src/dag/node";
+import { bigrams, def } from "../../src/utils";
 
-import { LayerableNode } from "../../src/sugiyama/layering";
-import { SugiDummyNode } from "../../src";
-import { def } from "../../src/utils";
+import { DummyNode } from "../../src/sugiyama/dummy";
 
-export function toLayers<N extends DagNode<{ id: string }> & LayerableNode>(
-  dag: Dag<N>
-): number[][] {
+export function toLayers(dag: Dag<{ id: string }>): number[][] {
   // TODO Require last layer is fully specified with empty nodes
   const layers: number[][] = [];
   for (const node of dag) {
-    const layerId = node.layer;
-    if (layerId === undefined) {
-      throw new Error(`node with id '${node.data.id}' was not given a layer`);
-    }
+    const layerId = def(
+      node.value,
+      `node with id '${node.data.id}' was not given a layer`
+    );
     const layer = layers[layerId] || (layers[layerId] = []);
     layer.push(parseInt(node.data.id));
   }
@@ -31,28 +28,24 @@ export function toLayers<N extends DagNode<{ id: string }> & LayerableNode>(
   return layers.map((layer) => layer.sort());
 }
 
-export class TestNode extends LayoutDagNode<
-  { layer: number; index: number },
-  undefined
-> {
-  x?: number;
-
-  constructor(layer: number, index: number) {
-    super({ layer, index });
-  }
-}
-
 function iter(ids: number | number[]): number[] {
   return typeof ids === "number" ? [ids] : ids;
+}
+
+export interface TestDatum {
+  layer: number;
+  index: number;
 }
 
 /** create layers for test dag */
 export function createLayers(
   children: (number[] | number)[][]
-): (TestNode | SugiDummyNode)[][] {
+): (DagNode<TestDatum> | DummyNode)[][] {
   const result = children.map((clayer, i) =>
     clayer.map((cval, j) =>
-      typeof cval === "number" ? new SugiDummyNode() : new TestNode(i, j)
+      typeof cval === "number"
+        ? new DummyNode()
+        : new LayoutDagNode({ layer: i, index: j })
     )
   );
   const lastLayer = children[children.length - 1];
@@ -68,7 +61,7 @@ export function createLayers(
   result.push(
     new Array(maxLastId + 1)
       .fill(null)
-      .map((_, j) => new TestNode(children.length, j))
+      .map((_, j) => new LayoutDagNode({ layer: children.length, index: j }))
   );
 
   for (const [i, nodes] of children.entries()) {
@@ -85,27 +78,20 @@ export function createLayers(
       // There's no good way to fool this because dummy nodes inherently break
       // type safety
       node.dataChildren = newChildren as
-        | ChildLink<undefined, SugiDummyNode>[]
-        | ChildLink<undefined, TestNode>[];
+        | ChildLink<undefined, undefined>[]
+        | ChildLink<TestDatum, undefined>[];
     }
   }
 
   return result;
 }
 
-export function nodeSize(): [number, number] {
-  return [1, 1];
-}
+export const nodeSize = () => [1, 1] as const;
 
-export function crossings<NodeType extends DagNode>(
-  layers: NodeType[][]
-): number {
+export function crossings(layers: readonly (readonly DagNode[])[]): number {
   let crossings = 0;
-  let [topLayer, ...restLayers] = layers;
-  for (const bottomLayer of restLayers) {
-    const inds = new Map<NodeType, number>(
-      bottomLayer.map((node, j) => [node, j])
-    );
+  for (const [topLayer, bottomLayer] of bigrams(layers)) {
+    const inds = new Map(bottomLayer.map((node, j) => [node, j] as const));
     for (const [j, p1] of topLayer.entries()) {
       for (const p2 of topLayer.slice(j + 1)) {
         for (const c1 of p1.ichildren()) {
@@ -117,7 +103,6 @@ export function crossings<NodeType extends DagNode>(
         }
       }
     }
-    topLayer = bottomLayer;
   }
   return crossings;
 }

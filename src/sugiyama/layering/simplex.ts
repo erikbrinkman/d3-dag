@@ -14,32 +14,32 @@
 
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode } from "../../dag/node";
-import {
-  GroupAccessor,
-  LayerableNode,
-  LayeringOperator,
-  RankAccessor
-} from ".";
-import { Replace, def } from "../../utils";
+import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
+import { Replace, bigrams, def } from "../../utils";
 
-interface Operators<NodeType extends DagNode> {
-  rank: RankAccessor<NodeType>;
-  group: GroupAccessor<NodeType>;
+interface Operators<NodeDatum, LinkDatum> {
+  rank: RankAccessor<NodeDatum, LinkDatum>;
+  group: GroupAccessor<NodeDatum, LinkDatum>;
 }
 
 export interface SimplexOperator<
-  NodeType extends DagNode = DagNode,
-  Ops extends Operators<NodeType> = Operators<NodeType>
-> extends LayeringOperator<NodeType> {
+  NodeDatum = unknown,
+  LinkDatum = unknown,
+  Ops extends Operators<NodeDatum, LinkDatum> = Operators<NodeDatum, LinkDatum>
+> extends LayeringOperator<NodeDatum, LinkDatum> {
   /**
    * Set the {@link RankAccessor}. Any node with a rank assigned will have a second
    * ordering enforcing ordering of the ranks. Note, this can cause the simplex
    * optimization to be ill-defined, and may result in an error during layout.
    */
-  rank<NewNode extends NodeType, NewRank extends RankAccessor<NewNode>>(
+  rank<
+    NewNodeDatum extends NodeDatum,
+    NewLinkDatum extends LinkDatum,
+    NewRank extends RankAccessor<NewNodeDatum, NewLinkDatum>
+  >(
     // NOTE this is necessary for type inference
-    newRank: NewRank & ((node: NewNode) => number | undefined)
-  ): SimplexOperator<NewNode, Replace<Ops, "rank", NewRank>>;
+    newRank: NewRank & RankAccessor<NewNodeDatum, NewLinkDatum>
+  ): SimplexOperator<NewNodeDatum, NewLinkDatum, Replace<Ops, "rank", NewRank>>;
   /**
    * Get the current {@link RankAccessor}.
    */
@@ -51,9 +51,17 @@ export interface SimplexOperator<
    * Note, this can cause the simplex optimization to be ill-defined, and may
    * result in an error during layout.
    */
-  group<NewNode extends NodeType, NewGroup extends GroupAccessor<NewNode>>(
-    newGroup: NewGroup & ((node: NewNode) => string | undefined)
-  ): SimplexOperator<NewNode, Replace<Ops, "group", NewGroup>>;
+  group<
+    NewNodeDatum extends NodeDatum,
+    NewLinkDatum extends LinkDatum,
+    NewGroup extends GroupAccessor<NewNodeDatum, NewLinkDatum>
+  >(
+    newGroup: NewGroup & GroupAccessor<NewNodeDatum, NewLinkDatum>
+  ): SimplexOperator<
+    NewNodeDatum,
+    NewLinkDatum,
+    Replace<Ops, "group", NewGroup>
+  >;
   /**
    * Get the current {@link GroupAccessor}.
    */
@@ -61,29 +69,28 @@ export interface SimplexOperator<
 }
 
 /** @internal */
-function buildOperator<
-  NodeType extends DagNode,
-  Ops extends Operators<NodeType>
->(options: Ops): SimplexOperator<NodeType, Ops> {
-  function simplexCall<N extends NodeType & LayerableNode>(dag: Dag<N>): void {
-    const variables: SolverDict<Variable> = Object.create(null);
-    const ints: SolverDict<number> = Object.create(null);
-    const constraints: SolverDict<Constraint> = Object.create(null);
+function buildOperator<N, L, Ops extends Operators<N, L>>(
+  options: Ops
+): SimplexOperator<N, L, Ops> {
+  function simplexCall(dag: Dag<N, L>): void {
+    const variables: SolverDict<Variable> = {};
+    const ints: SolverDict<number> = {};
+    const constraints: SolverDict<Constraint> = {};
 
-    const ids = new Map<NodeType, string>(
+    const ids = new Map(
       dag
         .idescendants()
         .entries()
-        .map(([i, node]) => [node, i.toString()])
+        .map(([i, node]) => [node, i.toString()] as const)
     );
 
     /** get node id */
-    function n(node: NodeType): string {
+    function n(node: DagNode<N, L>): string {
       return def(ids.get(node));
     }
 
     /** get variable associated with a node */
-    function variable(node: NodeType): Variable {
+    function variable(node: DagNode<N, L>): Variable {
       return variables[n(node)];
     }
 
@@ -94,8 +101,8 @@ function buildOperator<
      */
     function before(
       prefix: string,
-      first: NodeType,
-      second: NodeType,
+      first: DagNode<N, L>,
+      second: DagNode<N, L>,
       strict: boolean = true
     ): void {
       const fvar = variable(first);
@@ -108,13 +115,17 @@ function buildOperator<
     }
 
     /** enforce that first and second occur on the same layer */
-    function equal(prefix: string, first: NodeType, second: NodeType): void {
+    function equal(
+      prefix: string,
+      first: DagNode<N, L>,
+      second: DagNode<N, L>
+    ): void {
       before(`${prefix} before`, first, second, false);
       before(`${prefix} after`, second, first, false);
     }
 
-    const ranks: [number, N][] = [];
-    const groups = new Map<string, N[]>();
+    const ranks: [number, DagNode<N, L>][] = [];
+    const groups = new Map<string, DagNode<N, L>[]>();
 
     // Add node variables and fetch ranks
     for (const node of dag) {
@@ -147,28 +158,23 @@ function buildOperator<
     }
 
     // Add rank constraints
-    let [first, ...rest] = ranks.sort(([a], [b]) => a - b);
-    for (const second of rest) {
-      const [frank, fnode] = first;
-      const [srank, snode] = second;
+    const ranked = ranks.sort(([a], [b]) => a - b);
+    for (const [[frank, fnode], [srank, snode]] of bigrams(ranked)) {
       if (frank < srank) {
         before("rank", fnode, snode);
       } else {
         equal("rank", fnode, snode);
       }
-      first = second;
     }
 
     // group constraints
     for (const group of groups.values()) {
-      let [first, ...rest] = group;
-      for (const second of rest) {
+      for (const [first, second] of bigrams(group)) {
         equal("group", first, second);
-        first = second;
       }
     }
 
-    // NOTE bundling sets this to undefined, and we need it to be setable
+    // NOTE bundling sets `this` to undefined, and we need it to be setable
     const { feasible, ...assignment } = Solve.call(
       {},
       {
@@ -194,21 +200,23 @@ function buildOperator<
 
     // lp solver doesn't assign some zeros
     for (const node of dag) {
-      node.layer = assignment[n(node)] || 0;
+      node.value = assignment[n(node)] || 0;
     }
   }
 
   function rank<
-    NewNode extends NodeType,
-    NewRank extends RankAccessor<NewNode>
-  >(newRank: NewRank): SimplexOperator<NewNode, Replace<Ops, "rank", NewRank>>;
+    NN extends N,
+    NL extends L,
+    NewRank extends RankAccessor<NN, NL>
+  >(newRank: NewRank): SimplexOperator<NN, NL, Replace<Ops, "rank", NewRank>>;
   function rank(): Ops["rank"];
   function rank<
-    NewNode extends NodeType,
-    NewRank extends RankAccessor<NewNode>
+    NN extends N,
+    NL extends L,
+    NewRank extends RankAccessor<NN, NL>
   >(
     newRank?: NewRank
-  ): SimplexOperator<NewNode, Replace<Ops, "rank", NewRank>> | Ops["rank"] {
+  ): SimplexOperator<NN, NL, Replace<Ops, "rank", NewRank>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
     } else {
@@ -219,18 +227,20 @@ function buildOperator<
   simplexCall.rank = rank;
 
   function group<
-    NewNode extends NodeType,
-    NewGroup extends GroupAccessor<NewNode>
+    NN extends N,
+    NL extends L,
+    NewGroup extends GroupAccessor<NN, NL>
   >(
     newGroup: NewGroup
-  ): SimplexOperator<NewNode, Replace<Ops, "group", NewGroup>>;
+  ): SimplexOperator<NN, NL, Replace<Ops, "group", NewGroup>>;
   function group(): Ops["group"];
   function group<
-    NewNode extends NodeType,
-    NewGroup extends GroupAccessor<NewNode>
+    NN extends N,
+    NL extends L,
+    NewGroup extends GroupAccessor<NN, NL>
   >(
     newGroup?: NewGroup
-  ): SimplexOperator<NewNode, Replace<Ops, "group", NewGroup>> | Ops["group"] {
+  ): SimplexOperator<NN, NL, Replace<Ops, "group", NewGroup>> | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;
     } else {
@@ -249,7 +259,7 @@ function defaultAccessor(): undefined {
 }
 
 /** Create a default {@link SimplexOperator}. */
-export function simplex(...args: never[]): SimplexOperator<DagNode> {
+export function simplex(...args: never[]): SimplexOperator {
   if (args.length) {
     throw new Error(
       `got arguments to simplex(${args}), but constructor takes no aruguments.`

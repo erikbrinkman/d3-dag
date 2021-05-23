@@ -1,12 +1,10 @@
-import {
-  SugiDummyNode,
-  coordCenter,
-  coordGreedy,
-  coordQuad
-} from "../../../src";
 import { createLayers, nodeSize } from "../utils";
 
 import { DagNode } from "../../../src/dag/node";
+import { DummyNode } from "../../../src/sugiyama/dummy";
+import { center } from "../../../src/sugiyama/coord/center";
+import { greedy } from "../../../src/sugiyama/coord/greedy";
+import { quad } from "../../../src/sugiyama/coord/quad";
 
 const square = () =>
   createLayers([
@@ -24,12 +22,12 @@ const vee = () => createLayers([[[0], [0]]]);
 const ex = () => createLayers([[[1], [0]]]);
 
 function idLayerSize(
-  node: DagNode<{ index: number }> | SugiDummyNode
+  node: DagNode<{ index: number }> | DummyNode
 ): [number, number] {
   return [(node.data?.index || 0) + 1, 1];
 }
 
-for (const method of [coordCenter(), coordGreedy(), coordQuad()]) {
+for (const method of [center(), greedy(), quad()]) {
   for (const dat of [square, ccoz, dtopo, doub, vee, ex]) {
     test(`invariants apply to ${dat.name} assigned by ${method.name}`, () => {
       const layered = dat();

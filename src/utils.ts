@@ -1,23 +1,26 @@
 /** utility type for replacing keys with new value */
-export type Replace<O, K extends keyof O, N> = Omit<O, K> & { [key in K]: N };
+export type Replace<O, K extends keyof O, N> = Omit<O, K> & Record<K, N>;
 
 /** helper for verifying things aren't undefined */
-export function def<T>(val: T | undefined): T {
+export function def<T>(
+  val: T | undefined,
+  msg = "internal error: got unexpected undefined value"
+): T {
   /* istanbul ignore else: only for unaccounted for errors */
   if (val !== undefined) {
     return val;
   } else {
-    throw new Error("got unexpected undefined value");
+    throw new Error(msg);
   }
 }
 
 /** assert something */
 export function assert(
   statement: unknown,
-  msg: string = "failed assert"
+  msg: string = "internal error: failed assert"
 ): asserts statement {
   if (!statement) {
-    throw new Error(`internal error: ${msg}`);
+    throw new Error(msg);
   }
 }
 
@@ -66,4 +69,15 @@ export function js(
       ])
     )
     .join("");
+}
+
+/** iterate over bigrams of an array */
+export function* bigrams<T>(
+  array: readonly T[]
+): Generator<readonly [T, T], void> {
+  let [first, ...rest] = array;
+  for (const second of rest) {
+    yield [first, second];
+    first = second;
+  }
 }

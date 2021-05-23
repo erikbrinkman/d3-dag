@@ -12,12 +12,12 @@
  */
 
 import { Dag, DagNode } from "../../dag/node";
-import { LayerableNode, LayeringOperator } from ".";
 
 import FastPriorityQueue from "fastpriorityqueue";
+import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
-export interface CoffmanGrahamOperator extends LayeringOperator<DagNode> {
+export interface CoffmanGrahamOperator extends LayeringOperator {
   /**
    * Set the maximum width of any layer. If set to 0 (the default), the width
    * is set to the rounded square root of the number of nodes.
@@ -29,19 +29,20 @@ export interface CoffmanGrahamOperator extends LayeringOperator<DagNode> {
 
 /** @internal */
 function buildOperator(options: { width: number }): CoffmanGrahamOperator {
-  function coffmanGrahamCall<N extends DagNode & LayerableNode>(
-    dag: Dag<N>
-  ): void {
+  function coffmanGrahamCall(dag: Dag): void {
     const maxWidth = options.width || Math.floor(Math.sqrt(dag.size() + 0.5));
 
-    class Data {
-      before: number[] = [];
-      parents: N[] = [];
-    }
-
     // initialize node data
-    const data = new Map<DagNode, Data>(
-      dag.idescendants().map((node) => [node, new Data()])
+    const data = new Map(
+      dag
+        .idescendants()
+        .map(
+          (node) =>
+            [
+              node,
+              { before: [] as number[], parents: [] as DagNode[] }
+            ] as const
+        )
     );
     for (const node of dag) {
       for (const child of node.ichildren()) {
@@ -66,7 +67,7 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
       return true;
     }
 
-    const queue = new FastPriorityQueue<N>(comp);
+    const queue = new FastPriorityQueue(comp);
 
     // start with root nodes
     for (const root of dag.iroots()) {
@@ -79,12 +80,12 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
     while ((node = queue.poll())) {
       if (
         width < maxWidth &&
-        def(data.get(node)).parents.every((p) => def(p.layer) < layer)
+        def(data.get(node)).parents.every((p) => def(p.value) < layer)
       ) {
-        node.layer = layer;
+        node.value = layer;
         width++;
       } else {
-        node.layer = ++layer;
+        node.value = ++layer;
         width = 1;
       }
       for (const child of node.ichildren()) {

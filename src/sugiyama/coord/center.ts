@@ -7,13 +7,13 @@
  * @module
  */
 
-import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
+import { CoordOperator, NodeSizeAccessor } from ".";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 import { def } from "../../utils";
 
-export type CenterOperator = CoordOperator<DagNode>;
+export type CenterOperator = CoordOperator;
 
 /** Create a new center assignment operator. */
 export function center(...args: never[]): CenterOperator {
@@ -23,9 +23,9 @@ export function center(...args: never[]): CenterOperator {
     );
   }
 
-  function centerCall<N extends DagNode>(
-    layers: ((N & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N>
+  function centerCall<N, L>(
+    layers: (DagNode<N, L> | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N, L>
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;

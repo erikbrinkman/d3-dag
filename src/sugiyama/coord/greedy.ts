@@ -14,13 +14,13 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 
-import { CoordOperator, HorizableNode, NodeSizeAccessor } from ".";
-import { def, js } from "../../utils";
+import { CoordOperator, NodeSizeAccessor } from ".";
+import { assert, def } from "../../utils";
 
 import { DagNode } from "../../dag/node";
 import { DummyNode } from "../dummy";
 
-export type GreedyOperator = CoordOperator<DagNode>;
+export type GreedyOperator = CoordOperator;
 
 /** Create a greedy coordinate assignment operator. */
 export function greedy(...args: never[]): GreedyOperator {
@@ -30,9 +30,9 @@ export function greedy(...args: never[]): GreedyOperator {
     );
   }
 
-  function greedyCall<N extends DagNode>(
-    layers: ((N & HorizableNode) | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N>
+  function greedyCall<N, L>(
+    layers: (DagNode<N, L> | DummyNode)[][],
+    nodeSize: NodeSizeAccessor<N, L>
   ): number {
     // TODO other initial assignments
     const assignment = meanAssignment;
@@ -75,9 +75,7 @@ export function greedy(...args: never[]): GreedyOperator {
 
       // order nodes nodes by degree and start with highest degree
       const ordered = layer
-        .map(
-          (node, j) => [j, node] as [number, (N & HorizableNode) | DummyNode]
-        )
+        .map((node, j) => [j, node] as const)
         .sort(([aj, anode], [bj, bnode]) => {
           const adeg = def(degrees.get(anode));
           const bdeg = def(degrees.get(bnode));
@@ -130,25 +128,18 @@ export function greedy(...args: never[]): GreedyOperator {
 // clever way to combine then, but it's not immediately obvious since twolayer
 // uses the index of toplayer, and this uses the x value
 /** @internal */
-function meanAssignment<NodeType extends (DagNode & HorizableNode) | DummyNode>(
-  topLayer: NodeType[],
-  bottomLayer: NodeType[]
-): void {
+function meanAssignment(topLayer: DagNode[], bottomLayer: DagNode[]): void {
   for (const node of bottomLayer) {
     node.x = 0.0;
   }
   const counts = new Map<DagNode, number>();
   for (const node of topLayer) {
+    assert(node.x !== undefined);
     for (const child of node.ichildren()) {
-      /* istanbul ignore if */
-      if (child.x === undefined) {
-        throw new Error(
-          js`internal error: unexpected undefined x for '${child}'`
-        );
-      }
+      assert(child.x !== undefined);
       const newCount = (counts.get(child) || 0) + 1;
       counts.set(child, newCount);
-      child.x += (def(node.x) - child.x) / newCount;
+      child.x += (node.x - child.x) / newCount;
     }
   }
 }

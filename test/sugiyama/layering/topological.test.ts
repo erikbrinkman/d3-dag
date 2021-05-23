@@ -1,11 +1,11 @@
 import { doub, square } from "../../examples";
 
-import { layeringTopological } from "../../../src";
 import { toLayers } from "../utils";
+import { topological } from "../../../src/sugiyama/layering/topological";
 
-test("layeringTopological() works for square", () => {
+test("topological() works for square", () => {
   const dag = square();
-  layeringTopological()(dag);
+  topological()(dag);
   const layers = toLayers(dag);
   expect([
     [[0], [1], [2], [3]],
@@ -13,9 +13,9 @@ test("layeringTopological() works for square", () => {
   ]).toContainEqual(layers);
 });
 
-test("layeringTopological() works for disconnected graph", () => {
+test("topological() works for disconnected graph", () => {
   const dag = doub();
-  layeringTopological()(dag);
+  topological()(dag);
   const layers = toLayers(dag);
   expect([
     [[0], [1]],
@@ -23,9 +23,7 @@ test("layeringTopological() works for disconnected graph", () => {
   ]).toContainEqual(layers);
 });
 
-test("layeringTopological() fails passing an arg to constructor", () => {
+test("topological() fails passing an arg to constructor", () => {
   // @ts-expect-error topological takes no arguments
-  expect(() => layeringTopological(undefined)).toThrow(
-    "got arguments to topological"
-  );
+  expect(() => topological(undefined)).toThrow("got arguments to topological");
 });

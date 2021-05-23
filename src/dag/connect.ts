@@ -53,7 +53,7 @@ export interface ConnectOperator<
    * ]
    * ```
    */
-  <L extends LinkDatum>(data: readonly L[]): Dag<DagNode<ConnectDatum, L>>;
+  <L extends LinkDatum>(data: readonly L[]): Dag<ConnectDatum, L>;
 
   /**
    * Sets the source accessor to the given {@link IdOperator} and returns this
@@ -66,7 +66,7 @@ export interface ConnectOperator<
    * ```
    */
   sourceId<NewLink extends LinkDatum, NewId extends IdOperator<NewLink>>(
-    id: NewId & ((d: NewLink, i: number) => string)
+    id: NewId & IdOperator<NewLink>
   ): ConnectOperator<NewLink, NewId, TargetId>;
   /** Gets the current sourceId accessor. */
   sourceId(): SourceId;
@@ -81,9 +81,9 @@ export interface ConnectOperator<
    * }
    * ```
    */
-  targetId<NewLink extends LinkDatum, NewId extends IdOperator<LinkDatum>>(
-    id: NewId & ((d: NewLink, i: number) => string)
-  ): ConnectOperator<LinkDatum, SourceId, NewId>;
+  targetId<NewLink extends LinkDatum, NewId extends IdOperator<NewLink>>(
+    id: NewId & IdOperator<NewLink>
+  ): ConnectOperator<NewLink, SourceId, NewId>;
   /** Gets the current targetId accessor. */
   targetId(): TargetId;
 
@@ -111,7 +111,7 @@ function buildOperator<
 ): ConnectOperator<LinkDatum, SourceId, TargetId> {
   function connect<L extends LinkDatum>(
     data: readonly L[]
-  ): Dag<DagNode<ConnectDatum, L>> {
+  ): Dag<ConnectDatum, L> {
     if (!data.length) {
       throw new Error("can't connect empty data");
     }
@@ -259,8 +259,8 @@ function defaultTargetId(d: unknown): string {
 export function connect(...args: never[]): ConnectOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to dagConnect(${args}), but constructor takes no aruguments. ` +
-        "These were probably meant as data which should be called as dagConnect()(...)"
+      `got arguments to connect(${args}), but constructor takes no aruguments. ` +
+        "These were probably meant as data which should be called as connect()(...)"
     );
   }
   return buildOperator(defaultSourceId, defaultTargetId, false);

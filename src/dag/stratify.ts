@@ -127,7 +127,7 @@ export interface StratifyOperator<
    * ]
    * ```
    */
-  <N extends NodeDatum>(data: readonly N[]): Dag<DagNode<N, LinkDatum>>;
+  <N extends NodeDatum>(data: readonly N[]): Dag<N, LinkDatum>;
 
   /**
    * Sets the id accessor to the given {@link IdOperator} and returns this
@@ -140,7 +140,7 @@ export interface StratifyOperator<
    * ```
    */
   id<NewDatum extends NodeDatum, NewId extends IdOperator<NewDatum>>(
-    id: NewId & ((d: NewDatum, i: number) => string)
+    id: NewId & IdOperator<NewDatum>
   ): StratifyOperator<NewDatum, LinkDatum, NewId, ParentIds, ParentData>;
   /**
    * Gets the current id accessor.
@@ -218,7 +218,7 @@ function buildOperator<
 ): StratifyOperator<NodeDatum, LinkDatum, Id, ParentIds, ParentData> {
   function stratify<N extends NodeDatum>(
     data: readonly N[]
-  ): Dag<DagNode<N, LinkDatum>> {
+  ): Dag<N, LinkDatum> {
     if (!data.length) throw new Error("can't stratify empty data");
     const mapping = new Map<
       string,
@@ -438,8 +438,8 @@ export function stratify(
 > {
   if (args.length) {
     throw Error(
-      `got arguments to dagStratify(${args}), but constructor takes no aruguments. ` +
-        "These were probably meant as data which should be called as dagStratify()(...)"
+      `got arguments to stratify(${args}), but constructor takes no aruguments. ` +
+        "These were probably meant as data which should be called as stratify()(...)"
     );
   }
   return buildOperator(
