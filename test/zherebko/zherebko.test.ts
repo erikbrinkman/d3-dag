@@ -118,6 +118,5 @@ test("zherebko() works on sink", () => {
 });
 
 test("zherebko() fails with args", () => {
-  // @ts-expect-error zherebko takes no arguments
-  expect(() => zherebko(undefined)).toThrow("got arguments to zherebko");
+  expect(() => zherebko(null as never)).toThrow("got arguments to zherebko");
 });

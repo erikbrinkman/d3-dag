@@ -4,7 +4,7 @@
  *
  * @module
  */
-import { DagNode } from "../../dag/node";
+import { SugiNode } from "../utils";
 import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 import { order } from "./utils";
@@ -40,8 +40,8 @@ export function mean(...args: never[]): MeanOperator {
   }
 
   function meanCall(
-    topLayer: DagNode[],
-    bottomLayer: DagNode[],
+    topLayer: SugiNode[],
+    bottomLayer: SugiNode[],
     topDown: boolean
   ): void {
     if (topDown) {

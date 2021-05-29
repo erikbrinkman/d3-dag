@@ -1,6 +1,6 @@
 import * as d3types from "../src";
 
-import { createLayers, nodeSize, toLayers } from "./sugiyama/utils";
+import { createLayers, getIndex, getLayers, nodeSize } from "./sugiyama/utils";
 
 import { square } from "./examples";
 
@@ -27,7 +27,7 @@ describe.skip("tests that require a built bundle", () => {
       [[0], [1]]
     ]);
     d3dag.decrossOpt()(layers);
-    const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+    const inds = layers.map((layer) => layer.map(getIndex));
     expect(inds).toEqual([
       [1, 0],
       [0, 1],
@@ -41,7 +41,7 @@ describe.skip("tests that require a built bundle", () => {
     // independent links that need to be swapped
     const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
     d3dag.twolayerOpt()(topLayer, bottomLayer, true);
-    const inds = bottomLayer.map((n) => n.data?.index);
+    const inds = bottomLayer.map(getIndex);
     expect(inds).toEqual([1, 0]);
   });
 
@@ -50,7 +50,7 @@ describe.skip("tests that require a built bundle", () => {
     const d3dag = await load();
     const dag = square();
     d3dag.layeringSimplex()(dag);
-    const layers = toLayers(dag);
+    const layers = getLayers(dag);
     expect([[0], [1, 2], [3]]).toEqual(layers);
   });
 
@@ -73,7 +73,7 @@ describe.skip("tests that require a built bundle", () => {
     // independent links that need to be swapped
     const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
     d3dag.twolayerMedian()(topLayer, bottomLayer, true);
-    const inds = bottomLayer.map((n) => n.data?.index);
+    const inds = bottomLayer.map(getIndex);
     expect(inds).toEqual([1, 0]);
   });
 
@@ -82,7 +82,7 @@ describe.skip("tests that require a built bundle", () => {
     const d3dag = await load();
     const dag = square();
     d3dag.layeringCoffmanGraham()(dag);
-    const layers = toLayers(dag);
+    const layers = getLayers(dag);
     expect([[0], [1, 2], [3]]).toEqual(layers);
   });
 });

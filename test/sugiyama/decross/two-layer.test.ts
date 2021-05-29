@@ -1,7 +1,6 @@
-import { TestDatum, createLayers } from "../utils";
+import { TestDatum, createLayers, getIndex } from "../utils";
 
-import { DagNode } from "../../../src/dag/node";
-import { DummyNode } from "../../../src/sugiyama/dummy";
+import { SugiNode } from "../../../src/sugiyama/utils";
 import { TwolayerOperator } from "../../../src/sugiyama/twolayer";
 import { mean } from "../../../src/sugiyama/twolayer/mean";
 import { median } from "../../../src/sugiyama/twolayer/median";
@@ -9,8 +8,8 @@ import { opt } from "../../../src/sugiyama/twolayer/opt";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
 
 test("twoLayer() correctly adapts to types", () => {
-  const layers = createLayers([[[], 0]]);
-  const unks = layers as (DagNode | DummyNode)[][];
+  const layers = createLayers([[[], []], [[]]]);
+  const unks = layers as SugiNode[][];
 
   const init = twoLayer();
   init(layers);
@@ -18,8 +17,8 @@ test("twoLayer() correctly adapts to types", () => {
 
   // narrowed for custom
   function customTwolayer(
-    topLayer: (DagNode<TestDatum> | DummyNode)[],
-    bottomLayer: (DagNode<TestDatum> | DummyNode)[],
+    topLayer: SugiNode<TestDatum>[],
+    bottomLayer: SugiNode<TestDatum>[],
     topDown: boolean
   ): void {
     void [topLayer, bottomLayer, topDown];
@@ -53,10 +52,11 @@ test("twoLayer() propogates to both layers", () => {
   // o o    o o
   const layers = createLayers([
     [[1], [0]],
-    [[0], [1]]
+    [[0], [1]],
+    [[], []]
   ]);
   twoLayer()(layers);
-  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
     [0, 1],
     [1, 0],
@@ -65,9 +65,12 @@ test("twoLayer() propogates to both layers", () => {
 });
 
 test("twoLayer() propogates down and up", () => {
-  const layers = createLayers([[[1], [1], [0], [1]]]);
+  const layers = createLayers([
+    [[1], [1], [0], [1]],
+    [[], []]
+  ]);
   twoLayer()(layers);
-  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
     [0, 1, 3, 2],
     [1, 0]
@@ -77,14 +80,15 @@ test("twoLayer() propogates down and up", () => {
 test("twoLayer() can be set", () => {
   const layers = createLayers([
     [[1], [0]],
-    [[0], [1]]
+    [[0], [1]],
+    [[], []]
   ]);
   const twolayer = median();
   const decross = twoLayer().order(twolayer).passes(2);
   expect(decross.order()).toBe(twolayer);
   expect(decross.passes()).toBe(2);
   decross(layers);
-  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
     [0, 1],
     [1, 0],
@@ -93,19 +97,18 @@ test("twoLayer() can be set", () => {
 });
 
 test("twoLayer() can be set with all built in methods", () => {
-  const layers = createLayers([[[0]]]);
+  const layers = createLayers([[[0]], [[]]]);
   const decross = twoLayer();
   decross.order(mean());
   decross.order(median());
   decross.order(opt());
   decross(layers);
-  const inds = layers.map((layer) => layer.map((node) => node.data?.index));
+  const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([[0], [0]]);
 });
 
 test("twoLayer() fails passing an arg to constructor", () => {
-  // @ts-expect-error two-layer takes no arguments
-  expect(() => twoLayer(undefined)).toThrow("got arguments to twoLayer");
+  expect(() => twoLayer(null as never)).toThrow("got arguments to twoLayer");
 });
 
 test("twoLayer() fails passing 0 to passes", () => {

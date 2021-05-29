@@ -1,4 +1,4 @@
-import { CoordOperator, NodeSizeAccessor } from "../../src/sugiyama/coord";
+import { CoordOperator, SugiNodeSizeAccessor } from "../../src/sugiyama/coord";
 import { Dag, DagNode } from "../../src/dag/node";
 import {
   SimpleDatum,
@@ -11,8 +11,8 @@ import {
 } from "../examples";
 
 import { DecrossOperator } from "../../src/sugiyama/decross";
-import { DummyNode } from "../../src/sugiyama/dummy";
 import { LayeringOperator } from "../../src/sugiyama/layering";
+import { SugiNode } from "../../src/sugiyama/utils";
 import { center } from "../../src/sugiyama/coord/center";
 import { coffmanGraham } from "../../src/sugiyama/layering/coffman-graham";
 import { topological as coordTopological } from "../../src/sugiyama/coord/topological";
@@ -37,18 +37,16 @@ test("sugiyama() correctly adapts to types", () => {
   init(unks);
 
   // narrowed for custom
-  const customLayering = simplex().rank(
-    (() => undefined) as (node: SimpleNode) => undefined
-  );
+  const simprank: (node: SimpleNode) => undefined = () => undefined;
+  const customLayering = simplex().rank(simprank);
   const custom = init.layering(customLayering);
   custom(dag);
   // @ts-expect-error custom only takes SimpleNode
   custom(unks);
 
   // works for group too
-  const acc = custom.nodeSize(
-    (() => [1, 1] as const) as (node: SimpleNode | DummyNode) => readonly [1, 1]
-  );
+  const siz: (node: SugiNode<SimpleDatum>) => [1, 1] = () => [1, 1];
+  const acc = custom.sugiNodeSize(siz);
   acc(dag);
   // @ts-expect-error cast only takes TestNodes
   acc(unks);
@@ -63,12 +61,9 @@ test("sugiyama() correctly adapts to types", () => {
   const decrossing = optimal.decross().large("large");
   expect(decrossing.large()).toBe("large");
 
-  const unrelated: (
-    node: DagNode<{ id: boolean }> | DummyNode
-  ) => [1, 1] = () => [1, 1];
-  init.nodeSize(unrelated);
-  // @ts-expect-error unrelated is unrelated to SimpleDatum
-  optimal.nodeSize(unrelated);
+  const unrelated: (node: SugiNode<{ id: boolean }>) => [1, 1] = () => [1, 1];
+  init.sugiNodeSize(unrelated);
+  optimal.sugiNodeSize(unrelated);
 });
 
 test("sugiyama() works for single node", () => {
@@ -133,17 +128,30 @@ test("sugiyama() works with a dummy node", () => {
 test("sugiyama() allows changing nodeSize", () => {
   const dag = three();
 
-  function nodeSize(node: SimpleNode | DummyNode): [number, number] {
-    if (node instanceof DummyNode) {
-      return [1, 1];
-    } else {
-      const size = parseInt(node.data.id) + 1;
+  function sugiNodeSize(node: SugiNode<SimpleDatum>): [number, number] {
+    if ("node" in node.data) {
+      const size = parseInt(node.data.node.data.id) + 1;
       return [size, size];
+    } else {
+      return [1, 1];
     }
   }
 
-  const layout = sugiyama().nodeSize(nodeSize);
-  expect(layout.nodeSize()).toEqual(nodeSize);
+  function nodeSize(node?: DagNode<SimpleDatum>): [number, number] {
+    if (node) {
+      const size = parseInt(node.data.id) + 1;
+      return [size, size];
+    } else {
+      return [1, 1];
+    }
+  }
+
+  const test = sugiyama().sugiNodeSize(sugiNodeSize);
+  expect(test.sugiNodeSize()).toBe(sugiNodeSize);
+  expect(test.nodeSize()).toBeNull();
+  const layout = test.nodeSize(nodeSize);
+  expect(layout.nodeSize()).toBe(nodeSize);
+  expect(layout.sugiNodeSize().wrapped).toBe(nodeSize);
   const { width, height } = layout(dag);
   expect(width).toBeCloseTo(9);
   expect(height).toBeCloseTo(10);
@@ -179,17 +187,17 @@ test("sugiyama() allows changing operators", () => {
     }
     return 1;
   };
-  const nodeSize: NodeSizeAccessor<SimpleDatum> = () => [2, 2];
+  const sugiNodeSize: SugiNodeSizeAccessor<SimpleDatum> = () => [2, 2];
   const layout = sugiyama()
     .layering(layering)
     .decross(decross)
     .coord(coord)
-    .nodeSize(nodeSize)
+    .sugiNodeSize(sugiNodeSize)
     .size([1, 2]);
   expect(layout.layering()).toBe(layering);
   expect(layout.decross()).toBe(decross);
   expect(layout.coord()).toBe(coord);
-  expect(layout.nodeSize()).toBe(nodeSize);
+  expect(layout.sugiNodeSize()).toBe(sugiNodeSize);
   expect(layout.size()).toEqual([1, 2]);
   // still runs
   layout(dag);
@@ -220,7 +228,7 @@ test("sugiyama() throws with noop layering", () => {
   const dag = dummy();
   const layout = sugiyama().layering(() => undefined);
   expect(() => layout(dag)).toThrow(
-    /layering did not assign layer to node '{"data":{"id":"0"},.*}'/
+    `node with data '{"id":"0"}' did not get a defined value during layering`
   );
 });
 
@@ -233,7 +241,7 @@ test("sugiyama() throws with invalid layers", () => {
     }
   });
   expect(() => layout(dag)).toThrow(
-    /layering assigned a negative layer \(-1\) to node '{"data":{"id":"0"},.*}'/
+    `node with data '{"id":"0"}' got an invalid (negative) value during layering: -1`
   );
 });
 
@@ -246,7 +254,7 @@ test("sugiyama() throws with flat layering", () => {
     }
   });
   expect(() => layout(dag)).toThrow(
-    /layering left child node '{"data":{"id":"1".*}.*}' \(0\) with a greater or equal layer to parent node '{"data":{"id":"0".*}.*}' \(0\)/
+    /layering left child data '{.*"id":"1".*}' \(0\) with greater or equal layer to parent data '{.*"id":"0".*}' \(0\)/
   );
 });
 
@@ -254,13 +262,13 @@ test("sugiyama() throws with noop coord", () => {
   const dag = dummy();
   const layout = sugiyama().coord(() => 1);
   expect(() => layout(dag)).toThrow(
-    /coord didn't assign an x to node '{"data":{"id":"0"},.*}'/
+    /coord didn't assign an x to node '{.*"data":{"id":"0"}.*}'/
   );
 });
 
 test("sugiyama() throws with bad coord width", () => {
   const dag = dummy();
-  const layout = sugiyama().coord((layers: DagNode[][]): number => {
+  const layout = sugiyama().coord((layers: SugiNode[][]): number => {
     for (const layer of layers) {
       for (const node of layer) {
         node.x = 2;
@@ -275,29 +283,28 @@ test("sugiyama() throws with bad coord width", () => {
 
 test("sugiyama() throws with negative node width", () => {
   const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [-1, 1]);
+  const layout = sugiyama().sugiNodeSize(() => [-1, 1]);
   expect(() => layout(dag)).toThrow(
-    /all node sizes must be non-negative, but got width -1 and height 1 for node '{"data":{"id":"0".*}.*}'/
+    /all node sizes must be non-negative, but got width -1 and height 1 for node '{.*"data":{"id":"0".*}.*}'/
   );
 });
 
 test("sugiyama() throws with negative node height", () => {
   const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [1, -1]);
+  const layout = sugiyama().sugiNodeSize(() => [1, -1]);
   expect(() => layout(dag)).toThrow(
-    /all node sizes must be non-negative, but got width 1 and height -1 for node '{"data":{"id":"0".*}.*}'/
+    /all node sizes must be non-negative, but got width 1 and height -1 for node '{.*"data":{"id":"0".*}.*}'/
   );
 });
 
 test("sugiyama() throws with zero node height", () => {
   const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [1, 0]);
+  const layout = sugiyama().sugiNodeSize(() => [1, 0]);
   expect(() => layout(dag)).toThrow(
     "at least one node must have positive height, but total height was zero"
   );
 });
 
 test("sugiyama() fails passing an arg to constructor", () => {
-  // @ts-expect-error sugiyama takes no arguments
-  expect(() => sugiyama(undefined)).toThrow("got arguments to sugiyama");
+  expect(() => sugiyama(null as never)).toThrow("got arguments to sugiyama");
 });

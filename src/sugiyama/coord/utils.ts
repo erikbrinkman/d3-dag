@@ -1,8 +1,7 @@
 import { bigrams, def } from "../../utils";
 
-import { DagNode } from "../../dag/node";
-import { DummyNode } from "../dummy";
-import { NodeSizeAccessor } from ".";
+import { SugiNode } from "../utils";
+import { SugiNodeSizeAccessor } from ".";
 import { solveQP } from "quadprog";
 
 /** @internal wrapper for solveQP */
@@ -70,23 +69,19 @@ export function solve(
 }
 
 /** @internal compute indices used to index arrays */
-export function indices(layers: DagNode[][]): Map<DagNode, number> {
-  const inds = new Map<DagNode, number>();
-  let i = 0;
-  for (const layer of layers) {
-    for (const node of layer) {
-      inds.set(node, i++);
-    }
-  }
-  return inds;
+export function indices(layers: SugiNode[][]): Map<SugiNode, number> {
+  return new Map(
+    layers.flatMap((layer) => layer).map((n, i) => [n, i] as const)
+  );
 }
 
 /** @interal Compute constraint arrays for layer separation */
 export function init<N, L>(
-  layers: (DagNode<N, L> | DummyNode)[][],
-  inds: Map<DagNode, number>,
-  nodeSize: NodeSizeAccessor<N, L>
+  layers: SugiNode<N, L>[][],
+  inds: Map<SugiNode, number>,
+  nodeSize: SugiNodeSizeAccessor<N, L>
 ): [number[][], number[], number[][], number[]] {
+  // NOTE max because we might assign a node the same index
   const n = 1 + Math.max(...inds.values());
   const A: number[][] = [];
   const b: number[] = [];
@@ -104,7 +99,7 @@ export function init<N, L>(
   }
 
   const c = new Array(n).fill(0);
-  const Q = new Array(n).fill(null).map(() => new Array(n).fill(0));
+  const Q = [...new Array(n)].map(() => new Array(n).fill(0));
 
   return [Q, c, A, b];
 }
@@ -154,9 +149,9 @@ export function minBend(
  * @internal
  */
 export function layout<N, L>(
-  layers: (DagNode<N, L> | DummyNode)[][],
-  nodeSize: NodeSizeAccessor<N, L>,
-  inds: Map<DagNode, number>,
+  layers: SugiNode<N, L>[][],
+  nodeSize: SugiNodeSizeAccessor<N, L>,
+  inds: Map<SugiNode, number>,
   solution: number[]
 ): number {
   // find span of solution

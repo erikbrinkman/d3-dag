@@ -9,7 +9,7 @@
  */
 import { Model, Solve } from "javascript-lp-solver";
 
-import { DagNode } from "../../dag/node";
+import { SugiNode } from "../utils";
 import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 
@@ -43,8 +43,8 @@ function buildOperator(options: {
   dist: boolean;
 }): OptOperator {
   function optCall(
-    topLayer: DagNode[],
-    bottomLayer: DagNode[],
+    topLayer: SugiNode[],
+    bottomLayer: SugiNode[],
     topDown: boolean
   ): void {
     // check if input is too large
@@ -78,7 +78,7 @@ function buildOperator(options: {
     const inds = new Map(reordered.map((node, i) => [node, i] as const));
 
     /** create key from nodes */
-    function key(...nodes: DagNode[]): string {
+    function key(...nodes: SugiNode[]): string {
       return nodes
         .map((n) => def(inds.get(n)))
         .sort((a, b) => a - b)
@@ -94,7 +94,7 @@ function buildOperator(options: {
         .filter((cs) => cs.length > 1);
     } else {
       unconstrained = topLayer.filter((n) => !n.ichildren().length);
-      const parents = new Map<DagNode, DagNode[]>();
+      const parents = new Map<SugiNode, SugiNode[]>();
       for (const node of topLayer) {
         for (const child of node.ichildren()) {
           const group = parents.get(child);

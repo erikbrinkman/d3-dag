@@ -1,6 +1,6 @@
 /**
  * A two layer (order) operator is any function that complies with the
- * {@link Operator} interface.  This function must rearrange the oder of the bottom
+ * {@link TwolayerOperator} interface.  This function must rearrange the oder of the bottom
  * layer to minimize the number of crossings.
  *
  * There are three built in decrossing operators, which are all constructed in
@@ -11,13 +11,13 @@
  *
  * @module
  */
-import { DagNode } from "../../dag/node";
-import { DummyNode } from "../dummy";
+import { SugiNode } from "../utils";
 
+/** twolayer operator */
 export interface TwolayerOperator<NodeDatum = unknown, LinkDatum = unknown> {
   (
-    topLayer: (DagNode<NodeDatum, LinkDatum> | DummyNode)[],
-    bottomLayer: (DagNode<NodeDatum, LinkDatum> | DummyNode)[],
+    topLayer: SugiNode<NodeDatum, LinkDatum>[],
+    bottomLayer: SugiNode<NodeDatum, LinkDatum>[],
     topDown: boolean
   ): void;
 }

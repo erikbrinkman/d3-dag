@@ -110,7 +110,6 @@ test("stratify() works with data accessor", () => {
   expect(layout.parentData()).toBe(newParentData);
   expect(layout.parentIds().wrapped).toBe(newParentData);
 
-  // @ts-expect-error can't make unrelated
   layout.parentIds((ps: string[]): string[] => ps);
 
   const justIds = layout.parentIds();
@@ -129,8 +128,9 @@ test("stratify() works with data accessor", () => {
 });
 
 test("stratify() fails with arguments", () => {
-  // @ts-expect-error stratify takes no arguments
-  expect(() => stratify(undefined)).toThrow("got arguments to stratify");
+  expect(() => stratify(undefined as never)).toThrow(
+    "got arguments to stratify"
+  );
 });
 
 test("stratify() fails with empty data", () => {

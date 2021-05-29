@@ -139,9 +139,15 @@ export interface StratifyOperator<
    * }
    * ```
    */
-  id<NewDatum extends NodeDatum, NewId extends IdOperator<NewDatum>>(
+  id<NewDatum, NewId extends IdOperator<NewDatum>>(
     id: NewId & IdOperator<NewDatum>
-  ): StratifyOperator<NewDatum, LinkDatum, NewId, ParentIds, ParentData>;
+  ): StratifyOperator<
+    NodeDatum & NewDatum,
+    LinkDatum,
+    NewId,
+    ParentIds,
+    ParentData
+  >;
   /**
    * Gets the current id accessor.
    */
@@ -157,14 +163,10 @@ export interface StratifyOperator<
    * }
    * ```
    */
-  parentIds<
-    NewDatum extends NodeDatum,
-    NewParentIds extends ParentIdsOperator<NewDatum>
-  >(
-    ids: NewParentIds &
-      ((d: NewDatum, i: number) => readonly string[] | undefined)
+  parentIds<NewDatum, NewParentIds extends ParentIdsOperator<NewDatum>>(
+    ids: NewParentIds & ParentIdsOperator<NewDatum>
   ): StratifyOperator<
-    NewDatum,
+    NodeDatum & NewDatum,
     undefined,
     Id,
     NewParentIds,
@@ -181,17 +183,13 @@ export interface StratifyOperator<
    * returns this {@link StratifyOperator}.
    */
   parentData<
-    NewDatum extends NodeDatum,
+    NewDatum,
     NewLinkDatum,
     NewParentData extends ParentDataOperator<NewDatum, NewLinkDatum>
   >(
-    data: NewParentData &
-      ((
-        d: NewDatum,
-        i: number
-      ) => readonly (readonly [string, NewLinkDatum])[] | undefined)
+    data: NewParentData & ParentDataOperator<NewDatum, NewLinkDatum>
   ): StratifyOperator<
-    NewDatum,
+    NodeDatum & NewDatum,
     NewLinkDatum,
     Id,
     WrappedParentDataOperator<NewDatum, NewLinkDatum, NewParentData>,
@@ -206,28 +204,26 @@ export interface StratifyOperator<
 
 /** @internal */
 function buildOperator<
-  NodeDatum,
-  LinkDatum,
-  Id extends IdOperator<NodeDatum>,
-  ParentIds extends ParentIdsOperator<NodeDatum>,
-  ParentData extends ParentDataOperator<NodeDatum, LinkDatum>
+  N,
+  L,
+  Id extends IdOperator<N>,
+  ParentIds extends ParentIdsOperator<N>,
+  ParentData extends ParentDataOperator<N, L>
 >(
   idOp: Id,
   parentIdsOp: ParentIds,
   parentDataOp: ParentData
-): StratifyOperator<NodeDatum, LinkDatum, Id, ParentIds, ParentData> {
-  function stratify<N extends NodeDatum>(
-    data: readonly N[]
-  ): Dag<N, LinkDatum> {
+): StratifyOperator<N, L, Id, ParentIds, ParentData> {
+  function stratify<NN extends N>(data: readonly NN[]): Dag<NN, L> {
     if (!data.length) throw new Error("can't stratify empty data");
     const mapping = new Map<
       string,
-      [DagNode<N, LinkDatum>, readonly (readonly [string, LinkDatum])[]]
+      [DagNode<NN, L>, readonly (readonly [string, L])[]]
     >();
     for (const [i, datum] of data.entries()) {
       const id = verifyId(idOp(datum, i));
       const pdata = parentDataOp(datum, i) || [];
-      const node = new LayoutDagNode<N, LinkDatum>(datum);
+      const node = new LayoutDagNode<NN, L>(datum);
       if (mapping.has(id)) {
         throw new Error(`found a duplicate id: ${id}`);
       } else {
@@ -235,7 +231,7 @@ function buildOperator<
       }
     }
 
-    const roots: DagNode<N, LinkDatum>[] = [];
+    const roots: DagNode<NN, L>[] = [];
     for (const [node, pdata] of mapping.values()) {
       for (const [pid, linkData] of pdata) {
         const info = mapping.get(pid);
@@ -253,12 +249,12 @@ function buildOperator<
   }
 
   function id(): Id;
-  function id<NewDatum extends NodeDatum, NewId extends IdOperator<NewDatum>>(
+  function id<NN, NewId extends IdOperator<NN>>(
     idGet: NewId
-  ): StratifyOperator<NewDatum, LinkDatum, NewId, ParentIds, ParentData>;
-  function id<NewDatum extends NodeDatum, NewId extends IdOperator<NewDatum>>(
+  ): StratifyOperator<N & NN, L, NewId, ParentIds, ParentData>;
+  function id<NN, NewId extends IdOperator<NN>>(
     idGet?: NewId
-  ): Id | StratifyOperator<NewDatum, LinkDatum, NewId, ParentIds, ParentData> {
+  ): Id | StratifyOperator<N & NN, L, NewId, ParentIds, ParentData> {
     if (idGet === undefined) {
       return idOp;
     } else {
@@ -268,32 +264,24 @@ function buildOperator<
   stratify.id = id;
 
   function parentData(): ParentData;
-  function parentData<
-    NewDatum extends NodeDatum,
-    NewLinkDatum,
-    NewParentData extends ParentDataOperator<NewDatum, NewLinkDatum>
-  >(
+  function parentData<NN, NL, NewParentData extends ParentDataOperator<NN, NL>>(
     data: NewParentData
   ): StratifyOperator<
-    NewDatum,
-    NewLinkDatum,
+    N & NN,
+    NL,
     Id,
-    WrappedParentDataOperator<NewDatum, NewLinkDatum, NewParentData>,
+    WrappedParentDataOperator<NN, NL, NewParentData>,
     NewParentData
   >;
-  function parentData<
-    NewDatum extends NodeDatum,
-    NewLinkDatum,
-    NewParentData extends ParentDataOperator<NewDatum, NewLinkDatum>
-  >(
+  function parentData<NN, NL, NewParentData extends ParentDataOperator<NN, NL>>(
     data?: NewParentData
   ):
     | ParentData
     | StratifyOperator<
-        NewDatum,
-        NewLinkDatum,
+        N & NN,
+        NL,
         Id,
-        WrappedParentDataOperator<NewDatum, NewLinkDatum, NewParentData>,
+        WrappedParentDataOperator<NN, NL, NewParentData>,
         NewParentData
       > {
     if (data === undefined) {
@@ -305,31 +293,25 @@ function buildOperator<
   stratify.parentData = parentData;
 
   function parentIds(): ParentIds;
-  function parentIds<
-    NewDatum extends NodeDatum,
-    NewParentIds extends ParentIdsOperator<NewDatum>
-  >(
+  function parentIds<NN, NewParentIds extends ParentIdsOperator<NN>>(
     ids: NewParentIds
   ): StratifyOperator<
-    NewDatum,
+    N & NN,
     undefined,
     Id,
     NewParentIds,
-    WrappedParentIdsOperator<NewDatum, NewParentIds>
+    WrappedParentIdsOperator<NN, NewParentIds>
   >;
-  function parentIds<
-    NewDatum extends NodeDatum,
-    NewParentIds extends ParentIdsOperator<NewDatum>
-  >(
+  function parentIds<NN, NewParentIds extends ParentIdsOperator<NN>>(
     ids?: NewParentIds
   ):
     | ParentIds
     | StratifyOperator<
-        NewDatum,
+        N & NN,
         undefined,
         Id,
         NewParentIds,
-        WrappedParentIdsOperator<NewDatum, NewParentIds>
+        WrappedParentIdsOperator<NN, NewParentIds>
       > {
     if (ids === undefined) {
       return parentIdsOp;
@@ -343,11 +325,10 @@ function buildOperator<
 }
 
 /** @internal */
-function wrapParentIds<
-  NodeDatum,
-  ParentIds extends ParentIdsOperator<NodeDatum>
->(parentIds: ParentIds): WrappedParentIdsOperator<NodeDatum, ParentIds> {
-  function wrapped(d: NodeDatum, i: number): [string, undefined][] {
+function wrapParentIds<N, ParentIds extends ParentIdsOperator<N>>(
+  parentIds: ParentIds
+): WrappedParentIdsOperator<N, ParentIds> {
+  function wrapped(d: N, i: number): [string, undefined][] {
     return (parentIds(d, i) || []).map((id) => [id, undefined]);
   }
   wrapped.wrapped = parentIds;
@@ -355,14 +336,10 @@ function wrapParentIds<
 }
 
 /** @internal */
-function wrapParentData<
-  NodeDatum,
-  LinkDatum,
-  ParentData extends ParentDataOperator<NodeDatum, LinkDatum>
->(
+function wrapParentData<N, L, ParentData extends ParentDataOperator<N, L>>(
   parentData: ParentData
-): WrappedParentDataOperator<NodeDatum, LinkDatum, ParentData> {
-  function wrapped(d: NodeDatum, i: number): string[] {
+): WrappedParentDataOperator<N, L, ParentData> {
+  function wrapped(d: N, i: number): string[] {
     return (parentData(d, i) || []).map(([id]) => id);
   }
   wrapped.wrapped = parentData;

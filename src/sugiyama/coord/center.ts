@@ -7,10 +7,9 @@
  * @module
  */
 
-import { CoordOperator, NodeSizeAccessor } from ".";
+import { CoordOperator, SugiNodeSizeAccessor } from ".";
 
-import { DagNode } from "../../dag/node";
-import { DummyNode } from "../dummy";
+import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
 export type CenterOperator = CoordOperator;
@@ -24,8 +23,8 @@ export function center(...args: never[]): CenterOperator {
   }
 
   function centerCall<N, L>(
-    layers: (DagNode<N, L> | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N, L>
+    layers: SugiNode<N, L>[][],
+    nodeSize: SugiNodeSizeAccessor<N, L>
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;

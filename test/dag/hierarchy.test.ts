@@ -108,10 +108,26 @@ test("hierarchy() fails with invalid root", () => {
   );
 });
 
+test("hierarchy() passes with invalid root and roots", () => {
+  const input = { id: "1", children: [{ id: "2" }] };
+  const layout = hierarchy().roots(false);
+  expect(layout.roots()).toBeFalsy();
+  layout(input, ...input.children);
+});
+
 interface Loop {
   id: string;
   children: Loop[];
 }
+
+test("hierarchy() detects cycle with invalid roots", () => {
+  const input: Loop = { id: "1", children: [{ id: "2", children: [] }] };
+  input.children[0].children.push(input);
+  const layout = hierarchy().roots(false);
+  expect(() => layout(input)).toThrow(
+    /cycle: '{.*"id":"1".*}' -> '{.*"id":"2".*}' -> '{.*"id":"1".*}'/
+  );
+});
 
 test("hierarchy() fails with cycle", () => {
   const selfLoop: Loop = { id: "2", children: [] };
@@ -121,7 +137,7 @@ test("hierarchy() fails with cycle", () => {
     children: [selfLoop]
   };
   expect(() => hierarchy()(line)).toThrow(
-    /cycle: '{"id":"2",.*}' -> '{"id":"2",.*}'/
+    /cycle: '{.*"id":"2".*}' -> '{.*"id":"2".*}'/
   );
 });
 
@@ -151,8 +167,7 @@ test("hierarchy() fails with hard cycle", () => {
 
 test("hierarchy() throws for nonempty input", () => {
   expect(() => {
-    // @ts-expect-error testing javascript failure case
-    hierarchy(undefined);
+    hierarchy(null as never);
   }).toThrow("got arguments to hierarchy");
 });
 

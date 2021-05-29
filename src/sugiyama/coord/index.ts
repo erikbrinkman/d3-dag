@@ -17,8 +17,7 @@
  *
  * @module
  */
-import { DagNode } from "../../dag/node";
-import { DummyNode } from "../dummy";
+import { SugiNode } from "../utils";
 
 /**
  * The node size accessor takes a node and returns its size as a tuple of
@@ -27,8 +26,11 @@ import { DummyNode } from "../dummy";
  * limitations of layered layouts, that means that layers will be separated by
  * the maximum height nodes in each layer.
  */
-export interface NodeSizeAccessor<NodeDatum = unknown, LinkDatum = unknown> {
-  (node: DagNode<NodeDatum, LinkDatum> | DummyNode): readonly [number, number];
+export interface SugiNodeSizeAccessor<
+  NodeDatum = unknown,
+  LinkDatum = unknown
+> {
+  (node: SugiNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
 /**
@@ -39,8 +41,7 @@ export interface NodeSizeAccessor<NodeDatum = unknown, LinkDatum = unknown> {
  */
 export interface CoordOperator<NodeDatum = unknown, LinkDatum = unknown> {
   <N extends NodeDatum, L extends LinkDatum>(
-    layers: (DagNode<N, L> | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N, L> &
-      ((node: DagNode<N, L> | DummyNode) => readonly [number, number])
+    layers: SugiNode<N, L>[][],
+    nodeSize: SugiNodeSizeAccessor<N, L>
   ): number;
 }

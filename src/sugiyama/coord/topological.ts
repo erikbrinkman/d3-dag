@@ -6,11 +6,10 @@
  *
  * @module
  */
-import { CoordOperator, NodeSizeAccessor } from ".";
+import { CoordOperator, SugiNodeSizeAccessor } from ".";
 import { init, layout, minBend, solve } from "./utils";
 
-import { DagNode } from "../../dag/node";
-import { DummyNode } from "../dummy";
+import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
 export type TopologicalOperator = CoordOperator;
@@ -24,12 +23,12 @@ export function topological(...args: never[]): TopologicalOperator {
   }
 
   function topologicalCall<N, L>(
-    layers: (DagNode<N, L> | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N, L>
+    layers: SugiNode<N, L>[][],
+    nodeSize: SugiNodeSizeAccessor<N, L>
   ): number {
     for (const layer of layers) {
       const numNodes = layer.reduce(
-        (count, node) => count + +!(node instanceof DummyNode),
+        (count, node) => count + +("node" in node.data),
         0
       );
       if (numNodes !== 1) {
@@ -37,11 +36,11 @@ export function topological(...args: never[]): TopologicalOperator {
       }
     }
 
-    const inds = new Map<DagNode, number>();
+    const inds = new Map<SugiNode, number>();
     let i = 0;
     for (const layer of layers) {
       for (const node of layer) {
-        if (node instanceof DummyNode) {
+        if ("target" in node.data) {
           inds.set(node, i++);
         }
       }
@@ -50,7 +49,7 @@ export function topological(...args: never[]): TopologicalOperator {
     // always assigns them the same coord: 0.
     for (const layer of layers) {
       for (const node of layer) {
-        if (!(node instanceof DummyNode)) {
+        if ("node" in node.data) {
           inds.set(node, i);
         }
       }
@@ -62,7 +61,7 @@ export function topological(...args: never[]): TopologicalOperator {
         const pind = def(inds.get(par));
         for (const node of par.ichildren()) {
           const nind = def(inds.get(node));
-          if (node instanceof DummyNode) {
+          if ("target" in node.data) {
             for (const child of node.ichildren()) {
               const cind = def(inds.get(child));
               minBend(Q, pind, nind, cind, 1);

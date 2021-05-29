@@ -15,7 +15,7 @@
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode } from "../../dag/node";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
-import { Replace, bigrams, def } from "../../utils";
+import { Up, bigrams, def } from "../../utils";
 
 interface Operators<NodeDatum, LinkDatum> {
   rank: RankAccessor<NodeDatum, LinkDatum>;
@@ -39,7 +39,7 @@ export interface SimplexOperator<
   >(
     // NOTE this is necessary for type inference
     newRank: NewRank & RankAccessor<NewNodeDatum, NewLinkDatum>
-  ): SimplexOperator<NewNodeDatum, NewLinkDatum, Replace<Ops, "rank", NewRank>>;
+  ): SimplexOperator<NewNodeDatum, NewLinkDatum, Up<Ops, { rank: NewRank }>>;
   /**
    * Get the current {@link RankAccessor}.
    */
@@ -57,11 +57,7 @@ export interface SimplexOperator<
     NewGroup extends GroupAccessor<NewNodeDatum, NewLinkDatum>
   >(
     newGroup: NewGroup & GroupAccessor<NewNodeDatum, NewLinkDatum>
-  ): SimplexOperator<
-    NewNodeDatum,
-    NewLinkDatum,
-    Replace<Ops, "group", NewGroup>
-  >;
+  ): SimplexOperator<NewNodeDatum, NewLinkDatum, Up<Ops, { group: NewGroup }>>;
   /**
    * Get the current {@link GroupAccessor}.
    */
@@ -208,7 +204,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     NN extends N,
     NL extends L,
     NewRank extends RankAccessor<NN, NL>
-  >(newRank: NewRank): SimplexOperator<NN, NL, Replace<Ops, "rank", NewRank>>;
+  >(newRank: NewRank): SimplexOperator<NN, NL, Up<Ops, { rank: NewRank }>>;
   function rank(): Ops["rank"];
   function rank<
     NN extends N,
@@ -216,7 +212,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     NewRank extends RankAccessor<NN, NL>
   >(
     newRank?: NewRank
-  ): SimplexOperator<NN, NL, Replace<Ops, "rank", NewRank>> | Ops["rank"] {
+  ): SimplexOperator<NN, NL, Up<Ops, { rank: NewRank }>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
     } else {
@@ -230,9 +226,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     NN extends N,
     NL extends L,
     NewGroup extends GroupAccessor<NN, NL>
-  >(
-    newGroup: NewGroup
-  ): SimplexOperator<NN, NL, Replace<Ops, "group", NewGroup>>;
+  >(newGroup: NewGroup): SimplexOperator<NN, NL, Up<Ops, { group: NewGroup }>>;
   function group(): Ops["group"];
   function group<
     NN extends N,
@@ -240,7 +234,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     NewGroup extends GroupAccessor<NN, NL>
   >(
     newGroup?: NewGroup
-  ): SimplexOperator<NN, NL, Replace<Ops, "group", NewGroup>> | Ops["group"] {
+  ): SimplexOperator<NN, NL, Up<Ops, { group: NewGroup }>> | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;
     } else {

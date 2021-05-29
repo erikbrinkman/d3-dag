@@ -11,7 +11,7 @@
   "rules": {
     "@typescript-eslint/no-unused-vars": [
       "error",
-      { "varsIgnorePattern": "^_$" }
+      { "varsIgnorePattern": "^_+$" }
     ],
     "@typescript-eslint/no-inferrable-types": "off",
     "prefer-const": [

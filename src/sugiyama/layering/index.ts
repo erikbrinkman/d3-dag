@@ -1,7 +1,7 @@
 /**
- * A layering is any function that complies with the {@link Operator} interface.
- * This function must assign each node a non-negative integer `layer` such that
- * children have larger layers than their parents.
+ * A layering is any function that complies with the {@link LayeringOperator}
+ * interface.  This function must assign each node a non-negative integer
+ * `value` such that children have larger layers than their parents.
  *
  * There are several built in layering operators, which are all constructed in
  * a fluent fashion:

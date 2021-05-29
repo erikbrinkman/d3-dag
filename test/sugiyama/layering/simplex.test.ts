@@ -1,8 +1,8 @@
 import { Dag, DagNode } from "../../../src/dag/node";
 import { SimpleDatum, doub, ex, square } from "../../examples";
 
+import { getLayers } from "../utils";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
-import { toLayers } from "../utils";
 
 test("simplex() correctly adapts to types", () => {
   const dag = square();
@@ -53,7 +53,7 @@ test("simplex() correctly adapts to types", () => {
 test("simplex() works for square", () => {
   const dag = square();
   simplex()(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
 });
 
@@ -71,7 +71,7 @@ test("simplex() respects ranks and gets them", () => {
   const layout = simplex().rank(ranker);
   expect(layout.rank()).toBe(ranker);
   layout(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1], [2], [3]]).toEqual(layers);
 });
 
@@ -80,7 +80,7 @@ test("simplex() works for X", () => {
   // will not
   const dag = ex();
   simplex()(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1, 2], [3], [4, 5], [6]]).toEqual(layers);
 });
 
@@ -90,7 +90,7 @@ test("simplex() respects equality rank", () => {
     node.data.id === "0" || node.data.id === "2" ? 0 : undefined
   );
   layout(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0, 2], [1], [3], [4, 5], [6]]).toEqual(layers);
 });
 
@@ -101,20 +101,19 @@ test("simplex() respects groups", () => {
   const layout = simplex().group(grp);
   expect(layout.group()).toBe(grp);
   layout(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0, 2], [1], [3], [4, 5], [6]]).toEqual(layers);
 });
 
 test("simplex() works for disconnected dag", () => {
   const dag = doub();
   simplex()(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0, 1]]).toEqual(layers);
 });
 
 test("simplex() fails passing an arg to constructor", () => {
-  // @ts-expect-error simplex takes no arguments
-  expect(() => simplex(undefined)).toThrow("got arguments to simplex");
+  expect(() => simplex(null as never)).toThrow("got arguments to simplex");
 });
 
 test("simplex() fails with ill-defined ranks", () => {

@@ -4,7 +4,10 @@ import { greedy } from "../../../src/sugiyama/coord/greedy";
 
 test("greedy() works for N", () => {
   // degree matters
-  const layers = createLayers([[[0, 1], [1]]]);
+  const layers = createLayers([
+    [[0, 1], [1]],
+    [[], []]
+  ]);
   const [[topLeft, topRight], [bottomLeft, bottomRight]] = layers;
   greedy()(layers, nodeSize);
 
@@ -16,7 +19,7 @@ test("greedy() works for N", () => {
 
 test("greedy() works for carat", () => {
   // index fallback if not degree
-  const layers = createLayers([[[0, 1]]]);
+  const layers = createLayers([[[0, 1]], [[], []]]);
   const [[head], [left, right]] = layers;
   greedy()(layers, nodeSize);
 
@@ -27,7 +30,7 @@ test("greedy() works for carat", () => {
 
 test("greedy() works for triangle", () => {
   // dummy gets lowest priority
-  const layers = createLayers([[[0, 1]], [[0], 0]]);
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const [[one], [two, dummy], [three]] = layers;
   greedy()(layers, nodeSize);
 
@@ -38,12 +41,11 @@ test("greedy() works for triangle", () => {
 });
 
 test("greedy() fails passing an arg to constructor", () => {
-  // @ts-expect-error greedy takes no arguments
-  expect(() => greedy(undefined)).toThrow("got arguments to greedy");
+  expect(() => greedy(null as never)).toThrow("got arguments to greedy");
 });
 
 test("greedy() throws for zero width", () => {
-  const layers = createLayers([[[0]]]);
+  const layers = createLayers([[[]]]);
   expect(() => greedy()(layers, () => [0, 1] as const)).toThrow(
     "must assign nonzero width to at least one node"
   );

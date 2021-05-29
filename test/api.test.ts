@@ -1,5 +1,4 @@
 import {
-  SugiDummyNode,
   coordCenter,
   coordGreedy,
   coordQuad,
@@ -39,7 +38,8 @@ test("can loosly call the api", () => {
     .coord(coordGreedy())
     .coord(coordCenter())
     .coord(coordQuad());
-  layout(dag);
+  const { width, height } = layout(dag);
+  expect(width).toBeGreaterThanOrEqual(0);
+  expect(height).toBeGreaterThanOrEqual(0);
   zherebko()(dag);
-  expect(new SugiDummyNode().data).toBeUndefined();
 });

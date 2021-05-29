@@ -1,30 +1,24 @@
 import { createLayers, nodeSize } from "../utils";
 
-import { DagNode } from "../../../src/dag/node";
-import { DummyNode } from "../../../src/sugiyama/dummy";
+import { SugiNode } from "../../../src/sugiyama/utils";
 import { center } from "../../../src/sugiyama/coord/center";
 import { greedy } from "../../../src/sugiyama/coord/greedy";
 import { quad } from "../../../src/sugiyama/coord/quad";
 
-const square = () =>
+const square = () => createLayers([[[0], [1]], [[0], [0]], [[]]]);
+const ccoz = () => createLayers([[[0, 1], [2], [3]], [[0], [0], [], []], [[]]]);
+const dtopo = () => createLayers([[[0, 1]], [[], 0], [[]], [[0]], [[]]]);
+const doub = () => createLayers([[[0], []], [[]]]);
+const vee = () => createLayers([[[0], [0]], [[]]]);
+const ex = () =>
   createLayers([
-    [[0], [1]],
-    [[0], [0]]
+    [[1], [0]],
+    [[], []]
   ]);
-const ccoz = () =>
-  createLayers([
-    [[0, 1], [2], [3]],
-    [[0], [0], [], []]
-  ]);
-const dtopo = () => createLayers([[[0, 1]], [[], 0], [[]], [[0]]]);
-const doub = () => createLayers([[[0], []]]);
-const vee = () => createLayers([[[0], [0]]]);
-const ex = () => createLayers([[[1], [0]]]);
 
-function idLayerSize(
-  node: DagNode<{ index: number }> | DummyNode
-): [number, number] {
-  return [(node.data?.index || 0) + 1, 1];
+function idLayerSize(node: SugiNode<{ index: number }>): [number, number] {
+  const width = "node" in node.data ? node.data.node.data.index + 1 : 1;
+  return [width, 1];
 }
 
 for (const method of [center(), greedy(), quad()]) {
@@ -42,8 +36,7 @@ for (const method of [center(), greedy(), quad()]) {
   }
 
   test(`single layer respects node width by ${method.name}`, () => {
-    // NOTE due to design of createLayers, have to throw out top layer
-    const [, layer] = createLayers([[[0, 1, 2]]]);
+    const [layer] = createLayers([[[], [], []]]);
     const width = method([layer], idLayerSize);
     expect(width).toBeCloseTo(6);
     const [first, second, third] = layer;

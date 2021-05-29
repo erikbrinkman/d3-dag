@@ -1,5 +1,5 @@
 /** utility type for replacing keys with new value */
-export type Replace<O, K extends keyof O, N> = Omit<O, K> & Record<K, N>;
+export type Up<O, N> = Omit<O, keyof N> & N;
 
 /** helper for verifying things aren't undefined */
 export function def<T>(

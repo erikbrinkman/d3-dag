@@ -12,8 +12,8 @@
 import { Model, Solve } from "javascript-lp-solver";
 import { bigrams, def } from "../../utils";
 
-import { DagNode } from "../../dag/node";
 import { DecrossOperator } from ".";
+import { SugiNode } from "../utils";
 
 export type LargeHandling = "small" | "medium" | "large";
 
@@ -48,7 +48,7 @@ function buildOperator(options: {
   // TODO optimize this for disconnected graphs by breaking them apart, solving
   // each, then mushing them back together
 
-  function optCall(layers: DagNode[][]): void {
+  function optCall(layers: SugiNode[][]): void {
     // check for large input
     const numVars = layers.reduce(
       (t, l) => t + (l.length * Math.max(l.length - 1, 0)) / 2,
@@ -72,7 +72,7 @@ function buildOperator(options: {
       );
     }
 
-    const distanceConstraints: [DagNode[], DagNode[][]][] = [];
+    const distanceConstraints: [SugiNode[], SugiNode[][]][] = [];
     for (const [topLayer, bottomLayer] of bigrams(layers)) {
       const withParents = new Set(topLayer.flatMap((node) => node.children()));
       const topUnconstrained = bottomLayer.filter(
@@ -84,7 +84,7 @@ function buildOperator(options: {
       distanceConstraints.push([topUnconstrained, topGroups]);
 
       const bottomUnconstrained = topLayer.filter((n) => !n.ichildren().length);
-      const parents = new Map<DagNode, DagNode[]>();
+      const parents = new Map<SugiNode, SugiNode[]>();
       for (const node of topLayer) {
         for (const child of node.ichildren()) {
           const group = parents.get(child);
@@ -122,7 +122,7 @@ function buildOperator(options: {
 
     // map every node to an id for quick access, if one nodes id is less than
     // another it must come before it on the layer, or in a previous layer
-    const inds = new Map<DagNode, number>();
+    const inds = new Map<SugiNode, number>();
     {
       let i = 0;
       for (const layer of layers) {
@@ -133,14 +133,14 @@ function buildOperator(options: {
     }
 
     /** create a key from nodes */
-    function key(...nodes: DagNode[]): string {
+    function key(...nodes: SugiNode[]): string {
       return nodes
         .map((n) => def(inds.get(n)))
         .sort((a, b) => a - b)
         .join(" => ");
     }
 
-    function perms(layer: DagNode[]): void {
+    function perms(layer: SugiNode[]): void {
       // add variables for each pair of bottom later nodes indicating if they
       // should be flipped
       for (const [i, n1] of layer.slice(0, layer.length - 1).entries()) {
@@ -188,7 +188,7 @@ function buildOperator(options: {
       }
     }
 
-    function cross(layer: DagNode[]): void {
+    function cross(layer: SugiNode[]): void {
       for (const [i, p1] of layer.slice(0, layer.length - 1).entries()) {
         for (const p2 of layer.slice(i + 1)) {
           const pairp = key(p1, p2);
@@ -227,7 +227,7 @@ function buildOperator(options: {
       }
     }
 
-    function distance(unconstrained: DagNode[], groups: DagNode[][]): void {
+    function distance(unconstrained: SugiNode[], groups: SugiNode[][]): void {
       for (const node of unconstrained) {
         for (const group of groups) {
           for (const [i, start] of group.entries()) {

@@ -8,7 +8,7 @@ export { Dag, DagNode, DagRoot, Link, ChildLink } from "./dag/node";
 export { stratify as dagStratify, StratifyOperator } from "./dag/stratify";
 export { connect as dagConnect, ConnectOperator } from "./dag/connect";
 export { hierarchy as dagHierarchy, HierarchyOperator } from "./dag/hierarchy";
-export { sugiyama, SugiyamaOperator } from "./sugiyama";
+export { sugiyama, SugiyamaOperator, NodeSizeAccessor } from "./sugiyama";
 export {
   topological as layeringTopological,
   TopologicalOperator as TopologicalLayeringOperator
@@ -17,6 +17,10 @@ export {
   simplex as layeringSimplex,
   SimplexOperator
 } from "./sugiyama/layering/simplex";
+export { LayeringOperator } from "./sugiyama/layering";
+export { TwolayerOperator } from "./sugiyama/twolayer";
+export { DecrossOperator } from "./sugiyama/decross";
+export { CoordOperator, SugiNodeSizeAccessor } from "./sugiyama/coord";
 export {
   longestPath as layeringLongestPath,
   LongestPathOperator
@@ -49,5 +53,4 @@ export {
   opt as twolayerOpt,
   OptOperator as OptTwolayerOperator
 } from "./sugiyama/twolayer/opt";
-export { DummyNode as SugiDummyNode } from "./sugiyama/dummy";
 export { zherebko, ZherebkoOperator } from "./zherebko";

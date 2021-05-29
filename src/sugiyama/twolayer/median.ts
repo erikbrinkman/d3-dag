@@ -6,7 +6,7 @@
  *
  * @module
  */
-import { DagNode } from "../../dag/node";
+import { SugiNode } from "../utils";
 import { TwolayerOperator } from ".";
 import { median as arrayMedian } from "d3-array";
 import { def } from "../../utils";
@@ -22,8 +22,8 @@ export function median(...args: never[]): MedianOperator {
     );
   }
   function medianCall(
-    topLayer: DagNode[],
-    bottomLayer: DagNode[],
+    topLayer: SugiNode[],
+    bottomLayer: SugiNode[],
     topDown: boolean
   ): void {
     if (topDown) {

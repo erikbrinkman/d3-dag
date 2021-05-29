@@ -80,8 +80,9 @@ test("idescendants('breadth') is correct for square", () => {
 
 test("idescendants('unk') throws", () => {
   const dag = single();
-  // @ts-expect-error invalid iteration style
-  expect(() => dag.idescendants("unk")).toThrow("unknown iteration style: unk");
+  expect(() => dag.idescendants("unk" as "depth")).toThrow(
+    "unknown iteration style: unk"
+  );
 });
 
 test("size() is correct", () => {

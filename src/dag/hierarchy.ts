@@ -172,6 +172,16 @@ export interface HierarchyOperator<
    * will return a wrapped version that returns undefined data.
    */
   childrenData(): ChildrenData;
+
+  /**
+   * Specify if only roots should be passed in, if true, hierarchy will throw
+   * an error if a non-root was passed initially. (default: true)
+   */
+  roots(
+    val: boolean
+  ): HierarchyOperator<NodeDatum, LinkDatum, Children, ChildrenData>;
+  /** get the current roots value. */
+  roots(): boolean;
 }
 
 /** @internal */
@@ -182,7 +192,8 @@ function buildOperator<
   ChildrenData extends ChildrenDataOperator<N, L>
 >(
   childrenOp: Children,
-  childrenDataOp: ChildrenData
+  childrenDataOp: ChildrenData,
+  checkRoots: boolean
 ): HierarchyOperator<N, L, Children, ChildrenData> {
   function hierarchy(...data: N[]): Dag<N, L> {
     if (!data.length) {
@@ -214,14 +225,20 @@ function buildOperator<
     // verifty roots are roots
     const rootSet = new Set(roots);
     for (const node of mapping.values()) {
-      if (node.ichildren().some((child) => rootSet.has(child))) {
-        throw new Error(js`node '${node.data}' pointed to a root`);
+      for (const child of node.ichildren()) {
+        if (rootSet.delete(child) && checkRoots) {
+          throw new Error(js`node '${node.data}' pointed to a root`);
+        }
       }
     }
+    // NOTE if rootSet is empty then we have a cycle, but we defer to verifyDag
+    // to get better printing
+    const froots =
+      rootSet.size && rootSet.size !== roots.length ? [...rootSet] : roots;
 
     // create dag
-    verifyDag(roots);
-    return roots.length > 1 ? new LayoutDagRoot(roots) : roots[0];
+    verifyDag(froots);
+    return froots.length > 1 ? new LayoutDagRoot(froots) : froots[0];
   }
 
   function children(): Children;
@@ -251,7 +268,7 @@ function buildOperator<
         undefined,
         NewChildren,
         WrappedChildrenOperator<N, NewChildren>
-      >(childs, wrapChildren(childs));
+      >(childs, wrapChildren(childs), checkRoots);
     }
   }
   hierarchy.children = children;
@@ -291,10 +308,23 @@ function buildOperator<
         L,
         WrappedChildrenDataOperator<N, L, NewChildrenData>,
         NewChildrenData
-      >(wrapChildrenData(data), data);
+      >(wrapChildrenData(data), data, checkRoots);
     }
   }
   hierarchy.childrenData = childrenData;
+
+  function roots(): boolean;
+  function roots(val: boolean): HierarchyOperator<N, L, Children, ChildrenData>;
+  function roots(
+    val?: boolean
+  ): boolean | HierarchyOperator<N, L, Children, ChildrenData> {
+    if (val === undefined) {
+      return checkRoots;
+    } else {
+      return buildOperator(childrenOp, childrenDataOp, val);
+    }
+  }
+  hierarchy.roots = roots;
 
   return hierarchy;
 }
@@ -371,5 +401,5 @@ export function hierarchy(
         "These were probably meant as data which should be called as hierarchy()(...)"
     );
   }
-  return buildOperator(defaultChildren, wrapChildren(defaultChildren));
+  return buildOperator(defaultChildren, wrapChildren(defaultChildren), true);
 }

@@ -3,7 +3,7 @@ import { createLayers, nodeSize } from "../utils";
 import { topological } from "../../../src/sugiyama/coord/topological";
 
 test("topological() works for triangle", () => {
-  const layers = createLayers([[[0, 1]], [[0], 0]]);
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const [[one], [two, dummy], [three]] = layers;
   topological()(layers, nodeSize);
 
@@ -14,7 +14,7 @@ test("topological() works for triangle", () => {
 });
 
 test("topological() works for disconnected", () => {
-  const layered = createLayers([[[0, 1]], [[], 0], [[]], [[0]]]);
+  const layered = createLayers([[[0, 1]], [[], 0], [[]], [[0]], [[]]]);
   const width = topological()(layered, nodeSize);
   for (const layer of layered) {
     for (const node of layer) {
@@ -25,19 +25,20 @@ test("topological() works for disconnected", () => {
 });
 
 test("topological() throws for non-topological", () => {
-  const layers = createLayers([[[0], [1]]]);
+  const layers = createLayers([[[0], [0]], [[]]]);
   expect(() => topological()(layers, nodeSize)).toThrow(
     "only works with a topological layering"
   );
 });
 
 test("topological() fails passing an arg to constructor", () => {
-  // @ts-expect-error topological takes no arguments
-  expect(() => topological(undefined)).toThrow("got arguments to topological");
+  expect(() => topological(null as never)).toThrow(
+    "got arguments to topological"
+  );
 });
 
 test("topological() throws for zero width", () => {
-  const layers = createLayers([[[0]]]);
+  const layers = createLayers([[[]]]);
   expect(() => topological()(layers, () => [0, 1])).toThrow(
     "must assign nonzero width to at least one node"
   );

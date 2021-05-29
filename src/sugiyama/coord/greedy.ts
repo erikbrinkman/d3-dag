@@ -14,11 +14,10 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 
-import { CoordOperator, NodeSizeAccessor } from ".";
+import { CoordOperator, SugiNodeSizeAccessor } from ".";
 import { assert, def } from "../../utils";
 
-import { DagNode } from "../../dag/node";
-import { DummyNode } from "../dummy";
+import { SugiNode } from "../utils";
 
 export type GreedyOperator = CoordOperator;
 
@@ -31,14 +30,14 @@ export function greedy(...args: never[]): GreedyOperator {
   }
 
   function greedyCall<N, L>(
-    layers: (DagNode<N, L> | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N, L>
+    layers: SugiNode<N, L>[][],
+    nodeSize: SugiNodeSizeAccessor<N, L>
   ): number {
     // TODO other initial assignments
     const assignment = meanAssignment;
 
     // assign degrees
-    const degrees = new Map<DagNode, number>();
+    const degrees = new Map<SugiNode, number>();
     for (const layer of layers) {
       for (const node of layer) {
         // the -3 at the end ensures that dummy nodes have the lowest priority,
@@ -46,7 +45,7 @@ export function greedy(...args: never[]): GreedyOperator {
         // below any other valid node
         degrees.set(
           node,
-          node.ichildren().length + (node instanceof DummyNode ? -3 : 0)
+          node.ichildren().length + ("node" in node.data ? 0 : -3)
         );
       }
     }
@@ -128,11 +127,11 @@ export function greedy(...args: never[]): GreedyOperator {
 // clever way to combine then, but it's not immediately obvious since twolayer
 // uses the index of toplayer, and this uses the x value
 /** @internal */
-function meanAssignment(topLayer: DagNode[], bottomLayer: DagNode[]): void {
+function meanAssignment(topLayer: SugiNode[], bottomLayer: SugiNode[]): void {
   for (const node of bottomLayer) {
     node.x = 0.0;
   }
-  const counts = new Map<DagNode, number>();
+  const counts = new Map<SugiNode, number>();
   for (const node of topLayer) {
     assert(node.x !== undefined);
     for (const child of node.ichildren()) {

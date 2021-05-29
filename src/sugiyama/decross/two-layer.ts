@@ -12,10 +12,9 @@
 import { MedianOperator, median } from "../twolayer/median";
 import { bigrams, def } from "../../utils";
 
-import { DagNode } from "../../dag/node";
 import { DecrossOperator } from ".";
-import { DummyNode } from "../dummy";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
+import { SugiNode } from "../utils";
 
 export interface TwoLayerOperator<
   NodeDatum = unknown,
@@ -61,7 +60,7 @@ function buildOperator<N, L, Order extends OrderOperator<N, L>>(options: {
   order: Order;
   passes: number;
 }): TwoLayerOperator<N, L, Order> {
-  function twoLayerCall(layers: (DagNode<N, L> | DummyNode)[][]): void {
+  function twoLayerCall(layers: SugiNode<N, L>[][]): void {
     const reversed = layers.slice().reverse();
 
     let changed = true;

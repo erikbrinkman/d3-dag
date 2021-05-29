@@ -13,7 +13,7 @@ test("quad() modifiers work", () => {
 });
 
 test("quad() works for square like layout", () => {
-  const layers = createLayers([[[0, 1]], [[0], [0]]]);
+  const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);
   const [[head], [left, right], [tail]] = layers;
   quad()(layers, nodeSize);
 
@@ -24,7 +24,7 @@ test("quad() works for square like layout", () => {
 });
 
 test("quad() works for triangle", () => {
-  const layers = createLayers([[[0, 1]], [[0], 0]]);
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const [[one], [two, dummy], [three]] = layers;
   quad()(layers, nodeSize);
 
@@ -35,7 +35,7 @@ test("quad() works for triangle", () => {
 });
 
 test("quad() works with flat disconnected component", () => {
-  const layers = createLayers([[[], []], [[0]]]);
+  const layers = createLayers([[[], []], [[0]], [[]]]);
   const [[left, right], [high], [low]] = layers;
   quad()(layers, nodeSize);
 
@@ -65,7 +65,7 @@ test("quad() fails with invalid weights", () => {
 });
 
 test("quad() fails with two node zeros", () => {
-  const layers = createLayers([[[0, 1]]]);
+  const layers = createLayers([[[]]]);
   const layout = quad().vertical([0, 1]).curve([0, 1]);
   expect(() => layout(layers, nodeSize)).toThrow(
     "node vertical weight or node curve weight needs to be positive"
@@ -73,7 +73,7 @@ test("quad() fails with two node zeros", () => {
 });
 
 test("quad() fails with two dummy zeros", () => {
-  const layers = createLayers([[[0, 1]]]);
+  const layers = createLayers([[[]]]);
   const layout = quad().vertical([1, 0]).curve([1, 0]);
   expect(() => layout(layers, nodeSize)).toThrow(
     "dummy vertical weight or dummy curve weight needs to be positive"
@@ -81,12 +81,11 @@ test("quad() fails with two dummy zeros", () => {
 });
 
 test("quad() fails passing an arg to constructor", () => {
-  // @ts-expect-error quad takes no arguments
-  expect(() => quad(undefined)).toThrow("got arguments to quad");
+  expect(() => quad(null as never)).toThrow("got arguments to quad");
 });
 
 test("quad() throws for zero width", () => {
-  const layers = createLayers([[[0]]]);
+  const layers = createLayers([[[]]]);
   expect(() => quad()(layers, () => [0, 1])).toThrow(
     "must assign nonzero width to at least one node"
   );

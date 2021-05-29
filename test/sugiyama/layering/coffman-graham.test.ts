@@ -2,19 +2,19 @@ import { ccoz, square } from "../../examples";
 
 import { coffmanGraham } from "../../../src/sugiyama/layering/coffman-graham";
 import { connect } from "../../../src/dag/connect";
-import { toLayers } from "../utils";
+import { getLayers } from "../utils";
 
 test("coffmanGraham() works for square", () => {
   const dag = square();
   coffmanGraham()(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
 });
 
 test("coffmanGraham() works for a disconnected graph", () => {
   const dag = ccoz();
   coffmanGraham()(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect(layers.length).toBeTruthy();
 });
 
@@ -23,7 +23,7 @@ test("coffmanGraham() handles width", () => {
   const layering = coffmanGraham().width(1);
   expect(layering.width()).toBe(1);
   layering(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([
     [[0], [1], [2], [3]],
     [[0], [2], [1], [3]]
@@ -40,7 +40,7 @@ test("coffmanGraham() handles earlier nodes", () => {
     ["2", "4"]
   ]);
   coffmanGraham().width(1)(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
 });
 
@@ -55,7 +55,7 @@ test("coffmanGraham() handles shorter edges", () => {
     ["2", "4"]
   ]);
   coffmanGraham().width(1)(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
 });
 
@@ -71,7 +71,7 @@ test("coffmanGraham() handles history reverse", () => {
     ["2", "3"]
   ]);
   coffmanGraham().width(1)(dag);
-  const layers = toLayers(dag);
+  const layers = getLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
 });
 
@@ -80,8 +80,7 @@ test("coffmanGraham() requires positive width", () => {
 });
 
 test("coffmanGraham() fails passing an arg to constructor", () => {
-  // @ts-expect-error coffman-graham takes no arguments
-  expect(() => coffmanGraham(undefined)).toThrow(
+  expect(() => coffmanGraham(null as never)).toThrow(
     "got arguments to coffmanGraham"
   );
 });

@@ -1,4 +1,4 @@
-import { DagNode } from "../../dag/node";
+import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
 /** order a layer with respect to numeric values
@@ -14,12 +14,12 @@ import { def } from "../../utils";
  * | Stack Exchange} post for algorithmic details.
  */
 export function order(
-  layer: DagNode[],
-  poses: Map<DagNode, number | undefined>
+  layer: SugiNode[],
+  poses: Map<SugiNode, number | undefined>
 ): void {
   // first group by number and preserve order, this makes ties resolve to the
   // same order as layer
-  const orderMap = new Map<number, DagNode[]>();
+  const orderMap = new Map<number, SugiNode[]>();
   for (const node of layer) {
     const val = poses.get(node);
     if (val === undefined) {

@@ -19,7 +19,16 @@ export function verifyId(id: string): string {
 /** @internal Verify a DAG is valid. */
 export function verifyDag(roots: DagNode[]): void {
   // test that there are roots
-  if (!roots.length) throw new Error("dag contained no roots");
+  if (!roots.length)
+    throw new Error("dag contained no roots; this often indicates a cycle");
+
+  // make sure there's no duplicate edges
+  for (const node of new LayoutDagRoot(roots)) {
+    const childIdSet = new Set(node.ichildren());
+    if (childIdSet.size !== node.dataChildren.length) {
+      throw new Error(js`node '${node.data}' contained duplicate children`);
+    }
+  }
 
   // test that dag is free of cycles
   // we attempt to take every unique path from each root and see if we ever see
@@ -58,14 +67,6 @@ export function verifyDag(roots: DagNode[]): void {
         .map(({ data }) => js`'${data}'`)
         .join(" -> ");
       throw new Error(`dag contained a cycle: ${cycle}`);
-    }
-  }
-
-  // make sure there's no duplicate edges
-  for (const node of new LayoutDagRoot(roots)) {
-    const childIdSet = new Set(node.ichildren());
-    if (childIdSet.size !== node.dataChildren.length) {
-      throw new Error(js`node '${node.data}' contained duplicate children`);
     }
   }
 }

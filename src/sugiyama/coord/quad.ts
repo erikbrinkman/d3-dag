@@ -1,4 +1,7 @@
-import { CoordOperator, NodeSizeAccessor } from ".";
+import { CoordOperator, SugiNodeSizeAccessor } from ".";
+import { bigrams, def, setIntersect } from "../../utils";
+import { indices, init, layout, minBend, minDist, solve } from "./utils";
+
 /**
  * This accessor positions nodes to minimize aspect of curvature and distance
  * between nodes. The coordinates are assigned by solving a quadratic program,
@@ -8,22 +11,19 @@ import { CoordOperator, NodeSizeAccessor } from ".";
  *
  * @module
  */
-import { DagNode, LayoutDagRoot } from "../../dag/node";
-import { bigrams, def, setIntersect } from "../../utils";
-import { indices, init, layout, minBend, minDist, solve } from "./utils";
-
-import { DummyNode } from "../dummy";
+import { LayoutDagRoot } from "../../dag/node";
+import { SugiNode } from "../utils";
 
 /**
  * Compute a map from node ids to a connected component index. This is useful
  * to quickly compare if two nodes are in the same connected component.
  * @internal
  */
-function componentMap(layers: DagNode[][]): Map<DagNode, number> {
+function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
   // Note computing connected components is generally difficult, and with the
   // layer representation, we lost access to convenient dag methods. Thus, we
   // first reconstruct a mock dag to get connected components, then add them.
-  const roots = new Set<DagNode>();
+  const roots = new Set<SugiNode>();
   // We iterate in reverse order because we pop children, thus we're guaranteed
   // to only have roots after we're done.
   for (const layer of layers.slice().reverse()) {
@@ -38,7 +38,7 @@ function componentMap(layers: DagNode[][]): Map<DagNode, number> {
   // create a fake dag, and use it to get components
   const components = new LayoutDagRoot([...roots]).split();
   // assign each node it's component id for fast checking if they're identical
-  const compMap = new Map<DagNode, number>();
+  const compMap = new Map<SugiNode, number>();
   for (const [i, comp] of components.entries()) {
     for (const node of comp) {
       compMap.set(node, i);
@@ -55,9 +55,9 @@ function componentMap(layers: DagNode[][]): Map<DagNode, number> {
  * @internal
  */
 function splitComponentLayers<N, L>(
-  layers: (DagNode<N, L> | DummyNode)[][],
-  compMap: Map<DagNode, number>
-): (DagNode<N, L> | DummyNode)[][][] {
+  layers: SugiNode<N, L>[][],
+  compMap: Map<SugiNode, number>
+): SugiNode<N, L>[][][] {
   // Because of dummy nodes, there's no way for a component to skip a layer,
   // thus for layers to share no common components, there must be a clear
   // boundary between any two.
@@ -137,9 +137,9 @@ function buildOperator(options: {
   comp: number;
 }): QuadOperator {
   function quadComponent<N, L>(
-    layers: (DagNode<N, L> | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N, L>,
-    compMap: Map<DagNode, number>
+    layers: SugiNode<N, L>[][],
+    nodeSize: SugiNodeSizeAccessor<N, L>,
+    compMap: Map<SugiNode, number>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy, comp } = options;
     const inds = indices(layers);
@@ -148,11 +148,11 @@ function buildOperator(options: {
     for (const layer of layers) {
       for (const par of layer) {
         const pind = def(inds.get(par));
-        const wpdist = par instanceof DummyNode ? vertDummy : vertNode;
+        const wpdist = "node" in par.data ? vertNode : vertDummy;
         for (const node of par.ichildren()) {
           const nind = def(inds.get(node));
-          const wndist = node instanceof DummyNode ? vertDummy : vertNode;
-          const wcurve = node instanceof DummyNode ? curveDummy : curveNode;
+          const wndist = "node" in node.data ? vertNode : vertDummy;
+          const wcurve = "node" in node.data ? curveNode : curveDummy;
           minDist(Q, pind, nind, wpdist + wndist);
           for (const child of node.ichildren()) {
             const cind = def(inds.get(child));
@@ -176,8 +176,8 @@ function buildOperator(options: {
   }
 
   function quadCall<N, L>(
-    layers: (DagNode<N, L> | DummyNode)[][],
-    nodeSize: NodeSizeAccessor<N, L>
+    layers: SugiNode<N, L>[][],
+    nodeSize: SugiNodeSizeAccessor<N, L>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy } = options;
     if (vertNode === 0 && curveNode === 0) {
