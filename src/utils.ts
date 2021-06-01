@@ -81,3 +81,18 @@ export function* bigrams<T>(
     first = second;
   }
 }
+
+/** depth first search for arbitrary types */
+export function* dfs<T>(
+  children: (node: T) => Iterable<T>,
+  ...queue: T[]
+): Generator<T> {
+  const seen = new Set<T>();
+  let node;
+  while ((node = queue.pop())) {
+    if (seen.has(node)) continue;
+    yield node;
+    seen.add(node);
+    queue.push(...children(node));
+  }
+}

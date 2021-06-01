@@ -1,7 +1,3 @@
-import { CoordOperator, SugiNodeSizeAccessor } from ".";
-import { bigrams, def, setIntersect } from "../../utils";
-import { indices, init, layout, minBend, minDist, solve } from "./utils";
-
 /**
  * This accessor positions nodes to minimize aspect of curvature and distance
  * between nodes. The coordinates are assigned by solving a quadratic program,
@@ -11,7 +7,10 @@ import { indices, init, layout, minBend, minDist, solve } from "./utils";
  *
  * @module
  */
-import { LayoutDagRoot } from "../../dag/node";
+import { CoordOperator, SugiNodeSizeAccessor } from ".";
+import { bigrams, def, dfs, setIntersect } from "../../utils";
+import { indices, init, layout, minBend, minDist, solve } from "./utils";
+
 import { SugiNode } from "../utils";
 
 /**
@@ -20,30 +19,44 @@ import { SugiNode } from "../utils";
  * @internal
  */
 function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
-  // Note computing connected components is generally difficult, and with the
-  // layer representation, we lost access to convenient dag methods. Thus, we
-  // first reconstruct a mock dag to get connected components, then add them.
-  const roots = new Set<SugiNode>();
-  // We iterate in reverse order because we pop children, thus we're guaranteed
-  // to only have roots after we're done.
-  for (const layer of layers.slice().reverse()) {
+  // create parent map to allow accessing parents
+  const parents = new Map<SugiNode, SugiNode[]>();
+  for (const layer of layers) {
     for (const node of layer) {
       for (const child of node.ichildren()) {
-        roots.delete(child);
+        const pars = parents.get(child);
+        if (pars) {
+          pars.push(node);
+        } else {
+          parents.set(child, [node]);
+        }
       }
-      roots.add(node);
     }
   }
 
-  // create a fake dag, and use it to get components
-  const components = new LayoutDagRoot([...roots]).split();
-  // assign each node it's component id for fast checking if they're identical
-  const compMap = new Map<SugiNode, number>();
-  for (const [i, comp] of components.entries()) {
-    for (const node of comp) {
-      compMap.set(node, i);
+  // "children" function that returns children and parents
+  function* graph(node: SugiNode): Generator<SugiNode> {
+    for (const child of node.ichildren()) {
+      yield child;
+    }
+    for (const par of parents.get(node) || []) {
+      yield par;
     }
   }
+
+  // dfs over all nodes
+  let component = 0;
+  const compMap = new Map<SugiNode, number>();
+  for (const layer of layers) {
+    for (const node of layer) {
+      if (compMap.has(node)) continue;
+      for (const comp of dfs(graph, node)) {
+        compMap.set(comp, component);
+      }
+      component++;
+    }
+  }
+
   return compMap;
 }
 

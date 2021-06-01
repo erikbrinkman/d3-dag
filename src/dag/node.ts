@@ -19,7 +19,7 @@
  */
 
 import { FluentIterable, fluent } from "../iters";
-import { def, setIntersect } from "../utils";
+import { assert, def, dfs } from "../utils";
 
 /** @internal */
 export class LayoutChildLink<NodeDatum, LinkDatum> {
@@ -145,6 +145,10 @@ export class LayoutDagNode<NodeDatum, LinkDatum> {
     return this;
   }
 
+  *isplit(): Generator<Dag<NodeDatum, LinkDatum>> {
+    yield this;
+  }
+
   split(): DagNode<NodeDatum, LinkDatum>[] {
     return [this];
   }
@@ -181,15 +185,9 @@ export class LayoutDagRoot<NodeDatum, LinkDatum>
   }
 
   private *idepth(): Generator<DagNode<NodeDatum, LinkDatum>> {
-    const queue = this.roots();
-    const seen = new Set<DagNode>();
-    let node;
-    while ((node = queue.pop())) {
-      if (!seen.has(node)) {
-        seen.add(node);
-        yield node;
-        queue.push(...node.ichildren());
-      }
+    const ch = (node: DagNode<NodeDatum, LinkDatum>) => node.ichildren();
+    for (const node of dfs(ch, ...this.iroots())) {
+      yield node;
     }
   }
 
@@ -397,62 +395,66 @@ export class LayoutDagRoot<NodeDatum, LinkDatum>
     return this;
   }
 
+  /** split but iterable */
+  *isplit(): Generator<Dag<NodeDatum, LinkDatum>> {
+    // create parents
+    const parents = new Map<DagNode, DagNode<NodeDatum, LinkDatum>[]>();
+    for (const node of this) {
+      for (const child of node.ichildren()) {
+        const pars = parents.get(child);
+        if (pars) {
+          pars.push(node);
+        } else {
+          parents.set(child, [node]);
+        }
+      }
+    }
+
+    // "children" function that returns children and parents
+    function* graph(
+      node: DagNode<NodeDatum, LinkDatum>
+    ): Generator<DagNode<NodeDatum, LinkDatum>> {
+      for (const child of node.ichildren()) {
+        yield child;
+      }
+      for (const par of parents.get(node) || []) {
+        yield par;
+      }
+    }
+
+    // dfs over roots, tracing parents too
+    const available = new Set(this.iroots());
+    for (const root of this.iroots()) {
+      if (!available.delete(root)) continue;
+      const connected = [root];
+      for (const node of dfs(graph, root)) {
+        if (available.delete(node)) {
+          connected.push(node);
+        }
+      }
+
+      // yield all connected roots
+      yield connected.length > 1 ? new LayoutDagRoot(connected) : connected[0];
+    }
+  }
+
   /**
    * Returns an array of connected DAGs, splitting the DAG into several
    * components if its dosconnected.
    */
   split(): Dag<NodeDatum, LinkDatum>[] {
-    // construct a graph between root nodes with edges if they share
-    // descendants
-    const children = new Map<DagNode, DagNode<NodeDatum, LinkDatum>[]>();
-    const descendants = new Map<DagNode, Set<DagNode>>();
-    for (const root of this.iroots()) {
-      children.set(root, []);
-      descendants.set(
-        root,
-        new Set<DagNode<NodeDatum, LinkDatum>>(root.idescendants())
-      );
-    }
-    for (const [i, source] of this.iroots().entries()) {
-      const sourceCov = def(descendants.get(source));
-      for (const target of this.iroots().slice(i + 1)) {
-        const targetCov = def(descendants.get(target));
-        if (setIntersect(sourceCov, targetCov)) {
-          def(children.get(source)).push(target);
-          def(children.get(target)).push(source);
-        }
-      }
-    }
-
-    // now run dfs to collect connected components
-    const splitRoots: DagNode<NodeDatum, LinkDatum>[][] = [];
-    const seen = new Set<DagNode>();
-    for (const root of this.iroots()) {
-      if (!seen.has(root)) {
-        seen.add(root);
-        const connected = [root];
-        splitRoots.push(connected);
-        const queue = def(children.get(root)).slice();
-        let node;
-        while ((node = queue.pop())) {
-          if (!seen.has(node)) {
-            seen.add(node);
-            connected.push(node);
-            queue.push(...def(children.get(node)));
-          }
-        }
-      }
-    }
-    return splitRoots.map((sroots) =>
-      sroots.length > 1 ? new LayoutDagRoot(sroots) : sroots[0]
-    );
+    return [...this.isplit()];
   }
 
   /**
    * Return true if every node in the dag is reachable from every other.
    */
   connected(): boolean {
-    return this.split().length === 1;
+    const iter = this.isplit();
+    let { done } = iter.next();
+    assert(!done, "internal error: dag was somehow empty");
+    ({ done } = iter.next());
+    return !!done;
   }
 }
 

@@ -309,8 +309,19 @@ test("depth() is correct for X", () => {
 
 test("split() is correct for point", () => {
   const dag = single();
+  const [isplit] = dag.isplit();
+  expect(isplit).toBe(dag);
   const [split] = dag.split();
   expect(split).toBe(dag);
+});
+
+test("split() is correct for doub", () => {
+  const dag = doub();
+  const roots = new Set(dag.iroots());
+  const isplit = new Set(dag.isplit());
+  expect(isplit).toEqual(roots);
+  const split = new Set(dag.split());
+  expect(split).toEqual(roots);
 });
 
 test("connected() is correct for point", () => {
