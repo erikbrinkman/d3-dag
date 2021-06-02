@@ -33,13 +33,17 @@ export interface SimplexOperator<
    * optimization to be ill-defined, and may result in an error during layout.
    */
   rank<
-    NewNodeDatum extends NodeDatum,
-    NewLinkDatum extends LinkDatum,
+    NewNodeDatum,
+    NewLinkDatum,
     NewRank extends RankAccessor<NewNodeDatum, NewLinkDatum>
   >(
     // NOTE this is necessary for type inference
     newRank: NewRank & RankAccessor<NewNodeDatum, NewLinkDatum>
-  ): SimplexOperator<NewNodeDatum, NewLinkDatum, Up<Ops, { rank: NewRank }>>;
+  ): SimplexOperator<
+    NodeDatum & NewNodeDatum,
+    LinkDatum & NewLinkDatum,
+    Up<Ops, { rank: NewRank }>
+  >;
   /**
    * Get the current {@link RankAccessor}.
    */
@@ -52,12 +56,16 @@ export interface SimplexOperator<
    * result in an error during layout.
    */
   group<
-    NewNodeDatum extends NodeDatum,
-    NewLinkDatum extends LinkDatum,
+    NewNodeDatum,
+    NewLinkDatum,
     NewGroup extends GroupAccessor<NewNodeDatum, NewLinkDatum>
   >(
     newGroup: NewGroup & GroupAccessor<NewNodeDatum, NewLinkDatum>
-  ): SimplexOperator<NewNodeDatum, NewLinkDatum, Up<Ops, { group: NewGroup }>>;
+  ): SimplexOperator<
+    NodeDatum & NewNodeDatum,
+    LinkDatum & NewLinkDatum,
+    Up<Ops, { group: NewGroup }>
+  >;
   /**
    * Get the current {@link GroupAccessor}.
    */
@@ -200,19 +208,13 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     }
   }
 
-  function rank<
-    NN extends N,
-    NL extends L,
-    NewRank extends RankAccessor<NN, NL>
-  >(newRank: NewRank): SimplexOperator<NN, NL, Up<Ops, { rank: NewRank }>>;
+  function rank<NN, NL, NewRank extends RankAccessor<NN, NL>>(
+    newRank: NewRank
+  ): SimplexOperator<N & NN, L & NL, Up<Ops, { rank: NewRank }>>;
   function rank(): Ops["rank"];
-  function rank<
-    NN extends N,
-    NL extends L,
-    NewRank extends RankAccessor<NN, NL>
-  >(
+  function rank<NN, NL, NewRank extends RankAccessor<NN, NL>>(
     newRank?: NewRank
-  ): SimplexOperator<NN, NL, Up<Ops, { rank: NewRank }>> | Ops["rank"] {
+  ): SimplexOperator<N & NN, L & NL, Up<Ops, { rank: NewRank }>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
     } else {
@@ -222,19 +224,15 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   }
   simplexCall.rank = rank;
 
-  function group<
-    NN extends N,
-    NL extends L,
-    NewGroup extends GroupAccessor<NN, NL>
-  >(newGroup: NewGroup): SimplexOperator<NN, NL, Up<Ops, { group: NewGroup }>>;
+  function group<NN, NL, NewGroup extends GroupAccessor<NN, NL>>(
+    newGroup: NewGroup
+  ): SimplexOperator<N & NN, L & NL, Up<Ops, { group: NewGroup }>>;
   function group(): Ops["group"];
-  function group<
-    NN extends N,
-    NL extends L,
-    NewGroup extends GroupAccessor<NN, NL>
-  >(
+  function group<NN, NL, NewGroup extends GroupAccessor<NN, NL>>(
     newGroup?: NewGroup
-  ): SimplexOperator<NN, NL, Up<Ops, { group: NewGroup }>> | Ops["group"] {
+  ):
+    | SimplexOperator<N & NN, L & NL, Up<Ops, { group: NewGroup }>>
+    | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;
     } else {

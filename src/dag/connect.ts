@@ -65,9 +65,9 @@ export interface ConnectOperator<
    * }
    * ```
    */
-  sourceId<NewLink extends LinkDatum, NewId extends IdOperator<NewLink>>(
+  sourceId<NewLink, NewId extends IdOperator<NewLink>>(
     id: NewId & IdOperator<NewLink>
-  ): ConnectOperator<NewLink, NewId, TargetId>;
+  ): ConnectOperator<LinkDatum & NewLink, NewId, TargetId>;
   /** Gets the current sourceId accessor. */
   sourceId(): SourceId;
 
@@ -81,9 +81,9 @@ export interface ConnectOperator<
    * }
    * ```
    */
-  targetId<NewLink extends LinkDatum, NewId extends IdOperator<NewLink>>(
+  targetId<NewLink, NewId extends IdOperator<NewLink>>(
     id: NewId & IdOperator<NewLink>
-  ): ConnectOperator<NewLink, SourceId, NewId>;
+  ): ConnectOperator<LinkDatum & NewLink, SourceId, NewId>;
   /** Gets the current targetId accessor. */
   targetId(): TargetId;
 
@@ -100,35 +100,29 @@ export interface ConnectOperator<
 }
 
 /** @internal */
-function buildOperator<
-  LinkDatum,
-  SourceId extends IdOperator<LinkDatum>,
-  TargetId extends IdOperator<LinkDatum>
->(
-  sourceIdOp: SourceId,
-  targetIdOp: TargetId,
+function buildOperator<L, SI extends IdOperator<L>, TI extends IdOperator<L>>(
+  sourceIdOp: SI,
+  targetIdOp: TI,
   singleVal: boolean
-): ConnectOperator<LinkDatum, SourceId, TargetId> {
-  function connect<L extends LinkDatum>(
-    data: readonly L[]
-  ): Dag<ConnectDatum, L> {
+): ConnectOperator<L, SI, TI> {
+  function connect<NL extends L>(data: readonly NL[]): Dag<ConnectDatum, NL> {
     if (!data.length) {
       throw new Error("can't connect empty data");
     }
-    const nodes = new Map<string, DagNode<ConnectDatum, L>>();
+    const nodes = new Map<string, DagNode<ConnectDatum, NL>>();
     const hasParents = new Map<string, boolean>();
     for (const [i, datum] of data.entries()) {
       // create dag
       const source = verifyId(sourceIdOp(datum, i));
       let sourceNode = nodes.get(source);
       if (sourceNode === undefined) {
-        sourceNode = new LayoutDagNode<ConnectDatum, L>({ id: source });
+        sourceNode = new LayoutDagNode<ConnectDatum, NL>({ id: source });
         nodes.set(source, sourceNode);
       }
       const target = verifyId(targetIdOp(datum, i));
       let targetNode = nodes.get(target);
       if (targetNode === undefined) {
-        targetNode = new LayoutDagNode<ConnectDatum, L>({ id: target });
+        targetNode = new LayoutDagNode<ConnectDatum, NL>({ id: target });
         nodes.set(target, targetNode);
       }
 
@@ -143,7 +137,7 @@ function buildOperator<
       }
     }
 
-    const roots: DagNode<ConnectDatum, L>[] = [];
+    const roots: DagNode<ConnectDatum, NL>[] = [];
     for (const [id, parents] of hasParents) {
       if (!parents) {
         roots.push(def(nodes.get(id)));
@@ -153,15 +147,13 @@ function buildOperator<
     return roots.length > 1 ? new LayoutDagRoot(roots) : roots[0];
   }
 
-  function sourceId(): SourceId;
-  function sourceId<
-    NewLink extends LinkDatum,
-    NewId extends IdOperator<NewLink>
-  >(id: NewId): ConnectOperator<NewLink, NewId, TargetId>;
-  function sourceId<
-    NewLink extends LinkDatum,
-    NewId extends IdOperator<NewLink>
-  >(id?: NewId): SourceId | ConnectOperator<NewLink, NewId, TargetId> {
+  function sourceId(): SI;
+  function sourceId<NL, NI extends IdOperator<NL>>(
+    id: NI
+  ): ConnectOperator<L & NL, NI, TI>;
+  function sourceId<NL, NI extends IdOperator<NL>>(
+    id?: NI
+  ): SI | ConnectOperator<L & NL, NI, TI> {
     if (id === undefined) {
       return sourceIdOp;
     } else {
@@ -170,15 +162,13 @@ function buildOperator<
   }
   connect.sourceId = sourceId;
 
-  function targetId(): TargetId;
-  function targetId<
-    NewLink extends LinkDatum,
-    NewId extends IdOperator<NewLink>
-  >(id: NewId): ConnectOperator<NewLink, SourceId, NewId>;
-  function targetId<
-    NewLink extends LinkDatum,
-    NewId extends IdOperator<NewLink>
-  >(id?: NewId): TargetId | ConnectOperator<NewLink, SourceId, NewId> {
+  function targetId(): TI;
+  function targetId<NL, NI extends IdOperator<NL>>(
+    id: NI
+  ): ConnectOperator<L & NL, SI, NI>;
+  function targetId<NL, NI extends IdOperator<NL>>(
+    id?: NI
+  ): TI | ConnectOperator<L & NL, SI, NI> {
     if (id === undefined) {
       return targetIdOp;
     } else {
@@ -188,10 +178,8 @@ function buildOperator<
   connect.targetId = targetId;
 
   function single(): boolean;
-  function single(val: boolean): ConnectOperator<LinkDatum, SourceId, TargetId>;
-  function single(
-    val?: boolean
-  ): boolean | ConnectOperator<LinkDatum, SourceId, TargetId> {
+  function single(val: boolean): ConnectOperator<L, SI, TI>;
+  function single(val?: boolean): boolean | ConnectOperator<L, SI, TI> {
     if (val === undefined) {
       return singleVal;
     } else {

@@ -96,14 +96,14 @@ export interface SugiyamaOperator<
    * of the built in operators. The default value is {@link simplex}.
    */
   layering<
-    NewNodeDatum extends NodeDatum,
-    NewLinkDatum extends LinkDatum,
+    NewNodeDatum,
+    NewLinkDatum,
     NewLayering extends LayeringOperator<NewNodeDatum, NewLinkDatum>
   >(
     layer: NewLayering & LayeringOperator<NewNodeDatum, NewLinkDatum>
   ): SugiyamaOperator<
-    NewNodeDatum,
-    NewLinkDatum,
+    NodeDatum & NewNodeDatum,
+    LinkDatum & NewLinkDatum,
     Up<Ops, { layering: NewLayering }>
   >;
   /**
@@ -117,14 +117,14 @@ export interface SugiyamaOperator<
    * of the built in operators. The default value is {@link twoLayer}.
    */
   decross<
-    NewNodeDatum extends NodeDatum,
-    NewLinkDatum extends LinkDatum,
+    NewNodeDatum,
+    NewLinkDatum,
     NewDecross extends DecrossOperator<NewNodeDatum, NewLinkDatum>
   >(
     dec: NewDecross & DecrossOperator<NewNodeDatum, NewLinkDatum>
   ): SugiyamaOperator<
-    NewNodeDatum,
-    NewLinkDatum,
+    NodeDatum & NewNodeDatum,
+    LinkDatum & NewLinkDatum,
     Up<Ops, { decross: NewDecross }>
   >;
   /**
@@ -138,12 +138,16 @@ export interface SugiyamaOperator<
    * description of the built in operators. The default value is {@link quad}.
    */
   coord<
-    NewNodeDatum extends NodeDatum,
-    NewLinkDatum extends LinkDatum,
+    NewNodeDatum,
+    NewLinkDatum,
     NewCoord extends CoordOperator<NewNodeDatum, NewLinkDatum>
   >(
     crd: NewCoord & CoordOperator<NewNodeDatum, NewLinkDatum>
-  ): SugiyamaOperator<NewNodeDatum, NewLinkDatum, Up<Ops, { coord: NewCoord }>>;
+  ): SugiyamaOperator<
+    NodeDatum & NewNodeDatum,
+    LinkDatum & NewLinkDatum,
+    Up<Ops, { coord: NewCoord }>
+  >;
   /**
    * Get the current {@link CoordOperator}.
    */
@@ -313,27 +317,19 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   }
 
   function layering(): Ops["layering"];
-  function layering<
-    NN extends N,
-    NL extends L,
-    NewLayering extends LayeringOperator<NN, NL>
-  >(
+  function layering<NN, NL, NewLayering extends LayeringOperator<NN, NL>>(
     layer: NewLayering
-  ): SugiyamaOperator<NN, NL, Up<Ops, { layering: NewLayering }>>;
-  function layering<
-    NN extends N,
-    NL extends L,
-    NewLayering extends LayeringOperator<NN, NL>
-  >(
+  ): SugiyamaOperator<N & NN, L & NL, Up<Ops, { layering: NewLayering }>>;
+  function layering<NN, NL, NewLayering extends LayeringOperator<NN, NL>>(
     layer?: NewLayering
   ):
     | Ops["layering"]
-    | SugiyamaOperator<NN, NL, Up<Ops, { layering: NewLayering }>> {
+    | SugiyamaOperator<N & NN, L & NL, Up<Ops, { layering: NewLayering }>> {
     if (layer === undefined) {
       return options.layering;
     } else {
       const { layering: _, ...rest } = options;
-      return buildOperator<NN, NL, Up<Ops, { layering: NewLayering }>>({
+      return buildOperator<N & NN, L & NL, Up<Ops, { layering: NewLayering }>>({
         ...rest,
         layering: layer
       });
@@ -342,27 +338,19 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.layering = layering;
 
   function decross(): Ops["decross"];
-  function decross<
-    NN extends N,
-    NL extends L,
-    NewDecross extends DecrossOperator<NN, NL>
-  >(
+  function decross<NN, NL, NewDecross extends DecrossOperator<NN, NL>>(
     dec: NewDecross
-  ): SugiyamaOperator<NN, NL, Up<Ops, { decross: NewDecross }>>;
-  function decross<
-    NN extends N,
-    NL extends L,
-    NewDecross extends DecrossOperator<NN, NL>
-  >(
+  ): SugiyamaOperator<N & NN, L & NL, Up<Ops, { decross: NewDecross }>>;
+  function decross<NN, NL, NewDecross extends DecrossOperator<NN, NL>>(
     dec?: NewDecross
   ):
     | Ops["decross"]
-    | SugiyamaOperator<NN, NL, Up<Ops, { decross: NewDecross }>> {
+    | SugiyamaOperator<N & NN, L & NL, Up<Ops, { decross: NewDecross }>> {
     if (dec === undefined) {
       return options.decross;
     } else {
       const { decross: _, ...rest } = options;
-      return buildOperator<NN, NL, Up<Ops, { decross: NewDecross }>>({
+      return buildOperator<N & NN, L & NL, Up<Ops, { decross: NewDecross }>>({
         ...rest,
         decross: dec
       });
@@ -371,23 +359,19 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.decross = decross;
 
   function coord(): Ops["coord"];
-  function coord<
-    NN extends N,
-    NL extends L,
-    NewCoord extends CoordOperator<NN, NL>
-  >(crd: NewCoord): SugiyamaOperator<NN, NL, Up<Ops, { coord: NewCoord }>>;
-  function coord<
-    NN extends N,
-    NL extends L,
-    NewCoord extends CoordOperator<NN, NL>
-  >(
+  function coord<NN, NL, NewCoord extends CoordOperator<NN, NL>>(
+    crd: NewCoord
+  ): SugiyamaOperator<N & NN, L & NL, Up<Ops, { coord: NewCoord }>>;
+  function coord<NN, NL, NewCoord extends CoordOperator<NN, NL>>(
     crd?: NewCoord
-  ): Ops["coord"] | SugiyamaOperator<NN, NL, Up<Ops, { coord: NewCoord }>> {
+  ):
+    | Ops["coord"]
+    | SugiyamaOperator<N & NN, L & NL, Up<Ops, { coord: NewCoord }>> {
     if (crd === undefined) {
       return options.coord;
     } else {
       const { coord: _, ...rest } = options;
-      return buildOperator<NN, NL, Up<Ops, { coord: NewCoord }>>({
+      return buildOperator<N & NN, L & NL, Up<Ops, { coord: NewCoord }>>({
         ...rest,
         coord: crd
       });

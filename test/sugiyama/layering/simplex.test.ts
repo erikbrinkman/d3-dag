@@ -46,7 +46,6 @@ test("simplex() correctly adapts to types", () => {
     return undefined;
   }
   init.group(unrelated);
-  // @ts-expect-error unrelated is unrelated to SimpleDatum
   rank.group(unrelated);
 });
 

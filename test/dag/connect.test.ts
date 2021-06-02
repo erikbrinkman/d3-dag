@@ -87,9 +87,6 @@ test("connect() parses a more complex square", () => {
   expect(layout.sourceId()).toBe(newSource);
   expect(layout.targetId()).toBe(newTarget);
 
-  // @ts-expect-error can't widen type
-  layout.sourceId((src: string): string => src);
-
   const dag = layout(complexSquare);
   expect(dag.size()).toBeCloseTo(4);
 });
