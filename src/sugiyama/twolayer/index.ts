@@ -14,7 +14,7 @@
 import { SugiNode } from "../utils";
 
 /** twolayer operator */
-export interface TwolayerOperator<NodeDatum = unknown, LinkDatum = unknown> {
+export interface TwolayerOperator<NodeDatum = never, LinkDatum = never> {
   (
     topLayer: SugiNode<NodeDatum, LinkDatum>[],
     bottomLayer: SugiNode<NodeDatum, LinkDatum>[],

@@ -3,12 +3,12 @@ import { assert, def, js } from "../utils";
 
 import { hierarchy } from "../dag/hierarchy";
 
-type SugiData<N, L> =
-  | { layer: number; node: DagNode<N, L> }
+export type SugiData<NodeDatum = unknown, LinkDatum = unknown> =
+  | { layer: number; node: DagNode<NodeDatum, LinkDatum> }
   | {
       layer: number;
-      source: DagNode<N, L>;
-      target: DagNode<N, L>;
+      source: DagNode<NodeDatum, LinkDatum>;
+      target: DagNode<NodeDatum, LinkDatum>;
     };
 export type SugiNode<NodeDatum = unknown, LinkDatum = unknown> = DagNode<
   SugiData<NodeDatum, LinkDatum>,
@@ -18,6 +18,14 @@ export type SugiDag<NodeDatum = unknown, LinkDatum = unknown> = Dag<
   SugiData<NodeDatum, LinkDatum>,
   undefined
 >;
+
+export type SugiDataDagNode<S extends SugiData> = S extends {
+  node: DagNode;
+}
+  ? S["node"]
+  : never;
+export type NodeDatum<D extends DagNode> = D["data"];
+export type LinkDatum<D extends DagNode> = D["dataChildren"][number]["data"];
 
 /** validate layer assignments @internal */
 function vlayer(node: DagNode): number {

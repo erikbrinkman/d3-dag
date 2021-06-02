@@ -17,7 +17,8 @@ import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
-export interface CoffmanGrahamOperator extends LayeringOperator {
+export interface CoffmanGrahamOperator
+  extends LayeringOperator<unknown, unknown> {
   /**
    * Set the maximum width of any layer. If set to 0 (the default), the width
    * is set to the rounded square root of the number of nodes.

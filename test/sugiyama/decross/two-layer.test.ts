@@ -1,7 +1,6 @@
 import { TestDatum, createLayers, getIndex } from "../utils";
 
 import { SugiNode } from "../../../src/sugiyama/utils";
-import { TwolayerOperator } from "../../../src/sugiyama/twolayer";
 import { mean } from "../../../src/sugiyama/twolayer/mean";
 import { median } from "../../../src/sugiyama/twolayer/median";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
@@ -28,14 +27,8 @@ test("twoLayer() correctly adapts to types", () => {
   // @ts-expect-error custom only takes TestDatum
   custom(unks);
 
-  // still works for cast
-  const cast = custom.order(mean() as TwolayerOperator<TestDatum>);
-  cast(layers);
-  // @ts-expect-error cast only takes TestNodes
-  cast(unks);
-
   // rexpands for more general two layers
-  const optimal = cast.order(opt());
+  const optimal = custom.order(opt());
   optimal(layers);
   optimal(unks);
 

@@ -12,7 +12,7 @@ import { init, layout, minBend, solve } from "./utils";
 import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
-export type TopologicalOperator = CoordOperator;
+export type TopologicalOperator = CoordOperator<unknown, unknown>;
 
 /** Create a topological coordinate assignment operator. */
 export function topological(...args: never[]): TopologicalOperator {

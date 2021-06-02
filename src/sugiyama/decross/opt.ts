@@ -17,7 +17,7 @@ import { SugiNode } from "../utils";
 
 export type LargeHandling = "small" | "medium" | "large";
 
-export interface OptOperator extends DecrossOperator {
+export interface OptOperator extends DecrossOperator<unknown, unknown> {
   /**
    * Set the large dag handling, which will error if you try to decross DAGs
    * that are too large. Since this operator is so expensive, this exists

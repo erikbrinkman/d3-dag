@@ -14,7 +14,7 @@
 import { Dag } from "../../dag/node";
 import { LayeringOperator } from ".";
 
-export type TopologicalOperator = LayeringOperator;
+export type TopologicalOperator = LayeringOperator<unknown, unknown>;
 
 /**
  * Create a topological layering.

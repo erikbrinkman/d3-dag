@@ -15,7 +15,7 @@ import { def } from "../../utils";
 
 export type LargeHandling = "small" | "medium" | "large";
 
-export interface OptOperator extends TwolayerOperator {
+export interface OptOperator extends TwolayerOperator<unknown, unknown> {
   /**
    * Set the large dag handling which will error if you try to decross a dag
    * that is too large. `"small"` the default only allows small graphs.

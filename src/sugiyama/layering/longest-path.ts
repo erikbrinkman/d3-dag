@@ -13,7 +13,8 @@ import { Dag } from "../../dag/node";
 import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
-export interface LongestPathOperator extends LayeringOperator {
+export interface LongestPathOperator
+  extends LayeringOperator<unknown, unknown> {
   /**
    * Set whether longest path should go top down or not. If set to true (the
    * default), longest path will start at the top, putting nodes as close to

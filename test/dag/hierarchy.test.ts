@@ -1,6 +1,6 @@
 import { hierarchy } from "../../src/dag/hierarchy";
 
-const tail = { id: "d" } as const;
+const tail = { id: "d", children: [] } as const;
 const square = {
   id: "a",
   children: [
@@ -81,11 +81,14 @@ test("hierarchy() works with custom operators", () => {
     ]
   };
 
-  function newChildData(
-    d: ComplexDatum
-  ): readonly (readonly [ComplexDatum, string])[] | undefined {
-    return d.c;
+  function newChildData({
+    c
+  }: ComplexDatum): readonly (readonly [ComplexDatum, string])[] | undefined {
+    return c;
   }
+
+  // @ts-expect-error can't pass random thing
+  expect(() => hierarchy()(null)).toThrow();
 
   const layout = hierarchy().childrenData(newChildData);
   expect(layout.children().wrapped).toBe(newChildData);
@@ -102,14 +105,20 @@ test("hierarchy() fails with empty data", () => {
 });
 
 test("hierarchy() fails with invalid root", () => {
-  const input = { id: "1", children: [{ id: "2" }] };
+  const input = {
+    id: "1",
+    children: [{ id: "2", children: undefined }]
+  } as const;
   expect(() => hierarchy()(input, ...input.children)).toThrow(
     /node '{"id":"1",.*}' pointed to a root/
   );
 });
 
 test("hierarchy() passes with invalid root and roots", () => {
-  const input = { id: "1", children: [{ id: "2" }] };
+  const input = {
+    id: "1",
+    children: [{ id: "2", children: undefined }]
+  } as const;
   const layout = hierarchy().roots(false);
   expect(layout.roots()).toBeFalsy();
   layout(input, ...input.children);
@@ -172,8 +181,7 @@ test("hierarchy() throws for nonempty input", () => {
 });
 
 class BadChildren {
-  id = "";
-  get children() {
+  get children(): undefined {
     throw new Error("bad children");
   }
 }

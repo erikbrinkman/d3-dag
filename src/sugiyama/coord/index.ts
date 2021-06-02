@@ -26,10 +26,7 @@ import { SugiNode } from "../utils";
  * limitations of layered layouts, that means that layers will be separated by
  * the maximum height nodes in each layer.
  */
-export interface SugiNodeSizeAccessor<
-  NodeDatum = unknown,
-  LinkDatum = unknown
-> {
+export interface SugiNodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node: SugiNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
@@ -39,7 +36,7 @@ export interface SugiNodeSizeAccessor<
  * coordinates should satisfy the node size accessor, and all be between zero
  * and the returned width.
  */
-export interface CoordOperator<NodeDatum = unknown, LinkDatum = unknown> {
+export interface CoordOperator<NodeDatum = never, LinkDatum = never> {
   <N extends NodeDatum, L extends LinkDatum>(
     layers: SugiNode<N, L>[][],
     nodeSize: SugiNodeSizeAccessor<N, L>

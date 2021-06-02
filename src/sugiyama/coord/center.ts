@@ -12,7 +12,7 @@ import { CoordOperator, SugiNodeSizeAccessor } from ".";
 import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
-export type CenterOperator = CoordOperator;
+export type CenterOperator = CoordOperator<unknown, unknown>;
 
 /** Create a new center assignment operator. */
 export function center(...args: never[]): CenterOperator {

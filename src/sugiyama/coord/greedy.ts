@@ -19,7 +19,7 @@ import { assert, def } from "../../utils";
 
 import { SugiNode } from "../utils";
 
-export type GreedyOperator = CoordOperator;
+export type GreedyOperator = CoordOperator<unknown, unknown>;
 
 /** Create a greedy coordinate assignment operator. */
 export function greedy(...args: never[]): GreedyOperator {

@@ -94,7 +94,7 @@ function splitComponentLayers<N, L>(
  * nodes (longer edges). The total weight for that node type must be greater
  * than zero otherwise the optimization will not be well formed.
  */
-export interface QuadOperator extends CoordOperator {
+export interface QuadOperator extends CoordOperator<unknown, unknown> {
   /**
    * Set the weight for verticality. Higher weights mean connected nodes should
    * be closer together, or corollarily edges should be closer to vertical

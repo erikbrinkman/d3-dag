@@ -12,7 +12,7 @@ export type SimpleLinkDatum = [string, string];
 
 // single node
 // 0
-export function single(): Dag<SimpleDatum> {
+export function single(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -22,7 +22,7 @@ export function single(): Dag<SimpleDatum> {
 
 // two independent nodes
 // 0 1
-export function doub(): Dag<SimpleDatum> {
+export function doub(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -35,7 +35,7 @@ export function doub(): Dag<SimpleDatum> {
 
 // three independent nodes
 // 0 1 2
-export function trip(): Dag<SimpleDatum> {
+export function trip(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -55,7 +55,7 @@ export function trip(): Dag<SimpleDatum> {
 // 1   2
 //  \ /
 //   3
-export function square(): Dag<SimpleDatum> {
+export function square(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -81,7 +81,7 @@ export function square(): Dag<SimpleDatum> {
 // | 1
 // |/
 // 2
-export function dummy(): Dag<SimpleDatum> {
+export function dummy(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -103,7 +103,7 @@ export function dummy(): Dag<SimpleDatum> {
 // 1 2 3
 //  \|/
 //   4
-export function three(): Dag<SimpleDatum> {
+export function three(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -131,7 +131,7 @@ export function three(): Dag<SimpleDatum> {
 // 0 1
 // |\|
 // 2 3
-export function en(): Dag<SimpleDatum> {
+export function en(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -154,7 +154,7 @@ export function en(): Dag<SimpleDatum> {
 // 0   1
 //  \ /
 //   2
-export function vee(): Dag<SimpleDatum> {
+export function vee(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -173,7 +173,7 @@ export function vee(): Dag<SimpleDatum> {
 // 0   1   2
 //  \ / \ /
 //   3   4
-export function doubleYou(): Dag<SimpleDatum> {
+export function doubleYou(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -199,7 +199,7 @@ export function doubleYou(): Dag<SimpleDatum> {
 // 0   1   2   3
 //  \ /     \ /
 //   4       5
-export function doubleVee(): Dag<SimpleDatum> {
+export function doubleVee(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"
@@ -234,7 +234,7 @@ export function doubleVee(): Dag<SimpleDatum> {
 // 4   5
 //     |
 //     6
-export function ex(): Dag<SimpleDatum> {
+export function ex(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
       id: "0"

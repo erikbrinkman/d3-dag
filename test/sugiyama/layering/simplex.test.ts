@@ -6,47 +6,53 @@ import { simplex } from "../../../src/sugiyama/layering/simplex";
 
 test("simplex() correctly adapts to types", () => {
   const dag = square();
-  const unks = dag as Dag;
+  const simp = dag as Dag<SimpleDatum>;
+  const unks = simp as Dag;
 
   const init = simplex();
-  init(dag);
   init(unks);
+  init(simp);
+  init(dag);
 
-  // narrowed for custom
+  // narrowed for custom rank / node data
   function customRank(node: DagNode<SimpleDatum>): number | undefined {
     void node;
     return undefined;
   }
   const custom = init.rank(customRank);
-  custom(dag);
-  // @ts-expect-error custom only takes TestNodes
+  // @ts-expect-error custom can't take unks
   custom(unks);
+  custom(simp);
+  custom(dag);
 
   // works for group too
-  function customGroup(node: DagNode<SimpleDatum>): string | undefined {
+  function customGroup(
+    node: DagNode<SimpleDatum, undefined>
+  ): string | undefined {
     void node;
     return undefined;
   }
   const group = custom.group(customGroup);
-  group(dag);
-  // @ts-expect-error cast only takes TestNodes
+  // @ts-expect-error can't take unknowns
   group(unks);
+  // @ts-expect-error must have undefined link data
+  group(simp);
+  group(dag);
 
-  // still works for more general two layers
-  const rank = group.rank(() => undefined);
-  rank(dag);
-  // @ts-expect-error opt only takes TestNodes
-  rank(unks);
-
-  // but we can still get original operator and operate on it
-  expect(rank.group()).toBe(customGroup);
-
-  function unrelated(node: DagNode<{ misc: string }>): string | undefined {
+  // overly restrictive
+  function invalidRank(node: DagNode<null>): number | undefined {
     void node;
     return undefined;
   }
-  init.group(unrelated);
-  rank.group(unrelated);
+  const invalid = group.rank(invalidRank);
+  // @ts-expect-error fails on everything
+  invalid(unks);
+  // @ts-expect-error fails on everything
+  invalid(simp);
+  // @ts-expect-error fails on everything
+  invalid(dag);
+
+  expect(invalid.rank()).toBe(invalidRank);
 });
 
 test("simplex() works for square", () => {

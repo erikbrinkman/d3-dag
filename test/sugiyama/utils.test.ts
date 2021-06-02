@@ -14,14 +14,14 @@ test("sugify() works with dummy nodes", () => {
 });
 
 test("sugify() throws for undefined id", () => {
-  const dag = hierarchy()({ id: "a" });
+  const dag = hierarchy()({ children: undefined });
   expect(() => sugify(dag)).toThrow(
     "did not get a defined value during layering"
   );
 });
 
 test("sugify() throws for negative id", () => {
-  const dag = hierarchy()({ id: "a" });
+  const dag = hierarchy()({ children: undefined });
   for (const node of dag) {
     node.value = -1;
   }
@@ -31,7 +31,7 @@ test("sugify() throws for negative id", () => {
 });
 
 test("sugify() throws for layering without 0", () => {
-  const dag = hierarchy()({ id: "a" });
+  const dag = hierarchy()({ children: undefined });
   for (const node of dag) {
     node.value = 1;
   }

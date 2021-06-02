@@ -1,10 +1,5 @@
 import { connect } from "../../src/dag/connect";
 
-interface ComplexLinkDatum {
-  source: string;
-  target: string;
-}
-
 const simpleSquare = [
   ["a", "b"],
   ["a", "c"],
@@ -15,12 +10,12 @@ const simpleVee = [
   ["a", "c"],
   ["b", "c"]
 ] as const;
-const complexSquare: ComplexLinkDatum[] = [
+const complexSquare = [
   { source: "a", target: "b" },
   { source: "a", target: "c" },
   { source: "b", target: "d" },
   { source: "c", target: "d" }
-];
+] as const;
 
 const zherebko = [
   ["1", "2"],
@@ -76,16 +71,25 @@ test("connect() handles single nodes", () => {
 });
 
 test("connect() parses a more complex square", () => {
-  function newSource(datum: ComplexLinkDatum): string {
-    return datum.source;
-  }
-  function newTarget(datum: ComplexLinkDatum): string {
-    return datum.target;
-  }
+  const newSource = ({ source }: { source: string }): string => source;
+  const newTarget = ({ target }: { target: string }): string => target;
 
-  const layout = connect().sourceId(newSource).targetId(newTarget);
+  const base = connect();
+  // @ts-expect-error can't use complex
+  expect(() => base(complexSquare)).toThrow();
+
+  const source = base.sourceId(newSource);
+  expect(source.sourceId()).toBe(newSource);
+  // @ts-expect-error can't use simple
+  expect(() => source(simpleSquare)).toThrow();
+  // @ts-expect-error can't use complex
+  expect(() => source(complexSquare)).toThrow();
+
+  const layout = source.targetId(newTarget);
   expect(layout.sourceId()).toBe(newSource);
   expect(layout.targetId()).toBe(newTarget);
+  // @ts-expect-error can't use simple
+  expect(() => source(simpleSquare)).toThrow();
 
   const dag = layout(complexSquare);
   expect(dag.size()).toBeCloseTo(4);
@@ -115,7 +119,7 @@ test("connect() fails with no roots", () => {
   const cycle = [
     ["a", "b"],
     ["b", "a"]
-  ];
+  ] as const;
   expect(() => connect()(cycle)).toThrow("dag contained no roots");
 });
 
@@ -124,21 +128,21 @@ test("connect() fails with cycle", () => {
     ["c", "a"],
     ["a", "b"],
     ["b", "a"]
-  ];
+  ] as const;
   expect(() => connect()(cycle)).toThrow(
     `cycle: '{"id":"a"}' -> '{"id":"b"}' -> '{"id":"a"}'`
   );
 });
 
 class BadZero {
-  get ["0"]() {
+  get [0](): string {
     throw new Error("bad zero");
   }
-  ["1"] = "a";
+  readonly [1] = "b";
 }
 
 test("connect() fails on non-string source", () => {
-  expect(() => connect()([[null, "a"]])).toThrow(
+  expect(() => connect()([[(null as unknown) as string, "a"]])).toThrow(
     "default source id expected datum[0] to be a string but got datum: "
   );
   expect(() => connect()([new BadZero()])).toThrow(
@@ -147,14 +151,14 @@ test("connect() fails on non-string source", () => {
 });
 
 class BadOne {
-  ["0"] = "a";
-  get ["1"]() {
+  readonly [0] = "a";
+  get [1](): string {
     throw new Error("bad one");
   }
 }
 
 test("connect() fails on non-string target", () => {
-  expect(() => connect()([["a", null]])).toThrow(
+  expect(() => connect()([["a", (null as unknown) as string]])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
   expect(() => connect()([new BadOne()])).toThrow(

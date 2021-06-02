@@ -12,7 +12,7 @@ import { median as arrayMedian } from "d3-array";
 import { def } from "../../utils";
 import { order } from "./utils";
 
-export type MedianOperator = TwolayerOperator;
+export type MedianOperator = TwolayerOperator<unknown, unknown>;
 
 /** Create a median two layer ordering operator. */
 export function median(...args: never[]): MedianOperator {

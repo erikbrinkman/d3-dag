@@ -15,35 +15,41 @@
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode } from "../../dag/node";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
+import { LinkDatum, NodeDatum } from "../utils";
 import { Up, bigrams, def } from "../../utils";
 
-interface Operators<NodeDatum, LinkDatum> {
-  rank: RankAccessor<NodeDatum, LinkDatum>;
-  group: GroupAccessor<NodeDatum, LinkDatum>;
+interface Operators {
+  rank: RankAccessor;
+  group: GroupAccessor;
 }
 
-export interface SimplexOperator<
-  NodeDatum = unknown,
-  LinkDatum = unknown,
-  Ops extends Operators<NodeDatum, LinkDatum> = Operators<NodeDatum, LinkDatum>
-> extends LayeringOperator<NodeDatum, LinkDatum> {
+type OpDagNode<O extends RankAccessor | GroupAccessor> = Parameters<O>[0];
+type OpNodeDatum<O extends RankAccessor | GroupAccessor> = NodeDatum<
+  OpDagNode<O>
+>;
+type OpLinkDatum<O extends RankAccessor | GroupAccessor> = LinkDatum<
+  OpDagNode<O>
+>;
+type OpsNodeDatum<Ops extends Operators> = OpNodeDatum<Ops["rank"]> &
+  OpNodeDatum<Ops["group"]>;
+type OpsLinkDatum<Ops extends Operators> = OpLinkDatum<Ops["rank"]> &
+  OpLinkDatum<Ops["group"]>;
+type OpsDagNode<Ops extends Operators> = DagNode<
+  OpsNodeDatum<Ops>,
+  OpsLinkDatum<Ops>
+>;
+
+export interface SimplexOperator<Ops extends Operators = Operators>
+  extends LayeringOperator<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
    * Set the {@link RankAccessor}. Any node with a rank assigned will have a second
    * ordering enforcing ordering of the ranks. Note, this can cause the simplex
    * optimization to be ill-defined, and may result in an error during layout.
    */
-  rank<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewRank extends RankAccessor<NewNodeDatum, NewLinkDatum>
-  >(
+  rank<NewRank extends RankAccessor>(
     // NOTE this is necessary for type inference
-    newRank: NewRank & RankAccessor<NewNodeDatum, NewLinkDatum>
-  ): SimplexOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
-    Up<Ops, { rank: NewRank }>
-  >;
+    newRank: NewRank
+  ): SimplexOperator<Up<Ops, { rank: NewRank }>>;
   /**
    * Get the current {@link RankAccessor}.
    */
@@ -55,17 +61,9 @@ export interface SimplexOperator<
    * Note, this can cause the simplex optimization to be ill-defined, and may
    * result in an error during layout.
    */
-  group<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewGroup extends GroupAccessor<NewNodeDatum, NewLinkDatum>
-  >(
-    newGroup: NewGroup & GroupAccessor<NewNodeDatum, NewLinkDatum>
-  ): SimplexOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
-    Up<Ops, { group: NewGroup }>
-  >;
+  group<NewGroup extends GroupAccessor>(
+    newGroup: NewGroup
+  ): SimplexOperator<Up<Ops, { group: NewGroup }>>;
   /**
    * Get the current {@link GroupAccessor}.
    */
@@ -73,10 +71,10 @@ export interface SimplexOperator<
 }
 
 /** @internal */
-function buildOperator<N, L, Ops extends Operators<N, L>>(
+function buildOperator<Ops extends Operators>(
   options: Ops
-): SimplexOperator<N, L, Ops> {
-  function simplexCall(dag: Dag<N, L>): void {
+): SimplexOperator<Ops> {
+  function simplexCall(dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>): void {
     const variables: SolverDict<Variable> = {};
     const ints: SolverDict<number> = {};
     const constraints: SolverDict<Constraint> = {};
@@ -89,12 +87,12 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     );
 
     /** get node id */
-    function n(node: DagNode<N, L>): string {
+    function n(node: OpsDagNode<Ops>): string {
       return def(ids.get(node));
     }
 
     /** get variable associated with a node */
-    function variable(node: DagNode<N, L>): Variable {
+    function variable(node: OpsDagNode<Ops>): Variable {
       return variables[n(node)];
     }
 
@@ -105,8 +103,8 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
      */
     function before(
       prefix: string,
-      first: DagNode<N, L>,
-      second: DagNode<N, L>,
+      first: OpsDagNode<Ops>,
+      second: OpsDagNode<Ops>,
       strict: boolean = true
     ): void {
       const fvar = variable(first);
@@ -121,15 +119,15 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     /** enforce that first and second occur on the same layer */
     function equal(
       prefix: string,
-      first: DagNode<N, L>,
-      second: DagNode<N, L>
+      first: OpsDagNode<Ops>,
+      second: OpsDagNode<Ops>
     ): void {
       before(`${prefix} before`, first, second, false);
       before(`${prefix} after`, second, first, false);
     }
 
-    const ranks: [number, DagNode<N, L>][] = [];
-    const groups = new Map<string, DagNode<N, L>[]>();
+    const ranks: [number, OpsDagNode<Ops>][] = [];
+    const groups = new Map<string, OpsDagNode<Ops>[]>();
 
     // Add node variables and fetch ranks
     for (const node of dag) {
@@ -208,13 +206,13 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     }
   }
 
-  function rank<NN, NL, NewRank extends RankAccessor<NN, NL>>(
-    newRank: NewRank
-  ): SimplexOperator<N & NN, L & NL, Up<Ops, { rank: NewRank }>>;
+  function rank<NR extends RankAccessor>(
+    newRank: NR
+  ): SimplexOperator<Up<Ops, { rank: NR }>>;
   function rank(): Ops["rank"];
-  function rank<NN, NL, NewRank extends RankAccessor<NN, NL>>(
-    newRank?: NewRank
-  ): SimplexOperator<N & NN, L & NL, Up<Ops, { rank: NewRank }>> | Ops["rank"] {
+  function rank<NR extends RankAccessor>(
+    newRank?: NR
+  ): SimplexOperator<Up<Ops, { rank: NR }>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
     } else {
@@ -224,15 +222,13 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   }
   simplexCall.rank = rank;
 
-  function group<NN, NL, NewGroup extends GroupAccessor<NN, NL>>(
-    newGroup: NewGroup
-  ): SimplexOperator<N & NN, L & NL, Up<Ops, { group: NewGroup }>>;
+  function group<NG extends GroupAccessor>(
+    newGroup: NG
+  ): SimplexOperator<Up<Ops, { group: NG }>>;
   function group(): Ops["group"];
-  function group<NN, NL, NewGroup extends GroupAccessor<NN, NL>>(
-    newGroup?: NewGroup
-  ):
-    | SimplexOperator<N & NN, L & NL, Up<Ops, { group: NewGroup }>>
-    | Ops["group"] {
+  function group<NG extends GroupAccessor>(
+    newGroup?: NG
+  ): SimplexOperator<Up<Ops, { group: NG }>> | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;
     } else {
@@ -251,7 +247,12 @@ function defaultAccessor(): undefined {
 }
 
 /** Create a default {@link SimplexOperator}. */
-export function simplex(...args: never[]): SimplexOperator {
+export function simplex(
+  ...args: never[]
+): SimplexOperator<{
+  rank: RankAccessor<unknown, unknown>;
+  group: GroupAccessor<unknown, unknown>;
+}> {
   if (args.length) {
     throw new Error(
       `got arguments to simplex(${args}), but constructor takes no aruguments.`

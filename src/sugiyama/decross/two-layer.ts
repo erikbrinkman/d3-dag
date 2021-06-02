@@ -9,33 +9,32 @@
  * @module
  */
 
+import { LinkDatum, NodeDatum, SugiDataDagNode } from "../utils";
 import { MedianOperator, median } from "../twolayer/median";
 import { bigrams, def } from "../../utils";
 
 import { DecrossOperator } from ".";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
-import { SugiNode } from "../utils";
 
-export interface TwoLayerOperator<
-  NodeDatum = unknown,
-  LinkDatum = unknown,
-  Order extends OrderOperator<NodeDatum, LinkDatum> = OrderOperator<
-    NodeDatum,
-    LinkDatum
-  >
-> extends DecrossOperator<NodeDatum, LinkDatum> {
+type OpSugiNode<O extends OrderOperator> = Parameters<O>[0][number];
+type OpSugiData<O extends OrderOperator> = OpSugiNode<O>["data"];
+type OpNodeDatum<O extends OrderOperator> = NodeDatum<
+  SugiDataDagNode<OpSugiData<O>>
+>;
+type OpLinkDatum<O extends OrderOperator> = LinkDatum<
+  SugiDataDagNode<OpSugiData<O>>
+>;
+
+export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
+  extends DecrossOperator<OpNodeDatum<Order>, OpLinkDatum<Order>> {
   /**
    * Sets the order accessor to the specified {@link OrderOperator} and returns
    * this {@link TwoLayerOperator}. See the {@link "sugiyama/twolayer/index" | two
    * layer} module for more information on order operators.
    */
-  order<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewOrder extends OrderOperator<NewNodeDatum, NewLinkDatum>
-  >(
-    ord: NewOrder & OrderOperator<NewNodeDatum, NewLinkDatum>
-  ): TwoLayerOperator<NewNodeDatum, NewLinkDatum, NewOrder>;
+  order<NewOrder extends OrderOperator>(
+    ord: NewOrder
+  ): TwoLayerOperator<NewOrder>;
   /**
    * Get the current {@link OrderOperator} which defaults to {@link median}.
    */
@@ -45,7 +44,7 @@ export interface TwoLayerOperator<
    * Sets the number of passes to make, more takes longer, but might result in
    * a better output. (default: 1)
    */
-  passes(val: number): TwoLayerOperator<NodeDatum, LinkDatum, Order>;
+  passes(val: number): TwoLayerOperator<Order>;
   /**
    * Get the current number of passes
    */
@@ -56,11 +55,11 @@ export interface TwoLayerOperator<
 // TODO Add two layer noop. This only makes sense if there's a greedy swapping ability
 
 /** @internal */
-function buildOperator<N, L, Order extends OrderOperator<N, L>>(options: {
-  order: Order;
+function buildOperator<O extends OrderOperator>(options: {
+  order: O;
   passes: number;
-}): TwoLayerOperator<N, L, Order> {
-  function twoLayerCall(layers: SugiNode<N, L>[][]): void {
+}): TwoLayerOperator<O> {
+  function twoLayerCall(layers: OpSugiNode<O>[][]): void {
     const reversed = layers.slice().reverse();
 
     let changed = true;
@@ -87,26 +86,21 @@ function buildOperator<N, L, Order extends OrderOperator<N, L>>(options: {
     }
   }
 
-  function order<NN, NL, NewOrder extends OrderOperator<NN, NL>>(
-    ord: NewOrder
-  ): TwoLayerOperator<NN, NL, NewOrder>;
-  function order(): Order;
-  function order<NN, NL, NewOrder extends OrderOperator<NN, NL>>(
-    ord?: NewOrder
-  ): Order | TwoLayerOperator<NN, NL, NewOrder> {
+  function order<NO extends OrderOperator>(ord: NO): TwoLayerOperator<NO>;
+  function order(): O;
+  function order<NO extends OrderOperator>(ord?: NO): O | TwoLayerOperator<NO> {
     if (ord === undefined) {
       return options.order;
     } else {
-      const localOrder = ord;
       const { order: _, ...rest } = options;
-      return buildOperator({ ...rest, order: localOrder });
+      return buildOperator({ ...rest, order: ord });
     }
   }
   twoLayerCall.order = order;
 
-  function passes(val: number): TwoLayerOperator<N, L, Order>;
+  function passes(val: number): TwoLayerOperator<O>;
   function passes(): number;
-  function passes(val?: number): TwoLayerOperator<N, L, Order> | number {
+  function passes(val?: number): TwoLayerOperator<O> | number {
     if (val === undefined) {
       return options.passes;
     } else if (val <= 0) {
@@ -121,9 +115,7 @@ function buildOperator<N, L, Order extends OrderOperator<N, L>>(options: {
 }
 
 /** Create a default {@link TwoLayerOperator}. */
-export function twoLayer(
-  ...args: never[]
-): TwoLayerOperator<unknown, unknown, MedianOperator> {
+export function twoLayer(...args: never[]): TwoLayerOperator<MedianOperator> {
   if (args.length) {
     throw new Error(
       `got arguments to twoLayer(${args}), but constructor takes no aruguments.`

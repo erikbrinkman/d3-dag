@@ -9,7 +9,7 @@ import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 import { order } from "./utils";
 
-export type MeanOperator = TwolayerOperator;
+export type MeanOperator = TwolayerOperator<unknown, unknown>;
 
 /** @internal */
 class Mean {

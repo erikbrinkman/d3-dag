@@ -15,6 +15,6 @@
 import { SugiNode } from "../utils";
 
 /** decross operator */
-export interface DecrossOperator<NodeDatum = unknown, LinkDatum = unknown> {
+export interface DecrossOperator<NodeDatum = never, LinkDatum = never> {
   (layers: SugiNode<NodeDatum, LinkDatum>[][]): void;
 }

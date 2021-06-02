@@ -26,14 +26,20 @@
 
 import { CoordOperator, SugiNodeSizeAccessor } from "./coord";
 import { Dag, DagNode } from "../dag/node";
+import { GroupAccessor, LayeringOperator, RankAccessor } from "./layering";
+import {
+  LinkDatum,
+  NodeDatum,
+  SugiDataDagNode,
+  SugiNode,
+  sugify
+} from "./utils";
 import { QuadOperator, quad } from "./coord/quad";
 import { SimplexOperator, simplex } from "./layering/simplex";
-import { SugiNode, sugify } from "./utils";
 import { TwoLayerOperator, twoLayer } from "./decross/two-layer";
 import { Up, assert, def, js } from "../utils";
 
 import { DecrossOperator } from "./decross";
-import { LayeringOperator } from "./layering";
 import { MedianOperator } from "./twolayer/median";
 import { cachedNodeSize } from "./nodesize";
 
@@ -42,24 +48,28 @@ export interface SugiyamaInfo {
   height: number;
 }
 
-export interface NodeSizeAccessor<NodeDatum = unknown, LinkDatum = unknown> {
+export interface NodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node?: DagNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
-export interface WrappedNodeSizeAccessor<
-  NodeDatum,
-  LinkDatum,
-  NodeSize extends NodeSizeAccessor<NodeDatum, LinkDatum>
-> extends SugiNodeSizeAccessor<NodeDatum, LinkDatum> {
+type NsDagNode<NS extends NodeSizeAccessor> = Exclude<
+  Parameters<NS>[0],
+  undefined
+>;
+type NsNodeDatum<NS extends NodeSizeAccessor> = NodeDatum<NsDagNode<NS>>;
+type NsLinkDatum<NS extends NodeSizeAccessor> = LinkDatum<NsDagNode<NS>>;
+
+export interface WrappedNodeSizeAccessor<NodeSize extends NodeSizeAccessor>
+  extends SugiNodeSizeAccessor<NsNodeDatum<NodeSize>, NsLinkDatum<NodeSize>> {
   wrapped: NodeSize;
 }
 
-function wrapNodeSizeAccessor<N, L, NS extends NodeSizeAccessor<N, L>>(
-  acc: NS & NodeSizeAccessor<N, L>
-): WrappedNodeSizeAccessor<N, L, NS> {
+function wrapNodeSizeAccessor<NS extends NodeSizeAccessor>(
+  acc: NS
+): WrappedNodeSizeAccessor<NS> {
   const empty = acc();
   function sugiNodeSizeAccessor(
-    node: SugiNode<N, L>
+    node: SugiNode<NsNodeDatum<NS>, NsLinkDatum<NS>>
   ): readonly [number, number] {
     return "node" in node.data ? acc(node.data.node) : empty;
   }
@@ -67,45 +77,59 @@ function wrapNodeSizeAccessor<N, L, NS extends NodeSizeAccessor<N, L>>(
   return sugiNodeSizeAccessor;
 }
 
-interface Operators<NodeDatum, LinkDatum> {
-  layering: LayeringOperator<NodeDatum, LinkDatum>;
-  decross: DecrossOperator<NodeDatum, LinkDatum>;
-  coord: CoordOperator<NodeDatum, LinkDatum>;
-  nodeSize: NodeSizeAccessor<NodeDatum, LinkDatum> | null;
-  sugiNodeSize: SugiNodeSizeAccessor<NodeDatum, LinkDatum>;
+interface Operators {
+  layering: LayeringOperator;
+  decross: DecrossOperator;
+  coord: CoordOperator;
+  nodeSize: NodeSizeAccessor | null;
+  sugiNodeSize: SugiNodeSizeAccessor;
 }
+
+type DagDagNode<D extends Dag> = D extends DagNode ? D : never;
+type LDag<Op extends LayeringOperator> = Parameters<Op>[0];
+type LDagNode<Op extends LayeringOperator> = DagDagNode<LDag<Op>>;
+type DDagNode<Op extends DecrossOperator> = SugiDataDagNode<
+  Parameters<Op>[0][number][number]["data"]
+>;
+type CDagNode<Op extends CoordOperator> = SugiDataDagNode<
+  Parameters<Op>[0][number][number]["data"]
+>;
+type SNSDagNode<Op extends SugiNodeSizeAccessor> = SugiDataDagNode<
+  Parameters<Op>[0]["data"]
+>;
+
+type OpsNodeDatum<Ops extends Operators> = NodeDatum<
+  LDagNode<Ops["layering"]>
+> &
+  NodeDatum<DDagNode<Ops["decross"]>> &
+  NodeDatum<CDagNode<Ops["coord"]>> &
+  NodeDatum<SNSDagNode<Ops["sugiNodeSize"]>>;
+type OpsLinkDatum<Ops extends Operators> = LinkDatum<
+  LDagNode<Ops["layering"]>
+> &
+  LinkDatum<DDagNode<Ops["decross"]>> &
+  LinkDatum<CDagNode<Ops["coord"]>> &
+  LinkDatum<SNSDagNode<Ops["sugiNodeSize"]>>;
 
 /**
  * The operator used to layout a {@link Dag} using the sugiyama method.
  */
-export interface SugiyamaOperator<
-  NodeDatum = unknown,
-  LinkDatum = unknown,
-  Ops extends Operators<NodeDatum, LinkDatum> = Operators<NodeDatum, LinkDatum>
-> {
+export interface SugiyamaOperator<Ops extends Operators = Operators> {
   /**
    * Layout the {@link Dag} using the currently configured operator. The returned
    * DAG nodes will have added properties from {@link SugiyamaNode}. In addition,
    * each link will have points reset and assigned.
    */
-  (dag: Dag<NodeDatum, LinkDatum>): SugiyamaInfo;
+  (dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>): SugiyamaInfo;
 
   /**
    * Set the {@link LayeringOperator}. See {@link "sugiyama/layering/index" |
    * layerings} for more information about proper operators and a description
    * of the built in operators. The default value is {@link simplex}.
    */
-  layering<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewLayering extends LayeringOperator<NewNodeDatum, NewLinkDatum>
-  >(
-    layer: NewLayering & LayeringOperator<NewNodeDatum, NewLinkDatum>
-  ): SugiyamaOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
-    Up<Ops, { layering: NewLayering }>
-  >;
+  layering<NewLayering extends LayeringOperator>(
+    layer: NewLayering
+  ): SugiyamaOperator<Up<Ops, { layering: NewLayering }>>;
   /**
    * Get the current {@link LayeringOperator}.
    */
@@ -116,17 +140,9 @@ export interface SugiyamaOperator<
    * decrossings} for more information about proper operators and a description
    * of the built in operators. The default value is {@link twoLayer}.
    */
-  decross<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewDecross extends DecrossOperator<NewNodeDatum, NewLinkDatum>
-  >(
-    dec: NewDecross & DecrossOperator<NewNodeDatum, NewLinkDatum>
-  ): SugiyamaOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
-    Up<Ops, { decross: NewDecross }>
-  >;
+  decross<NewDecross extends DecrossOperator>(
+    dec: NewDecross
+  ): SugiyamaOperator<Up<Ops, { decross: NewDecross }>>;
   /**
    * Get the current {@link DecrossOperator}.
    */
@@ -137,17 +153,9 @@ export interface SugiyamaOperator<
    * assignments} for more information about proper operators and a
    * description of the built in operators. The default value is {@link quad}.
    */
-  coord<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewCoord extends CoordOperator<NewNodeDatum, NewLinkDatum>
-  >(
-    crd: NewCoord & CoordOperator<NewNodeDatum, NewLinkDatum>
-  ): SugiyamaOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
-    Up<Ops, { coord: NewCoord }>
-  >;
+  coord<NewCoord extends CoordOperator>(
+    crd: NewCoord
+  ): SugiyamaOperator<Up<Ops, { coord: NewCoord }>>;
   /**
    * Get the current {@link CoordOperator}.
    */
@@ -160,9 +168,7 @@ export interface SugiyamaOperator<
    * size, keeping all distances proportional. If it's null, the nodeSize
    * parameters will be respected as coordinate sizes.
    */
-  size(
-    sz: readonly [number, number] | null
-  ): SugiyamaOperator<NodeDatum, LinkDatum, Ops>;
+  size(sz: readonly [number, number] | null): SugiyamaOperator<Ops>;
   /**
    * Get the current layout size, which defaults to [1, 1]. The return value
    * will be null if the layout is {@link nodeSize}d.
@@ -172,24 +178,14 @@ export interface SugiyamaOperator<
   /**
    * Sets the sugiyama layouts NodeSizeAccessor. This accessor...
    */
-  nodeSize<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewNodeSize extends NodeSizeAccessor<NewNodeDatum, NewLinkDatum>
-  >(
-    acc: NewNodeSize & NodeSizeAccessor<NewNodeDatum, NewLinkDatum>
+  nodeSize<NewNodeSize extends NodeSizeAccessor>(
+    acc: NewNodeSize
   ): SugiyamaOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
     Up<
       Ops,
       {
         nodeSize: NewNodeSize;
-        sugiNodeSize: WrappedNodeSizeAccessor<
-          NewNodeDatum,
-          NewLinkDatum,
-          NewNodeSize
-        >;
+        sugiNodeSize: WrappedNodeSizeAccessor<NewNodeSize>;
       }
     >
   >;
@@ -201,15 +197,9 @@ export interface SugiyamaOperator<
    * the width and height of a node it's called on, and the node will then be
    * laidout to have at least that much of a gap between nodes.
    */
-  sugiNodeSize<
-    NewNodeDatum,
-    NewLinkDatum,
-    NewSugiNodeSize extends SugiNodeSizeAccessor<NewNodeDatum, NewLinkDatum>
-  >(
-    sz: NewSugiNodeSize & SugiNodeSizeAccessor<NewNodeDatum, NewLinkDatum>
+  sugiNodeSize<NewSugiNodeSize extends SugiNodeSizeAccessor>(
+    sz: NewSugiNodeSize
   ): SugiyamaOperator<
-    NodeDatum & NewNodeDatum,
-    LinkDatum & NewLinkDatum,
     Up<Ops, { sugiNodeSize: NewSugiNodeSize; nodeSize: null }>
   >;
   /**
@@ -221,12 +211,14 @@ export interface SugiyamaOperator<
 }
 
 /** @internal */
-function buildOperator<N, L, Ops extends Operators<N, L>>(
+function buildOperator<Ops extends Operators>(
   options: Ops & {
     size: readonly [number, number] | null;
   }
-): SugiyamaOperator<N, L, Ops> {
-  function sugiyama(dag: Dag<N, L>): SugiyamaInfo {
+): SugiyamaOperator<Ops> {
+  function sugiyama(
+    dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>
+  ): SugiyamaInfo {
     // compute layers
     options.layering(dag);
 
@@ -317,19 +309,17 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   }
 
   function layering(): Ops["layering"];
-  function layering<NN, NL, NewLayering extends LayeringOperator<NN, NL>>(
-    layer: NewLayering
-  ): SugiyamaOperator<N & NN, L & NL, Up<Ops, { layering: NewLayering }>>;
-  function layering<NN, NL, NewLayering extends LayeringOperator<NN, NL>>(
-    layer?: NewLayering
-  ):
-    | Ops["layering"]
-    | SugiyamaOperator<N & NN, L & NL, Up<Ops, { layering: NewLayering }>> {
+  function layering<NL extends LayeringOperator>(
+    layer: NL
+  ): SugiyamaOperator<Up<Ops, { layering: NL }>>;
+  function layering<NL extends LayeringOperator>(
+    layer?: NL
+  ): Ops["layering"] | SugiyamaOperator<Up<Ops, { layering: NL }>> {
     if (layer === undefined) {
       return options.layering;
     } else {
       const { layering: _, ...rest } = options;
-      return buildOperator<N & NN, L & NL, Up<Ops, { layering: NewLayering }>>({
+      return buildOperator({
         ...rest,
         layering: layer
       });
@@ -338,19 +328,17 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.layering = layering;
 
   function decross(): Ops["decross"];
-  function decross<NN, NL, NewDecross extends DecrossOperator<NN, NL>>(
-    dec: NewDecross
-  ): SugiyamaOperator<N & NN, L & NL, Up<Ops, { decross: NewDecross }>>;
-  function decross<NN, NL, NewDecross extends DecrossOperator<NN, NL>>(
-    dec?: NewDecross
-  ):
-    | Ops["decross"]
-    | SugiyamaOperator<N & NN, L & NL, Up<Ops, { decross: NewDecross }>> {
+  function decross<ND extends DecrossOperator>(
+    dec: ND
+  ): SugiyamaOperator<Up<Ops, { decross: ND }>>;
+  function decross<ND extends DecrossOperator>(
+    dec?: ND
+  ): Ops["decross"] | SugiyamaOperator<Up<Ops, { decross: ND }>> {
     if (dec === undefined) {
       return options.decross;
     } else {
       const { decross: _, ...rest } = options;
-      return buildOperator<N & NN, L & NL, Up<Ops, { decross: NewDecross }>>({
+      return buildOperator({
         ...rest,
         decross: dec
       });
@@ -359,19 +347,17 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.decross = decross;
 
   function coord(): Ops["coord"];
-  function coord<NN, NL, NewCoord extends CoordOperator<NN, NL>>(
-    crd: NewCoord
-  ): SugiyamaOperator<N & NN, L & NL, Up<Ops, { coord: NewCoord }>>;
-  function coord<NN, NL, NewCoord extends CoordOperator<NN, NL>>(
-    crd?: NewCoord
-  ):
-    | Ops["coord"]
-    | SugiyamaOperator<N & NN, L & NL, Up<Ops, { coord: NewCoord }>> {
+  function coord<NC extends CoordOperator>(
+    crd: NC
+  ): SugiyamaOperator<Up<Ops, { coord: NC }>>;
+  function coord<NC extends CoordOperator>(
+    crd?: NC
+  ): Ops["coord"] | SugiyamaOperator<Up<Ops, { coord: NC }>> {
     if (crd === undefined) {
       return options.coord;
     } else {
       const { coord: _, ...rest } = options;
-      return buildOperator<N & NN, L & NL, Up<Ops, { coord: NewCoord }>>({
+      return buildOperator({
         ...rest,
         coord: crd
       });
@@ -380,10 +366,10 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.coord = coord;
 
   function size(): null | readonly [number, number];
-  function size(sz: readonly [number, number]): SugiyamaOperator<N, L, Ops>;
+  function size(sz: readonly [number, number]): SugiyamaOperator<Ops>;
   function size(
     sz?: readonly [number, number] | null
-  ): SugiyamaOperator<N, L, Ops> | null | readonly [number, number] {
+  ): SugiyamaOperator<Ops> | null | readonly [number, number] {
     if (sz !== undefined) {
       return buildOperator({ ...options, size: sz });
     } else {
@@ -393,44 +379,27 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.size = size;
 
   function nodeSize(): Ops["nodeSize"];
-  function nodeSize<NN, NL, NNS extends NodeSizeAccessor<NN, NL>>(
+  function nodeSize<NNS extends NodeSizeAccessor>(
     sz: NNS
   ): SugiyamaOperator<
-    N & NN,
-    L & NL,
-    Up<
-      Ops,
-      { nodeSize: NNS; sugiNodeSize: WrappedNodeSizeAccessor<NN, NL, NNS> }
-    >
+    Up<Ops, { nodeSize: NNS; sugiNodeSize: WrappedNodeSizeAccessor<NNS> }>
   >;
-  function nodeSize<NN, NL, NNS extends NodeSizeAccessor<NN, NL>>(
+  function nodeSize<NNS extends NodeSizeAccessor>(
     sz?: NNS
   ):
     | SugiyamaOperator<
-        N & NN,
-        L & NL,
         Up<
           Ops,
           {
             nodeSize: NNS;
-            sugiNodeSize: WrappedNodeSizeAccessor<NN, NL, NNS>;
+            sugiNodeSize: WrappedNodeSizeAccessor<NNS>;
           }
         >
       >
     | Ops["nodeSize"] {
     if (sz !== undefined) {
       const { nodeSize: _, sugiNodeSize: __, ...rest } = options;
-      return buildOperator<
-        N & NN,
-        L & NL,
-        Up<
-          Ops,
-          {
-            nodeSize: NNS;
-            sugiNodeSize: WrappedNodeSizeAccessor<NN, NL, NNS>;
-          }
-        >
-      >({
+      return buildOperator({
         ...rest,
         nodeSize: sz,
         sugiNodeSize: wrapNodeSizeAccessor(sz)
@@ -442,29 +411,17 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   sugiyama.nodeSize = nodeSize;
 
   function sugiNodeSize(): Ops["sugiNodeSize"];
-  function sugiNodeSize<NN, NL, NSNS extends SugiNodeSizeAccessor<NN, NL>>(
+  function sugiNodeSize<NSNS extends SugiNodeSizeAccessor>(
     sz: NSNS
-  ): SugiyamaOperator<
-    N & NN,
-    L & NL,
-    Up<Ops, { sugiNodeSize: NSNS; nodeSize: null }>
-  >;
-  function sugiNodeSize<NN, NL, NSNS extends SugiNodeSizeAccessor<NN, NL>>(
+  ): SugiyamaOperator<Up<Ops, { sugiNodeSize: NSNS; nodeSize: null }>>;
+  function sugiNodeSize<NSNS extends SugiNodeSizeAccessor>(
     sz?: NSNS
   ):
-    | SugiyamaOperator<
-        N & NN,
-        L & NL,
-        Up<Ops, { sugiNodeSize: NSNS; nodeSize: null }>
-      >
+    | SugiyamaOperator<Up<Ops, { sugiNodeSize: NSNS; nodeSize: null }>>
     | Ops["sugiNodeSize"] {
     if (sz !== undefined) {
       const { sugiNodeSize: _, nodeSize: __, ...rest } = options;
-      return buildOperator<
-        N & NN,
-        L & NL,
-        Up<Ops, { sugiNodeSize: NSNS; nodeSize: null }>
-      >({
+      return buildOperator({
         ...rest,
         sugiNodeSize: sz,
         nodeSize: null
@@ -488,22 +445,20 @@ function defaultNodeSize(node?: DagNode): [number, number] {
  */
 export function sugiyama(
   ...args: never[]
-): SugiyamaOperator<
-  unknown,
-  unknown,
-  {
-    layering: SimplexOperator;
-    decross: TwoLayerOperator<unknown, unknown, MedianOperator>;
-    coord: QuadOperator;
-    nodeSize: NodeSizeAccessor;
-    sugiNodeSize: WrappedNodeSizeAccessor<unknown, unknown, NodeSizeAccessor>;
-  }
-> {
-  if (args.length) {
-    throw new Error(
-      `got arguments to sugiyama(${args}), but constructor takes no aruguments.`
-    );
-  }
+): SugiyamaOperator<{
+  layering: SimplexOperator<{
+    rank: RankAccessor<unknown, unknown>;
+    group: GroupAccessor<unknown, unknown>;
+  }>;
+  decross: TwoLayerOperator<MedianOperator>;
+  coord: QuadOperator;
+  nodeSize: NodeSizeAccessor<unknown, unknown>;
+  sugiNodeSize: WrappedNodeSizeAccessor<NodeSizeAccessor<unknown, unknown>>;
+}> {
+  assert(
+    !args.length,
+    `got arguments to sugiyama(${args}), but constructor takes no aruguments.`
+  );
   return buildOperator({
     layering: simplex(),
     decross: twoLayer(),

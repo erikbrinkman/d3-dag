@@ -96,32 +96,53 @@ test("stratify() parses a square with altered ids", () => {
 });
 
 test("stratify() works with data accessor", () => {
-  function newParentData(
-    d: SimpleDatum
-  ): readonly (readonly [string, string])[] | undefined {
-    // NOTE this is a poor implementation, but it gets edge cases
-    if (d.parentIds === undefined) {
-      return undefined;
-    } else {
-      return d.parentIds.map((pid) => [pid, `${d.id} -> ${pid}`]);
+  const complexSquare = [
+    { i: "a", pd: undefined },
+    { i: "b", pd: [["a", "a -> b"]] },
+    { i: "c", pd: [["a", "a -> c"]] },
+    {
+      i: "d",
+      pd: [
+        ["b", "b -> d"],
+        ["c", "c -> d"]
+      ]
     }
-  }
-  const layout = stratify().parentData(newParentData);
+  ] as const;
+
+  const newId = ({ i }: { i: string }) => i;
+  const newParentData = ({
+    pd
+  }: {
+    pd: readonly (readonly [string, string])[] | undefined;
+  }) => pd;
+
+  const base = stratify();
+  // @ts-expect-error doesn't work for complex
+  expect(() => base(complexSquare)).toThrow();
+
+  const id = base.id(newId);
+  expect(id.id()).toBe(newId);
+  // @ts-expect-error doesn't work for simple
+  expect(() => id(square)).toThrow();
+
+  const layout = id.parentData(newParentData);
+  expect(id.id()).toBe(newId);
   expect(layout.parentData()).toBe(newParentData);
   expect(layout.parentIds().wrapped).toBe(newParentData);
+  // @ts-expect-error doesn't work for simple
+  expect(() => layout(square)).toThrow();
 
-  layout.parentIds((ps: string[]): string[] => ps);
-
+  // check that wrapper works
   const justIds = layout.parentIds();
-  for (const data of square) {
-    expect(justIds(data, 0).slice().sort()).toEqual(
-      ("parentIds" in data ? data.parentIds : []).slice().sort()
+  for (const data of complexSquare) {
+    expect((justIds(data, 0) || []).slice().sort()).toEqual(
+      (data.pd || []).map(([id]: readonly [string, string]) => id).sort()
     );
   }
 
-  const dag = layout(square);
-  const [root] = dag.descendants().filter((n) => n.data.id === "0");
-  expect(root.data.id).toBe("0");
+  const dag = layout(complexSquare);
+  const [root] = dag.descendants().filter((n) => n.data.i === "a");
+  expect(root.data.i).toBe("a");
   expect(root.children()).toHaveLength(2);
   const [left, right] = root.ichildren();
   expect(left.children()[0]).toBe(right.children()[0]);
@@ -138,13 +159,13 @@ test("stratify() fails with empty data", () => {
 });
 
 class BadId {
-  get id() {
+  get id(): string {
     throw new Error("bad id");
   }
 }
 test("stratify() fails at undefined id", () => {
   expect(() => {
-    stratify()([{}]);
+    stratify()([{ id: (null as unknown) as string }]);
   }).toThrow("default id function expected datum to have an id field but got");
   expect(() => {
     stratify()([new BadId()]);
@@ -216,14 +237,15 @@ test("stratify() fails with hard cycle", () => {
 });
 
 test("stratify() fails with invalid id type", () => {
+  const id: unknown = () => null;
   expect(() =>
-    stratify().id(() => (null as unknown) as string)([null])
+    stratify().id(id as (_: unknown) => string)([{ parentIds: [] }])
   ).toThrow("id is supposed to be string but got type object");
 });
 
 class BadParentIds {
   id = "";
-  get parentIds() {
+  get parentIds(): undefined {
     throw new Error("bad parent ids");
   }
 }
@@ -232,7 +254,7 @@ test("stratify() fails with incorrect parentIds", () => {
   const data = [
     {
       id: "1",
-      parentIds: null
+      parentIds: (null as unknown) as undefined
     }
   ];
   expect(() => stratify()(data)).toThrow(
