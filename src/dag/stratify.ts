@@ -21,8 +21,10 @@ import { verifyDag, verifyId } from "./verify";
  * same data. Ids cannot contain the null character `'\0'`.
  *
  * `i` will increment in the order nodes are processed.
+ *
+ * This can be modfied with the {@link id} method.
  */
-interface IdOperator<NodeDatum = never> {
+export interface IdOperator<NodeDatum = never> {
   (d: NodeDatum, i: number): string;
 }
 
@@ -30,8 +32,10 @@ interface IdOperator<NodeDatum = never> {
  * The interface for getting the parent ids from data. This must return an
  * array of the ids of every parent of this node. `i` will increment in the
  * order nodes are processed.
+ *
+ * This can be modified with the {@link parentIds} method.
  */
-interface ParentIdsOperator<NodeDatum = never> {
+export interface ParentIdsOperator<NodeDatum = never> {
   (d: NodeDatum, i: number): readonly string[] | undefined;
 }
 
@@ -39,8 +43,10 @@ interface ParentIdsOperator<NodeDatum = never> {
  * The interface for getting the parent ids and link data from the current node
  * data. This must return an array of parent ids coupled with data for the link
  * between this node and the parent id.
+ *
+ * This can be modified with the {@link parentData} method.
  */
-interface ParentDataOperator<NodeDatum = never, LinkDatum = unknown> {
+export interface ParentDataOperator<NodeDatum = never, LinkDatum = unknown> {
   (d: NodeDatum, i: number):
     | readonly (readonly [string, LinkDatum])[]
     | undefined;
@@ -59,7 +65,7 @@ type OpsLinkDatum<Ops extends Operators> = Exclude<
 /**
  * What gets returned by {@link parentData}() when {@link parentIds} is set.
  */
-interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
+export interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
   extends ParentDataOperator<OpNodeDatum<ParentIds>, undefined> {
   wrapped: ParentIds;
 }
@@ -67,7 +73,7 @@ interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
 /**
  * What gets returned by {@link parentIds}() when {@link parentData} is set.
  */
-interface WrappedParentDataOperator<ParentData extends ParentDataOperator>
+export interface WrappedParentDataOperator<ParentData extends ParentDataOperator>
   extends ParentIdsOperator<OpNodeDatum<ParentData>> {
   wrapped: ParentData;
 }
@@ -95,12 +101,18 @@ type UpData<Ops extends Operators, ParentData extends ParentDataOperator> = Up<
 >;
 
 /**
- * The operator that constructs a {@link Dag} from stratified tabularesque data.
+ * The operator that constructs a {@link Dag} from stratified tabularesque
+ * data.
+ *
+ * Create a default operator with {@link stratify}. The accessors for a node's
+ * {@link id} or {@link parentIds | parents' ids} can be altered, or {@link
+ * parentData} can be specified to attach link data to each edge.
  */
 export interface StratifyOperator<Ops extends Operators> {
   /**
    * Construct a dag from the specified `data`. The data should be an array
-   * of data elements that contain info about their parents' ids. For example:
+   * of data elements that contain information about their parents' ids. For
+   * example:
    *
    * ```json
    * [
@@ -145,7 +157,7 @@ export interface StratifyOperator<Ops extends Operators> {
   <N extends OpsNodeDatum<Ops>>(data: readonly N[]): Dag<N, OpsLinkDatum<Ops>>;
 
   /**
-   * Sets the id accessor to the given {@link IdOperator} and returns this
+   * Sets the id accessor to the given {@link IdOperator} and returns a
    * {@link StratifyOperator}. The default operator is:
    *
    * ```js
@@ -164,7 +176,7 @@ export interface StratifyOperator<Ops extends Operators> {
 
   /**
    * Sets the parentIds accessor to the given {@link ParentIdsOperator}
-   * and returns this {@link StratifyOperator}. The default operator is:
+   * and returns a {@link StratifyOperator}. The default operator is:
    *
    * ```js
    * function parentIds(d) {
@@ -177,7 +189,8 @@ export interface StratifyOperator<Ops extends Operators> {
   ): StratifyOperator<UpIds<Ops, NewParentIds>>;
   /**
    * Gets the current parent ids accessor.  If {@link parentData} was passed, the
-   * returned function will wrap that to just return the ids.
+   * returned function will {@link WrappedParentDataOperator | wrap} that to
+   * just return the ids.
    */
   parentIds(): Ops["parentIds"];
 
@@ -190,12 +203,12 @@ export interface StratifyOperator<Ops extends Operators> {
   ): StratifyOperator<UpData<Ops, NewParentData>>;
   /**
    * Gets the current parentData accessor. If {@link parentIds} was passed, this
-   * will wrap that to just return the ids with `undefined` data.
+   * will {@link WrappedParentIdsOperator | wrap} that to just return the ids
+   * with `undefined` data.
    */
   parentData(): Ops["parentData"];
 }
 
-/** @internal */
 function buildOperator<Ops extends Operators>(
   options: Ops
 ): StratifyOperator<Ops> {
@@ -298,7 +311,6 @@ function buildOperator<Ops extends Operators>(
   return stratify;
 }
 
-/** @internal */
 function wrapParentIds<P extends ParentIdsOperator>(
   parentIds: P
 ): WrappedParentIdsOperator<P> {
@@ -309,7 +321,6 @@ function wrapParentIds<P extends ParentIdsOperator>(
   return wrapper;
 }
 
-/** @internal */
 function wrapParentData<D extends ParentDataOperator>(
   parentData: D
 ): WrappedParentDataOperator<D> {
@@ -320,12 +331,10 @@ function wrapParentData<D extends ParentDataOperator>(
   return wrapper;
 }
 
-/** @internal */
 interface HasId {
   readonly id: string;
 }
 
-/** @internal */
 function hasId(d: unknown): d is HasId {
   try {
     return typeof (d as HasId).id === "string";
@@ -334,7 +343,6 @@ function hasId(d: unknown): d is HasId {
   }
 }
 
-/** @internal */
 function defaultId(data: unknown): string {
   assert(
     hasId(data),
@@ -343,12 +351,10 @@ function defaultId(data: unknown): string {
   return data.id;
 }
 
-/** @internal */
 interface HasParentIds {
   readonly parentIds?: readonly string[] | undefined;
 }
 
-/** @internal */
 function hasParentIds(d: unknown): d is HasParentIds {
   try {
     const parentIds = (d as HasParentIds).parentIds;
@@ -362,7 +368,6 @@ function hasParentIds(d: unknown): d is HasParentIds {
   }
 }
 
-/** @internal */
 function defaultParentIds(d: unknown): readonly string[] | undefined {
   assert(
     hasParentIds(d),
@@ -372,7 +377,8 @@ function defaultParentIds(d: unknown): readonly string[] | undefined {
 }
 
 /**
- * Constructs a new {@link StratifyOperator} with the default settings.
+ * Constructs a new {@link StratifyOperator} with the default settings. This is
+ * bundled as {@link dagStratify}.
  */
 export function stratify(
   ...args: never[]

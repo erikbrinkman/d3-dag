@@ -48,6 +48,34 @@ var dag = d3.sugiyama();
   * [Sugiyama](https://erikbrinkman.github.io/d3-dag/modules/sugiyama.html) - standard layout
   * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/zherebko.html) - topological layout
 
+## General Usage Notes
+
+This library is built around the concept of operators.
+Operators are functions with a fluent interface to modify their behavior.
+Every function that modifies behavior returns a copy, and will not modify the original operator.
+For example, the `stratify` operator creates dags from id-based parent data, can ve used like so:
+
+```ts
+// note initial function call with no arguments to create default operator
+const stratify = dagStratify();
+const dag = stratify([{ id: "parent" }, { id: "child", parentIds: ["parent"] }]);
+
+stratify.id(({ myid }: { myid: string }) => myid);
+// doesn't work, stratify was not modified
+const dag = stratify([{ myid: "parent" }, { myid: "child", parentIds: ["parent"] }]);
+
+const myStratify = stratify.id(({ myid }: { myid: string }) => myid);
+// works!
+const dag = myStratify([{ myid: "parent" }, { myid: "child", parentIds: ["parent"] }]);
+```
+
+### Typescript Notes
+
+- Default operators will expect the necessary types for them to work, but will also do runtime checks in case javascript users use them inappropriately.
+- Due to what seems like a bug in typescript, passing operators that take no arguments, e.g. `dagStratify().id(() => "")` will cause typescript to infer the data as `undefined`, which will then restrict the overall data-type to never in most circumstances.
+  If you encounter typescript errors saying types can't be assigned to `never` check that the appropraite types are being inferred from custom operators and accessors.
+
+
 ## Experimental ES6 Imports
 
 As of version 0.7, the full typescript build is released in the `dist` folder. That means in addition to importing from the bundled es6 module that was available before, you should be able to import arbitrary nested modules from `d3-dag/dist/...`. There may be issues with doing this, but it is at least an option. If people report success importing once private members from this more structured interface it may become stable.
@@ -55,6 +83,29 @@ As of version 0.7, the full typescript build is released in the `dist` folder. T
 ## Updating
 
 Information for major changes between releases
+
+### Updating from 0.7 to 0.8
+
+This update features a large rewrite of much of the library, and as a result has some new features coupled with a lot of breaking changes.
+With this, the library is nearing stability and version 1.0 may be released soon.
+
+New features:
+
+
+- New features:
+  - Better type checking / appropriate types in typescript.
+  - Dags no longer require ids.
+- Javascript breaking changes: (changes that affect everyone)
+  - The largest breaking change was the removal of the arquint layout from this library.
+    The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
+    If possible, I would like to bring it back.
+  - The layout algorithms Sugiyama and Zherebko don't return the dag anymore, but since the dag was always modified, those changes still hold.
+  - Layering now changes the value, so if you set the `value` of a node before using a layout, and expected the value to be preserved that no longer happens
+  - The API for custom sugiyama accessor changed significantly. I don't think this API was actually used very frequently, but if you did, look at the new operator definitions. Roughly instead of having a `DummyNode` or the actual `DagNode`, you will have a `SugiDagNode` which is a normal dag node with node data that either has a single `node` attribute for normal nodes, or a `parent` and `child` attribute for dummy nodes.
+- Typescript breaking changes: (changes that only affect typescript users)
+- Unlikely breaking changes: (changes to private apis that shouldn't break things, but might in strange circumstances)
+  - Many operator types were renamed from `Operator` in the appropriate module to a named operator like `TwolayerOperator`. This should only affect you if you were using the experimental 
+  - The build system was switched from rollup to esbuild. There was one error with the bundling that was caught in development, otherwise everything should still work.
 
 ### Updating from 0.6 to 0.7
 

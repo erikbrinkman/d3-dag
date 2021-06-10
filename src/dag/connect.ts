@@ -14,14 +14,17 @@ import {
 import { Up, assert } from "../utils";
 import { verifyDag, verifyId } from "./verify";
 
+/**
+ * The default node data on dags built using connect
+ */
 export interface ConnectDatum {
   id: string;
 }
 
 /**
  * The interface for getting a node id from data. The function must return an
- * appropriate id for given link data.  Ids cannot contain the null character
- * `'\0'`.
+ * appropriate id for given link data. This operator will only be called once
+ * for each data point.
  *
  * `i` will increment in the order links are processed.
  */
@@ -29,22 +32,35 @@ export interface IdOperator<LinkDatum = never> {
   (d: LinkDatum, i: number): string;
 }
 
+/**
+ * The operators that parametrize {@link ConnectOperator}
+ */
 interface Operators {
   sourceId: IdOperator;
   targetId: IdOperator;
 }
 
 type OpLinkDatum<O extends IdOperator> = Parameters<O>[0];
-
+/**
+ * The constraint applied to data passed into {@link ConnectOperator}
+ * conditioned on its operators.
+ */
 type OpsLinkDatum<Ops extends Operators> = OpLinkDatum<Ops["sourceId"]> &
   OpLinkDatum<Ops["targetId"]>;
 
 /**
- * The operator that constructs a {@link Dag} from link data.
+ * An operator that constructs a {@link Dag} from link data.
+ *
+ * Create a default connect operator with {@link connect}. The accessor for the
+ * {@link sourceId | source id string}, {@link targetId | target id string},
+ * and whether to allow {@link single} nodes can all be modified.
+ *
+ * Links in the dag will have the same data as the objects passed in, and nodes
+ * will have the ids referenced as either the source or the target.
  */
 export interface ConnectOperator<Ops extends Operators> {
   /**
-   * Construct a dag from the specified data. The data should be an array of
+   * Construct a {@link Dag} from the specified data. The data should be an array of
    * data elements that contain info about links in the graph. For example:
    *
    * ```json
@@ -62,7 +78,8 @@ export interface ConnectOperator<Ops extends Operators> {
 
   /**
    * Sets the source accessor to the given {@link IdOperator} and returns this
-   * {@link ConnectOperator}. The default accessor is:
+   * {@link ConnectOperator}. This should return the source id of the link
+   * data. The default accessor is:
    *
    * ```js
    * function sourceAccessor(link) {
@@ -78,7 +95,8 @@ export interface ConnectOperator<Ops extends Operators> {
 
   /**
    * Sets the target accessor to the given {@link IdOperator} and returns this
-   * {@link ConnectOperator}. The default accessor is:
+   * {@link ConnectOperator}. This should return the target id of the link
+   * data. The default accessor is:
    *
    * ```js
    * function sourceAccessor(link) {
@@ -97,14 +115,13 @@ export interface ConnectOperator<Ops extends Operators> {
    * the target id, then a single node with no parents will be created.
    * Otherwise a self loop will be created which will result in an error. Note
    * only single nodes without parents or children need to be specified this
-   * way, otherwise any other connection will work. (default: false)
+   * way, otherwise any other connection to a node will creat it. (default: false)
    */
   single(val: boolean): ConnectOperator<Ops>;
   /** get the current single node setting. */
   single(): boolean;
 }
 
-/** @internal */
 function buildOperator<Ops extends Operators>(
   options: Ops & { single: boolean }
 ): ConnectOperator<Ops> {
@@ -191,12 +208,10 @@ function buildOperator<Ops extends Operators>(
   return connect;
 }
 
-/** @internal */
 interface ZeroString {
   readonly [0]: string;
 }
 
-/** @internal */
 function isZeroString(d: unknown): d is ZeroString {
   try {
     return typeof (d as ZeroString)[0] === "string";
@@ -205,7 +220,6 @@ function isZeroString(d: unknown): d is ZeroString {
   }
 }
 
-/** @internal */
 function defaultSourceId(d: ZeroString): string {
   assert(
     isZeroString(d),
@@ -214,12 +228,10 @@ function defaultSourceId(d: ZeroString): string {
   return d[0];
 }
 
-/** @internal */
 interface OneString {
   readonly [1]: string;
 }
 
-/** @internal */
 function isOneString(d: unknown): d is OneString {
   try {
     return typeof (d as OneString)[1] === "string";
@@ -228,7 +240,6 @@ function isOneString(d: unknown): d is OneString {
   }
 }
 
-/** @internal */
 function defaultTargetId(d: OneString): string {
   assert(
     isOneString(d),
@@ -238,7 +249,8 @@ function defaultTargetId(d: OneString): string {
 }
 
 /**
- * Constructs a new {@link ConnectOperator} with the default settings.
+ * Creates a new {@link ConnectOperator} with the default settings. This is
+ * bundled as {@link dagConnect}
  */
 export function connect(
   ...args: never[]

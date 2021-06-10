@@ -1,5 +1,7 @@
 type OfAble<T> = Iterator<T> | Iterable<T>;
 
+// FIXME replace this with fluent iterable
+
 class LazyFluentIterable<T> implements Iterable<T> {
   constructor(private readonly base: Iterable<T>) {}
 

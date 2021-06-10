@@ -6,9 +6,9 @@
  * All DAGs are also iterators over all of their nodes.
  *
  * Three methods exist to turn existing data into {@link Dag}s:
- * 1. {@link "dag/hierarchy" | dagHierarchy} - when the data already has a dag structure.
- * 2. {@link "dag/stratify" | dagStratify } - when the dag has a tabular structure, referencing parents by id.
- * 3. {@link "dag/connect" | dagConnect } - when the dag has a link structure and is specified as pairs of nodes.
+ * 1. {@link HierarchyOperator} - when the data already has a dag structure.
+ * 2. {@link StratifyOperator} - when the dag has a tabular structure, referencing parents by id.
+ * 3. {@link ConnectOperator} - when the dag has a link structure and is specified as pairs of nodes.
  *
  * Methods names preceeded by an `i` will return a {@link FluentIterable} which is
  * a wrapper around native EMCA iterators that also adds most methods found in
@@ -17,6 +17,10 @@
  *
  * @module
  */
+
+// FIXME rename Link to DagLink
+// FIXME separate dag interfaces, constructor interfaces, and implementation so
+// that implementation is encapsulated
 
 import { FluentIterable, fluent } from "../iters";
 import { assert, def, dfs } from "../utils";

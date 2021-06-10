@@ -1,6 +1,16 @@
 /**
  * This file contains all of the exports that make it into the pure javascript
- * flat structure.
+ * / bundled flat structure.
+ *
+ * To create a dag structure from data, a necessary first step before computing
+ * a layout, see the three creation algorithms:
+ * - {@link HierarchyOperator} - for converting data that is already in a dag form with children
+ * - {@link StratifyOperator} - for converting id based data with parent ids
+ * - {@link ConnectOperator} - for link based data with a source and target
+ *
+ * To layout a dag see the two dag layout algorithms:
+ * - {@link SugiyamaOperator} - for a general layered dag representation
+ * - {@link ZherebkoOperator} - for a simple topological layout
  *
  * @module
  */

@@ -1,8 +1,6 @@
 /**
- * Before you can compute a DAG layout, you need a DAG structure.  If your data
- * is already in a DAG structure, you can use the {@link hierarchy} method to
- * generate a default {@link HierarchyOperator} which can then be used to transform
- * your data into a {@link Dag}.
+ * Construct a {@link Dag} out of data that already has a dag =-like structure
+ * using {@link hierarchy} to create a {@link HiararchyOperator}.
  *
  * @module
  */
@@ -27,8 +25,10 @@ import { verifyDag } from "./verify";
  * The interface for getting child data from node data. This function must
  * return data for every child given the data for the current node. `i` will
  * increment for each node processed.
+ *
+ * Can be modified with {@link children}.
  */
-interface ChildrenOperator<NodeDatum> {
+export interface ChildrenOperator<NodeDatum> {
   (d: NodeDatum, i: number): readonly NodeDatum[] | undefined;
 }
 
@@ -36,8 +36,10 @@ interface ChildrenOperator<NodeDatum> {
  * The interface for getting children data and associated link data from node
  * data. This function must return data for every child of the given node, and
  * data for link between the two. `i` will increment for each node processesed.
+ *
+ * Can be modified with {@link childrenData}.
  */
-interface ChildrenDataOperator<NodeDatum, LinkDatum = unknown> {
+export interface ChildrenDataOperator<NodeDatum, LinkDatum = unknown> {
   (d: NodeDatum, i: number):
     | readonly (readonly [NodeDatum, LinkDatum])[]
     | undefined;
@@ -46,7 +48,7 @@ interface ChildrenDataOperator<NodeDatum, LinkDatum = unknown> {
 /**
  * What gets returned by {@link childrenData}() when {@link children} is set.
  */
-interface WrappedChildrenOperator<
+export interface WrappedChildrenOperator<
   NodeDatum,
   Children extends ChildrenOperator<NodeDatum>
 > extends ChildrenDataOperator<NodeDatum, undefined> {
@@ -56,7 +58,7 @@ interface WrappedChildrenOperator<
 /**
  * What gets returned by {@link children}() when {@link childrenData} is set.
  */
-interface WrappedChildrenDataOperator<
+export interface WrappedChildrenDataOperator<
   NodeDatum,
   ChildrenData extends ChildrenDataOperator<NodeDatum>
 > extends ChildrenOperator<NodeDatum> {
@@ -96,14 +98,24 @@ type ChildrenDataHierarchyOperator<
 >;
 
 /**
- * The operator that constructs a {@link Dag} from hierarchy data.
+ * An operator that constructs a {@link Dag} from hierarchy data.
+ *
+ * A default operator can be created with {@link hierarchy}. How to access a
+ * piece of data's {@link children} or {@link childrenData | children with
+ * associated link data} can be altered. Similarly you can disable whether to
+ * check that all initial nodes are actually {@link roots}.
+ *
+ * Data passed in will become node data, if {@link childrenData} is specified,
+ * then link data will also be included. This method uses object identity, so
+ * for two nodes to point to the same object, they must both return the same
+ * object in their children.
  */
 export interface HierarchyOperator<
   NodeDatum,
   Ops extends Operators<NodeDatum> = Operators<NodeDatum>
 > {
   /**
-   * Construct a DAG from the specified root nodes.
+   * Construct a {@link Dag} from the specified root nodes.
    * Each root node must be an object representing a root node.
    * For example:
    *
@@ -142,14 +154,19 @@ export interface HierarchyOperator<
    *   ]
    * }
    * ```
+   *
+   * The children of each node will be further traversed until the entire dag
+   * is explored. Unless {@link roots} is set to false, all initial roots must
+   * be roots, i.e. they cann't occur in an call to children.
+   *
    */
   // NOTE we can't infer data type for hierarchy generator because the children
   // and children data method also has to be typed
   (...data: readonly NodeDatum[]): Dag<NodeDatum, OpsLinkDatum<NodeDatum, Ops>>;
 
   /**
-   * Sets the children accessor to the given {@link ChildrenOperator} and returns
-   * this {@link HierarchyOperator}. The default operator is:
+   * Sets the children accessor to the given {@link ChildrenOperator} and
+   * returns a new hierarchy operator. The default operator is:
    *
    * ```js
    * function children(d) {
@@ -162,14 +179,14 @@ export interface HierarchyOperator<
   ): ChildrenHierarchyOperator<NewDatum, NewChildren>;
   /**
    * Gets the current {@link ChildrenOperator}, If {@link childrenData} was specified,
-   * this will return a wrapped version that returns only the children of that
-   * operator.
+   * this will return a {@link WrappedChildrenOperatoe | wrapped version} that
+   * returns only the children of that operator.
    */
   children(): Ops["children"];
 
   /**
    * Sets the childrenData accessor to the given {@link ChildrenDataOperator} and
-   * returns this {@link HierarchyOperator}.
+   * returns a new hierarchy operator.
    */
   childrenData<
     NewDatum,
@@ -179,7 +196,8 @@ export interface HierarchyOperator<
   ): ChildrenDataHierarchyOperator<NewDatum, NewChildrenData>;
   /**
    * Get the current childrenData operator. If {@link children} was specified, this
-   * will return a wrapped version that returns undefined data.
+   * will return a {@link WrappedChildrenDataOperator | wrapped version} that
+   * returns undefined data.
    */
   childrenData(): Ops["childrenData"];
 
@@ -192,7 +210,6 @@ export interface HierarchyOperator<
   roots(): boolean;
 }
 
-/** @internal */
 function buildOperator<N, Ops extends Operators<N>>(
   options: Ops & { roots: boolean }
 ): HierarchyOperator<N, Ops> {
@@ -300,7 +317,6 @@ function buildOperator<N, Ops extends Operators<N>>(
   return hierarchy;
 }
 
-/** @internal */
 function wrapChildren<N, C extends ChildrenOperator<N>>(
   children: C
 ): WrappedChildrenOperator<N, C> {
@@ -311,7 +327,6 @@ function wrapChildren<N, C extends ChildrenOperator<N>>(
   return wrapped;
 }
 
-/** @internal */
 function wrapChildrenData<N, C extends ChildrenDataOperator<N>>(
   childrenData: C
 ): WrappedChildrenDataOperator<N, C> {
@@ -322,12 +337,10 @@ function wrapChildrenData<N, C extends ChildrenDataOperator<N>>(
   return wrapped;
 }
 
-/** @internal */
 interface HasChildren {
   readonly children?: readonly HasChildren[] | undefined;
 }
 
-/** @internal */
 function hasChildren(d: unknown): d is HasChildren {
   try {
     const children = (d as HasChildren).children;
@@ -337,7 +350,6 @@ function hasChildren(d: unknown): d is HasChildren {
   }
 }
 
-/** @internal */
 function defaultChildren(d: unknown): readonly HasChildren[] | undefined {
   assert(
     hasChildren(d),
@@ -347,12 +359,8 @@ function defaultChildren(d: unknown): readonly HasChildren[] | undefined {
 }
 
 /**
- * Constructs a new {@link HierarchyOperator} with default settings.
- *
- * By default ids will be pulled from the `id` property and children will be
- * pulled from the `children` property. Since `children` being undefined is
- * valid, forgetting to set children properly will result in a dag with only a
- * single node.
+ * Constructs a new {@link HierarchyOperator} with default settings. This is
+ * bundled as {@link dagHierarchy}.
  */
 export function hierarchy(
   ...args: never[]
