@@ -96,7 +96,7 @@ test("lastIndexOf()", () => {
   expect(fluent([1, 2, 1]).lastIndexOf(1)).toBe(2);
   expect(fluent([1, 2, 1]).lastIndexOf(1, 1)).toBe(0);
   expect(() => fluent([1]).lastIndexOf(1, -1)).toThrow(
-    "fromIndex doesn't support negative numbers because generator length isn't known"
+    "lastIndexOf doesn't support negative numbers because generator length isn't known"
   );
 });
 
@@ -138,7 +138,11 @@ test("slice()", () => {
 test("slice() on infinite", () => {
   let i = 0;
   const iter = {
-    next: () => ({ value: i++, done: false })
+    [Symbol.iterator]() {
+      return {
+        next: () => ({ value: i++, done: false })
+      };
+    }
   };
   expect([...fluent(iter).slice(1, 4)]).toEqual([1, 2, 3]);
 });
