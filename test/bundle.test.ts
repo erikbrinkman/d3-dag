@@ -24,7 +24,8 @@ describe.skip("tests that require a built bundle", () => {
     // o o    o o
     const layers = createLayers([
       [[1], [0]],
-      [[0], [1]]
+      [[0], [1]],
+      [[], []]
     ]);
     d3dag.decrossOpt()(layers);
     const inds = layers.map((layer) => layer.map(getIndex));
@@ -39,7 +40,10 @@ describe.skip("tests that require a built bundle", () => {
   test("twolayerOpt() works for very simple case", async () => {
     const d3dag = await load();
     // independent links that need to be swapped
-    const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
+    const [topLayer, bottomLayer] = createLayers([
+      [[1], [0]],
+      [[], []]
+    ]);
     d3dag.twolayerOpt()(topLayer, bottomLayer, true);
     const inds = bottomLayer.map(getIndex);
     expect(inds).toEqual([1, 0]);
@@ -57,7 +61,7 @@ describe.skip("tests that require a built bundle", () => {
   // quadprog
   test("coordQuad() works for square like layout", async () => {
     const d3dag = await load();
-    const layers = createLayers([[[0, 1]], [[0], [0]]]);
+    const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);
     const [[head], [left, right], [tail]] = layers;
     d3dag.coordQuad()(layers, nodeSize);
 
@@ -71,7 +75,10 @@ describe.skip("tests that require a built bundle", () => {
   test("twolayerMedian() works for very simple case", async () => {
     const d3dag = await load();
     // independent links that need to be swapped
-    const [topLayer, bottomLayer] = createLayers([[[1], [0]]]);
+    const [topLayer, bottomLayer] = createLayers([
+      [[1], [0]],
+      [[], []]
+    ]);
     d3dag.twolayerMedian()(topLayer, bottomLayer, true);
     const inds = bottomLayer.map(getIndex);
     expect(inds).toEqual([1, 0]);

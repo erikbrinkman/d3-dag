@@ -28,36 +28,37 @@
     "/dist/**/*.d.ts"
   ],
   "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "moduleFileExtensions": [
-      "ts",
-      "js"
+    "transformIgnorePatterns": [
+      "node_modules/(?!(d3-array|internmap)/)"
     ]
   },
   "scripts": {
     "format": "prettier --write {src,test,types}/**/*.ts {,.}*.json && import-sort --write {src,test,types}/**/*.ts",
     "lint": "prettier --check {src,test,types}/**/*.ts {,.}*.json && tsc --noEmit && eslint {src,test,types}/**/*.ts",
     "fix": "eslint --fix {src,test,types}/**/*.ts",
-    "build": "tsc && esbuild dist/index.js --bundle --minify --external:fs --external:child_process --global-name=d3 --banner:js=\"$(preamble)\nvar d3 = Object.assign(d3 || {}, (() => {\" --footer:js='return d3; })())' --outfile=bundle/d3-dag.iife.min.js && esbuild dist/index.js --bundle --minify --format=cjs --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js && esbuild dist/index.js --bundle --minify --format=esm --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
-    "test": "jest --coverage && yarn lint",
+    "build": "tsc -p tsconfig.build.json && esbuild dist/index.js --bundle --minify --external:fs --external:child_process --global-name=d3 --banner:js=\"$(preamble)\nvar d3 = Object.assign(d3 || {}, (() => {\" --footer:js='return d3; })())' --outfile=bundle/d3-dag.iife.min.js && esbuild dist/index.js --bundle --minify --format=cjs --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js && esbuild dist/index.js --bundle --minify --format=esm --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
+    "test": "tsc -p tsconfig.test.json && jest --coverage && yarn lint",
     "prepare": "yarn jest --clear-cache && yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
     "docs": "typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
   },
   "dependencies": {
-    "d3-array": "^2.12.1",
+    "d3-array": "^3.0.1",
     "fastpriorityqueue": "^0.7.1",
     "javascript-lp-solver": "0.4.24",
     "quadprog": "^1.6.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.5",
+    "@babel/preset-env": "^7.14.5",
+    "@babel/preset-typescript": "^7.14.5",
     "@babel/types": "^7.14.5",
     "@types/d3-array": "^2.12.1",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",
+    "babel-jest": "^27.0.2",
     "esbuild": "^0.12.8",
     "eslint": "^7.28.0",
     "eslint-config-prettier": "^8.3.0",
@@ -66,7 +67,6 @@
     "jest": "^27.0.4",
     "package-preamble": "^0.1.0",
     "prettier": "^2.3.1",
-    "ts-jest": "^27.0.3",
     "typedoc": "^0.20.36",
     "typescript": "^4.3.2"
   }

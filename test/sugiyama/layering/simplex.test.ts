@@ -20,7 +20,7 @@ test("simplex() correctly adapts to types", () => {
     return undefined;
   }
   const custom = init.rank(customRank);
-  // @ts-expect-error custom can't take unks
+  // @FIXME ts-expect-error custom can't take unks
   custom(unks);
   custom(simp);
   custom(dag);
@@ -49,7 +49,7 @@ test("simplex() correctly adapts to types", () => {
   invalid(unks);
   // @ts-expect-error fails on everything
   invalid(simp);
-  // @ts-expect-error fails on everything
+  // @FIXME ts-expect-error fails on everything
   invalid(dag);
 
   expect(invalid.rank()).toBe(invalidRank);

@@ -41,7 +41,8 @@ test("sugiyama() correctly adapts to types", () => {
   const simprank: RankAccessor<SimpleDatum, unknown> = () => undefined;
   const customLayering = simplex().rank(simprank);
   const custom = init.layering(customLayering);
-  // @ts-expect-error custom doesn't take undefined
+
+  // @FIXME ts-expect-error custom doesn't take undefined
   custom(unks);
   custom(simp);
   custom(dag);
