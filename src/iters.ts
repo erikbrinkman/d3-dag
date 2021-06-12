@@ -328,6 +328,6 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 }
 
-export function fluent<T>(seq: Iterable<T>): FluentIterable<T> {
+export function fluent<T>(seq: Iterable<T> = []): FluentIterable<T> {
   return new LazyFluentIterable(seq);
 }
