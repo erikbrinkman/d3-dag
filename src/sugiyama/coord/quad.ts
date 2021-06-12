@@ -35,13 +35,9 @@ function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
   }
 
   // "children" function that returns children and parents
-  function* graph(node: SugiNode): Generator<SugiNode> {
-    for (const child of node.ichildren()) {
-      yield child;
-    }
-    for (const par of parents.get(node) || []) {
-      yield par;
-    }
+  function* graph(node: SugiNode): Generator<SugiNode, void, undefined> {
+    yield* node.ichildren();
+    yield* parents.get(node) || [];
   }
 
   // dfs over all nodes

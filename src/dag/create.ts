@@ -71,9 +71,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
 
   *#gdepth(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const ch = (node: DagNode<NodeDatum, LinkDatum>) => node.ichildren();
-    for (const node of dfs(ch, ...this.iroots())) {
-      yield node;
-    }
+    yield* dfs(ch, ...this.iroots());
   }
 
   *#gbreadth(): Generator<DagNode<NodeDatum, LinkDatum>> {
@@ -255,13 +253,9 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     // "children" function that returns children and parents
     function* graph(
       node: DagNode<NodeDatum, LinkDatum>
-    ): Generator<DagNode<NodeDatum, LinkDatum>> {
-      for (const child of node.ichildren()) {
-        yield child;
-      }
-      for (const par of parents.get(node) || []) {
-        yield par;
-      }
+    ): Generator<DagNode<NodeDatum, LinkDatum>, void, undefined> {
+      yield* node.ichildren();
+      yield* parents.get(node) || [];
     }
 
     // dfs over roots, tracing parents too
