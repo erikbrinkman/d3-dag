@@ -1,4 +1,4 @@
-import { Dag, DagNode } from "../../../src/dag/node";
+import { Dag, DagNode } from "../../../src/dag";
 import { SimpleDatum, doub, ex, square } from "../../examples";
 
 import { getLayers } from "../utils";

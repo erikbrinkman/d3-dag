@@ -25,7 +25,7 @@
  */
 
 import { CoordOperator, SugiNodeSizeAccessor } from "./coord";
-import { Dag, DagNode } from "../dag/node";
+import { Dag, DagNode } from "../dag";
 import { GroupAccessor, LayeringOperator, RankAccessor } from "./layering";
 import {
   LinkDatum,
@@ -85,13 +85,10 @@ interface Operators {
   sugiNodeSize: SugiNodeSizeAccessor;
 }
 
-type DagDagNode<D extends Dag> = D extends DagNode ? D : never;
-type LDag<Op extends LayeringOperator> = Parameters<Op>[0];
-type LDagNode<Op extends LayeringOperator> = DagDagNode<LDag<Op>>;
-type DDagNode<Op extends DecrossOperator> = SugiDataDagNode<
-  Parameters<Op>[0][number][number]["data"]
->;
-type CDagNode<Op extends CoordOperator> = SugiDataDagNode<
+type LDagNode<Op extends LayeringOperator> = ReturnType<
+  Parameters<Op>[0]["roots"]
+>[number];
+type OpDagNode<Op extends DecrossOperator | CoordOperator> = SugiDataDagNode<
   Parameters<Op>[0][number][number]["data"]
 >;
 type SNSDagNode<Op extends SugiNodeSizeAccessor> = SugiDataDagNode<
@@ -101,14 +98,14 @@ type SNSDagNode<Op extends SugiNodeSizeAccessor> = SugiDataDagNode<
 type OpsNodeDatum<Ops extends Operators> = NodeDatum<
   LDagNode<Ops["layering"]>
 > &
-  NodeDatum<DDagNode<Ops["decross"]>> &
-  NodeDatum<CDagNode<Ops["coord"]>> &
+  NodeDatum<OpDagNode<Ops["decross"]>> &
+  NodeDatum<OpDagNode<Ops["coord"]>> &
   NodeDatum<SNSDagNode<Ops["sugiNodeSize"]>>;
 type OpsLinkDatum<Ops extends Operators> = LinkDatum<
   LDagNode<Ops["layering"]>
 > &
-  LinkDatum<DDagNode<Ops["decross"]>> &
-  LinkDatum<CDagNode<Ops["coord"]>> &
+  LinkDatum<OpDagNode<Ops["decross"]>> &
+  LinkDatum<OpDagNode<Ops["coord"]>> &
   LinkDatum<SNSDagNode<Ops["sugiNodeSize"]>>;
 
 /**
@@ -443,9 +440,7 @@ function defaultNodeSize(node?: DagNode): [number, number] {
 /**
  * Construct a new {@link SugiyamaOperator} with the default settings.
  */
-export function sugiyama(
-  ...args: never[]
-): SugiyamaOperator<{
+export function sugiyama(...args: never[]): SugiyamaOperator<{
   layering: SimplexOperator<{
     rank: RankAccessor<unknown, unknown>;
     group: GroupAccessor<unknown, unknown>;

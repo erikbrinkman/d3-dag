@@ -11,7 +11,7 @@
  * @module
  */
 
-import { Dag } from "../../dag/node";
+import { Dag } from "../../dag";
 import { LayeringOperator } from ".";
 
 export type TopologicalOperator = LayeringOperator<unknown, unknown>;

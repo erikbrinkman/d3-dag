@@ -1,4 +1,4 @@
-import { connect } from "../../src/dag/connect";
+import { connect } from "../../src/dag/create";
 
 const simpleSquare = [
   ["a", "b"],
@@ -142,7 +142,7 @@ class BadZero {
 }
 
 test("connect() fails on non-string source", () => {
-  expect(() => connect()([[(null as unknown) as string, "a"]])).toThrow(
+  expect(() => connect()([[null as unknown as string, "a"]])).toThrow(
     "default source id expected datum[0] to be a string but got datum: "
   );
   expect(() => connect()([new BadZero()])).toThrow(
@@ -158,7 +158,7 @@ class BadOne {
 }
 
 test("connect() fails on non-string target", () => {
-  expect(() => connect()([["a", (null as unknown) as string]])).toThrow(
+  expect(() => connect()([["a", null as unknown as string]])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
   expect(() => connect()([new BadOne()])).toThrow(

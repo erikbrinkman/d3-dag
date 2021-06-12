@@ -1,7 +1,7 @@
-import { Dag, DagNode } from "../dag/node";
+import { Dag, DagNode } from "../dag";
 import { assert, def, js } from "../utils";
 
-import { hierarchy } from "../dag/hierarchy";
+import { hierarchy } from "../dag/create";
 
 export type SugiData<NodeDatum = unknown, LinkDatum = unknown> =
   | { layer: number; node: DagNode<NodeDatum, LinkDatum> }
@@ -25,7 +25,9 @@ export type SugiDataDagNode<S extends SugiData> = S extends {
   ? S["node"]
   : never;
 export type NodeDatum<D extends DagNode> = D["data"];
-export type LinkDatum<D extends DagNode> = D["dataChildren"][number]["data"];
+export type LinkDatum<D extends DagNode> = ReturnType<
+  D["childLinks"]
+>[number]["data"];
 
 /** validate layer assignments @internal */
 function vlayer(node: DagNode): number {

@@ -8,7 +8,7 @@
  *
  * @module
  */
-import { Dag } from "../dag/node";
+import { Dag } from "../dag";
 import { assert } from "../utils";
 import { greedy } from "./greedy";
 

@@ -106,6 +106,7 @@ New features:
 - Unlikely breaking changes: (changes to private apis that shouldn't break things, but might in strange circumstances)
   - Many operator types were renamed from `Operator` in the appropriate module to a named operator like `TwolayerOperator`. This should only affect you if you were using the experimental 
   - The build system was switched from rollup to esbuild. There was one error with the bundling that was caught in development, otherwise everything should still work.
+  - The definition of Dag changed from being a union of Dag and Dag root, to just being a subset of DagNode without the local node operations
 
 ### Updating from 0.6 to 0.7
 

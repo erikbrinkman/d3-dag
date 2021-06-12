@@ -1,5 +1,5 @@
 import { SimpleDatum } from "../examples";
-import { stratify } from "../../src/dag/stratify";
+import { stratify } from "../../src/dag/create";
 
 const single = [
   {
@@ -165,7 +165,7 @@ class BadId {
 }
 test("stratify() fails at undefined id", () => {
   expect(() => {
-    stratify()([{ id: (null as unknown) as string }]);
+    stratify()([{ id: null as unknown as string }]);
   }).toThrow("default id function expected datum to have an id field but got");
   expect(() => {
     stratify()([new BadId()]);
@@ -254,7 +254,7 @@ test("stratify() fails with incorrect parentIds", () => {
   const data = [
     {
       id: "1",
-      parentIds: (null as unknown) as undefined
+      parentIds: null as unknown as undefined
     }
   ];
   expect(() => stratify()(data)).toThrow(

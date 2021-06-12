@@ -12,7 +12,7 @@
  *
  * @module
  */
-import { Dag, DagNode } from "../../dag/node";
+import { Dag, DagNode } from "../../dag";
 
 /**
  * A rank accessor assigns a rank to specific nodes. Layering operators that

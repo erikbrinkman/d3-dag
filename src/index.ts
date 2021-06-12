@@ -14,10 +14,15 @@
  *
  * @module
  */
-export { Dag, DagNode, DagRoot, Link, ChildLink } from "./dag/node";
-export { stratify as dagStratify, StratifyOperator } from "./dag/stratify";
-export { connect as dagConnect, ConnectOperator } from "./dag/connect";
-export { hierarchy as dagHierarchy, HierarchyOperator } from "./dag/hierarchy";
+export { Dag, DagNode, DagLink } from "./dag";
+export {
+  stratify as dagStratify,
+  StratifyOperator,
+  connect as dagConnect,
+  ConnectOperator,
+  hierarchy as dagHierarchy,
+  HierarchyOperator
+} from "./dag/create";
 export { sugiyama, SugiyamaOperator, NodeSizeAccessor } from "./sugiyama";
 export {
   topological as layeringTopological,

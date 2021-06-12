@@ -1,9 +1,7 @@
+import { connect, hierarchy, stratify } from "../../src/dag/create";
 import { createLayers, crossings, getLayers } from "./utils";
 
-import { connect } from "../../src/dag/connect";
 import { dummy } from "../examples";
-import { hierarchy } from "../../src/dag/hierarchy";
-import { stratify } from "../../src/dag/stratify";
 import { sugify } from "../../src/sugiyama/utils";
 
 test("sugify() works with dummy nodes", () => {

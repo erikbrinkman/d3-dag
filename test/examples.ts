@@ -1,7 +1,6 @@
-import { ConnectDatum, connect } from "../src/dag/connect";
+import { ConnectDatum, connect, stratify } from "../src/dag/create";
 
-import { Dag } from "../src/dag/node";
-import { stratify } from "../src/dag/stratify";
+import { Dag } from "../src/dag";
 
 export interface SimpleDatum {
   readonly id: string;

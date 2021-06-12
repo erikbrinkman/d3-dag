@@ -1,5 +1,5 @@
 import { CoordOperator, SugiNodeSizeAccessor } from "../../src/sugiyama/coord";
-import { Dag, DagNode } from "../../src/dag/node";
+import { Dag, DagNode } from "../../src/dag";
 import { LayeringOperator, RankAccessor } from "../../src/sugiyama/layering";
 import { NodeSizeAccessor, sugiyama } from "../../src/sugiyama";
 import {

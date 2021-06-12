@@ -1,4 +1,4 @@
-import { hierarchy } from "../../src/dag/hierarchy";
+import { hierarchy } from "../../src/dag/create";
 
 const tail = { id: "d", children: [] } as const;
 const square = {

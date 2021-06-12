@@ -11,7 +11,7 @@ describe.skip("tests that require a built bundle", () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore-error in case not initialized yet
     const mod = await import("..");
-    return (mod as unknown) as typeof d3types;
+    return mod as unknown as typeof d3types;
   }
 
   // javascript=lp-solver

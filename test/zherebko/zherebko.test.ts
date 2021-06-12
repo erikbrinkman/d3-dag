@@ -1,6 +1,6 @@
 import { doub, single } from "../examples";
 
-import { connect } from "../../src/dag/connect";
+import { connect } from "../../src/dag/create";
 import { zherebko } from "../../src/zherebko";
 
 test("zherebko() works for a point", () => {

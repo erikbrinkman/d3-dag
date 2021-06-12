@@ -1,7 +1,5 @@
 type OfAble<T> = Iterator<T> | Iterable<T>;
 
-// FIXME replace this with fluent iterable
-
 class LazyFluentIterable<T> implements Iterable<T> {
   constructor(private readonly base: Iterable<T>) {}
 
@@ -166,7 +164,7 @@ class LazyFluentIterable<T> implements Iterable<T> {
         index: number
       ) => T;
       let first = true;
-      let accumulator: T = (undefined as unknown) as T;
+      let accumulator: T = undefined as unknown as T;
       for (const [index, element] of this.entries()) {
         if (first) {
           accumulator = element;

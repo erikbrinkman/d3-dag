@@ -13,7 +13,7 @@
  */
 
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
-import { Dag, DagNode } from "../../dag/node";
+import { Dag, DagNode } from "../../dag";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { LinkDatum, NodeDatum } from "../utils";
 import { Up, bigrams, def } from "../../utils";
@@ -247,9 +247,7 @@ function defaultAccessor(): undefined {
 }
 
 /** Create a default {@link SimplexOperator}. */
-export function simplex(
-  ...args: never[]
-): SimplexOperator<{
+export function simplex(...args: never[]): SimplexOperator<{
   rank: RankAccessor<unknown, unknown>;
   group: GroupAccessor<unknown, unknown>;
 }> {

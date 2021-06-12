@@ -9,7 +9,7 @@
  *
  * @module
  */
-import { Dag } from "../../dag/node";
+import { Dag } from "../../dag";
 import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
