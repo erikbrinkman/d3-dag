@@ -16,7 +16,7 @@ import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { Dag, DagNode } from "../../dag";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { LinkDatum, NodeDatum } from "../utils";
-import { Up, bigrams, def } from "../../utils";
+import { Up, assert, bigrams, def } from "../../utils";
 
 interface Operators {
   rank: RankAccessor;
@@ -188,16 +188,10 @@ function buildOperator<Ops extends Operators>(
       }
     );
     if (!feasible) {
-      /* istanbul ignore else */
-      if (ranks.length || groups.size) {
-        throw new Error(
-          "could not find a feasbile simplex layout, check that rank or group accessors are not ill-defined"
-        );
-      } else {
-        throw new Error(
-          "could not find feasbile simplex layout, this should not happen"
-        );
-      }
+      assert(ranks.length || groups.size);
+      throw new Error(
+        "could not find a feasbile simplex layout, check that rank or group accessors are not ill-defined"
+      );
     }
 
     // lp solver doesn't assign some zeros

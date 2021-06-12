@@ -285,7 +285,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
   connected(): boolean {
     const iter = this.isplit()[Symbol.iterator]();
     let { done } = iter.next();
-    assert(!done, "internal error: dag was somehow empty");
+    assert(!done);
     ({ done } = iter.next());
     return !!done;
   }
@@ -356,10 +356,9 @@ class LayoutDagNode<NodeDatum, LinkDatum>
  * Verify an ID is a valid ID.
  */
 function verifyId(id: string): string {
-  assert(
-    typeof id === "string",
-    `id is supposed to be string but got type ${typeof id}`
-  );
+  if (typeof id !== "string") {
+    throw new Error(`id is supposed to be string but got type ${typeof id}`);
+  }
   return id;
 }
 
@@ -368,15 +367,16 @@ function verifyId(id: string): string {
  */
 function verifyDag(roots: DagNode[]): void {
   // test that there are roots
-  assert(roots.length, "dag contained no roots; this often indicates a cycle");
+  if (!roots.length) {
+    throw new Error("dag contained no roots; this often indicates a cycle");
+  }
 
   // make sure there's no duplicate edges
   for (const node of new LayoutDag(roots)) {
     const childIdSet = new Set(node.ichildren());
-    assert(
-      childIdSet.size === node.ichildren().length,
-      js`node '${node.data}' contained duplicate children`
-    );
+    if (childIdSet.size !== node.ichildren().length) {
+      throw new Error(js`node '${node.data}' contained duplicate children`);
+    }
   }
 
   // test that dag is free of cycles
@@ -546,7 +546,9 @@ function buildConnect<Ops extends ConnectOperators>(
   function connect<L extends ConnectLinkDatum<Ops>>(
     data: readonly L[]
   ): Dag<ConnectDatum, L> {
-    assert(data.length, "can't connect empty data");
+    if (!data.length) {
+      throw new Error("can't connect empty data");
+    }
     const nodes = new Map<string, LayoutDagNode<ConnectDatum, L>>();
     const hasParents = new Set<string>();
     for (const [i, datum] of data.entries()) {
@@ -639,11 +641,13 @@ function isZeroString(d: unknown): d is ZeroString {
 }
 
 function defaultSourceId(d: ZeroString): string {
-  assert(
-    isZeroString(d),
-    `default source id expected datum[0] to be a string but got datum: ${d}`
-  );
-  return d[0];
+  if (isZeroString(d)) {
+    return d[0];
+  } else {
+    throw new Error(
+      `default source id expected datum[0] to be a string but got datum: ${d}`
+    );
+  }
 }
 
 interface OneString {
@@ -659,11 +663,13 @@ function isOneString(d: unknown): d is OneString {
 }
 
 function defaultTargetId(d: OneString): string {
-  assert(
-    isOneString(d),
-    `default target id expected datum[1] to be a string but got datum: ${d}`
-  );
-  return d[1];
+  if (isOneString(d)) {
+    return d[1];
+  } else {
+    throw new Error(
+      `default target id expected datum[1] to be a string but got datum: ${d}`
+    );
+  }
 }
 
 /**
@@ -674,16 +680,18 @@ export function connect(...args: never[]): ConnectOperator<{
   sourceId: IdOperator<ZeroString>;
   targetId: IdOperator<OneString>;
 }> {
-  assert(
-    !args.length,
-    `got arguments to connect(${args}), but constructor takes no aruguments. ` +
-      "These were probably meant as data which should be called as connect()(...)"
-  );
-  return buildConnect({
-    sourceId: defaultSourceId,
-    targetId: defaultTargetId,
-    single: false
-  });
+  if (args.length) {
+    throw new Error(
+      `got arguments to connect(${args}), but constructor takes no aruguments. ` +
+        "These were probably meant as data which should be called as connect()(...)"
+    );
+  } else {
+    return buildConnect({
+      sourceId: defaultSourceId,
+      targetId: defaultTargetId,
+      single: false
+    });
+  }
 }
 
 /*************
@@ -1022,11 +1030,13 @@ function hasChildren(d: unknown): d is HasChildren {
 }
 
 function defaultChildren(d: unknown): readonly HasChildren[] | undefined {
-  assert(
-    hasChildren(d),
-    js`default children function expected datum to have a children field but got: ${d}`
-  );
-  return d.children;
+  if (hasChildren(d)) {
+    return d.children;
+  } else {
+    throw new Error(
+      js`default children function expected datum to have a children field but got: ${d}`
+    );
+  }
 }
 
 /**
@@ -1036,16 +1046,18 @@ function defaultChildren(d: unknown): readonly HasChildren[] | undefined {
 export function hierarchy(
   ...args: never[]
 ): ChildrenHierarchyOperator<HasChildren, ChildrenOperator<HasChildren>> {
-  assert(
-    !args.length,
-    `got arguments to hierarchy(${args}), but constructor takes no aruguments. ` +
-      "These were probably meant as data which should be called as hierarchy()(...)"
-  );
-  return buildHierarchy({
-    children: defaultChildren,
-    childrenData: wrapChildren(defaultChildren),
-    roots: true
-  });
+  if (args.length) {
+    throw new Error(
+      `got arguments to hierarchy(${args}), but constructor takes no aruguments. ` +
+        "These were probably meant as data which should be called as hierarchy()(...)"
+    );
+  } else {
+    return buildHierarchy({
+      children: defaultChildren,
+      childrenData: wrapChildren(defaultChildren),
+      roots: true
+    });
+  }
 }
 
 /************
@@ -1378,11 +1390,13 @@ function hasId(d: unknown): d is HasId {
 }
 
 function defaultId(data: unknown): string {
-  assert(
-    hasId(data),
-    js`default id function expected datum to have an id field but got '${data}'`
-  );
-  return data.id;
+  if (hasId(data)) {
+    return data.id;
+  } else {
+    throw new Error(
+      js`default id function expected datum to have an id field but got '${data}'`
+    );
+  }
 }
 
 interface HasParentIds {
@@ -1403,11 +1417,13 @@ function hasParentIds(d: unknown): d is HasParentIds {
 }
 
 function defaultParentIds(d: unknown): readonly string[] | undefined {
-  assert(
-    hasParentIds(d),
-    `default parentIds function expected datum to have a parentIds field but got: ${d}`
-  );
-  return d.parentIds;
+  if (hasParentIds(d)) {
+    return d.parentIds;
+  } else {
+    throw new Error(
+      `default parentIds function expected datum to have a parentIds field but got: ${d}`
+    );
+  }
 }
 
 /**
@@ -1419,14 +1435,16 @@ export function stratify(...args: never[]): StratifyOperator<{
   parentIds: ParentIdsOperator<HasParentIds>;
   parentData: WrappedParentIdsOperator<ParentIdsOperator<HasParentIds>>;
 }> {
-  assert(
-    !args.length,
-    `got arguments to stratify(${args}), but constructor takes no aruguments. ` +
-      "These were probably meant as data which should be called as stratify()(...)"
-  );
-  return buildStratify({
-    id: defaultId,
-    parentIds: defaultParentIds,
-    parentData: wrapParentIds(defaultParentIds)
-  });
+  if (args.length) {
+    throw new Error(
+      `got arguments to stratify(${args}), but constructor takes no aruguments. ` +
+        "These were probably meant as data which should be called as stratify()(...)"
+    );
+  } else {
+    return buildStratify({
+      id: defaultId,
+      parentIds: defaultParentIds,
+      parentData: wrapParentIds(defaultParentIds)
+    });
+  }
 }

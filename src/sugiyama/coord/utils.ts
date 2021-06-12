@@ -1,4 +1,4 @@
-import { bigrams, def } from "../../utils";
+import { assert, bigrams, def } from "../../utils";
 
 import { SugiNode } from "../utils";
 import { SugiNodeSizeAccessor } from ".";
@@ -36,10 +36,7 @@ function qp(
   bvec.push(...b.map((v) => -v));
 
   const { solution, message } = solveQP(Dmat, dvec, Amat, bvec, meq);
-  /* istanbul ignore next */
-  if (message.length) {
-    throw new Error(`internal error: quadprog failed with: ${message}`);
-  }
+  assert(!message.length);
   solution.shift();
   return solution;
 }

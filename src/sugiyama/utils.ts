@@ -31,15 +31,17 @@ export type LinkDatum<D extends DagNode> = ReturnType<
 
 /** validate layer assignments @internal */
 function vlayer(node: DagNode): number {
-  assert(
-    node.value !== undefined,
-    js`node with data '${node.data}' did not get a defined value during layering`
-  );
-  assert(
-    node.value >= 0,
-    js`node with data '${node.data}' got an invalid (negative) value during layering: ${node.value}`
-  );
-  return node.value;
+  if (node.value === undefined) {
+    throw new Error(
+      js`node with data '${node.data}' did not get a defined value during layering`
+    );
+  } else if (node.value < 0) {
+    throw new Error(
+      js`node with data '${node.data}' got an invalid (negative) value during layering: ${node.value}`
+    );
+  } else {
+    return node.value;
+  }
 }
 
 /**
@@ -65,10 +67,11 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
     const source = "node" in data ? data.node : data.source;
     return targets.map((target) => {
       const datum = def(cache.get(target));
-      assert(
-        datum.layer >= layer,
-        js`layering left child data '${target.data}' (${target.value}) with greater or equal layer to parent data '${source.data}' (${source.value})`
-      );
+      if (datum.layer < layer) {
+        throw new Error(
+          js`layering left child data '${target.data}' (${target.value}) with greater or equal layer to parent data '${source.data}' (${source.value})`
+        );
+      }
       return datum.layer === layer ? datum : { source, target, layer };
     });
   }
@@ -84,9 +87,11 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
     const layer = layers[node.data.layer] || (layers[node.data.layer] = []);
     layer.push(node);
   }
-  assert(layers[0] && layers[0].length, "no nodes were assigned to layer 0");
-  for (const [i, layer] of layers.entries()) {
-    assert(layer && layer.length, `internal error: layer ${i} was empty`);
+  if (!layers[0] || !layers[0].length) {
+    throw new Error("no nodes were assigned to layer 0");
+  }
+  for (const layer of layers) {
+    assert(layer && layer.length);
   }
   return layers;
 }

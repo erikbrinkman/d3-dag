@@ -58,9 +58,7 @@ test("getLayers() throws when not all nodes have a layer", () => {
   for (const node of dag) {
     node.value = node.data.layer;
   }
-  expect(() => getLayers(dag)).toThrow(
-    `node with id 'b' was not given a layer`
-  );
+  expect(() => getLayers(dag)).toThrow();
 });
 
 test("createLayers() return the right number of nodes", () => {
@@ -75,17 +73,15 @@ test("createLayers() return the right number of nodes", () => {
 });
 
 test("createLayers() throws on empty", () => {
-  expect(() => createLayers([])).toThrow("must pass at least one layer");
+  expect(() => createLayers([])).toThrow();
 });
 
 test("createLayers() throws on invalid last row", () => {
-  expect(() => createLayers([[[1]]])).toThrow("last layer contained ids");
+  expect(() => createLayers([[[1]]])).toThrow();
 });
 
 test("createLayers() throws on out of range", () => {
-  expect(() => createLayers([[[1]], [[]]])).toThrow(
-    "got invalid child index: 1"
-  );
+  expect(() => createLayers([[[1]], [[]]])).toThrow();
 });
 
 test("getLayers() throws with empty layer", () => {

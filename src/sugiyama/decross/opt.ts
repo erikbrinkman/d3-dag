@@ -295,10 +295,7 @@ function buildOperator(options: {
 
     // sort layers
     for (const layer of layers) {
-      layer.sort(
-        /* istanbul ignore next */
-        (n1, n2) => ordering[key(n1, n2)] || -1
-      );
+      layer.sort((n1, n2) => ordering[key(n1, n2)] || -1);
     }
   }
 

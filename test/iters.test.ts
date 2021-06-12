@@ -8,6 +8,10 @@ test("fluent works like an iterable", () => {
   expect(array).toEqual([1, 2, 3]);
 });
 
+test("empty fluent works", () => {
+  expect(fluent().length).toEqual(0);
+});
+
 test("concat()", () => {
   const concated = [...fluent<number>([]).concat([], [1], fluent([2, 3]))];
   expect(concated).toEqual([1, 2, 3]);

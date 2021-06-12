@@ -1,7 +1,6 @@
-import { assert, js } from "../utils";
-
 import { SugiNode } from "./utils";
 import { SugiNodeSizeAccessor } from "./coord";
+import { js } from "../utils";
 
 /**
  * A checked and cached node size accessor wrapper.
@@ -18,10 +17,11 @@ export function cachedNodeSize<N, L>(
     if (val === undefined) {
       val = nodeSize(node);
       const [width, height] = val;
-      assert(
-        width >= 0 && height >= 0,
-        js`all node sizes must be non-negative, but got width ${width} and height ${height} for node '${node}'`
-      );
+      if (width < 0 || height < 0) {
+        throw new Error(
+          js`all node sizes must be non-negative, but got width ${width} and height ${height} for node '${node}'`
+        );
+      }
       cache.set(node, val);
     }
     return val;

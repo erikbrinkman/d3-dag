@@ -232,10 +232,11 @@ function buildOperator<Ops extends Operators>(
       }
       height += layerHeight;
     }
-    assert(
-      height > 0,
-      "at least one node must have positive height, but total height was zero"
-    );
+    if (height <= 0) {
+      throw new Error(
+        "at least one node must have positive height, but total height was zero"
+      );
+    }
 
     // minimize edge crossings
     options.decross(layers);
@@ -246,14 +247,13 @@ function buildOperator<Ops extends Operators>(
     // verify
     for (const layer of layers) {
       for (const node of layer) {
-        assert(
-          node.x !== undefined,
-          js`coord didn't assign an x to node '${node}'`
-        );
-        assert(
-          node.x >= 0 && node.x <= width,
-          `coord assgined an x (${node.x}) outside of [0, ${width}]`
-        );
+        if (node.x === undefined) {
+          throw new Error(js`coord didn't assign an x to node '${node}'`);
+        } else if (node.x < 0 || node.x > width) {
+          throw new Error(
+            `coord assgined an x (${node.x}) outside of [0, ${width}]`
+          );
+        }
       }
     }
 
@@ -450,16 +450,18 @@ export function sugiyama(...args: never[]): SugiyamaOperator<{
   nodeSize: NodeSizeAccessor<unknown, unknown>;
   sugiNodeSize: WrappedNodeSizeAccessor<NodeSizeAccessor<unknown, unknown>>;
 }> {
-  assert(
-    !args.length,
-    `got arguments to sugiyama(${args}), but constructor takes no aruguments.`
-  );
-  return buildOperator({
-    layering: simplex(),
-    decross: twoLayer(),
-    coord: quad(),
-    size: null,
-    nodeSize: defaultNodeSize,
-    sugiNodeSize: wrapNodeSizeAccessor(defaultNodeSize)
-  });
+  if (args.length) {
+    throw new Error(
+      `got arguments to sugiyama(${args}), but constructor takes no aruguments.`
+    );
+  } else {
+    return buildOperator({
+      layering: simplex(),
+      decross: twoLayer(),
+      coord: quad(),
+      size: null,
+      nodeSize: defaultNodeSize,
+      sugiNodeSize: wrapNodeSizeAccessor(defaultNodeSize)
+    });
+  }
 }

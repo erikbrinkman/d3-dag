@@ -239,10 +239,7 @@ function buildOperator(options: {
     const ordering = Solve.call({}, model);
 
     // sort layers
-    reordered.sort(
-      /* istanbul ignore next */
-      (n1, n2) => ordering[key(n1, n2)] || -1
-    );
+    reordered.sort((n1, n2) => ordering[key(n1, n2)] || -1);
   }
 
   function large(): LargeHandling;

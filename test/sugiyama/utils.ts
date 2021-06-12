@@ -7,10 +7,7 @@ import { hierarchy } from "../../src/dag/create";
 export function getLayers(dag: Dag<{ id: string }>): number[][] {
   const layers: number[][] = [];
   for (const node of dag) {
-    const layerId = def(
-      node.value,
-      `node with id '${node.data.id}' was not given a layer`
-    );
+    const layerId = def(node.value);
     const layer = layers[layerId] || (layers[layerId] = []);
     layer.push(parseInt(node.data.id));
   }
@@ -59,15 +56,12 @@ export function createLayers(
   children: (number[] | number)[][]
 ): SugiNode<TestDatum>[][] {
   // easy checks
-  assert(children.length, "must pass at least one layer");
+  assert(children.length);
   for (const first of children[0]) {
-    assert(typeof first !== "number", "first layer contained a dummy node");
+    assert(typeof first !== "number");
   }
   for (const last of children[children.length - 1]) {
-    assert(
-      typeof last !== "number" && !last.length,
-      "last layer contained ids"
-    );
+    assert(typeof last !== "number" && !last.length);
   }
 
   // look up data by key, allowing for uniqueness
@@ -87,8 +81,7 @@ export function createLayers(
 
   function childrenAccessor(datum: TestDatum): TestDatum[] {
     const vals = children[datum.layer][datum.index];
-    assert(vals !== undefined);
-    assert(typeof vals !== "number", "tried to get children of a dummy node");
+    assert(vals !== undefined && typeof vals !== "number");
     return [...new Set(vals)].map((ind) => {
       let layer = datum.layer + 1;
       let next;
@@ -98,13 +91,13 @@ export function createLayers(
         ind = next;
         layer++;
       }
-      assert(next !== undefined, `got invalid child index: ${ind}`);
+      assert(next !== undefined);
 
       // store dummy indicies
       for (const [i, index] of dummies.entries()) {
         const dinds = dummyInds[datum.layer + i + 1];
         const key = [datum.layer, datum.index, layer, ind].join(",");
-        assert(!dinds.has(key), "duplicate dummy edge");
+        assert(!dinds.has(key));
         dinds.set(key, index);
       }
       return def(data.get([layer, ind].join(",")));

@@ -2,25 +2,18 @@
 export type Up<O, N> = Omit<O, keyof N> & N;
 
 /** helper for verifying things aren't undefined */
-export function def<T>(
-  val: T | undefined,
-  msg = "internal error: got unexpected undefined value"
-): T {
-  /* istanbul ignore else: only for unaccounted for errors */
+export function def<T>(val: T | undefined): T {
   if (val !== undefined) {
     return val;
   } else {
-    throw new Error(msg);
+    throw new Error("internal error: got unexpected undefined value");
   }
 }
 
 /** assert something */
-export function assert(
-  statement: unknown,
-  msg: string = "internal error: failed assert"
-): asserts statement {
+export function assert(statement: unknown): asserts statement {
   if (!statement) {
-    throw new Error(msg);
+    throw new Error("internal error: failed assert");
   }
 }
 
