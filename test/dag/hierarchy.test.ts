@@ -87,9 +87,6 @@ test("hierarchy() works with custom operators", () => {
     return c;
   }
 
-  // @ts-expect-error can't pass random thing
-  expect(() => hierarchy()(null)).toThrow();
-
   const layout = hierarchy().childrenData(newChildData);
   expect(layout.children().wrapped).toBe(newChildData);
   expect(layout.childrenData()).toBe(newChildData);

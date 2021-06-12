@@ -1,41 +1,9 @@
-import { TestDatum, createLayers, getIndex } from "../utils";
+import { createLayers, getIndex } from "../utils";
 
-import { SugiNode } from "../../../src/sugiyama/utils";
 import { mean } from "../../../src/sugiyama/twolayer/mean";
 import { median } from "../../../src/sugiyama/twolayer/median";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
-
-test("twoLayer() correctly adapts to types", () => {
-  const layers = createLayers([[[], []], [[]]]);
-  const unks = layers as SugiNode[][];
-
-  const init = twoLayer();
-  init(layers);
-  init(unks);
-
-  // narrowed for custom
-  function customTwolayer(
-    topLayer: SugiNode<TestDatum>[],
-    bottomLayer: SugiNode<TestDatum>[],
-    topDown: boolean
-  ): void {
-    void [topLayer, bottomLayer, topDown];
-  }
-  const custom = init.order(customTwolayer);
-  custom(layers);
-  // @ts-expect-error custom only takes TestDatum
-  custom(unks);
-
-  // rexpands for more general two layers
-  const optimal = custom.order(opt());
-  optimal(layers);
-  optimal(unks);
-
-  // but we can still get original operator and operate on it
-  const newOrder = optimal.order().dist(true);
-  expect(newOrder.dist()).toBeTruthy();
-});
 
 test("twoLayer() propogates to both layers", () => {
   // o o    o o

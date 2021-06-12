@@ -1,59 +1,8 @@
-import { Dag, DagNode } from "../../../src/dag";
 import { SimpleDatum, doub, ex, square } from "../../examples";
 
+import { DagNode } from "../../../src/dag";
 import { getLayers } from "../utils";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
-
-test("simplex() correctly adapts to types", () => {
-  const dag = square();
-  const simp = dag as Dag<SimpleDatum>;
-  const unks = simp as Dag;
-
-  const init = simplex();
-  init(unks);
-  init(simp);
-  init(dag);
-
-  // narrowed for custom rank / node data
-  function customRank(node: DagNode<SimpleDatum>): number | undefined {
-    void node;
-    return undefined;
-  }
-  const custom = init.rank(customRank);
-  // @FIXME ts-expect-error custom can't take unks
-  custom(unks);
-  custom(simp);
-  custom(dag);
-
-  // works for group too
-  function customGroup(
-    node: DagNode<SimpleDatum, undefined>
-  ): string | undefined {
-    void node;
-    return undefined;
-  }
-  const group = custom.group(customGroup);
-  // @ts-expect-error can't take unknowns
-  group(unks);
-  // @ts-expect-error must have undefined link data
-  group(simp);
-  group(dag);
-
-  // overly restrictive
-  function invalidRank(node: DagNode<null>): number | undefined {
-    void node;
-    return undefined;
-  }
-  const invalid = group.rank(invalidRank);
-  // @ts-expect-error fails on everything
-  invalid(unks);
-  // @ts-expect-error fails on everything
-  invalid(simp);
-  // @FIXME ts-expect-error fails on everything
-  invalid(dag);
-
-  expect(invalid.rank()).toBe(invalidRank);
-});
 
 test("simplex() works for square", () => {
   const dag = square();

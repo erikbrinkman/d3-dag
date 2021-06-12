@@ -8,9 +8,8 @@ import { square } from "./examples";
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip("tests that require a built bundle", () => {
   async function load(): Promise<typeof d3types> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore-error in case not initialized yet
-    const mod = await import("..");
+    // NOTE as string prevents compile time check of path
+    const mod = await import(".." as string);
     return mod as unknown as typeof d3types;
   }
 

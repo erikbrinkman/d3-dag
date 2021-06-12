@@ -95,18 +95,16 @@ type SNSDagNode<Op extends SugiNodeSizeAccessor> = SugiDataDagNode<
   Parameters<Op>[0]["data"]
 >;
 
-type OpsNodeDatum<Ops extends Operators> = NodeDatum<
-  LDagNode<Ops["layering"]>
-> &
-  NodeDatum<OpDagNode<Ops["decross"]>> &
-  NodeDatum<OpDagNode<Ops["coord"]>> &
-  NodeDatum<SNSDagNode<Ops["sugiNodeSize"]>>;
-type OpsLinkDatum<Ops extends Operators> = LinkDatum<
-  LDagNode<Ops["layering"]>
-> &
-  LinkDatum<OpDagNode<Ops["decross"]>> &
-  LinkDatum<OpDagNode<Ops["coord"]>> &
-  LinkDatum<SNSDagNode<Ops["sugiNodeSize"]>>;
+type OpsDag<Ops extends Operators> = Dag<
+  NodeDatum<LDagNode<Ops["layering"]>> &
+    NodeDatum<OpDagNode<Ops["decross"]>> &
+    NodeDatum<OpDagNode<Ops["coord"]>> &
+    NodeDatum<SNSDagNode<Ops["sugiNodeSize"]>>,
+  LinkDatum<LDagNode<Ops["layering"]>> &
+    LinkDatum<OpDagNode<Ops["decross"]>> &
+    LinkDatum<OpDagNode<Ops["coord"]>> &
+    LinkDatum<SNSDagNode<Ops["sugiNodeSize"]>>
+>;
 
 /**
  * The operator used to layout a {@link Dag} using the sugiyama method.
@@ -117,7 +115,7 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
    * DAG nodes will have added properties from {@link SugiyamaNode}. In addition,
    * each link will have points reset and assigned.
    */
-  (dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>): SugiyamaInfo;
+  (dag: OpsDag<Ops>): SugiyamaInfo;
 
   /**
    * Set the {@link LayeringOperator}. See {@link "sugiyama/layering/index" |
@@ -213,9 +211,7 @@ function buildOperator<Ops extends Operators>(
     size: readonly [number, number] | null;
   }
 ): SugiyamaOperator<Ops> {
-  function sugiyama(
-    dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>
-  ): SugiyamaInfo {
+  function sugiyama(dag: OpsDag<Ops>): SugiyamaInfo {
     // compute layers
     options.layering(dag);
 

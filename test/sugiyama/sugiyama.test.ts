@@ -1,20 +1,10 @@
 import { CoordOperator, SugiNodeSizeAccessor } from "../../src/sugiyama/coord";
 import { Dag, DagNode } from "../../src/dag";
-import { LayeringOperator, RankAccessor } from "../../src/sugiyama/layering";
-import { NodeSizeAccessor, sugiyama } from "../../src/sugiyama";
-import {
-  SimpleDatum,
-  doub,
-  dummy,
-  single,
-  square,
-  three,
-  trip
-} from "../examples";
+import { SimpleDatum, doub, dummy, single, three, trip } from "../examples";
 
 import { DecrossOperator } from "../../src/sugiyama/decross";
+import { LayeringOperator } from "../../src/sugiyama/layering";
 import { SugiNode } from "../../src/sugiyama/utils";
-import { TwolayerOperator } from "../../src/sugiyama/twolayer";
 import { center } from "../../src/sugiyama/coord/center";
 import { coffmanGraham } from "../../src/sugiyama/layering/coffman-graham";
 import { topological as coordTopological } from "../../src/sugiyama/coord/topological";
@@ -25,52 +15,8 @@ import { longestPath } from "../../src/sugiyama/layering/longest-path";
 import { opt } from "../../src/sugiyama/decross/opt";
 import { quad } from "../../src/sugiyama/coord/quad";
 import { simplex } from "../../src/sugiyama/layering/simplex";
+import { sugiyama } from "../../src/sugiyama";
 import { twoLayer } from "../../src/sugiyama/decross/two-layer";
-
-test("sugiyama() correctly adapts to types", () => {
-  const dag = square();
-  const simp = dag as Dag<SimpleDatum>;
-  const unks = simp as Dag;
-
-  const init = sugiyama();
-  init(unks);
-  init(simp);
-  init(dag);
-
-  // narrowed for custom
-  const simprank: RankAccessor<SimpleDatum, unknown> = () => undefined;
-  const customLayering = simplex().rank(simprank);
-  const custom = init.layering(customLayering);
-
-  // @FIXME ts-expect-error custom doesn't take undefined
-  custom(unks);
-  custom(simp);
-  custom(dag);
-
-  // works for group too
-  const siz: NodeSizeAccessor<unknown, undefined> = () => [1, 1];
-  const acc = custom.nodeSize(siz);
-  // @ts-expect-error cast only takes full simple
-  acc(unks);
-  // @ts-expect-error cast only takes full simple
-  acc(simp);
-  acc(dag);
-
-  // can be fully narrowed
-  const tl: TwolayerOperator<null, null> = () => undefined;
-  const optimal = acc.decross(twoLayer().order(tl));
-  // @ts-expect-error doesn't work for anythin
-  optimal(unks);
-  // @ts-expect-error doesn't work for anythin
-  optimal(simp);
-  // @ts-expect-error doesn't work for anythin
-  optimal(dag);
-
-  // but we can still get original operator and operate on it
-  expect(optimal.decross().order()).toBe(tl);
-  expect(optimal.nodeSize()).toBe(siz);
-  expect(optimal.sugiNodeSize().wrapped).toBe(siz);
-});
 
 test("sugiyama() works for single node", () => {
   const dag = single();

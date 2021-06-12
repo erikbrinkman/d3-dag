@@ -33,14 +33,15 @@
     ]
   },
   "scripts": {
-    "format": "prettier --write {src,test,types}/**/*.ts {,.}*.json && import-sort --write {src,test,types}/**/*.ts",
-    "lint": "prettier --check {src,test,types}/**/*.ts {,.}*.json && tsc --noEmit && eslint {src,test,types}/**/*.ts",
-    "fix": "eslint --fix {src,test,types}/**/*.ts",
-    "build": "tsc -p tsconfig.build.json && esbuild dist/index.js --bundle --minify --external:fs --external:child_process --global-name=d3 --banner:js=\"$(preamble)\nvar d3 = Object.assign(d3 || {}, (() => {\" --footer:js='return d3; })())' --outfile=bundle/d3-dag.iife.min.js && esbuild dist/index.js --bundle --minify --format=cjs --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js && esbuild dist/index.js --bundle --minify --format=esm --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
-    "test": "tsc -p tsconfig.test.json && jest --coverage && yarn lint",
-    "prepare": "yarn jest --clear-cache && yarn test && yarn build",
+    "prettier": "prettier {src,test,test-d,types}/**/*.ts {,.}*.json",
+    "format": "yarn prettier --write && import-sort --write {src,test,test-d,types}/**/*.ts",
+    "lint": "yarn prettier --check && eslint {src,test,test-d,types}/**/*.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "bundle": "rm -rf bundle && esbuild dist/index.js --bundle --minify --external:fs --external:child_process --global-name=d3 --banner:js=\"$(preamble)\nvar d3 = Object.assign(d3 || {}, (() => {\" --footer:js='return d3; })())' --outfile=bundle/d3-dag.iife.min.js && esbuild dist/index.js --bundle --minify --format=cjs --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js && esbuild dist/index.js --bundle --minify --format=esm --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
+    "test": "tsc && jest --coverage && yarn build && tsd && yarn lint",
+    "prepare": "jest --clear-cache && yarn test && yarn build && yarn bundle",
     "todo": "grep -rI --color TODO src test types",
-    "docs": "typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
+    "docs": "rm -rf docs && typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
   },
   "dependencies": {
     "d3-array": "^3.0.1",
@@ -67,6 +68,7 @@
     "jest": "^27.0.4",
     "package-preamble": "^0.1.0",
     "prettier": "^2.3.1",
+    "tsd": "^0.17.0",
     "typedoc": "^0.20.36",
     "typescript": "^4.3.2"
   }

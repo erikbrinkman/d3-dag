@@ -14,10 +14,6 @@ export type SugiNode<NodeDatum = unknown, LinkDatum = unknown> = DagNode<
   SugiData<NodeDatum, LinkDatum>,
   undefined
 >;
-export type SugiDag<NodeDatum = unknown, LinkDatum = unknown> = Dag<
-  SugiData<NodeDatum, LinkDatum>,
-  undefined
->;
 
 export type SugiDataDagNode<S extends SugiData> = S extends {
   node: DagNode;

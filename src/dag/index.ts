@@ -19,6 +19,9 @@ export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
 /** */
 export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
   extends Iterable<DagNode<NodeDatum, LinkDatum>> {
+  // XXX this is unused, but necessary for typescript to typecheck
+  __typing_sentinel__?: NodeDatum;
+
   /** */
   iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>>;
 

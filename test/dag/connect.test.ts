@@ -74,22 +74,9 @@ test("connect() parses a more complex square", () => {
   const newSource = ({ source }: { source: string }): string => source;
   const newTarget = ({ target }: { target: string }): string => target;
 
-  const base = connect();
-  // @ts-expect-error can't use complex
-  expect(() => base(complexSquare)).toThrow();
-
-  const source = base.sourceId(newSource);
-  expect(source.sourceId()).toBe(newSource);
-  // @ts-expect-error can't use simple
-  expect(() => source(simpleSquare)).toThrow();
-  // @ts-expect-error can't use complex
-  expect(() => source(complexSquare)).toThrow();
-
-  const layout = source.targetId(newTarget);
+  const layout = connect().sourceId(newSource).targetId(newTarget);
   expect(layout.sourceId()).toBe(newSource);
   expect(layout.targetId()).toBe(newTarget);
-  // @ts-expect-error can't use simple
-  expect(() => source(simpleSquare)).toThrow();
 
   const dag = layout(complexSquare);
   expect(dag.size()).toBeCloseTo(4);
@@ -111,8 +98,7 @@ test("connect() fails on empty", () => {
 });
 
 test("connect() fails passing an arg to connect", () => {
-  // @ts-expect-error testing javascript failure case
-  expect(() => connect(null)).toThrow("got arguments to connect");
+  expect(() => connect(null as never)).toThrow("got arguments to connect");
 });
 
 test("connect() fails with no roots", () => {

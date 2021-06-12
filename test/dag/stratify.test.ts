@@ -116,21 +116,10 @@ test("stratify() works with data accessor", () => {
     pd: readonly (readonly [string, string])[] | undefined;
   }) => pd;
 
-  const base = stratify();
-  // @ts-expect-error doesn't work for complex
-  expect(() => base(complexSquare)).toThrow();
-
-  const id = base.id(newId);
-  expect(id.id()).toBe(newId);
-  // @ts-expect-error doesn't work for simple
-  expect(() => id(square)).toThrow();
-
-  const layout = id.parentData(newParentData);
-  expect(id.id()).toBe(newId);
+  const layout = stratify().id(newId).parentData(newParentData);
+  expect(layout.id()).toBe(newId);
   expect(layout.parentData()).toBe(newParentData);
   expect(layout.parentIds().wrapped).toBe(newParentData);
-  // @ts-expect-error doesn't work for simple
-  expect(() => layout(square)).toThrow();
 
   // check that wrapper works
   const justIds = layout.parentIds();

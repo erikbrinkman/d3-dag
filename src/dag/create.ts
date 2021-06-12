@@ -36,7 +36,9 @@ class LayoutChildLink<NodeDatum, LinkDatum> {
 /**
  * The concrete class backing the {@link Link} interface.
  */
-class LayoutLink<NodeDatum, LinkDatum> {
+class LayoutLink<NodeDatum, LinkDatum>
+  implements DagLink<NodeDatum, LinkDatum>
+{
   constructor(
     readonly source: DagNode<NodeDatum, LinkDatum>,
     readonly target: DagNode<NodeDatum, LinkDatum>,
