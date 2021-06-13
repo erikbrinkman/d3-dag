@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "d3-array": "^3.0.1",
+    "denque": "^1.5.0",
     "fastpriorityqueue": "^0.7.1",
     "javascript-lp-solver": "0.4.24",
     "quadprog": "^1.6.1"

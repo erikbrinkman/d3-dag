@@ -6,12 +6,18 @@
  *
  * @module
  */
+import Denque from "denque";
 
 /**
  * A fluent iterable
  *
  * This interface provides array method access to iterables that are lazy and
  * only applied when the iterator is consumed.
+ *
+ * @remarks
+ *
+ * Since the iterable length isn't known, most negative indices will require a
+ * buffer that large to account for the the unknown end of the iterable.
  */
 export interface FluentIterable<T> extends Iterable<T> {
   /**
@@ -103,6 +109,16 @@ export interface FluentIterable<T> extends Iterable<T> {
   map<S>(callback: (element: T, index: number) => S): FluentIterable<S>;
 
   /**
+   * Get the last element of the iterable
+   */
+  pop(): T | undefined;
+
+  /**
+   * Add elements to the end of the iterable
+   */
+  push(...items: T[]): FluentIterable<T>;
+
+  /**
    * Return the iterable using callback
    */
   reduce(callback: (accumulator: T, currentValue: T, index: number) => T): T;
@@ -115,6 +131,11 @@ export interface FluentIterable<T> extends Iterable<T> {
    * Reverse the iterable
    */
   reverse(): FluentIterable<T>;
+
+  /**
+   * Get the first element of the iterable
+   */
+  shift(): T | undefined;
 
   /**
    * Slice the iterable
@@ -135,6 +156,11 @@ export interface FluentIterable<T> extends Iterable<T> {
    * Splice the iterable
    */
   splice(start: number, deleteCount?: number, ...items: T[]): FluentIterable<T>;
+
+  /**
+   * Add elements to the front of the iterable
+   */
+  unshift(...items: T[]): FluentIterable<T>;
 
   /**
    * Return this iterable
@@ -197,12 +223,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   find(callback: (element: T, index: number) => boolean): T | undefined {
-    for (const [index, element] of this.gentries()) {
-      if (callback(element, index)) {
-        return element;
-      }
-    }
-    return undefined;
+    return this.filter(callback).shift();
   }
 
   findIndex(callback: (element: T, index: number) => boolean): number {
@@ -240,18 +261,29 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
 
   indexOf(query: T, fromIndex: number = 0): number {
     if (fromIndex < 0) {
-      // NOTE this could be done with a deque, but since this is eventually
-      // going to be part of the spec and is unused, this is easier
-      throw new Error(
-        `fromIndex doesn't support negative numbers because generator length isn't known`
-      );
-    }
-    for (const [index, element] of this.gentries()) {
-      if (index >= fromIndex && element === query) {
-        return index;
+      let index = 0;
+      const queue = new Denque();
+      for (const elem of this) {
+        if (index >= -fromIndex) {
+          queue.shift();
+        }
+        queue.push(elem);
+        index++;
       }
+      const ind = queue.toArray().indexOf(query);
+      if (ind === -1) {
+        return -1;
+      } else {
+        return ind + index + fromIndex;
+      }
+    } else {
+      for (const [index, element] of this.gentries()) {
+        if (index >= fromIndex && element === query) {
+          return index;
+        }
+      }
+      return -1;
     }
-    return -1;
   }
 
   join(separator: string = ","): string {
@@ -270,17 +302,24 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   lastIndexOf(query: T, fromIndex: number = Infinity): number {
-    if (fromIndex < 0) {
-      // NOTE this could be done with a deque, but since this is eventually
-      // going to be part of the spec and is unused, this is easier
-      throw new Error(
-        `lastIndexOf doesn't support negative numbers because generator length isn't known`
-      );
-    }
     let lastIndex = -1;
-    for (const [index, element] of this.gentries()) {
-      if (index <= fromIndex && element === query) {
-        lastIndex = index;
+    if (fromIndex < 0) {
+      const queue = new Denque();
+      for (const [index, element] of this.gentries()) {
+        if (element === query) {
+          queue.push(index);
+        }
+        const next = queue.peekFront();
+        if (next !== undefined && next <= index + fromIndex + 1) {
+          queue.shift();
+          lastIndex = next;
+        }
+      }
+    } else {
+      for (const [index, element] of this.gentries()) {
+        if (index <= fromIndex && element === query) {
+          lastIndex = index;
+        }
       }
     }
     return lastIndex;
@@ -298,6 +337,18 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
 
   map<S>(callback: (element: T, index: number) => S): FluentIterable<S> {
     return fluent(this.gmap(callback));
+  }
+
+  pop(): T | undefined {
+    let last: T | undefined;
+    for (last of this) {
+      // noop
+    }
+    return last;
+  }
+
+  push(...items: T[]): FluentIterable<T> {
+    return this.concat(items);
   }
 
   reduce(callback: (accumulator: T, currentValue: T, index: number) => T): T;
@@ -349,20 +400,61 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return fluent([...this].reverse());
   }
 
+  shift(): T | undefined {
+    for (const val of this) {
+      return val;
+    }
+    return undefined;
+  }
+
   private *gslice(start: number, end: number): Generator<T> {
     for (const [index, element] of this.gentries()) {
-      if (index < start) {
-        // do nothing
-      } else if (index < end) {
-        yield element;
-      } else {
+      if (index >= end) {
         break; // no more elements
+      } else if (index >= start) {
+        yield element;
+      }
+    }
+  }
+
+  private *gnegslice(start: number, end: number): Generator<T> {
+    const queue = new Denque();
+    const pop = start - end;
+    for (const [index, elem] of this.gentries()) {
+      if (index >= pop) {
+        yield queue.shift();
+        queue.push(elem);
+      } else if (index >= start) {
+        queue.push(elem);
       }
     }
   }
 
   slice(start: number = 0, end: number = Infinity): FluentIterable<T> {
-    return fluent(this.gslice(start, end));
+    if (start < 0) {
+      let index = 0;
+      const queue = new Denque();
+      for (const elem of this) {
+        if (index >= -start) {
+          queue.shift();
+        }
+        queue.push(elem);
+        index++;
+      }
+      const array = queue.toArray();
+      const num = end - index - start;
+      if (end < 0) {
+        return fluent(array.slice(0, end));
+      } else if (num > 0) {
+        return fluent(array.slice(0, num));
+      } else {
+        return fluent();
+      }
+    } else if (end < 0) {
+      return fluent(this.gnegslice(start, end));
+    } else {
+      return fluent(this.gslice(start, end));
+    }
   }
 
   some(callback: (element: T, index: number) => boolean): boolean {
@@ -399,6 +491,10 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     ...items: T[]
   ): FluentIterable<T> {
     return fluent(this.gsplice(start, deleteCount, ...items));
+  }
+
+  unshift(...items: T[]): FluentIterable<T> {
+    return fluent(items).concat(this);
   }
 
   values(): FluentIterable<T> {

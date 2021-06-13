@@ -91,4 +91,16 @@ describe.skip("tests that require a built bundle", () => {
     const layers = getLayers(dag);
     expect([[0], [1, 2], [3]]).toEqual(layers);
   });
+
+  // denque
+  test("slice() works with negatives", async () => {
+    const d3dag = await load();
+    const dag = d3dag.dagConnect()([
+      ["0", "1"],
+      ["1", "2"]
+    ]);
+    expect(dag.size()).toBe(3);
+    expect([...dag.idescendants().slice(1, -1)]).toHaveLength(1);
+    expect(dag.idescendants().slice(1, -1).length).toBe(1);
+  });
 });

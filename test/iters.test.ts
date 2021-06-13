@@ -69,19 +69,16 @@ test("includes()", () => {
   expect(fluent([1, 2]).includes(1)).toBeTruthy();
   expect(fluent([1, 2]).includes(1, 1)).toBeFalsy();
   expect(fluent([1, 2, 1]).includes(1, 1)).toBeTruthy();
-  expect(() => fluent([1]).includes(1, -1)).toThrow(
-    "fromIndex doesn't support negative numbers because generator length isn't known"
-  );
 });
 
 test("indexOf()", () => {
   expect(fluent([1, 2]).indexOf(1)).toBe(0);
   expect(fluent([1, 2]).indexOf(1, 1)).toBe(-1);
+  expect(fluent([1, 2]).indexOf(1, -1)).toBe(-1);
   expect(fluent([1, 2, 1]).indexOf(1)).toBe(0);
   expect(fluent([1, 2, 1]).indexOf(1, 1)).toBe(2);
-  expect(() => fluent([1]).indexOf(1, -1)).toThrow(
-    "fromIndex doesn't support negative numbers because generator length isn't known"
-  );
+  expect(fluent([1, 2, 1]).indexOf(1, -3)).toBe(0);
+  expect(fluent([1, 2, 1]).indexOf(1, -2)).toBe(2);
 });
 
 test("join()", () => {
@@ -97,11 +94,12 @@ test("keys()", () => {
 test("lastIndexOf()", () => {
   expect(fluent([2, 1]).lastIndexOf(1)).toBe(1);
   expect(fluent([2, 1]).lastIndexOf(1, 0)).toBe(-1);
+  expect(fluent([2, 1]).lastIndexOf(1, -1)).toBe(1);
+  expect(fluent([2, 1]).lastIndexOf(1, -2)).toBe(-1);
   expect(fluent([1, 2, 1]).lastIndexOf(1)).toBe(2);
   expect(fluent([1, 2, 1]).lastIndexOf(1, 1)).toBe(0);
-  expect(() => fluent([1]).lastIndexOf(1, -1)).toThrow(
-    "lastIndexOf doesn't support negative numbers because generator length isn't known"
-  );
+  expect(fluent([1, 2, 1]).lastIndexOf(1, -1)).toBe(2);
+  expect(fluent([1, 2, 1]).lastIndexOf(1, -2)).toBe(0);
 });
 
 test("length", () => {
@@ -117,6 +115,19 @@ test("map()", () => {
     "3"
   ]);
   expect([...fluent<number>([]).map((v) => v.toString())]).toEqual([]);
+});
+
+test("pop()", () => {
+  expect(fluent().pop()).toBeUndefined();
+  expect(fluent([1]).pop()).toBe(1);
+  expect(fluent([1, 2]).pop()).toBe(2);
+});
+
+test("push()", () => {
+  expect([...fluent().push()]).toEqual([]);
+  expect([...fluent().push(1)]).toEqual([1]);
+  expect([...fluent([0]).push(1)]).toEqual([0, 1]);
+  expect([...fluent().push(1, 2)]).toEqual([1, 2]);
 });
 
 test("reduce()", () => {
@@ -137,6 +148,14 @@ test("slice()", () => {
   expect([...fluent([1, 2, 3]).slice()]).toEqual([1, 2, 3]);
   expect([...fluent([1, 2, 3]).slice(1)]).toEqual([2, 3]);
   expect([...fluent([1, 2, 3]).slice(1, 2)]).toEqual([2]);
+  expect([...fluent([1, 2, 3]).slice(-2)]).toEqual([2, 3]);
+  expect([...fluent([1, 2, 3]).slice(-1)]).toEqual([3]);
+  expect([...fluent([1, 2, 3]).slice(-1, 2)]).toEqual([]);
+  expect([...fluent([1, 2, 3]).slice(-2, -1)]).toEqual([2]);
+  expect([...fluent([1, 2, 3]).slice(-2, 2)]).toEqual([2]);
+  expect([...fluent([1, 2, 3]).slice(0, -2)]).toEqual([1]);
+  expect([...fluent([1, 2, 3]).slice(1, -2)]).toEqual([]);
+  expect([...fluent([1, 2, 3]).slice(1, -1)]).toEqual([2]);
 });
 
 test("slice() on infinite", () => {
@@ -174,7 +193,14 @@ test("splice()", () => {
   expect([...fluent([1, 2, 3]).splice(1, 1, 0, 1)]).toEqual([1, 0, 1, 3]);
 });
 
+test("unshift()", () => {
+  expect([...fluent().unshift()]).toEqual([]);
+  expect([...fluent([3]).unshift()]).toEqual([3]);
+  expect([...fluent([3]).unshift(2)]).toEqual([2, 3]);
+  expect([...fluent([3]).unshift(1, 2)]).toEqual([1, 2, 3]);
+});
+
 test("values()", () => {
-  expect([...fluent([]).values()]).toEqual([]);
+  expect([...fluent().values()]).toEqual([]);
   expect([...fluent([1, 2, 3]).values()]).toEqual([1, 2, 3]);
 });
