@@ -1,41 +1,42 @@
 /**
- * A layering is any function that complies with the {@link LayeringOperator}
- * interface.  This function must assign each node a non-negative integer
- * `value` such that children have larger layers than their parents.
- *
- * There are several built in layering operators, which are all constructed in
- * a fluent fashion:
- * - {@link "sugiyama/layering/longest-path" | Longest path}
- * - {@link "sugiyama/layering/coffman-graham" | Coffman-Graham}
- * - {@link "sugiyama/layering/simplex" | Simplex}
- * - {@link "sugiyama/layering/topological" | Topological}
+ * A {@link LayeringOperator} for assigning nodes in a dag a non-negative
+ * layer. {@link RankAccessor} and {@link GroupAccessor} allow specifying extra
+ * constraints on the layout.
  *
  * @module
  */
 import { Dag, DagNode } from "../../dag";
 
 /**
- * A rank accessor assigns a rank to specific nodes. Layering operators that
- * take a rank accessor should respect the convention that nodes with higher
- * rank should be pushed farther down, and nodes with the same rank should have
- * the same layer.
+ * A rank accessor assigns a numeric rank to specific nodes. Layering operators
+ * that take a rank accessor should respect the convention that nodes with
+ * higher rank should be pushed farther down, and nodes with the same rank
+ * should have the same layer.
  */
 export interface RankAccessor<NodeDatum = never, LinkDatum = never> {
   (node: DagNode<NodeDatum, LinkDatum>): number | undefined;
 }
 
 /**
- * A group accessor assigns a group to specific nodes. Layering operators that
- * take a group accessor should respect the convention that nodes with the same
- * group should have the same layer.
+ * A group accessor assigns a group string to specific nodes. Layering
+ * operators that take a group accessor should respect the convention that
+ * nodes with the same group should have the same layer.
  */
 export interface GroupAccessor<NodeDatum = never, LinkDatum = never> {
   (node: DagNode<NodeDatum, LinkDatum>): string | undefined;
 }
 
 /**
- * Layer a dag. After calling a layering operator on a dag, every node's value
- * should be set to a non-negative integer layer.
+ * An operator for laying a dag.
+ *
+ * After calling a layering operator on a dag, every node's value should be set
+ * to a non-negative integer layer, starting at 0.
+ *
+ * There are several built in layering operators:
+ * - {@link LongestPathOperator} - minimum height layout
+ * - {@link CoffmanGrahamOperator} - fixed node with layout
+ * - {@link SimplexOperator} - minimize the length of edges
+ * - {@link TopologicalOperatior} - topological layering (one node per layer)
  */
 export interface LayeringOperator<NodeDatum = never, LinkDatum = never> {
   (dag: Dag<NodeDatum, LinkDatum>): void;

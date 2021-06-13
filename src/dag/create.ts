@@ -1,19 +1,8 @@
 /**
- * A {@link Dag} is simply a collection of {@link DagNode}s, defined by every reachable
- * child node from the current returned node.  If a DAG contains multiple
- * roots, then the returned node will be a {@link DagRoot} that links to all nodes.
- * Each child node on its own will function as a valid DAG with a single root.
- * All DAGs are also iterators over all of their nodes.
- *
- * Three methods exist to turn existing data into {@link Dag}s:
+ * Three built-in methods exist to turn existing raw data into {@link Dag}s:
  * 1. {@link HierarchyOperator} - when the data already has a dag structure.
  * 2. {@link StratifyOperator} - when the dag has a tabular structure, referencing parents by id.
  * 3. {@link ConnectOperator} - when the dag has a link structure and is specified as pairs of nodes.
- *
- * Methods names preceeded by an `i` will return a {@link FluentIterable} which is
- * a wrapper around native EMCA iterators that also adds most methods found in
- * the `Array` prototype making them much more useful for fluent functional
- * programming.
  *
  * @module
  */
@@ -71,12 +60,12 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     return [...this.iroots()];
   }
 
-  *#gdepth(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *gdepth(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const ch = (node: DagNode<NodeDatum, LinkDatum>) => node.ichildren();
     yield* dfs(ch, ...this.iroots());
   }
 
-  *#gbreadth(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *gbreadth(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const seen = new Set<DagNode>();
     let next = this.roots();
     let current: DagNode<NodeDatum, LinkDatum>[] = [];
@@ -94,7 +83,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     } while (next.length);
   }
 
-  *#gbefore(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *gbefore(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const numBefore = new Map<DagNode, number>();
     for (const node of this) {
       for (const child of node.ichildren()) {
@@ -117,7 +106,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     }
   }
 
-  *#gafter(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *gafter(): Generator<DagNode<NodeDatum, LinkDatum>> {
     const queue = this.roots();
     const seen = new Set<DagNode>();
     let node;
@@ -138,13 +127,13 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     style: IterStyle = "depth"
   ): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     if (style === "depth") {
-      return fluent(this.#gdepth());
+      return fluent(this.gdepth());
     } else if (style === "breadth") {
-      return fluent(this.#gbreadth());
+      return fluent(this.gbreadth());
     } else if (style === "before") {
-      return fluent(this.#gbefore());
+      return fluent(this.gbefore());
     } else if (style === "after") {
-      return fluent(this.#gafter());
+      return fluent(this.gafter());
     } else {
       throw new Error(`unknown iteration style: ${style}`);
     }
@@ -238,7 +227,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     return this;
   }
 
-  *#gsplit(): Generator<Dag<NodeDatum, LinkDatum>> {
+  private *gsplit(): Generator<Dag<NodeDatum, LinkDatum>> {
     // create parents
     const parents = new Map<DagNode, DagNode<NodeDatum, LinkDatum>[]>();
     for (const node of this) {
@@ -277,7 +266,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
   }
 
   isplit(): FluentIterable<Dag<NodeDatum, LinkDatum>> {
-    return fluent(this.#gsplit());
+    return fluent(this.gsplit());
   }
 
   split(): Dag<NodeDatum, LinkDatum>[] {
@@ -296,8 +285,6 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
 /**
  * Concrete implementation of {@link DagNode}.
  */
-// NOTE can't make directly extend singleton Dag due to issues with constructor
-// and circular references
 class LayoutDagNode<NodeDatum, LinkDatum>
   extends LayoutDag<NodeDatum, LinkDatum>
   implements DagNode<NodeDatum, LinkDatum>
@@ -308,32 +295,34 @@ class LayoutDagNode<NodeDatum, LinkDatum>
     super();
   }
 
+  // NOTE everything extends from iroots, so by overriding this, we allow
+  // dagnodes to work effectively
   iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
     return fluent([this]);
   }
 
-  *#gchildren(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *gchildren(): Generator<DagNode<NodeDatum, LinkDatum>> {
     for (const { child } of this.dataChildren) {
       yield child;
     }
   }
 
   ichildren(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
-    return fluent(this.#gchildren());
+    return fluent(this.gchildren());
   }
 
   children(): DagNode<NodeDatum, LinkDatum>[] {
     return [...this.ichildren()];
   }
 
-  *#gchildLinks(): Generator<DagLink<NodeDatum, LinkDatum>> {
+  private *gchildLinks(): Generator<DagLink<NodeDatum, LinkDatum>> {
     for (const { child, data, points } of this.dataChildren) {
       yield new LayoutLink(this, child, data, points);
     }
   }
 
   ichildLinks(): FluentIterable<DagLink<NodeDatum, LinkDatum>> {
-    return fluent(this.#gchildLinks());
+    return fluent(this.gchildLinks());
   }
 
   childLinks(): DagLink<NodeDatum, LinkDatum>[] {
@@ -433,13 +422,14 @@ function verifyDag(roots: DagNode[]): void {
  *
  * `i` will increment in the order data are processed.
  *
- * This is used in the {@link id}, {@link sourceId}, and {@link targetId}
- * methods.
+ * This is used in {@link StratifyOperator.id}, {@link
+ * ConnectOperator.sourceId}, and {@link ConnectOperator.targetId}.
  */
 export interface IdOperator<Datum = never> {
   (d: Datum, i: number): string;
 }
 
+/** get datum type from IdOperator */
 type IdDatum<O extends IdOperator> = Parameters<O>[0];
 
 /***********
@@ -1224,7 +1214,7 @@ export interface StratifyOperator<Ops extends StratifyOperators> {
 
   /**
    * Sets the parentIds accessor to the given {@link ParentIdsOperator}
-   * and returns a {@link StratifyOperator}. The default operator is:
+   * and returns an update operator. The default operator is:
    *
    * ```js
    * function parentIds(d) {
@@ -1244,7 +1234,7 @@ export interface StratifyOperator<Ops extends StratifyOperators> {
 
   /**
    * Sets the parentData accessor to the given {@link ParentDataOperator} and
-   * returns this {@link StratifyOperator}.
+   * returns an updated operator.
    */
   parentData<NewParentData extends ParentDataOperator>(
     data: NewParentData

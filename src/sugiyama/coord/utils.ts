@@ -1,10 +1,16 @@
+/**
+ * Utilities for quadratic optimization
+ *
+ * @internal
+ * @module
+ */
 import { assert, bigrams, def } from "../../utils";
 
 import { CoordNodeSizeAccessor } from ".";
 import { SugiNode } from "../utils";
 import { solveQP } from "quadprog";
 
-/** @internal wrapper for solveQP */
+/** wrapper for solveQP */
 function qp(
   Q: number[][],
   c: number[],
@@ -41,7 +47,7 @@ function qp(
   return solution;
 }
 
-/** @internal solve for node positions */
+/** solve for node positions */
 export function solve(
   Q: number[][],
   c: number[],
@@ -65,14 +71,14 @@ export function solve(
   return solution;
 }
 
-/** @internal compute indices used to index arrays */
+/** compute indices used to index arrays */
 export function indices(layers: SugiNode[][]): Map<SugiNode, number> {
   return new Map(
     layers.flatMap((layer) => layer).map((n, i) => [n, i] as const)
   );
 }
 
-/** @interal Compute constraint arrays for layer separation */
+/** Compute constraint arrays for layer separation */
 export function init<N, L>(
   layers: SugiNode<N, L>[][],
   inds: Map<SugiNode, number>,
@@ -101,7 +107,7 @@ export function init<N, L>(
   return [Q, c, A, b];
 }
 
-/** @internal update Q that minimizes edge distance squared */
+/** update Q that minimizes edge distance squared */
 export function minDist(
   Q: number[][],
   pind: number,
@@ -118,8 +124,6 @@ export function minDist(
  * update Q that minimizes curve of edges through a node where curve is
  * calcukates as the squared distance of the middle node from the midpoint of
  * the first and last, multiplied by four for some reason
- *
- * @internal
  */
 export function minBend(
   Q: number[][],
@@ -142,8 +146,6 @@ export function minBend(
 /**
  * Assign nodes x based off of solution, and return the width of the final
  * layout.
- *
- * @internal
  */
 export function layout<N, L>(
   layers: SugiNode<N, L>[][],

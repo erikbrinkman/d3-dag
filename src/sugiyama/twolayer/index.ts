@@ -1,19 +1,24 @@
 /**
- * A two layer (order) operator is any function that complies with the
- * {@link TwolayerOperator} interface.  This function must rearrange the oder of the bottom
- * layer to minimize the number of crossings.
- *
- * There are three built in decrossing operators, which are all constructed in
- * a fluent fashion:
- * - {@link "sugiyama/twolayer/opt" | Optimal}
- * - {@link "sugiyama/twolayer/median" | Median}
- * - {@link "sugiyama/twolayer/mean" | Mean}
+ * The definition of the {@link TwolayerOperator} interface, which is used to
+ * customize {@link TwoLayerOperator}.
  *
  * @module
  */
 import { SugiNode } from "../utils";
 
-/** twolayer operator */
+/**
+ * An operator for optimizing decrossings one layer at a time.
+ *
+ * When called with `topDown = true` `topLayer` should be untouched, and
+ * `bottomLayer` should be rearranged to minimize crossings. When `topDown =
+ * false` then `topLayer` should be rearranged, and `bottomLayer` should remain
+ * fixed.
+ *
+ * There are three built in two-layer operators:
+ * - {@link OptOperator} - optimal corssing minimization for the layer in question
+ * - {@link MedianOperator} - order according to median of parent indices
+ * - {@link MeanOperator} - order according to mean of parent indices
+ */
 export interface TwolayerOperator<NodeDatum = never, LinkDatum = never> {
   (
     topLayer: SugiNode<NodeDatum, LinkDatum>[],

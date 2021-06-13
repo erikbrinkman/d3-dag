@@ -3,72 +3,148 @@
  *
  * We use this over `fluent-iterable` because that package is out of date, and
  * there's no need to invoke another dependency just for this.
+ *
  * @module
  */
 
 /**
+ * A fluent iterable
  *
+ * This interface provides array method access to iterables that are lazy and
+ * only applied when the iterator is consumed.
  */
 export interface FluentIterable<T> extends Iterable<T> {
+  /**
+   * Concatenate several iterables together
+   */
   concat(...others: Iterable<T>[]): FluentIterable<T>;
 
+  /**
+   * Return a tuple of the index paired with each element
+   */
   entries(): FluentIterable<[number, T]>;
 
+  /**
+   * Return true if callback is true for ever element of the iterable
+   */
   every(callback: (element: T, index: number) => boolean): boolean;
 
+  /**
+   * Return a new iterable where every value is val
+   */
   fill<S>(val: S): FluentIterable<S>;
 
+  /**
+   * Return a new iterable where callback is true for the elements
+   */
   filter<P extends T>(
     callback: (element: T, index: number) => element is P
   ): FluentIterable<P>;
   filter(callback: (element: T, index: number) => boolean): FluentIterable<T>;
 
+  /**
+   * Return the first element that passes callback
+   */
   find<P extends T>(
     callback: (element: T, index: number) => element is P
   ): P | undefined;
   find(callback: (element: T, index: number) => boolean): T | undefined;
 
+  /**
+   * Return the index of the first element that passes callback
+   */
   findIndex(callback: (element: T, index: number) => boolean): number;
 
+  /**
+   * Map to an interable, and flatten the result
+   */
   flatMap<S>(
     callback: (element: T, index: number) => Iterable<S>
   ): FluentIterable<S>;
 
+  /**
+   * Call the callback for each element in iterable
+   */
   forEach(callback: (element: T, index: number) => void): void;
 
+  /**
+   * Return true if the element is in iterable after `fromIndex`
+   */
   includes(query: T, fromIndex?: number): boolean;
 
+  /**
+   * Return the index of the `query` in iterable if it's after `fromIndex`
+   */
   indexOf(query: T, fromIndex?: number): number;
 
+  /**
+   * Join every element with a delimiter
+   */
   join(separator?: string): string;
 
+  /**
+   * Return the indices of every element
+   */
   keys(): FluentIterable<number>;
 
+  /**
+   * Return the last index of `query` in iterable after `fromIndex`
+   */
   lastIndexOf(query: T, fromIndex?: number): number;
 
-  get length(): number;
+  /**
+   * The number of elements in the iterable
+   */
+  readonly length: number;
 
+  /**
+   * Map every element in the iterable using callback
+   */
   map<S>(callback: (element: T, index: number) => S): FluentIterable<S>;
 
+  /**
+   * Return the iterable using callback
+   */
   reduce(callback: (accumulator: T, currentValue: T, index: number) => T): T;
   reduce<S>(
     callback: (accumulator: S, currentValue: T, index: number) => S,
     initialValue: S
   ): S;
 
+  /**
+   * Reverse the iterable
+   */
   reverse(): FluentIterable<T>;
 
+  /**
+   * Slice the iterable
+   */
   slice(start?: number, end?: number): FluentIterable<T>;
 
+  /**
+   * Return true if any element in the iterable is true for callback
+   */
   some(callback: (element: T, index: number) => boolean): boolean;
 
+  /**
+   * Sort the iterable using the optional compare function
+   */
   sort(compare?: (first: T, second: T) => number): FluentIterable<T>;
 
+  /**
+   * Splice the iterable
+   */
   splice(start: number, deleteCount?: number, ...items: T[]): FluentIterable<T>;
 
+  /**
+   * Return this iterable
+   */
   values(): FluentIterable<T>;
 }
 
+/**
+ * The implementation of {@link FluentIterable}
+ */
 class LazyFluentIterable<T> implements FluentIterable<T> {
   constructor(private readonly base: Iterable<T>) {}
 
@@ -76,7 +152,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return this.base[Symbol.iterator]();
   }
 
-  *#concat(...others: Iterable<T>[]): Generator<T, void, undefined> {
+  private *gconcat(...others: Iterable<T>[]): Generator<T, void, undefined> {
     yield* this;
     for (const iter of others) {
       yield* iter;
@@ -84,10 +160,10 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   concat(...others: Iterable<T>[]): FluentIterable<T> {
-    return fluent(this.#concat(...others));
+    return fluent(this.gconcat(...others));
   }
 
-  *#entries(): Generator<[number, T]> {
+  private *gentries(): Generator<[number, T]> {
     let index = 0;
     for (const element of this) {
       yield [index++, element];
@@ -95,7 +171,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   entries(): FluentIterable<[number, T]> {
-    return fluent(this.#entries());
+    return fluent(this.gentries());
   }
 
   every(callback: (element: T, index: number) => boolean): boolean {
@@ -106,8 +182,10 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return this.map(() => val);
   }
 
-  *#filter(callback: (element: T, index: number) => boolean): Generator<T> {
-    for (const [index, element] of this.#entries()) {
+  private *gfilter(
+    callback: (element: T, index: number) => boolean
+  ): Generator<T> {
+    for (const [index, element] of this.gentries()) {
       if (callback(element, index)) {
         yield element;
       }
@@ -115,11 +193,11 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   filter(callback: (element: T, index: number) => boolean): FluentIterable<T> {
-    return fluent(this.#filter(callback));
+    return fluent(this.gfilter(callback));
   }
 
   find(callback: (element: T, index: number) => boolean): T | undefined {
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       if (callback(element, index)) {
         return element;
       }
@@ -128,7 +206,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   findIndex(callback: (element: T, index: number) => boolean): number {
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       if (callback(element, index)) {
         return index;
       }
@@ -136,10 +214,10 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return -1;
   }
 
-  *#flatMap<S>(
+  private *gflatMap<S>(
     callback: (element: T, index: number) => Iterable<S>
   ): Generator<S, void, undefined> {
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       yield* callback(element, index);
     }
   }
@@ -147,11 +225,11 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   flatMap<S>(
     callback: (element: T, index: number) => Iterable<S>
   ): FluentIterable<S> {
-    return fluent(this.#flatMap(callback));
+    return fluent(this.gflatMap(callback));
   }
 
   forEach(callback: (element: T, index: number) => void): void {
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       callback(element, index);
     }
   }
@@ -168,7 +246,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
         `fromIndex doesn't support negative numbers because generator length isn't known`
       );
     }
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       if (index >= fromIndex && element === query) {
         return index;
       }
@@ -180,7 +258,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return [...this].join(separator);
   }
 
-  *#keys(): Generator<number> {
+  private *gkeys(): Generator<number> {
     let index = 0;
     for (const _ of this) {
       yield index++;
@@ -188,7 +266,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   keys(): FluentIterable<number> {
-    return fluent(this.#keys());
+    return fluent(this.gkeys());
   }
 
   lastIndexOf(query: T, fromIndex: number = Infinity): number {
@@ -200,7 +278,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
       );
     }
     let lastIndex = -1;
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       if (index <= fromIndex && element === query) {
         lastIndex = index;
       }
@@ -212,14 +290,14 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return this.reduce((a) => a + 1, 0);
   }
 
-  *#map<S>(callback: (element: T, index: number) => S): Generator<S> {
-    for (const [index, element] of this.#entries()) {
+  private *gmap<S>(callback: (element: T, index: number) => S): Generator<S> {
+    for (const [index, element] of this.gentries()) {
       yield callback(element, index);
     }
   }
 
   map<S>(callback: (element: T, index: number) => S): FluentIterable<S> {
-    return fluent(this.#map(callback));
+    return fluent(this.gmap(callback));
   }
 
   reduce(callback: (accumulator: T, currentValue: T, index: number) => T): T;
@@ -241,7 +319,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
       ) => T;
       let first = true;
       let accumulator: T = undefined as unknown as T;
-      for (const [index, element] of this.#entries()) {
+      for (const [index, element] of this.gentries()) {
         if (first) {
           accumulator = element;
           first = false;
@@ -260,7 +338,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
         index: number
       ) => S;
       let accumulator = initialValue;
-      for (const [index, element] of this.#entries()) {
+      for (const [index, element] of this.gentries()) {
         accumulator = call(accumulator, element, index);
       }
       return accumulator;
@@ -271,8 +349,8 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return fluent([...this].reverse());
   }
 
-  *#slice(start: number, end: number): Generator<T> {
-    for (const [index, element] of this.#entries()) {
+  private *gslice(start: number, end: number): Generator<T> {
+    for (const [index, element] of this.gentries()) {
       if (index < start) {
         // do nothing
       } else if (index < end) {
@@ -284,11 +362,11 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   slice(start: number = 0, end: number = Infinity): FluentIterable<T> {
-    return fluent(this.#slice(start, end));
+    return fluent(this.gslice(start, end));
   }
 
   some(callback: (element: T, index: number) => boolean): boolean {
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       if (callback(element, index)) {
         return true;
       }
@@ -300,12 +378,12 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     return fluent([...this].sort(compare));
   }
 
-  *#splice(
+  private *gsplice(
     start: number,
     deleteCount: number,
     ...items: T[]
   ): Generator<T, void, undefined> {
-    for (const [index, element] of this.#entries()) {
+    for (const [index, element] of this.gentries()) {
       if (index === start) {
         yield* items;
       }
@@ -320,7 +398,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
     deleteCount: number = 0,
     ...items: T[]
   ): FluentIterable<T> {
-    return fluent(this.#splice(start, deleteCount, ...items));
+    return fluent(this.gsplice(start, deleteCount, ...items));
   }
 
   values(): FluentIterable<T> {
@@ -328,6 +406,9 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 }
 
+/**
+ * Create a fluent iterable from a source iterable
+ */
 export function fluent<T>(seq: Iterable<T> = []): FluentIterable<T> {
   return new LazyFluentIterable(seq);
 }

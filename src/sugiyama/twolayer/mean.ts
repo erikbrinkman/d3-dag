@@ -1,6 +1,6 @@
 /**
- * The mean order operator orders the bottom layer according to the mean of
- * their parent's indices.
+ * A {@link MeanOperator} that orders nodes based on the mean of their parents'
+ * or children's indices.
  *
  * @module
  */
@@ -9,6 +9,20 @@ import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 import { order } from "./utils";
 
+// TODO simplify by merging with median
+
+/**
+ * A {@link TwolayerOperator} that orders nodes based off the mean of their parents' or children's indices.
+ *
+ * This takes about as long as {@link MedianOperator} and often produces a
+ * worse layout, but it does use a little less memory. Nodes without parents or
+ * children respectively will be placed first to minimize the distance between
+ * nodes with common parents, and then to minimize rank inversions with respect
+ * to the initial ordering.
+ *
+ * Create with {@link mean}.
+ *
+ */
 export type MeanOperator = TwolayerOperator<unknown, unknown>;
 
 /** @internal */
@@ -31,7 +45,9 @@ class Mean {
   }
 }
 
-/** Create a mean two layer ordering operator. */
+/**
+ * Create a default {@link MeanOperator}, bundled as {@link twolayerMean}.
+ */
 export function mean(...args: never[]): MeanOperator {
   if (args.length) {
     throw new Error(

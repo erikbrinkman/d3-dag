@@ -1,3 +1,9 @@
+/**
+ * Until this is customizable, this is an internal module
+ *
+ * @internal
+ * @module
+ */
 // TODO turn this into an operator for zherebko
 
 import { DagNode } from "../dag";
@@ -42,6 +48,8 @@ export function greedy(nodes: DagNode[]): Map<DagNode, Map<DagNode, number>> {
     const posIndex = firstAvailable(pos, nodeLayer);
     if (negIndex < posIndex) {
       // TODO tiebreak with crossing for insertion
+      // NOTE there may not be a better layout than this, so this may not need
+      // to be an operator if we can solve this aspect.
       // tie-break right
       targets.set(child, -negIndex - 1);
       neg[negIndex] = childLayer - 1;

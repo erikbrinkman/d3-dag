@@ -1,12 +1,6 @@
 /**
- * Assigns every node a layer such that the width, not counting dummy nodes, is
- * always less than some constant. This can result in tall graphs, but is also
- * reasonably fast. If the max width is set to zero (the default), the width
- * will instead be set to the square root of the number of nodes.
- *
- * Create a new {@link CoffmanGrahamOperator} with {@link coffmanGraham}.
- *
- * <img alt="Coffman-Graham example" src="media://coffman_graham.png" width="400">
+ * A {@link CoffmanGrahamOperator} that prevents the width of the dag from
+ * being too large.
  *
  * @module
  */
@@ -17,11 +11,28 @@ import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
+/**
+ * A {@link LayeringOperator} that restricts the layout to have a maximum
+ * width.
+ *
+ * Assigns every node a layer such that the width, not counting dummy nodes, is
+ * always less than some constant. This can result in tall graphs, but is also
+ * reasonably fast. If the max width is set to zero (the default), the width
+ * will instead be set to the square root of the number of nodes.
+ *
+ * This method is reasonably fast, but can results in long edges which make the
+ * decrossing phase more difficult. Also note that setting {@link width |
+ * `width`} to 1 is roughly equivalent to topological layering.
+ *
+ * Create with {@link coffmanGraham}.
+ *
+ * <img alt="Coffman-Graham example" src="media://coffman_graham.png" width="400">
+ */
 export interface CoffmanGrahamOperator
   extends LayeringOperator<unknown, unknown> {
   /**
-   * Set the maximum width of any layer. If set to 0 (the default), the width
-   * is set to the rounded square root of the number of nodes.
+   * Set the maximum width of any layer. If set to 0, the width is set to the
+   * rounded square root of the number of nodes. (default: 0)
    */
   width(maxWidth: number): CoffmanGrahamOperator;
   /** Get the operators maximum width. */
@@ -117,7 +128,10 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
   return coffmanGrahamCall;
 }
 
-/** Create a default {@link CoffmanGrahamOperator}. */
+/**
+ * Create a default {@link CoffmanGrahamOperator}, bundled as
+ * {@link layeringCoffmanGraham}.
+ */
 export function coffmanGraham(...args: never[]): CoffmanGrahamOperator {
   if (args.length) {
     throw new Error(

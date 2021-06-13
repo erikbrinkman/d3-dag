@@ -1,7 +1,14 @@
+/**
+ * General utilities for {@link TwolayerOperator}s.
+ *
+ * @internal
+ * @module
+ */
 import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
-/** order a layer with respect to numeric values
+/**
+ * Order a layer with respect to numeric values
  *
  * Nodes without a value will be placed in the final order with as close as
  * possible to their initial position. This is defined as the position with the

@@ -1,8 +1,6 @@
 /**
- * This accessor only works with a topological layering, and minimizes the
- * curve of edges such that all nodes are positioned vertically.
- *
- * <img alt="topological example" src="media://topological.png" width="400">
+ * A {@link TopologicalOperator} for assigning coordinates to a topological
+ * layering.
  *
  * @module
  */
@@ -12,9 +10,21 @@ import { init, layout, minBend, solve } from "./utils";
 import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
+/**
+ * A {@link CoordOperator} for positioning edges of a topological layout.
+ *
+ * This operators also minimized a quadratic objective function (similar to
+ * {@link QuadOperator}), but is tailored to topological layouts.
+ *
+ * Create with {@link topological}.
+ *
+ * <img alt="topological example" src="media://topological.png" width="400">
+ */
 export type TopologicalOperator = CoordOperator<unknown, unknown>;
 
-/** Create a topological coordinate assignment operator. */
+/**
+ * Create a new {@link TopologicalOperator}, bundled as {@link coordTopological}.
+ */
 export function topological(...args: never[]): TopologicalOperator {
   if (args.length) {
     throw new Error(

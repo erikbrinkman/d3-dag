@@ -1,40 +1,39 @@
 /**
- * A coordinate assignmnet operator is any function that complies with the
- * {@link Operator} interface, and assigns each node an x coordinate between zero
- * and one, respecting node order within in a layer, and the node separation
- * function.
- *
- * There are three built in coordinate assignment operators, which are all
- * constructed in a fluent fashion:
- * - {@link "sugiyama/twolayer/quad" | Quadratic Optimization } (formerly *Vert*)
- * - {@link "sugiyama/twolayer/greedy" | Greedy}
- * - {@link "sugiyama/twolayer/center" | Center}
- * - {@link "sugiyama/twolayer/topological" | Topological}
- *
- * The operator {@link "sugiyama/twolayer/min-curve" | minimize curves} is
- * deprecated as it is identical to quad with equal weights for *vertical* and
- * *curve*.
+ * {@link CoordOperator}s assign `x` coordinations to every node, while
+ * respecting the {@link CoordNodeSizeAccessor}.
  *
  * @module
  */
 import { SugiNode } from "../utils";
 
 /**
- * The node size accessor takes a node and returns its size as a tuple of
- * [`width`, `height`]. In the layout, the nodes will positioned such that they
- * have at least width and height clearance around each of them. Due to the
- * limitations of layered layouts, that means that layers will be separated by
- * the maximum height nodes in each layer.
+ * An accessor that defines the horizontal size of a node.
+ *
+ * The node size accessor takes a node and returns its `width` in units. In the
+ * layout, the nodes will positioned such that they have at least width
+ * clearance around the center of the node.
+ *
+ * This interface is passed into {@link CoordOperator}s, but most users will
+ * interact with {@link NodeSizeAccessor} or for advanced users
+ * {@link SugiNodeSizeAccessor}.
  */
 export interface CoordNodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node: SugiNode<NodeDatum, LinkDatum>): number;
 }
 
 /**
- * The interface for coordinate assignment operators. This function must assign
- * each node an x coordinate, and return the width of the layout. The x
- * coordinates should satisfy the node size accessor, and all be between zero
- * and the returned width.
+ * An operator that assigns coordinates to layered {@link SugiNode}s
+ *
+ * This function must assign each node an `x` coordinate, and return the width
+ * of the layout. The `x` coordinates should satisfy the
+ * {@link CoordNodeSizeAccessor}, and all be between zero and the returned
+ * width.
+ *
+ * There are four built-in coordinate assignment operators:
+ * - {@link QuadOperator} - positions nodes according to quadratic optimization
+ * - {@link GreedyOperator} - positions nodes greedly according to their parent's positions
+ * - {@link CenterOperator} - positions nodes close together centering each layer
+ * - {@link TopologicalOperator} - positions nodes using quadratic optimization if they were layered using topological layering
  */
 export interface CoordOperator<NodeDatum = never, LinkDatum = never> {
   <N extends NodeDatum, L extends LinkDatum>(

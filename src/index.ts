@@ -4,9 +4,9 @@
  *
  * To create a dag structure from data, a necessary first step before computing
  * a layout, see the three creation algorithms:
- * - {@link HierarchyOperator} - for converting data that is already in a dag form with children
- * - {@link StratifyOperator} - for converting id based data with parent ids
- * - {@link ConnectOperator} - for link based data with a source and target
+ * - {@link HierarchyOperator} - when the data already has a dag structure.
+ * - {@link StratifyOperator} - when the dag has a tabular structure, referencing parents by id.
+ * - {@link ConnectOperator} - when the dag has a link structure and is specified as pairs of nodes.
  *
  * To layout a dag see the two dag layout algorithms:
  * - {@link SugiyamaOperator} - for a general layered dag representation

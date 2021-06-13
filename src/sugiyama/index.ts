@@ -1,25 +1,5 @@
 /**
- * This module contains methods for constructing a layered representation of
- * the DAG meant for visualization.  The algorithm is based off ideas presented
- * in K. Sugiyama et al. [1979], but described by [S.
- * Hong](http://www.it.usyd.edu.au/~shhong/fab.pdf).  The sugiyama layout can
- * be configured with different algorithms for each stage of the layout.  For
- * each stage there should be adecuate choices for methods that balance speed
- * and quality for your desired layout, but any function that meets the
- * interface for that stage is valid, but custom methods can also be provided,
- * assuming they do what's necessary in that step.
- *
- * The method {@link sugiyama} is used to create a new {@link SugiyamaOperator}. This
- * can be customized with all of the methods available, but in particular the
- * method is broken down into three steps:
- * 1. {@link "sugiyama/layering/index" | layering} - in this step, every node is
- *    assigned an integer later such that children are guaranteed to have
- *    higher layers than their parents.
- * 2. {@link "sugiyama/decross/index" | decrossing} - in the step, nodes in each
- *    layer are reordered to minimize the number of crossings.
- * 3. {@link "sugiyama/coord/index" | coordinate assignment} - in the step, the
- *    nodes are assigned x and y coordinates that respect their layer, and
- *    layer ordering.
+ * A {@link SugiyamaOperator} for computing a layered layout of a dag
  *
  * @module
  */
@@ -42,15 +22,43 @@ import { Up, assert, def, js } from "../utils";
 import { DecrossOperator } from "./decross";
 import { MedianOperator } from "./twolayer/median";
 
+/**
+ * The return from calling {@link SugiyamaOperator}
+ *
+ * This is the final width and height of the laidout dag.
+ */
 export interface SugiyamaInfo {
   width: number;
   height: number;
 }
 
+/**
+ * An accessor for computing the size of a node in the layout
+ *
+ * If `node` is omitted, the returned size is the size of a "dummy node", a
+ * piece of a long edge that can curve around other nodes. This accessor must
+ * return a tuple of non-negative numbers corresponding to the node's *width*
+ * and *height*. Since this is a layered layout, a node's height is effectively
+ * the maximum height of all nodes in the same layer.
+ *
+ * If you need more control over the size of dummy nodes, see
+ * {@link SugiNodeSizeAccessor}.
+ *
+ * This accessor will only be called once for each node.
+ */
 export interface NodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node?: DagNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
+/**
+ * An accessor for computing the size of a node in the layout
+ *
+ * This interface exposes a full {@link SugiNode}, which has more information
+ * about dummy nodes availble in case different dummy nodes should have
+ * different sizes.
+ *
+ * For most cases {@link NodeSizeAccessor} should be enough.
+ */
 export interface SugiNodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node: SugiNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
@@ -62,6 +70,10 @@ type NsDagNode<NS extends NodeSizeAccessor> = Exclude<
 type NsNodeDatum<NS extends NodeSizeAccessor> = NodeDatum<NsDagNode<NS>>;
 type NsLinkDatum<NS extends NodeSizeAccessor> = LinkDatum<NsDagNode<NS>>;
 
+/**
+ * The effective {@link SugiNodeSizeAccessor} when a normal
+ * {@link NodeSizeAccessor} is supplied.
+ */
 export interface WrappedNodeSizeAccessor<NodeSize extends NodeSizeAccessor>
   extends SugiNodeSizeAccessor<NsNodeDatum<NodeSize>, NsLinkDatum<NodeSize>> {
   wrapped: NodeSize;
@@ -110,20 +122,39 @@ type OpsDag<Ops extends Operators> = Dag<
 >;
 
 /**
- * The operator used to layout a {@link Dag} using the sugiyama method.
+ * The operator used to layout a {@link Dag} using the sugiyama layered method.
+ *
+ * The algorithm is roughly comprised of three steps:
+ * 1. {@link LayeringOperator | layering} - in this step, every node is
+ *    assigned a non-negative integer later such that children are guaranteed
+ *    to have higher layers than their parents. (modified with {@link layering})
+ * 2. {@link DecrossOperator | decrossing} - in the step, nodes in each layer
+ *    are reordered to minimize the number of crossings. (modified with {@link
+ *    decross})
+ * 3. {@link CoordOperator | coordinate assignment} - in the step, the
+ *    nodes are assigned x and y coordinates that respect their layer, layer
+ *    ordering, and size. (modified with {@link coord} and {@link nodeSize})
+ *
+ * The algorithm is based off ideas presented in K. Sugiyama et al. [1979], but
+ * described by {@link http://www.it.usyd.edu.au/~shhong/fab.pdf | S. Hong}.
+ * The sugiyama layout can be configured with different algorithms for each
+ * stage of the layout. For each stage there should be adecuate choices for
+ * methods that balance speed and quality for your desired layout. In the
+ * absence of those, any function that meets the interface for that stage is
+ * valid.
+ *
+ * Create with {@link sugiyama}.
  */
 export interface SugiyamaOperator<Ops extends Operators = Operators> {
   /**
-   * Layout the {@link Dag} using the currently configured operator. The returned
-   * DAG nodes will have added properties from {@link SugiyamaNode}. In addition,
-   * each link will have points reset and assigned.
+   * Layout the {@link Dag} using the currently configured operator. The
+   * returned dag nodes will have `x`, `y`, and `value` (layer), assigned. In
+   * addition, each link will have `points` assigned to the current layout.
    */
   (dag: OpsDag<Ops>): SugiyamaInfo;
 
   /**
-   * Set the {@link LayeringOperator}. See {@link "sugiyama/layering/index" |
-   * layerings} for more information about proper operators and a description
-   * of the built in operators. The default value is {@link simplex}.
+   * Set the {@link LayeringOperator}. (default: {@link SimplexOperator})
    */
   layering<NewLayering extends LayeringOperator>(
     layer: NewLayering
@@ -134,9 +165,7 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
   layering(): Ops["layering"];
 
   /**
-   * Set the {@link DecrossOperator}. See {@link "sugiyama/decross/index" |
-   * decrossings} for more information about proper operators and a description
-   * of the built in operators. The default value is {@link twoLayer}.
+   * Set the {@link DecrossOperator}. (default: {@link TwoLayerOperator})
    */
   decross<NewDecross extends DecrossOperator>(
     dec: NewDecross
@@ -147,9 +176,7 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
   decross(): Ops["decross"];
 
   /**
-   * Set the {@link CoordOperator}. See {@link "sugiyama/coord/index" | coordinate
-   * assignments} for more information about proper operators and a
-   * description of the built in operators. The default value is {@link quad}.
+   * Set the {@link CoordOperator}. (default: {@link QuadOperator})
    */
   coord<NewCoord extends CoordOperator>(
     crd: NewCoord
@@ -161,20 +188,21 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
 
   /**
    * Sets the sugiyama layout's size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns this {@link SugiyamaOperator}.  When
-   * {@link size} is non-null the dag will be shrunk or expanded to fit in the
-   * size, keeping all distances proportional. If it's null, the nodeSize
-   * parameters will be respected as coordinate sizes.
+   * numbers [ *width*, *height* ].  When `size` is non-null the dag will be
+   * shrunk or expanded to fit in the size, keeping all distances proportional.
+   * If it's null, the {@link nodeSize} parameters will be respected as
+   * coordinate sizes. (default: null)
    */
   size(sz: readonly [number, number] | null): SugiyamaOperator<Ops>;
   /**
-   * Get the current layout size, which defaults to [1, 1]. The return value
-   * will be null if the layout is {@link nodeSize}d.
+   * Get the current layout size.
    */
   size(): null | readonly [number, number];
 
   /**
-   * Sets the sugiyama layouts NodeSizeAccessor. This accessor...
+   * Sets the {@link NodeSizeAccessor}, which assigns how much space is
+   * necessary between nodes. (defaults to [1, 1] for normal nodes and [0, 0]
+   * for dummy nodes)
    */
   nodeSize<NewNodeSize extends NodeSizeAccessor>(
     acc: NewNodeSize
@@ -187,13 +215,19 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
       }
     >
   >;
-  /** Get the current NodeSizeAccessor ... */
+  /**
+   * Get the current node size
+   *
+   * If a {@link SugiNodeSizeAccessor} was specified, this will be null.
+   */
   nodeSize(): Ops["nodeSize"];
 
   /**
-   * Sets this sugiyama layout's {@link SugiNodeSizeAccessor}. This accessor returns
-   * the width and height of a node it's called on, and the node will then be
-   * laidout to have at least that much of a gap between nodes.
+   * Sets this sugiyama layout's {@link SugiNodeSizeAccessor}.
+   *
+   * This is effectively a more powerful api above the standard
+   * {@link NodeSizeAccessor}, and is only necessary if different dummy nodes
+   * need different sizes.
    */
   sugiNodeSize<NewSugiNodeSize extends SugiNodeSizeAccessor>(
     sz: NewSugiNodeSize
@@ -201,9 +235,8 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
     Up<Ops, { sugiNodeSize: NewSugiNodeSize; nodeSize: null }>
   >;
   /**
-   * Get the current {@link SugiNodeSizeAccessor}, which defaults to returning [1, 1]
-   * for normal nodes and [0, 1] for {@link DummyNodes}, casing edges to be treaded
-   * as if they had no width.
+   * Get the current sugi node size, or a {@link WrappedNodeSizeAccessor |
+   * wrapped version} if {@link nodeSize} was specified.
    */
   sugiNodeSize(): Ops["sugiNodeSize"];
 }

@@ -1,8 +1,26 @@
+/**
+ * Utility types for sugiyama layout
+ *
+ * This module should only really matter for those looking to develop custom
+ * {@link CoordOperator}s, {@link DecrossOperator}s, or in the rare case
+ * advanced {@link SugiNodeSizeAccessors}.
+ *
+ * @module
+ */
+
 import { Dag, DagNode } from "../dag";
 import { assert, def, js } from "../utils";
 
 import { hierarchy } from "../dag/create";
 
+/**
+ * The NodeDatum used for layered {@link SugiyamaOperator} layouts
+ *
+ * Nodes in the original graph have a layer and a reference to the original
+ * node. "dummy nodes" have a link to the parent and child of the edge their on
+ * in the original dag, as well as their actual layer. Given that duplicate
+ * edges aren't allowed, this uniquely defines each dummy node.
+ */
 export type SugiData<NodeDatum = unknown, LinkDatum = unknown> =
   | { layer: number; node: DagNode<NodeDatum, LinkDatum> }
   | {
@@ -10,17 +28,25 @@ export type SugiData<NodeDatum = unknown, LinkDatum = unknown> =
       source: DagNode<NodeDatum, LinkDatum>;
       target: DagNode<NodeDatum, LinkDatum>;
     };
+/**
+ * A {@link DagNode} with {@link SugiData}
+ *
+ * This is mostly a convenience type.
+ */
 export type SugiNode<NodeDatum = unknown, LinkDatum = unknown> = DagNode<
   SugiData<NodeDatum, LinkDatum>,
   undefined
 >;
 
+/** @internal get DagNode from SugiData */
 export type SugiDataDagNode<S extends SugiData> = S extends {
   node: DagNode;
 }
   ? S["node"]
   : never;
+/** @internal get NodeDatum from DagNode */
 export type NodeDatum<D extends DagNode> = D["data"];
+/** @internal get LinkDatum from DagNode */
 export type LinkDatum<D extends DagNode> = ReturnType<
   D["childLinks"]
 >[number]["data"];

@@ -1,12 +1,6 @@
 /**
- * This accessor assigns coordinates as the mean of their parents and then
- * spaces them out to respect their separation. Nodes with higher degree that
- * aren't dummy nodes are given higher priority for shifting order, i.e. are
- * less likely to be moved from the mean of their parents. This solution
- * results in a layout that is more pleaseing than center, but much faster to
- * compute than vert or minCurve.
- *
- * <img alt="greedy example" src="media://greedy_coordinate.png" width="400">
+ * The {@link GreedyOperator} assigns nodes close to the mean of their parents,
+ * then spreads them out.
  *
  * @module
  */
@@ -19,9 +13,24 @@ import { assert, def } from "../../utils";
 
 import { SugiNode } from "../utils";
 
+/**
+ * A {@link CoordOperator} that tries to place nodes close to their parents
+ *
+ * Nodes that can't be placed at the mean of their parents' location, will be
+ * spaced out with their priority equal to their degree.
+ *
+ * This is generally slower than {@link CenterOperator} but still reasonably
+ * fast.
+ *
+ * Create with {@link greedy}.
+ *
+ * <img alt="greedy example" src="media://greedy_coordinate.png" width="400">
+ */
 export type GreedyOperator = CoordOperator<unknown, unknown>;
 
-/** Create a greedy coordinate assignment operator. */
+/**
+ * Create a new {@link GreedyOperator}, bundled as {@link coordGreedy}.
+ */
 export function greedy(...args: never[]): GreedyOperator {
   if (args.length) {
     throw new Error(

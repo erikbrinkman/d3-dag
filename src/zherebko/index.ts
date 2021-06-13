@@ -1,10 +1,5 @@
 /**
- * This layout algorithm constructs a topological representation of the DAG
- * meant for visualization. The algorithm is based off a PR by D. Zherebko. The
- * nodes are topologically ordered, and edges are then positioned into "lanes"
- * to the left and right of the nodes.
- *
- * <img alt="zherebko example" src="media://zherebko.png" width="1000">
+ * A topological layout using {@link ZherebkoOperator}.
  *
  * @module
  */
@@ -12,16 +7,29 @@ import { Dag } from "../dag";
 import { assert } from "../utils";
 import { greedy } from "./greedy";
 
+/**
+ * A simple topological layout operator.
+ *
+ * This layout algorithm constructs a topological representation of the dag
+ * meant for visualization. The algorithm is based off a PR by D. Zherebko. The
+ * nodes are topologically ordered, and edges are then positioned into "lanes"
+ * to the left and right of the nodes.
+ *
+ * Create with {@link zherebko}.
+ *
+ * <img alt="zherebko example" src="media://zherebko.png" width="1000">
+ */
 export interface ZherebkoOperator {
-  /** Layout the input DAG. */
+  /** Layout the input dag */
   (dag: Dag): void;
 
   /**
    * Sets this zherebko layout's size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns this {@link ZherebkoOperator}..
+   * numbers [ *width*, *height* ] and returns a new operator. (default: [1,
+   * 1])
    */
   size(sz: readonly [number, number]): ZherebkoOperator;
-  /** Get the current size, which defaults to [1, 1]. */
+  /** Get the current size. */
   size(): [number, number];
 }
 
@@ -103,7 +111,9 @@ function buildOperator(width: number, height: number): ZherebkoOperator {
   return zherebkoCall;
 }
 
-/** Create a new {@link ZherebkoOperator} with default settings. */
+/**
+ * Create a new {@link ZherebkoOperator} with default settings.
+ */
 export function zherebko(...args: never[]): ZherebkoOperator {
   if (args.length) {
     throw new Error(

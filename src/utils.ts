@@ -1,3 +1,10 @@
+/**
+ * General utilities for use throughout the package
+ *
+ * @internal
+ * @module
+ */
+
 /** utility type for replacing keys with new value */
 export type Up<O, N> = Omit<O, keyof N> & N;
 

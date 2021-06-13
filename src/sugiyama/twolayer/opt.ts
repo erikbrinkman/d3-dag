@@ -1,9 +1,6 @@
 /**
- * The opt order operator orders the bottom layer to minimize the number of
- * crossings. This is expensive, but not nearly as expensive as optimizing all
- * crossings initially.
- *
- * <img alt="two layer opt example" src="media://two_layer_opt.png" width="400">
+ * A {@link OptOperator} that is optimal for only the current layer being
+ * rearranged.
  *
  * @module
  */
@@ -13,24 +10,42 @@ import { SugiNode } from "../utils";
 import { TwolayerOperator } from ".";
 import { def } from "../../utils";
 
+/**
+ * How to handle large dags
+ *
+ * Setting this higher than `"small"` may result in very long runtimes or
+ * crashes.
+ */
 export type LargeHandling = "small" | "medium" | "large";
 
+/**
+ * A {@link TwolayerOperator} for optimal decrossing of a single target layer
+ *
+ * The opt order operator orders the relevant layer to minimize the number of
+ * crossings. This is expensive, but not nearly as expensive as optimizing all
+ * crossings initially.
+ *
+ * Create with {@link opt}.
+ *
+ * <img alt="two layer opt example" src="media://two_layer_opt.png" width="400">
+ */
 export interface OptOperator extends TwolayerOperator<unknown, unknown> {
   /**
-   * Set the large dag handling which will error if you try to decross a dag
-   * that is too large. `"small"` the default only allows small graphs.
-   * `"medium"` will allow large graphs that may take an unreasonable amount of
-   * time to finish. `"large"` allows all graphs, including ones that will
-   * likely crash the vm.
+   * Set the large dag handling
+   *
+   * Setting to anything but `"small"` will allow running on larger dags, but
+   * the layout may run forever, or crash the vm. (default: `"small"`)
    */
   large(val: LargeHandling): OptOperator;
   /** Return the handling of large graphs. */
   large(): LargeHandling;
 
-  /** set whether to also minimize distance between nodes that share a parent / child
+  /**
+   * Set whether to also minimize distance between nodes that share a parent or
+   * child
    *
    * This adds more variables and constraints so will take longer, but will
-   * likely produce a better layout.
+   * likely produce a better layout. (default: false)
    */
   dist(val: boolean): OptOperator;
   /** get whether the current layout minimized distance */
@@ -267,7 +282,9 @@ function buildOperator(options: {
   return optCall;
 }
 
-/** Create a default {@link OptOperator}. */
+/**
+ * Create a default {@link OptOperator}, bundled as {@link twolayerOpt}.
+ */
 export function opt(...args: never[]): OptOperator {
   if (args.length) {
     throw new Error(

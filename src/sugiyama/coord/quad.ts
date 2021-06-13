@@ -1,9 +1,6 @@
 /**
- * This accessor positions nodes to minimize aspect of curvature and distance
- * between nodes. The coordinates are assigned by solving a quadratic program,
- * with weights for various parts of the objective function. Quadratic programs
- * can take a while to solve, but this will likely produce the most appealing
- * output.
+ * The {@link QuadOperator} positions nodes to minimize a quadratic
+ * optimization.
  *
  * @module
  */
@@ -16,6 +13,7 @@ import { SugiNode } from "../utils";
 /**
  * Compute a map from node ids to a connected component index. This is useful
  * to quickly compare if two nodes are in the same connected component.
+ *
  * @internal
  */
 function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
@@ -61,6 +59,7 @@ function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
  * distance between them to make a reasonable objective. If, however, layers
  * share no common components then they are truely independent in assignment of
  * x coordinates and should be solved separately.
+ *
  * @internal
  */
 function splitComponentLayers<N, L>(
@@ -85,10 +84,18 @@ function splitComponentLayers<N, L>(
 }
 
 /**
- * The operator for quadratically optimized coordinates. Two of the weight
- * settings allow specifying a different weight for regular nodes, and dummy
- * nodes (longer edges). The total weight for that node type must be greater
- * than zero otherwise the optimization will not be well formed.
+ * A {@link CoordOperator} that places nodes to minimize a quadratic function
+ *
+ * The minimization involves minimizing the distance between {@link vertical |
+ * connected nodes}, the {@link curve | curvature of edges}, and the distance
+ * between {@link component | disconnected components}.
+ *
+ * This operators generally takes the longest of all built-in operators but
+ * produces the most pleasing layout.
+ *
+ * Create with {@link quad}.
+ *
+ * <img alt="quad example" src="media://simplex.png" width="400">
  */
 export interface QuadOperator extends CoordOperator<unknown, unknown> {
   /**
@@ -97,47 +104,45 @@ export interface QuadOperator extends CoordOperator<unknown, unknown> {
    * lines. There are two different weights, [ *regular nodes*, *dummy nodes*
    * ], the weight for a pair of connected nodes the sum of the weight value
    * for each node depending on whether not that node is a dummy node. Setting
-   * them both to positive means all lines should ve roughly vertical, while
+   * them both to positive means all lines should be roughly vertical, while
    * setting a weight to zero doesn't peanalize edges between those types of
-   * nodes.
+   * nodes. (default: [1, 0])
    */
   vertical(val: readonly [number, number]): QuadOperator;
   /**
-   * Get the current vertical weights which defaults to [1, 0]. By setting the
-   * weight of dummy nodes to zero, longer edges aren't penalized to be
-   * straighter than short edges.
+   * Get the current vertical weights. By setting the weight of dummy nodes to
+   * zero, longer edges aren't penalized to be straighter than short edges.
    */
   vertical(): [number, number];
 
   /**
-   * Set the weight for curviness. Higher weights mean an edge going through a node type should be roughly straight.
-   * There are two different weights, [ *regular nodes*, *dummy nodes*
-   * ], that impact the curvature through those node types. Setting regular
-   * nodes to positive will create a type of flow of edges going through a
-   * node, while setting dummy nodes will enforce the longer edges should try
-   * to be stright.
+   * Set the weight for curviness. Higher weights mean an edge going through a
+   * node type should be roughly straight.  There are two different weights, [
+   * *regular nodes*, *dummy nodes* ], that impact the curvature through those
+   * node types. Setting regular nodes to positive will create a type of flow
+   * of edges going through a node, while setting dummy nodes will enforce the
+   * longer edges should try to be stright. (default: [0, 1])
    */
   curve(val: readonly [number, number]): QuadOperator;
   /**
-   * Get the current vertical weights which defaults to [0, 1]. By setting the
-   * weight of non-dummy nodes to zero, we only care about the curvature of
-   * edges, not lines that pass through nodes.
+   * Get the current vertical weights. By setting the weight of non-dummy nodes
+   * to zero, we only care about the curvature of edges, not lines that pass
+   * through nodes.
    */
   curve(): [number, number];
 
   /**
-   * Set the weight that for how close different disconnected components should
-   * be. The higher the weight, the more different components will be close to
-   * each other at the expense of other objectives. This needs to be greater
-   * than zero to make the objective sound when there are disconnected
-   * components, but otherwise should probably be very small.
+   * Set the weight for how close different disconnected components should be.
+   * The higher the weight, the more different components will be close to each
+   * other at the expense of other objectives. This needs to be greater than
+   * zero to make the objective sound when there are disconnected components,
+   * but otherwise should probably be very small. (default: 1)
    */
   component(val: number): QuadOperator;
-  /** Get the current component weight, which defaults to one. */
+  /** Get the current component weight. */
   component(): number;
 }
 
-/** @internal */
 function buildOperator(options: {
   vertNode: number;
   vertDummy: number;
@@ -281,7 +286,9 @@ function buildOperator(options: {
   return quadCall;
 }
 
-/** Create a default {@link QuadOperator}. */
+/**
+ * Create a default {@link QuadOperator}, bundled as {@link coordQuad}.
+ */
 export function quad(...args: never[]): QuadOperator {
   if (args.length) {
     throw new Error(

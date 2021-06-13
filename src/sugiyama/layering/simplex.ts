@@ -1,13 +1,6 @@
 /**
- * Assigns every node a layer with the goal of minimizing the number of dummy
- * nodes (long edges) inserted. Computing this layering requires solving an
- * integer linear program, which may take a long time, although in practice is
- * often quite fast. This is often known as the network simplex layering from
- * [Gansner et al. [1993}]](https://www.graphviz.org/Documentation/TSE93.pdf).
- *
- * Create a new {@link SimplexOperator} with {@link simplex}.
- *
- * <img alt="simplex example" src="media://simplex.png" width="400">
+ * A {@link SimplexOperator} that assigns layers to minimize the number of
+ * dummy nodes.
  *
  * @module
  */
@@ -39,6 +32,27 @@ type OpsDagNode<Ops extends Operators> = DagNode<
   OpsLinkDatum<Ops>
 >;
 
+/**
+ * A layering operator that assigns layers to minimize the number of dummy
+ * nodes (long edges) added to the layout.
+ *
+ * Computing this layering requires solving an integer linear program, which
+ * may take a long time, although in practice is often quite fast. This is
+ * often known as the network simplex layering from
+ * {@link https://www.graphviz.org/Documentation/TSE93.pdf | Gansner et al.
+ * [1993]}.
+ *
+ * Because this is solving a linear program, it is relatively easy to add new
+ * constraints. The current implementation allows specifying {@link rank}
+ * constriants that indicate which nodes should be above other nodes, or
+ * {@link group} constraints that say which nodes should be on the same layer.
+ * Note that adding these constraints can cause the optimization to become
+ * ill-defined.
+ *
+ * Create with {@link simplex}.
+ *
+ * <img alt="simplex example" src="media://simplex.png" width="400">
+ */
 export interface SimplexOperator<Ops extends Operators = Operators>
   extends LayeringOperator<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
@@ -47,7 +61,6 @@ export interface SimplexOperator<Ops extends Operators = Operators>
    * optimization to be ill-defined, and may result in an error during layout.
    */
   rank<NewRank extends RankAccessor>(
-    // NOTE this is necessary for type inference
     newRank: NewRank
   ): SimplexOperator<Up<Ops, { rank: NewRank }>>;
   /**
@@ -240,7 +253,9 @@ function defaultAccessor(): undefined {
   return undefined;
 }
 
-/** Create a default {@link SimplexOperator}. */
+/**
+ * Create a default {@link SimplexOperator}, bundled as {@link layeringSimplex}.
+ */
 export function simplex(...args: never[]): SimplexOperator<{
   rank: RankAccessor<unknown, unknown>;
   group: GroupAccessor<unknown, unknown>;

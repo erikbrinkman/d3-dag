@@ -1,8 +1,6 @@
 /**
- * The median order operator orders the bottom layer according to the median of
- * their parent's indices. In many cases this is optimal, and is very fast.
- *
- * <img alt="median example" src="media://two_layer_greedy.png" width="400">
+ * A {@link MedianOperator} that positions the layer in question as the median
+ * of the indices of its parents or children respectively.
  *
  * @module
  */
@@ -12,9 +10,25 @@ import { median as arrayMedian } from "d3-array";
 import { def } from "../../utils";
 import { order } from "./utils";
 
+/**
+ * A {@link TwolayerOperator} that positions nodes according to the median of
+ * their parent's indices.
+ *
+ * In many cases this is optimal, and is very fast. It takes as long as
+ * {@link MeanOperator}, with a little more memory. Nodes without parents or
+ * children respectively will be placed first to minimize the distance between
+ * nodes with common parents, and then to minimize rank inversions with respect
+ * to the initial ordering.
+ *
+ * Create with {@link median}.
+ *
+ * <img alt="median example" src="media://two_layer_greedy.png" width="400">
+ */
 export type MedianOperator = TwolayerOperator<unknown, unknown>;
 
-/** Create a median two layer ordering operator. */
+/**
+ * Create a default {@link MedianOperator}, bundled as {@link twolayerMedian}.
+ */
 export function median(...args: never[]): MedianOperator {
   if (args.length) {
     throw new Error(

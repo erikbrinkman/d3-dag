@@ -1,11 +1,5 @@
 /**
- * Create a decrossing operator that minimizes the the number of edge
- * crossings. This method solves an np-complete integer program, and as such
- * can take a very long time for large DAGs.
- *
- * Create a new {@link OptOperator} with {@link opt}.
- *
- * <img alt="optimal decross example" src="media://simplex.png" width="400">
+ * An {@link OptOperator} for optimally minimizing the number of crossings.
  *
  * @module
  */
@@ -15,25 +9,48 @@ import { bigrams, def } from "../../utils";
 import { DecrossOperator } from ".";
 import { SugiNode } from "../utils";
 
+/**
+ * What size of dags to error on
+ *
+ * Modifying this is probably a bad idea unless you know what you're doing.
+ *
+ * Optimally decrossing a dag can be prohibitively expensive. As a result, if
+ * you try to decross any dag that is heuristically determined to be too big,
+ * this will raise an error. Modifying how large graphs are handled will allow
+ * you to override these heuristic limits, but is probably unwise.
+ */
 export type LargeHandling = "small" | "medium" | "large";
 
+/**
+ * A {@link DecrossOperator} that minimizes the number of crossings.
+ *
+ * This method brute forces an NP-Complete problem, and as such may run for an
+ * exceedingly long time on large graphs. As a result, any graph that is
+ * probably too large will throw an error instead of running. Use with care.
+ *
+ * Create with {@link opt}.
+ *
+ * <img alt="optimal decross example" src="media://simplex.png" width="400">
+ */
 export interface OptOperator extends DecrossOperator<unknown, unknown> {
   /**
-   * Set the large dag handling, which will error if you try to decross DAGs
-   * that are too large. Since this operator is so expensive, this exists
-   * mostly to protect you from stalling. `"small"` the default only allows
-   * small graphs. `"medium"` will allow large graphs that may take an
-   * unreasonable amount of time to finish. `"large"` allows all graphs,
-   * including ones that will likely crash the vm.
+   * Set the large dag handling
+   *
+   * If you modify this, the layout may run forever, or may crash. See
+   * {@link LargeHandling} for more details. (default: `"small"`)
    */
   large(val: LargeHandling): OptOperator;
   /** Get the current large graph handling value. */
   large(): LargeHandling;
 
-  /** set whether to also minimize distance between nodes that share a parent / child
+  /**
+   * Set whether to also minimize distance between nodes that share a parent /
+   * child
    *
-   * This adds more variables and constraints so will take longer, but will
-   * likely produce a better layout.
+   * This adds more variables and constraints, and so will make the decrossing
+   * step take longer, but will likely produce a better layout as nodes that
+   * share common parents or children will be put closer together if it doesn't
+   * affect the number of crossings. (default: false)
    */
   dist(val: boolean): OptOperator;
   /** get whether the current layout minimized distance */
@@ -324,7 +341,9 @@ function buildOperator(options: {
   return optCall;
 }
 
-/** Create a default {@link OptOperator}. */
+/**
+ * Create a default {@link OptOperator}, bundled as {@link decrossOpt}.
+ */
 export function opt(...args: never[]): OptOperator {
   if (args.length) {
     throw new Error(

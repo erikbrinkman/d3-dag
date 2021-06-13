@@ -1,11 +1,5 @@
 /**
- * This layering operator assigns every node a layer such that the longest path
- * (the height) is minimized.  This often results in very wide graphs, but is
- * also fast to compute.
- *
- * Create a new {@link LongestPathOperator} with {@link longestPath}.
- *
- * <img alt="longest path example" src="media://longest_path.png" width="400">
+ * A {@link LongestPathOperator} that minimizes the height of the final layout
  *
  * @module
  */
@@ -13,12 +7,23 @@ import { Dag } from "../../dag";
 import { LayeringOperator } from ".";
 import { def } from "../../utils";
 
+/**
+ * A {@link LayeringOperator} that minimizes the height of the final layout.
+ *
+ * This often results in very wide and unplease graphs, but is very fast. The
+ * layout can go {@link topDown | top-down} or bottom-up, either assigning all roots to layer 0
+ * or all leaves to the last layer.
+ *
+ * Create with {@link longestPath}.
+ *
+ * <img alt="longest path example" src="media://longest_path.png" width="400">
+ */
 export interface LongestPathOperator
   extends LayeringOperator<unknown, unknown> {
   /**
-   * Set whether longest path should go top down or not. If set to true (the
-   * default), longest path will start at the top, putting nodes as close to
-   * the top as possible.
+   * Set whether longest path should go top down or not. If set to true, the
+   * longest path will start at the top, putting nodes as close to the top as
+   * possible. (default: true)
    */
   topDown(val: boolean): LongestPathOperator;
   /** Get whether or not this is using topDown. */
@@ -53,7 +58,10 @@ function buildOperator(options: { topDown: boolean }): LongestPathOperator {
   return longestPathCall;
 }
 
-/** Create a default {@link LongestPathOperator}. */
+/**
+ * Create a default {@link LongestPathOperator}, bundled as
+ * {@link layeringLongestPath}.
+ */
 export function longestPath(...args: never[]): LongestPathOperator {
   if (args.length) {
     throw new Error(

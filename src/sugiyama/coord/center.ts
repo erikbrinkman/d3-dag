@@ -1,8 +1,6 @@
 /**
- * The center coordinate assignment operator centers all of the nodes as
- * compatly as possible. It produces generally ppor layouts, but is very fast.
- *
- * <img alt="center example" src="media://center_coordinate.png" width="400">
+ * The {@link CenterOperator} centers all of the nodes as compactly as
+ * possible. It produces generally poor layouts, but is very fast.
  *
  * @module
  */
@@ -12,9 +10,21 @@ import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { SugiNode } from "../utils";
 import { def } from "../../utils";
 
+/**
+ * A {@link CoordOperator} that spaces every node out by node size, and then
+ * centers them.
+ *
+ * This is a very fast operator, but doesn't produce very pleasing layouts.
+ *
+ * Create with {@link center}.
+ *
+ * <img alt="center example" src="media://center_coordinate.png" width="400">
+ */
 export type CenterOperator = CoordOperator<unknown, unknown>;
 
-/** Create a new center assignment operator. */
+/**
+ * Create a {@link CenterOperator}. Bundled as {@link coordCenter}.
+ */
 export function center(...args: never[]): CenterOperator {
   if (args.length) {
     throw new Error(

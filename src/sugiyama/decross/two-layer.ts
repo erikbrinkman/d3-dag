@@ -1,10 +1,6 @@
 /**
- * Create a decrossing operator that minimizes the number of decrossings
- * heuristically by looking at each pair of layers. This method is very fast and very general and pften produces good results. It is also highly customizable, and can be parametrized by any {@link "sugiyama/twolayer/index" | two layer operator}.
- *
- * Create a new {@link TwoLayerOperator} with {@link twoLayer}.
- *
- * <img alt="two layer example" src="media://two_layer_greedy.png" width="400">
+ * A {@link TwoLayerOperator} heuristic for reducing the number of crossings in
+ * large dags efficiently.
  *
  * @module
  */
@@ -25,18 +21,29 @@ type OpLinkDatum<O extends OrderOperator> = LinkDatum<
   SugiDataDagNode<OpSugiData<O>>
 >;
 
+/**
+ * A decrossing operator that minimizes the number of crossings by looking at every pair of layers.
+ *
+ * This method can be very fast and is a general heuristic for efficient
+ * minimization. Customize with a two layer operator with {@link order} or use
+ * one of the built-in {@link TwolayerOperator}s.
+ *
+ * This methos can also make multiple {@link passes} in an attempt to produce a
+ * better layout.
+ *
+ * <img alt="two layer example" src="media://two_layer_greedy.png" width="400">
+ */
 export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
   extends DecrossOperator<OpNodeDatum<Order>, OpLinkDatum<Order>> {
   /**
-   * Sets the order accessor to the specified {@link OrderOperator} and returns
-   * this {@link TwoLayerOperator}. See the {@link "sugiyama/twolayer/index" | two
-   * layer} module for more information on order operators.
+   * Sets the order accessor to the specified {@link TwolayerOperator} and returns
+   * a new operator. (default: {@link MedianOperator}).
    */
   order<NewOrder extends OrderOperator>(
     ord: NewOrder
   ): TwoLayerOperator<NewOrder>;
   /**
-   * Get the current {@link OrderOperator} which defaults to {@link median}.
+   * Get the current {@link OrderOperator}.
    */
   order(): Order;
 
@@ -114,7 +121,10 @@ function buildOperator<O extends OrderOperator>(options: {
   return twoLayerCall;
 }
 
-/** Create a default {@link TwoLayerOperator}. */
+/**
+ * Create a default {@link TwoLayerOperator}, bundled as
+ * {@link decrossTwoLayer}.
+ */
 export function twoLayer(...args: never[]): TwoLayerOperator<MedianOperator> {
   if (args.length) {
     throw new Error(
