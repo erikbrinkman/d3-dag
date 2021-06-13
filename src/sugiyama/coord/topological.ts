@@ -6,7 +6,7 @@
  *
  * @module
  */
-import { CoordOperator, SugiNodeSizeAccessor } from ".";
+import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { init, layout, minBend, solve } from "./utils";
 
 import { SugiNode } from "../utils";
@@ -24,7 +24,7 @@ export function topological(...args: never[]): TopologicalOperator {
 
   function topologicalCall<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: SugiNodeSizeAccessor<N, L>
+    nodeSize: CoordNodeSizeAccessor<N, L>
   ): number {
     for (const layer of layers) {
       const numNodes = layer.reduce(

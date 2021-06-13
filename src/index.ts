@@ -23,7 +23,12 @@ export {
   hierarchy as dagHierarchy,
   HierarchyOperator
 } from "./dag/create";
-export { sugiyama, SugiyamaOperator, NodeSizeAccessor } from "./sugiyama";
+export {
+  sugiyama,
+  SugiyamaOperator,
+  NodeSizeAccessor,
+  SugiNodeSizeAccessor
+} from "./sugiyama";
 export {
   topological as layeringTopological,
   TopologicalOperator as TopologicalLayeringOperator
@@ -35,7 +40,7 @@ export {
 export { LayeringOperator } from "./sugiyama/layering";
 export { TwolayerOperator } from "./sugiyama/twolayer";
 export { DecrossOperator } from "./sugiyama/decross";
-export { CoordOperator, SugiNodeSizeAccessor } from "./sugiyama/coord";
+export { CoordOperator, CoordNodeSizeAccessor } from "./sugiyama/coord";
 export {
   longestPath as layeringLongestPath,
   LongestPathOperator

@@ -24,7 +24,7 @@
  * @module
  */
 
-import { CoordOperator, SugiNodeSizeAccessor } from "./coord";
+import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
 import { Dag, DagNode } from "../dag";
 import { GroupAccessor, LayeringOperator, RankAccessor } from "./layering";
 import {
@@ -41,7 +41,6 @@ import { Up, assert, def, js } from "../utils";
 
 import { DecrossOperator } from "./decross";
 import { MedianOperator } from "./twolayer/median";
-import { cachedNodeSize } from "./nodesize";
 
 export interface SugiyamaInfo {
   width: number;
@@ -50,6 +49,10 @@ export interface SugiyamaInfo {
 
 export interface NodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node?: DagNode<NodeDatum, LinkDatum>): readonly [number, number];
+}
+
+export interface SugiNodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
+  (node: SugiNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
 type NsDagNode<NS extends NodeSizeAccessor> = Exclude<
@@ -205,6 +208,37 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
   sugiNodeSize(): Ops["sugiNodeSize"];
 }
 
+/**
+ * A checked and cached node size accessor wrapper.
+ *
+ * @internal
+ */
+function cachedNodeSize<N, L>(
+  nodeSize: SugiNodeSizeAccessor<N, L>
+): readonly [CoordNodeSizeAccessor<N, L>, CoordNodeSizeAccessor<N, L>] {
+  const cache = new Map<SugiNode, readonly [number, number]>();
+
+  function cached(node: SugiNode<N, L>): readonly [number, number] {
+    let val = cache.get(node);
+    if (val === undefined) {
+      val = nodeSize(node);
+      const [width, height] = val;
+      if (width < 0 || height < 0) {
+        throw new Error(
+          js`all node sizes must be non-negative, but got width ${width} and height ${height} for node '${node}'`
+        );
+      }
+      cache.set(node, val);
+    }
+    return val;
+  }
+
+  const cachedX = (node: SugiNode<N, L>): number => cached(node)[0];
+  const cachedY = (node: SugiNode<N, L>): number => cached(node)[1];
+
+  return [cachedX, cachedY];
+}
+
 /** @internal */
 function buildOperator<Ops extends Operators>(
   options: Ops & {
@@ -219,10 +253,10 @@ function buildOperator<Ops extends Operators>(
     const layers = sugify(dag);
 
     // assign y
-    const nodeSize = cachedNodeSize(options.sugiNodeSize);
+    const [xSize, ySize] = cachedNodeSize(options.sugiNodeSize);
     let height = 0;
     for (const layer of layers) {
-      const layerHeight = Math.max(...layer.map((n) => nodeSize(n)[1]));
+      const layerHeight = Math.max(...layer.map(ySize));
       for (const node of layer) {
         node.y = height + layerHeight / 2;
       }
@@ -238,7 +272,7 @@ function buildOperator<Ops extends Operators>(
     options.decross(layers);
 
     // assign coordinates
-    let width = options.coord(layers, nodeSize);
+    let width = options.coord(layers, xSize);
 
     // verify
     for (const layer of layers) {

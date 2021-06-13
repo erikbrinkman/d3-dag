@@ -1,7 +1,8 @@
-import { CoordOperator, SugiNodeSizeAccessor } from "../../src/sugiyama/coord";
 import { Dag, DagNode } from "../../src/dag";
 import { SimpleDatum, doub, dummy, single, three, trip } from "../examples";
+import { SugiNodeSizeAccessor, sugiyama } from "../../src/sugiyama";
 
+import { CoordOperator } from "../../src/sugiyama/coord";
 import { DecrossOperator } from "../../src/sugiyama/decross";
 import { LayeringOperator } from "../../src/sugiyama/layering";
 import { SugiNode } from "../../src/sugiyama/utils";
@@ -15,7 +16,6 @@ import { longestPath } from "../../src/sugiyama/layering/longest-path";
 import { opt } from "../../src/sugiyama/decross/opt";
 import { quad } from "../../src/sugiyama/coord/quad";
 import { simplex } from "../../src/sugiyama/layering/simplex";
-import { sugiyama } from "../../src/sugiyama";
 import { twoLayer } from "../../src/sugiyama/decross/two-layer";
 
 test("sugiyama() works for single node", () => {

@@ -46,7 +46,7 @@ test("greedy() fails passing an arg to constructor", () => {
 
 test("greedy() throws for zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => greedy()(layers, () => [0, 1] as const)).toThrow(
+  expect(() => greedy()(layers, () => 0)).toThrow(
     "must assign nonzero width to at least one node"
   );
 });

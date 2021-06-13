@@ -86,7 +86,7 @@ test("quad() fails passing an arg to constructor", () => {
 
 test("quad() throws for zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => quad()(layers, () => [0, 1])).toThrow(
+  expect(() => quad()(layers, () => 0)).toThrow(
     "must assign nonzero width to at least one node"
   );
 });

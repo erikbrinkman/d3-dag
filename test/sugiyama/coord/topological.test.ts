@@ -39,7 +39,7 @@ test("topological() fails passing an arg to constructor", () => {
 
 test("topological() throws for zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => topological()(layers, () => [0, 1])).toThrow(
+  expect(() => topological()(layers, () => 0)).toThrow(
     "must assign nonzero width to at least one node"
   );
 });

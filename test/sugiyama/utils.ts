@@ -136,7 +136,8 @@ export function createLayers(
   return layers;
 }
 
-export const nodeSize = () => [1, 1] as const;
+export const sugiNodeSize = () => [1, 1] as const;
+export const nodeSize = () => 1 as const;
 
 export function crossings(layers: readonly (readonly SugiNode[])[]): number {
   let crossings = 0;

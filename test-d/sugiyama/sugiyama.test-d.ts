@@ -1,7 +1,12 @@
-import { CoordOperator, SugiNodeSizeAccessor } from "../../src/sugiyama/coord";
-import { NodeSizeAccessor, SugiyamaInfo, sugiyama } from "../../src/sugiyama";
+import {
+  NodeSizeAccessor,
+  SugiNodeSizeAccessor,
+  SugiyamaInfo,
+  sugiyama
+} from "../../src/sugiyama";
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
 
+import { CoordOperator } from "../../src/sugiyama/coord";
 import { Dag } from "../../src/dag";
 import { DecrossOperator } from "../../src/sugiyama/decross";
 import { LayeringOperator } from "../../src/sugiyama/layering";

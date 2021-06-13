@@ -1,7 +1,7 @@
 import { assert, bigrams, def } from "../../utils";
 
+import { CoordNodeSizeAccessor } from ".";
 import { SugiNode } from "../utils";
-import { SugiNodeSizeAccessor } from ".";
 import { solveQP } from "quadprog";
 
 /** @internal wrapper for solveQP */
@@ -76,7 +76,7 @@ export function indices(layers: SugiNode[][]): Map<SugiNode, number> {
 export function init<N, L>(
   layers: SugiNode<N, L>[][],
   inds: Map<SugiNode, number>,
-  nodeSize: SugiNodeSizeAccessor<N, L>
+  nodeSize: CoordNodeSizeAccessor<N, L>
 ): [number[][], number[], number[][], number[]] {
   // NOTE max because we might assign a node the same index
   const n = 1 + Math.max(...inds.values());
@@ -91,7 +91,7 @@ export function init<N, L>(
       cons[find] = 1;
       cons[sind] = -1;
       A.push(cons);
-      b.push(-(nodeSize(first)[0] + nodeSize(second)[0]) / 2);
+      b.push(-(nodeSize(first) + nodeSize(second)) / 2);
     }
   }
 
@@ -147,7 +147,7 @@ export function minBend(
  */
 export function layout<N, L>(
   layers: SugiNode<N, L>[][],
-  nodeSize: SugiNodeSizeAccessor<N, L>,
+  nodeSize: CoordNodeSizeAccessor<N, L>,
   inds: Map<SugiNode, number>,
   solution: number[]
 ): number {
@@ -160,11 +160,11 @@ export function layout<N, L>(
 
     start = Math.min(
       start,
-      solution[def(inds.get(first))] - nodeSize(first)[0] / 2
+      solution[def(inds.get(first))] - nodeSize(first) / 2
     );
     finish = Math.max(
       finish,
-      solution[def(inds.get(last))] + nodeSize(last)[0] / 2
+      solution[def(inds.get(last))] + nodeSize(last) / 2
     );
   }
 

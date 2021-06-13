@@ -16,9 +16,8 @@ const ex = () =>
     [[], []]
   ]);
 
-function idLayerSize(node: SugiNode<{ index: number }>): [number, number] {
-  const width = "node" in node.data ? node.data.node.data.index + 1 : 1;
-  return [width, 1];
+function idLayerSize(node: SugiNode<{ index: number }>): number {
+  return "node" in node.data ? node.data.node.data.index + 1 : 1;
 }
 
 for (const method of [center(), greedy(), quad()]) {

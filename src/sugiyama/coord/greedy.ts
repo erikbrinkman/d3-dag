@@ -14,7 +14,7 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 
-import { CoordOperator, SugiNodeSizeAccessor } from ".";
+import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { assert, def } from "../../utils";
 
 import { SugiNode } from "../utils";
@@ -31,7 +31,7 @@ export function greedy(...args: never[]): GreedyOperator {
 
   function greedyCall<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: SugiNodeSizeAccessor<N, L>
+    nodeSize: CoordNodeSizeAccessor<N, L>
   ): number {
     // TODO other initial assignments
     const assignment = meanAssignment;
@@ -62,7 +62,7 @@ export function greedy(...args: never[]): GreedyOperator {
     let start = 0;
     let finish = 0;
     for (const node of lastLayer) {
-      const size = nodeSize(node)[0];
+      const size = nodeSize(node);
       node.x = finish + size / 2;
       finish += size;
     }
@@ -84,11 +84,11 @@ export function greedy(...args: never[]): GreedyOperator {
       for (const [j, node] of ordered) {
         // first push nodes over to left
         // TODO we do left than right, but really we should do both and average
-        const nwidth = nodeSize(node)[0];
+        const nwidth = nodeSize(node);
 
         let end = def(node.x) + nwidth / 2;
         for (const next of layer.slice(j + 1)) {
-          const hsize = nodeSize(next)[0] / 2;
+          const hsize = nodeSize(next) / 2;
           const nx = (next.x = Math.max(def(next.x), end + hsize));
           end = nx + hsize;
         }
@@ -97,7 +97,7 @@ export function greedy(...args: never[]): GreedyOperator {
         // then push from the right
         let begin = def(node.x) - nwidth / 2;
         for (const next of layer.slice(0, j).reverse()) {
-          const hsize = nodeSize(next)[0] / 2;
+          const hsize = nodeSize(next) / 2;
           const nx = (next.x = Math.min(def(next.x), begin - hsize));
           begin = nx - hsize;
         }

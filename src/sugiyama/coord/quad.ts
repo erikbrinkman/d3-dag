@@ -7,7 +7,7 @@
  *
  * @module
  */
-import { CoordOperator, SugiNodeSizeAccessor } from ".";
+import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { bigrams, def, dfs, setIntersect } from "../../utils";
 import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
@@ -147,7 +147,7 @@ function buildOperator(options: {
 }): QuadOperator {
   function quadComponent<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: SugiNodeSizeAccessor<N, L>,
+    nodeSize: CoordNodeSizeAccessor<N, L>,
     compMap: Map<SugiNode, number>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy, comp } = options;
@@ -186,7 +186,7 @@ function buildOperator(options: {
 
   function quadCall<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: SugiNodeSizeAccessor<N, L>
+    nodeSize: CoordNodeSizeAccessor<N, L>
   ): number {
     const { vertNode, vertDummy, curveNode, curveDummy } = options;
     if (vertNode === 0 && curveNode === 0) {

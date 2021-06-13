@@ -7,7 +7,7 @@
  * @module
  */
 
-import { CoordOperator, SugiNodeSizeAccessor } from ".";
+import { CoordNodeSizeAccessor, CoordOperator } from ".";
 
 import { SugiNode } from "../utils";
 import { def } from "../../utils";
@@ -24,12 +24,12 @@ export function center(...args: never[]): CenterOperator {
 
   function centerCall<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: SugiNodeSizeAccessor<N, L>
+    nodeSize: CoordNodeSizeAccessor<N, L>
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;
       for (const node of layer) {
-        const nodeWidth = nodeSize(node)[0];
+        const nodeWidth = nodeSize(node);
         node.x = width + nodeWidth / 2;
         width += nodeWidth;
       }
