@@ -69,8 +69,20 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>This file contains all of the exports that make it into the pure javascript
-						flat structure.</p>
+						/ bundled flat structure.</p>
 					</div>
+					<p>To create a dag structure from data, a necessary first step before computing
+					a layout, see the three creation algorithms:</p>
+					<ul>
+						<li><a href="index.html#hierarchyoperator">HierarchyOperator</a> - when the data already has a dag structure.</li>
+						<li><a href="index.html#stratifyoperator">StratifyOperator</a> - when the dag has a tabular structure, referencing parents by id.</li>
+						<li><a href="index.html#connectoperator">ConnectOperator</a> - when the dag has a link structure and is specified as pairs of nodes.</li>
+					</ul>
+					<p>To layout a dag see the two dag layout algorithms:</p>
+					<ul>
+						<li><a href="index.html#sugiyamaoperator">SugiyamaOperator</a> - for a general layered dag representation</li>
+						<li><a href="index.html#zherebkooperator">ZherebkoOperator</a> - for a simple topological layout</li>
+					</ul>
 				</div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -80,38 +92,35 @@
 						<section class="tsd-index-section ">
 							<h3>References</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#arqdummynode" class="tsd-kind-icon">Arq<wbr>Dummy<wbr>Node</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#arquintoperator" class="tsd-kind-icon">Arquint<wbr>Operator</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#aggoperator" class="tsd-kind-icon">Agg<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#centeroperator" class="tsd-kind-icon">Center<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#coffmangrahamoperator" class="tsd-kind-icon">Coffman<wbr>Graham<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#connectoperator" class="tsd-kind-icon">Connect<wbr>Operator</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#coordnodesizeaccessor" class="tsd-kind-icon">Coord<wbr>Node<wbr>Size<wbr>Accessor</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#coordoperator" class="tsd-kind-icon">Coord<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#dag" class="tsd-kind-icon">Dag</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#daglink" class="tsd-kind-icon">Dag<wbr>Link</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#dagnode" class="tsd-kind-icon">Dag<wbr>Node</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#dagroot" class="tsd-kind-icon">Dag<wbr>Root</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#decrossoperator" class="tsd-kind-icon">Decross<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#greedyoperator" class="tsd-kind-icon">Greedy<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#hierarchyoperator" class="tsd-kind-icon">Hierarchy<wbr>Operator</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#link" class="tsd-kind-icon">Link</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#layeringoperator" class="tsd-kind-icon">Layering<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#longestpathoperator" class="tsd-kind-icon">Longest<wbr>Path<wbr>Operator</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#meanoperator" class="tsd-kind-icon">Mean<wbr>Operator</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#medianoperator" class="tsd-kind-icon">Median<wbr>Operator</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#nodesizeaccessor" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#optlayeringoperator" class="tsd-kind-icon">Opt<wbr>Layering<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#opttwolayeroperator" class="tsd-kind-icon">Opt<wbr>Twolayer<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#quadoperator" class="tsd-kind-icon">Quad<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#simplexoperator" class="tsd-kind-icon">Simplex<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#stratifyoperator" class="tsd-kind-icon">Stratify<wbr>Operator</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#sugidummynode" class="tsd-kind-icon">Sugi<wbr>Dummy<wbr>Node</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#sugiyamanode" class="tsd-kind-icon">Sugiyama<wbr>Node</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#suginodesizeaccessor" class="tsd-kind-icon">Sugi<wbr>Node<wbr>Size<wbr>Accessor</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#sugiyamaoperator" class="tsd-kind-icon">Sugiyama<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#topologicalcoordoperator" class="tsd-kind-icon">Topological<wbr>Coord<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#topologicallayeringoperator" class="tsd-kind-icon">Topological<wbr>Layering<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#twolayeroperator" class="tsd-kind-icon">Two<wbr>Layer<wbr>Operator</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#twolayeroperator-1" class="tsd-kind-icon">Twolayer<wbr>Operator</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#zherebkooperator" class="tsd-kind-icon">Zherebko<wbr>Operator</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#arqcoordspread" class="tsd-kind-icon">arqcoord<wbr>Spread</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#arquint" class="tsd-kind-icon">arquint</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#columnadjacent" class="tsd-kind-icon">column<wbr>Adjacent</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#columncenter" class="tsd-kind-icon">column<wbr>Center</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#columncomplex" class="tsd-kind-icon">column<wbr>Complex</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#columnleft" class="tsd-kind-icon">column<wbr>Left</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#aggmeanfactory" class="tsd-kind-icon">agg<wbr>Mean<wbr>Factory</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#aggmedianfactory" class="tsd-kind-icon">agg<wbr>Median<wbr>Factory</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#coordcenter" class="tsd-kind-icon">coord<wbr>Center</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#coordgreedy" class="tsd-kind-icon">coord<wbr>Greedy</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#coordquad" class="tsd-kind-icon">coord<wbr>Quad</a></li>
@@ -126,8 +135,7 @@
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#layeringsimplex" class="tsd-kind-icon">layering<wbr>Simplex</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#layeringtopological" class="tsd-kind-icon">layering<wbr>Topological</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#sugiyama" class="tsd-kind-icon">sugiyama</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#twolayermean" class="tsd-kind-icon">twolayer<wbr>Mean</a></li>
-								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#twolayermedian" class="tsd-kind-icon">twolayer<wbr>Median</a></li>
+								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#twolayeragg" class="tsd-kind-icon">twolayer<wbr>Agg</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#twolayeropt" class="tsd-kind-icon">twolayer<wbr>Opt</a></li>
 								<li class="tsd-kind-reference tsd-parent-kind-module"><a href="index.html#zherebko" class="tsd-kind-icon">zherebko</a></li>
 							</ul>
@@ -138,14 +146,9 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>References</h2>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="arqdummynode" class="tsd-anchor"></a>
-					<h3>Arq<wbr>Dummy<wbr>Node</h3>
-					Renames and exports <a href="../classes/arquint_dummy.dummynode.html">DummyNode</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="arquintoperator" class="tsd-anchor"></a>
-					<h3>Arquint<wbr>Operator</h3>
-					Renames and exports <a href="../interfaces/arquint.operator.html">Operator</a>
+					<a name="aggoperator" class="tsd-anchor"></a>
+					<h3>Agg<wbr>Operator</h3>
+					Re-exports <a href="../interfaces/sugiyama_twolayer_agg.aggoperator.html">AggOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="centeroperator" class="tsd-anchor"></a>
@@ -160,22 +163,37 @@
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="connectoperator" class="tsd-anchor"></a>
 					<h3>Connect<wbr>Operator</h3>
-					Re-exports <a href="../interfaces/dag_connect.connectoperator.html">ConnectOperator</a>
+					Re-exports <a href="../interfaces/dag_create.connectoperator.html">ConnectOperator</a>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
+					<a name="coordnodesizeaccessor" class="tsd-anchor"></a>
+					<h3>Coord<wbr>Node<wbr>Size<wbr>Accessor</h3>
+					Re-exports <a href="../interfaces/sugiyama_coord.coordnodesizeaccessor.html">CoordNodeSizeAccessor</a>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
+					<a name="coordoperator" class="tsd-anchor"></a>
+					<h3>Coord<wbr>Operator</h3>
+					Re-exports <a href="../interfaces/sugiyama_coord.coordoperator.html">CoordOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="dag" class="tsd-anchor"></a>
 					<h3>Dag</h3>
-					Re-exports <a href="dag_node.html#dag">Dag</a>
+					Re-exports <a href="../interfaces/dag.dag-1.html">Dag</a>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
+					<a name="daglink" class="tsd-anchor"></a>
+					<h3>Dag<wbr>Link</h3>
+					Re-exports <a href="../interfaces/dag.daglink.html">DagLink</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="dagnode" class="tsd-anchor"></a>
 					<h3>Dag<wbr>Node</h3>
-					Re-exports <a href="dag_node.html#dagnode">DagNode</a>
+					Re-exports <a href="../interfaces/dag.dagnode.html">DagNode</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="dagroot" class="tsd-anchor"></a>
-					<h3>Dag<wbr>Root</h3>
-					Re-exports <a href="dag_node.html#dagroot">DagRoot</a>
+					<a name="decrossoperator" class="tsd-anchor"></a>
+					<h3>Decross<wbr>Operator</h3>
+					Re-exports <a href="../interfaces/sugiyama_decross.decrossoperator.html">DecrossOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="greedyoperator" class="tsd-anchor"></a>
@@ -185,12 +203,12 @@
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="hierarchyoperator" class="tsd-anchor"></a>
 					<h3>Hierarchy<wbr>Operator</h3>
-					Re-exports <a href="../interfaces/dag_hierarchy.hierarchyoperator.html">HierarchyOperator</a>
+					Re-exports <a href="../interfaces/dag_create.hierarchyoperator.html">HierarchyOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="link" class="tsd-anchor"></a>
-					<h3>Link</h3>
-					Re-exports <a href="dag_node.html#link">Link</a>
+					<a name="layeringoperator" class="tsd-anchor"></a>
+					<h3>Layering<wbr>Operator</h3>
+					Re-exports <a href="../interfaces/sugiyama_layering.layeringoperator.html">LayeringOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="longestpathoperator" class="tsd-anchor"></a>
@@ -198,14 +216,9 @@
 					Re-exports <a href="../interfaces/sugiyama_layering_longest_path.longestpathoperator.html">LongestPathOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="meanoperator" class="tsd-anchor"></a>
-					<h3>Mean<wbr>Operator</h3>
-					Re-exports <a href="sugiyama_twolayer_mean.html#meanoperator">MeanOperator</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="medianoperator" class="tsd-anchor"></a>
-					<h3>Median<wbr>Operator</h3>
-					Re-exports <a href="sugiyama_twolayer_median.html#medianoperator">MedianOperator</a>
+					<a name="nodesizeaccessor" class="tsd-anchor"></a>
+					<h3>Node<wbr>Size<wbr>Accessor</h3>
+					Re-exports <a href="../interfaces/sugiyama.nodesizeaccessor.html">NodeSizeAccessor</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="optlayeringoperator" class="tsd-anchor"></a>
@@ -230,17 +243,12 @@
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="stratifyoperator" class="tsd-anchor"></a>
 					<h3>Stratify<wbr>Operator</h3>
-					Re-exports <a href="../interfaces/dag_stratify.stratifyoperator.html">StratifyOperator</a>
+					Re-exports <a href="../interfaces/dag_create.stratifyoperator.html">StratifyOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="sugidummynode" class="tsd-anchor"></a>
-					<h3>Sugi<wbr>Dummy<wbr>Node</h3>
-					Renames and exports <a href="../classes/sugiyama_dummy.dummynode.html">DummyNode</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="sugiyamanode" class="tsd-anchor"></a>
-					<h3>Sugiyama<wbr>Node</h3>
-					Re-exports <a href="../interfaces/sugiyama.sugiyamanode.html">SugiyamaNode</a>
+					<a name="suginodesizeaccessor" class="tsd-anchor"></a>
+					<h3>Sugi<wbr>Node<wbr>Size<wbr>Accessor</h3>
+					Re-exports <a href="../interfaces/sugiyama.suginodesizeaccessor.html">SugiNodeSizeAccessor</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="sugiyamaoperator" class="tsd-anchor"></a>
@@ -263,39 +271,24 @@
 					Re-exports <a href="../interfaces/sugiyama_decross_two_layer.twolayeroperator.html">TwoLayerOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
+					<a name="twolayeroperator-1" class="tsd-anchor"></a>
+					<h3>Twolayer<wbr>Operator</h3>
+					Re-exports <a href="../interfaces/sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="zherebkooperator" class="tsd-anchor"></a>
 					<h3>Zherebko<wbr>Operator</h3>
 					Re-exports <a href="../interfaces/zherebko.zherebkooperator.html">ZherebkoOperator</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="arqcoordspread" class="tsd-anchor"></a>
-					<h3>arqcoord<wbr>Spread</h3>
-					Renames and exports <a href="arquint_coord_spread.html#spread">spread</a>
+					<a name="aggmeanfactory" class="tsd-anchor"></a>
+					<h3>agg<wbr>Mean<wbr>Factory</h3>
+					Renames and exports <a href="sugiyama_twolayer_agg.html#meanfactory">meanFactory</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="arquint" class="tsd-anchor"></a>
-					<h3>arquint</h3>
-					Re-exports <a href="arquint.html#arquint-1">arquint</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="columnadjacent" class="tsd-anchor"></a>
-					<h3>column<wbr>Adjacent</h3>
-					Renames and exports <a href="arquint_column_adjacent.html#adjacent">adjacent</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="columncenter" class="tsd-anchor"></a>
-					<h3>column<wbr>Center</h3>
-					Renames and exports <a href="arquint_column_center.html#center">center</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="columncomplex" class="tsd-anchor"></a>
-					<h3>column<wbr>Complex</h3>
-					Renames and exports <a href="arquint_column_complex.html#complex">complex</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="columnleft" class="tsd-anchor"></a>
-					<h3>column<wbr>Left</h3>
-					Renames and exports <a href="arquint_column_left.html#left">left</a>
+					<a name="aggmedianfactory" class="tsd-anchor"></a>
+					<h3>agg<wbr>Median<wbr>Factory</h3>
+					Renames and exports <a href="sugiyama_twolayer_agg.html#medianfactory">medianFactory</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="coordcenter" class="tsd-anchor"></a>
@@ -320,17 +313,17 @@
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="dagconnect" class="tsd-anchor"></a>
 					<h3>dag<wbr>Connect</h3>
-					Renames and exports <a href="dag_connect.html#connect">connect</a>
+					Renames and exports <a href="dag_create.html#connect">connect</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="daghierarchy" class="tsd-anchor"></a>
 					<h3>dag<wbr>Hierarchy</h3>
-					Renames and exports <a href="dag_hierarchy.html#hierarchy">hierarchy</a>
+					Renames and exports <a href="dag_create.html#hierarchy">hierarchy</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="dagstratify" class="tsd-anchor"></a>
 					<h3>dag<wbr>Stratify</h3>
-					Renames and exports <a href="dag_stratify.html#stratify">stratify</a>
+					Renames and exports <a href="dag_create.html#stratify">stratify</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="decrossopt" class="tsd-anchor"></a>
@@ -368,14 +361,9 @@
 					Re-exports <a href="sugiyama.html#sugiyama-1">sugiyama</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="twolayermean" class="tsd-anchor"></a>
-					<h3>twolayer<wbr>Mean</h3>
-					Renames and exports <a href="sugiyama_twolayer_mean.html#mean">mean</a>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
-					<a name="twolayermedian" class="tsd-anchor"></a>
-					<h3>twolayer<wbr>Median</h3>
-					Renames and exports <a href="sugiyama_twolayer_median.html#median">median</a>
+					<a name="twolayeragg" class="tsd-anchor"></a>
+					<h3>twolayer<wbr>Agg</h3>
+					Renames and exports <a href="sugiyama_twolayer_agg.html#agg">agg</a>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-reference tsd-parent-kind-module">
 					<a name="twolayeropt" class="tsd-anchor"></a>
@@ -395,18 +383,81 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="dag_create.html">dag/create</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#arqdummynode" class="tsd-kind-icon">Arq<wbr>Dummy<wbr>Node</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#arquintoperator" class="tsd-kind-icon">Arquint<wbr>Operator</a>
+						<a href="index.html#aggoperator" class="tsd-kind-icon">Agg<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#centeroperator" class="tsd-kind-icon">Center<wbr>Operator</a>
@@ -418,13 +469,22 @@
 						<a href="index.html#connectoperator" class="tsd-kind-icon">Connect<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="index.html#coordnodesizeaccessor" class="tsd-kind-icon">Coord<wbr>Node<wbr>Size<wbr>Accessor</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="index.html#coordoperator" class="tsd-kind-icon">Coord<wbr>Operator</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#dag" class="tsd-kind-icon">Dag</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="index.html#daglink" class="tsd-kind-icon">Dag<wbr>Link</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#dagnode" class="tsd-kind-icon">Dag<wbr>Node</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#dagroot" class="tsd-kind-icon">Dag<wbr>Root</a>
+						<a href="index.html#decrossoperator" class="tsd-kind-icon">Decross<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#greedyoperator" class="tsd-kind-icon">Greedy<wbr>Operator</a>
@@ -433,16 +493,13 @@
 						<a href="index.html#hierarchyoperator" class="tsd-kind-icon">Hierarchy<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#link" class="tsd-kind-icon">Link</a>
+						<a href="index.html#layeringoperator" class="tsd-kind-icon">Layering<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#longestpathoperator" class="tsd-kind-icon">Longest<wbr>Path<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#meanoperator" class="tsd-kind-icon">Mean<wbr>Operator</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#medianoperator" class="tsd-kind-icon">Median<wbr>Operator</a>
+						<a href="index.html#nodesizeaccessor" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#optlayeringoperator" class="tsd-kind-icon">Opt<wbr>Layering<wbr>Operator</a>
@@ -460,10 +517,7 @@
 						<a href="index.html#stratifyoperator" class="tsd-kind-icon">Stratify<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#sugidummynode" class="tsd-kind-icon">Sugi<wbr>Dummy<wbr>Node</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#sugiyamanode" class="tsd-kind-icon">Sugiyama<wbr>Node</a>
+						<a href="index.html#suginodesizeaccessor" class="tsd-kind-icon">Sugi<wbr>Node<wbr>Size<wbr>Accessor</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#sugiyamaoperator" class="tsd-kind-icon">Sugiyama<wbr>Operator</a>
@@ -478,25 +532,16 @@
 						<a href="index.html#twolayeroperator" class="tsd-kind-icon">Two<wbr>Layer<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="index.html#twolayeroperator-1" class="tsd-kind-icon">Twolayer<wbr>Operator</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#zherebkooperator" class="tsd-kind-icon">Zherebko<wbr>Operator</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#arqcoordspread" class="tsd-kind-icon">arqcoord<wbr>Spread</a>
+						<a href="index.html#aggmeanfactory" class="tsd-kind-icon">agg<wbr>Mean<wbr>Factory</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#arquint" class="tsd-kind-icon">arquint</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#columnadjacent" class="tsd-kind-icon">column<wbr>Adjacent</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#columncenter" class="tsd-kind-icon">column<wbr>Center</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#columncomplex" class="tsd-kind-icon">column<wbr>Complex</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#columnleft" class="tsd-kind-icon">column<wbr>Left</a>
+						<a href="index.html#aggmedianfactory" class="tsd-kind-icon">agg<wbr>Median<wbr>Factory</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#coordcenter" class="tsd-kind-icon">coord<wbr>Center</a>
@@ -541,10 +586,7 @@
 						<a href="index.html#sugiyama" class="tsd-kind-icon">sugiyama</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#twolayermean" class="tsd-kind-icon">twolayer<wbr>Mean</a>
-					</li>
-					<li class=" tsd-kind-reference tsd-parent-kind-module">
-						<a href="index.html#twolayermedian" class="tsd-kind-icon">twolayer<wbr>Median</a>
+						<a href="index.html#twolayeragg" class="tsd-kind-icon">twolayer<wbr>Agg</a>
 					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="index.html#twolayeropt" class="tsd-kind-icon">twolayer<wbr>Opt</a>
@@ -570,10 +612,6 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>

@@ -75,7 +75,6 @@
 					<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama">Examples with Sugiyama Layout</a> - Allows you to experiment with different layouts and different datasets for the sugiyama layout.</li>
 					<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-topological">Examples with Topological Layout</a> - Allows you to experiment with different layouts and different datasets for topological layouts.</li>
 					<li><a href="https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows">Example with Arrows</a> - This example shows a simple, if inexact, way to render edge arrows with d3.</li>
-					<li><a href="https://observablehq.com/@arquintl/d3-dag-arquint">Examples with Arquint Layout</a> - Allows you to experiment with different layouts and different datasets for the arquint layout.</li>
 					<li><a href="https://github.com/BenPortner/js_family_tree">Expandable Family Tree</a> - An expandable family tree rendered using d3-dag.</li>
 				</ul>
 				<a href="#installing" id="installing" style="color: inherit; text-decoration: none;">
@@ -83,21 +82,17 @@
 				</a>
 				<p>If you use node, <code>npm i d3-dag</code> or <code>yarn add d3-dag</code>.
 				Otherwise you can load it using <code>unpkg</code>:</p>
-				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://unpkg.com/d3-dag@0.6.0&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
+				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://unpkg.com/d3-dag@0.8.0&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
 <span style="color: #800000">&lt;script&gt;</span>
-
-<span style="color: #0000FF">var</span><span style="color: #000000FF"> </span><span style="color: #001080">dag</span><span style="color: #000000FF"> </span><span style="color: #000000">=</span><span style="color: #000000FF"> </span><span style="color: #001080">d3</span><span style="color: #000000FF">.</span><span style="color: #795E26">sugiyama</span><span style="color: #000000FF">();</span>
-
+<span style="color: #0000FF">const</span><span style="color: #000000FF"> </span><span style="color: #0070C1">dag</span><span style="color: #000000FF"> </span><span style="color: #000000">=</span><span style="color: #000000FF"> </span><span style="color: #001080">d3</span><span style="color: #000000FF">.</span><span style="color: #795E26">dagStratify</span><span style="color: #000000FF">(</span><span style="color: #000000">...</span><span style="color: #000000FF">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000FF"> </span><span style="color: #0070C1">layout</span><span style="color: #000000FF"> </span><span style="color: #000000">=</span><span style="color: #000000FF"> </span><span style="color: #001080">d3</span><span style="color: #000000FF">.</span><span style="color: #795E26">sugiyama</span><span style="color: #000000FF">();</span>
+<span style="color: #795E26">layout</span><span style="color: #000000FF">(</span><span style="color: #001080">dag</span><span style="color: #000000FF">);</span>
+<span style="color: #008000">// ... render dag</span>
 <span style="color: #800000">&lt;/script&gt;</span>
 </code></pre>
 				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
 					<h2>API Reference</h2>
 				</a>
-				<blockquote>
-					<p>:warning: <strong>Documentation links aren&#39;t consistent</strong>: Due to the evolving nature of tsdoc and typedoc, internal linking between various points in the codebase doesn&#39;t work well.
-						Notably, it&#39;s currently impossible to differentiate linking between two symbols with the same name.
-					While there are workarounds, they are painful. Until this is addressed in typedoc, it&#39;s unlikely the documentation will be fixed.</p>
-				</blockquote>
 				<ul>
 					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/index.html">Javascript API</a> - methods exported to flat javascript</li>
 					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/dag_node.html">DAG</a> - documentation on the DAG structure</li>
@@ -110,9 +105,35 @@
 					<li>Layout algorithms<ul>
 							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/sugiyama.html">Sugiyama</a> - standard layout</li>
 							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/zherebko.html">Zherebko</a> - topological layout</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/modules/arquint.html">Arquint</a> - variable sized nodes</li>
 						</ul>
 					</li>
+				</ul>
+				<a href="#general-usage-notes" id="general-usage-notes" style="color: inherit; text-decoration: none;">
+					<h2>General Usage Notes</h2>
+				</a>
+				<p>This library is built around the concept of operators.
+					Operators are functions with a fluent interface to modify their behavior.
+					Every function that modifies behavior returns a copy, and will not modify the original operator.
+				For example, the <code>stratify</code> operator creates dags from id-based parent data, can ve used like so:</p>
+				<pre><code class="language-ts"><span style="color: #008000">// note initial function call with no arguments to create default operator</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">stratify</span><span style="color: #000000"> = </span><span style="color: #795E26">dagStratify</span><span style="color: #000000">();</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dag</span><span style="color: #000000"> = </span><span style="color: #795E26">stratify</span><span style="color: #000000">([{ </span><span style="color: #001080">id:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000"> }, { </span><span style="color: #001080">id:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;child&quot;</span><span style="color: #000000">, </span><span style="color: #001080">parentIds:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000">] }]);</span>
+
+<span style="color: #001080">stratify</span><span style="color: #000000">.</span><span style="color: #795E26">id</span><span style="color: #000000">(({ </span><span style="color: #001080">myid</span><span style="color: #000000"> }: { </span><span style="color: #001080">myid</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000"> }) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">myid</span><span style="color: #000000">);</span>
+<span style="color: #008000">// doesn&#039;t work, stratify was not modified</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dag</span><span style="color: #000000"> = </span><span style="color: #795E26">stratify</span><span style="color: #000000">([{ </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000"> }, { </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;child&quot;</span><span style="color: #000000">, </span><span style="color: #001080">parentIds:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000">] }]);</span>
+
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">myStratify</span><span style="color: #000000"> = </span><span style="color: #001080">stratify</span><span style="color: #000000">.</span><span style="color: #795E26">id</span><span style="color: #000000">(({ </span><span style="color: #001080">myid</span><span style="color: #000000"> }: { </span><span style="color: #001080">myid</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000"> }) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">myid</span><span style="color: #000000">);</span>
+<span style="color: #008000">// works!</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dag</span><span style="color: #000000"> = </span><span style="color: #795E26">myStratify</span><span style="color: #000000">([{ </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000"> }, { </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;child&quot;</span><span style="color: #000000">, </span><span style="color: #001080">parentIds:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000">] }]);</span>
+</code></pre>
+				<a href="#typescript-notes" id="typescript-notes" style="color: inherit; text-decoration: none;">
+					<h3>Typescript Notes</h3>
+				</a>
+				<ul>
+					<li>Default operators will expect the necessary types for them to work, but will also do runtime checks in case javascript users use them inappropriately.</li>
+					<li>Due to what seems like a bug in typescript, passing operators that take no arguments, e.g. <code>dagStratify().id(() =&gt; &quot;&quot;)</code> will cause typescript to infer the data as <code>undefined</code>, which will then restrict the overall data-type to never in most circumstances.
+					If you encounter typescript errors saying types can&#39;t be assigned to <code>never</code> check that the appropraite types are being inferred from custom operators and accessors.</li>
 				</ul>
 				<a href="#experimental-es6-imports" id="experimental-es6-imports" style="color: inherit; text-decoration: none;">
 					<h2>Experimental ES6 Imports</h2>
@@ -122,6 +143,52 @@
 					<h2>Updating</h2>
 				</a>
 				<p>Information for major changes between releases</p>
+				<a href="#updating-from-07-to-08" id="updating-from-07-to-08" style="color: inherit; text-decoration: none;">
+					<h3>Updating from 0.7 to 0.8</h3>
+				</a>
+				<p>This update features a large rewrite of much of the library, and as a result has some new features coupled with a lot of breaking changes.
+					Most of the breaking changes are in the backend, so if you&#39;ve only been using the bundled methods, most things should still work.
+				With this, the library is nearing stability, and I expected to release 1.0 soon</p>
+				<p><strong>Large Breaking Changes:</strong></p>
+				<ul>
+					<li>The largest breaking change was the removal of the arquint layout from this library.
+						The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
+					If possible, I would like to bring it back.</li>
+					<li><code>twolayerMedian</code> and <code>twolayerMean</code> were merged into <code>twolayerAgg</code>.
+					To get <code>twolayerMean</code> you now use <code>twolayerAgg().aggregator(aggMeanFactory)</code>.</li>
+					<li><code>sugiyama</code> and <code>zherebko</code> no longer return a dag, instead they just modify the dag that was passed in.
+					This isn&#39;t that different from the old behavior as the old dag was always modified, but in typescript there&#39;s no assertion that x and y exist on the returned dag.</li>
+					<li><code>sugiyama().nodeSize</code> changed slightly.
+					You used to have to check if the input extended <code>SugiDummyNode</code>, now you just check if it&#39;s undefined.</li>
+				</ul>
+				<p><strong>Minor Breaking Changes:</strong>
+				These changes should only affect you if you were writing custom operators or using infrequent or experimental apis.</p>
+				<ul>
+					<li>The Typescript types are much more coherent, and should make much more sense.
+						The old types had a lot of manual assertions and casting to get them to work, the new ones don&#39;t.
+					Most mthods should just work now without the need of manual annotation.</li>
+					<li><code>LayeringOperators</code> now modify a node&#39;s <code>value</code> instead of setting a <code>layer</code> propery.</li>
+					<li>The API for custom sugiyama operators has changed significantly. I don&#39;t think this API was actually used very frequently, but if you did, look at the new operator definitions. Roughly instead of having a <code>DummyNode</code> or the actual <code>DagNode</code>, you will have a <code>SugiDagNode</code> which is a normal dag node with node data that either has a single <code>node</code> attribute for normal nodes, or a <code>parent</code> and <code>child</code> attribute for dummy nodes.</li>
+					<li>Many operator types were renamed from <code>Operator</code> in the appropriate module to a named operator like <code>TwolayerOperator</code>.
+					This should only affect you if you were using the experimental ES6 module api.</li>
+					<li>The build system was switched from rollup to esbuild.
+					There was one error with the bundling that was caught in development, and is now being tested.</li>
+					<li>The definition of Dag changed from being a union of <code>DagNode</code> and <code>DagRoot</code>, to just being a subset of <code>DagNode</code> without the local node operations.
+					This is arguably a cleaner api, but will change the behavior of things like conditional types.</li>
+					<li>The definition of <code>TwolayerOperator</code> must now support going bottom to top.</li>
+					<li>Layout* (e.g. <code>LayoutDagNode</code>) has been completely isolated, so it&#39;s impossible to create dags manually without implementing the interface yourself.
+					The purpose is to enforce that dags remain dags, and most operators can be do by clever application of the construction methods (see <code>sugify</code>).</li>
+				</ul>
+				<p><strong>New features:</strong></p>
+				<ul>
+					<li>All built-in decrossing operators now preserve the order of layers if there&#39;s nothing else to do.</li>
+					<li>All built-in ecrossing operators now all have an option to (or always) minimize the distance between nodes that have a common parent or child.</li>
+					<li><code>decrossTwoLayer</code> does a bottom to top pass as well, and supports multiple passes.</li>
+					<li><code>nodeSize</code> is usable without checking for <code>SugiDummyNode</code> instances (now they&#39;re just undefined).</li>
+					<li><code>dagConnect</code> supports adding single nodes.</li>
+					<li><code>layeringSimplex</code> allows equality groups, these are similar to setting rank the same, but there&#39;s no ordering constraint between groups.</li>
+					<li>Much better typescript typings, and better tests to ensure they make sense.</li>
+				</ul>
 				<a href="#updating-from-06-to-07" id="updating-from-06-to-07" style="color: inherit; text-decoration: none;">
 					<h3>Updating from 0.6 to 0.7</h3>
 				</a>
@@ -218,46 +285,10 @@
 						<a href="modules.html">Exports</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/arquint.html">arquint</a>
+						<a href="modules/dag.html">dag</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/arquint_column.html">arquint/column</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_column_adjacent.html">arquint/column/adjacent</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_column_center.html">arquint/column/center</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_column_complex.html">arquint/column/complex</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_column_left.html">arquint/column/left</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_coord.html">arquint/coord</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_coord_spread.html">arquint/coord/spread</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/arquint_dummy.html">arquint/dummy</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag_connect.html">dag/connect</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag_hierarchy.html">dag/hierarchy</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag_node.html">dag/node</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag_stratify.html">dag/stratify</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag_verify.html">dag/verify</a>
+						<a href="modules/dag_create.html">dag/create</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/index.html">index</a>
@@ -284,9 +315,6 @@
 						<a href="modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord_utils.html">sugiyama/coord/utils</a>
-					</li>
-					<li class=" tsd-kind-module">
 						<a href="modules/sugiyama_decross.html">sugiyama/decross</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -294,9 +322,6 @@
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_dummy.html">sugiyama/dummy</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/sugiyama_layering.html">sugiyama/layering</a>
@@ -317,10 +342,7 @@
 						<a href="modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_twolayer_mean.html">sugiyama/twolayer/mean</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_twolayer_median.html">sugiyama/twolayer/median</a>
+						<a href="modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
@@ -329,13 +351,7 @@
 						<a href="modules/sugiyama_utils.html">sugiyama/utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/utils.html">utils</a>
-					</li>
-					<li class=" tsd-kind-module">
 						<a href="modules/zherebko.html">zherebko</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/zherebko_greedy.html">zherebko/greedy</a>
 					</li>
 				</ul>
 			</nav>
@@ -359,10 +375,6 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>

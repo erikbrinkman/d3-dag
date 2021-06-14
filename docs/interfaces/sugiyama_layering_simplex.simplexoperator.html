@@ -61,21 +61,38 @@
 					<a href="sugiyama_layering_simplex.simplexoperator.html">SimplexOperator</a>
 				</li>
 			</ul>
-			<h1>Interface SimplexOperator&lt;NodeType, Ops&gt;</h1>
+			<h1>Interface SimplexOperator&lt;Ops&gt;</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A layering operator that assigns layers to minimize the number of dummy
+						nodes (long edges) added to the layout.</p>
+					</div>
+					<p>Computing this layering requires solving an integer linear program, which
+						may take a long time, although in practice is often quite fast. This is
+						often known as the network simplex layering from
+					<a href="https://www.graphviz.org/Documentation/TSE93.pdf" class="external">Gansner et al. [1993]</a>.</p>
+					<p>Because this is solving a linear program, it is relatively easy to add new
+						constraints. The current implementation allows specifying <a href="sugiyama_layering_simplex.simplexoperator.html#rank">rank</a>
+						constriants that indicate which nodes should be above other nodes, or
+						<a href="sugiyama_layering_simplex.simplexoperator.html#group">group</a> constraints that say which nodes should be on the same layer.
+						Note that adding these constraints can cause the optimization to become
+					ill-defined.</p>
+					<p>Create with <a href="../modules/sugiyama_layering_simplex.html#simplex">simplex</a>.</p>
+					<img alt="simplex example" src="../media/simplex.png" width="400">
+				</div>
+			</section>
 			<section class="tsd-panel tsd-type-parameters">
 				<h3>Type parameters</h3>
 				<ul class="tsd-type-parameters">
 					<li>
-						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a></h4>
-					</li>
-					<li>
-						<h4>Ops<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Operators</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">Operators</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4>Ops<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Operators</span> = <span class="tsd-signature-type">Operators</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -83,7 +100,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="sugiyama_layering.operator.html" class="tsd-signature-type" data-tsd-kind="Interface">Operator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span>
+						<a href="sugiyama_layering.layeringoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">LayeringOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">OpsNodeDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OpsLinkDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">SimplexOperator</span>
@@ -95,19 +112,37 @@
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">Simplex<wbr>Operator<span class="tsd-signature-symbol">(</span>dag<span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dag" class="tsd-signature-type" data-tsd-kind="Type alias">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> &amp; </span><a href="sugiyama_layering.layerablenode.html" class="tsd-signature-type" data-tsd-kind="Interface">LayerableNode</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">Simplex<wbr>Operator<span class="tsd-signature-symbol">(</span>dag<span class="tsd-signature-symbol">: </span><a href="dag.dag-1.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">OpsNodeDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OpsLinkDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/layering/index.ts#L30">src/sugiyama/layering/index.ts:30</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/layering/index.ts#L41">src/sugiyama/layering/index.ts:41</a></li>
 							</ul>
 						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>A layering operator that assigns layers to minimize the number of dummy
+								nodes (long edges) added to the layout.</p>
+							</div>
+							<p>Computing this layering requires solving an integer linear program, which
+								may take a long time, although in practice is often quite fast. This is
+								often known as the network simplex layering from
+							<a href="https://www.graphviz.org/Documentation/TSE93.pdf" class="external">Gansner et al. [1993]</a>.</p>
+							<p>Because this is solving a linear program, it is relatively easy to add new
+								constraints. The current implementation allows specifying <a href="sugiyama_layering_simplex.simplexoperator.html#rank">rank</a>
+								constriants that indicate which nodes should be above other nodes, or
+								<a href="sugiyama_layering_simplex.simplexoperator.html#group">group</a> constraints that say which nodes should be on the same layer.
+								Note that adding these constraints can cause the optimization to become
+							ill-defined.</p>
+							<p>Create with <a href="../modules/sugiyama_layering_simplex.html#simplex">simplex</a>.</p>
+							<img alt="simplex example" src="../media/simplex.png" width="400">
+						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>dag: <a href="../modules/dag_node.html#dag" class="tsd-signature-type" data-tsd-kind="Type alias">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> &amp; </span><a href="sugiyama_layering.layerablenode.html" class="tsd-signature-type" data-tsd-kind="Interface">LayerableNode</a><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>dag: <a href="dag.dag-1.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">OpsNodeDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OpsLinkDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -121,6 +156,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="sugiyama_layering_simplex.simplexoperator.html#group" class="tsd-kind-icon">group</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="sugiyama_layering_simplex.simplexoperator.html#rank" class="tsd-kind-icon">rank</a></li>
 							</ul>
 						</section>
@@ -130,30 +166,81 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="group" class="tsd-anchor"></a>
+					<h3>group</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">group&lt;NewGroup&gt;<span class="tsd-signature-symbol">(</span>newGroup<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewGroup</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Up</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>group<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewGroup</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">group<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">&quot;group&quot;</span><span class="tsd-signature-symbol">]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/layering/simplex.ts#L77">src/sugiyama/layering/simplex.ts:77</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the <a href="sugiyama_layering.groupaccessor.html">GroupAccessor</a>. Any node with a group assigned will have a second
+										ordering enforcing all nodes with the same group have the same layer.
+										Note, this can cause the simplex optimization to be ill-defined, and may
+									result in an error during layout.</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>NewGroup<span class="tsd-signature-symbol">: </span><a href="sugiyama_layering.groupaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">GroupAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewGroup</span><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newGroup: <span class="tsd-signature-type">NewGroup</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Up</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>group<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewGroup</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/layering/simplex.ts#L83">src/sugiyama/layering/simplex.ts:83</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the current <a href="sugiyama_layering.groupaccessor.html">GroupAccessor</a>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">&quot;group&quot;</span><span class="tsd-signature-symbol">]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
 					<a name="rank" class="tsd-anchor"></a>
 					<h3>rank</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">rank&lt;NewRank&gt;<span class="tsd-signature-symbol">(</span>newRank<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/utils.html#replace" class="tsd-signature-type" data-tsd-kind="Type alias">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;rank&quot;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">rank&lt;NewRank&gt;<span class="tsd-signature-symbol">(</span>newRank<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Up</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>rank<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 						<li class="tsd-signature tsd-kind-icon">rank<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">&quot;rank&quot;</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/layering/simplex.ts#L33">src/sugiyama/layering/simplex.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/layering/simplex.ts#L63">src/sugiyama/layering/simplex.ts:63</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Set the <a href="sugiyama_layering.rankaccessor.html">RankAccessor</a>. Any node with a rank assigned will have a second
 										ordering enforcing ordering of the ranks. Note, this can cause the simplex
-									optimization to be ildefined, and may result in an error during layout.</p>
+									optimization to be ill-defined, and may result in an error during layout.</p>
 								</div>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
-									<h4>NewRank<span class="tsd-signature-symbol">: </span><a href="sugiyama_layering.rankaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">RankAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">&gt;</span></h4>
+									<h4>NewRank<span class="tsd-signature-symbol">: </span><a href="sugiyama_layering.rankaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">RankAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">&gt;</span></h4>
 								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -162,12 +249,12 @@
 									<h5>newRank: <span class="tsd-signature-type">NewRank</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/utils.html#replace" class="tsd-signature-type" data-tsd-kind="Type alias">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;rank&quot;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Up</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>rank<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewRank</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/layering/simplex.ts#L39">src/sugiyama/layering/simplex.ts:39</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/layering/simplex.ts#L69">src/sugiyama/layering/simplex.ts:69</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -187,8 +274,74 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="../modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
@@ -200,13 +353,16 @@
 						<a href="sugiyama_layering_simplex.simplexoperator.html" class="tsd-kind-icon">Simplex<wbr>Operator</a>
 						<ul>
 							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="sugiyama_layering_simplex.simplexoperator.html#group" class="tsd-kind-icon">group</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
 								<a href="sugiyama_layering_simplex.simplexoperator.html#rank" class="tsd-kind-icon">rank</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="../modules/sugiyama_layering_simplex.html#simplex" class="tsd-kind-icon">simplex</a>
 					</li>
 				</ul>
@@ -227,10 +383,6 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>

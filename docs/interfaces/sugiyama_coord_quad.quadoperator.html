@@ -61,7 +61,7 @@
 					<a href="sugiyama_coord_quad.quadoperator.html">QuadOperator</a>
 				</li>
 			</ul>
-			<h1>Interface QuadOperator&lt;NodeType&gt;</h1>
+			<h1>Interface QuadOperator</h1>
 		</div>
 	</div>
 </header>
@@ -71,26 +71,21 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>The operator for quadratically optimized coordinates. Two of the weight
-							settings allow specifying a different weight for regular nodes, and dummy
-							nodes (longer edges). The total weight for that node type must be greater
-						than zero otherwise the optimization will not be well formed.</p>
+						<p>A <a href="sugiyama_coord.coordoperator.html">CoordOperator</a> that places nodes to minimize a quadratic function</p>
 					</div>
+					<p>The minimization involves minimizing the distance between <a href="sugiyama_coord_quad.quadoperator.html#vertical">connected nodes</a>, the <a href="sugiyama_coord_quad.quadoperator.html#curve">curvature of edges</a>, and the distance
+					between <a href="sugiyama_coord_quad.quadoperator.html#component">disconnected components</a>.</p>
+					<p>This operators generally takes the longest of all built-in operators but
+					produces the most pleasing layout.</p>
+					<p>Create with <a href="../modules/sugiyama_coord_quad.html#quad">quad</a>.</p>
+					<img alt="quad example" src="../media/simplex.png" width="400">
 				</div>
-			</section>
-			<section class="tsd-panel tsd-type-parameters">
-				<h3>Type parameters</h3>
-				<ul class="tsd-type-parameters">
-					<li>
-						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a></h4>
-					</li>
-				</ul>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="sugiyama_coord.operator.html" class="tsd-signature-type" data-tsd-kind="Interface">Operator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span>
+						<a href="sugiyama_coord.coordoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">CoordOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">QuadOperator</span>
@@ -102,30 +97,42 @@
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">Quad<wbr>Operator<span class="tsd-signature-symbol">(</span>layers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> &amp; </span><a href="sugiyama_coord.horizablenode.html" class="tsd-signature-type" data-tsd-kind="Interface">HorizableNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span>, nodeSize<span class="tsd-signature-symbol">: </span><a href="sugiyama_coord.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					<li class="tsd-signature tsd-kind-icon">Quad<wbr>Operator&lt;N, L&gt;<span class="tsd-signature-symbol">(</span>layers<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">N</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span>, nodeSize<span class="tsd-signature-symbol">: </span><a href="sugiyama_coord.coordnodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">CoordNodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">N</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/index.ts#L44">src/sugiyama/coord/index.ts:44</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/index.ts#L38">src/sugiyama/coord/index.ts:38</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>The operator for quadratically optimized coordinates. Two of the weight
-									settings allow specifying a different weight for regular nodes, and dummy
-									nodes (longer edges). The total weight for that node type must be greater
-								than zero otherwise the optimization will not be well formed.</p>
+								<p>A <a href="sugiyama_coord.coordoperator.html">CoordOperator</a> that places nodes to minimize a quadratic function</p>
 							</div>
+							<p>The minimization involves minimizing the distance between <a href="sugiyama_coord_quad.quadoperator.html#vertical">connected nodes</a>, the <a href="sugiyama_coord_quad.quadoperator.html#curve">curvature of edges</a>, and the distance
+							between <a href="sugiyama_coord_quad.quadoperator.html#component">disconnected components</a>.</p>
+							<p>This operators generally takes the longest of all built-in operators but
+							produces the most pleasing layout.</p>
+							<p>Create with <a href="../modules/sugiyama_coord_quad.html#quad">quad</a>.</p>
+							<img alt="quad example" src="../media/simplex.png" width="400">
 						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>N<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">unknown</span></h4>
+							</li>
+							<li>
+								<h4>L<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">unknown</span></h4>
+							</li>
+						</ul>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>layers: <span class="tsd-signature-symbol">(</span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> &amp; </span><a href="sugiyama_coord.horizablenode.html" class="tsd-signature-type" data-tsd-kind="Interface">HorizableNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>layers: <a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">N</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 							<li>
-								<h5>nodeSize: <a href="sugiyama_coord.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>nodeSize: <a href="sugiyama_coord.coordnodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">CoordNodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">N</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">L</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -153,23 +160,23 @@
 					<a name="component" class="tsd-anchor"></a>
 					<h3>component</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">component<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">component<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a></li>
 						<li class="tsd-signature tsd-kind-icon">component<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/quad.ts#L129">src/sugiyama/coord/quad.ts:129</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/quad.ts#L141">src/sugiyama/coord/quad.ts:141</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Set the weight that for how close different disconnected components should
-										be. The higher the weight, the more different components will be close to
-										each other at the expense of other objectives. This needs to be greater
-										than zero to make the objective sound when there are disconnected
-									components, but otherwise should probably be very small.</p>
+									<p>Set the weight for how close different disconnected components should be.
+										The higher the weight, the more different components will be close to each
+										other at the expense of other objectives. This needs to be greater than
+										zero to make the objective sound when there are disconnected components,
+									but otherwise should probably be very small. (default: 1)</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -178,17 +185,17 @@
 									<h5>val: <span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/quad.ts#L131">src/sugiyama/coord/quad.ts:131</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/quad.ts#L143">src/sugiyama/coord/quad.ts:143</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get the current component weight, which defaults to one.</p>
+									<p>Get the current component weight.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -199,45 +206,45 @@
 					<a name="curve" class="tsd-anchor"></a>
 					<h3>curve</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">curve<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">curve<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a></li>
 						<li class="tsd-signature tsd-kind-icon">curve<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/quad.ts#L114">src/sugiyama/coord/quad.ts:114</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/quad.ts#L126">src/sugiyama/coord/quad.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Set the weight for curviness. Higher weights mean an edge going through a node type should be roughly straight.
-										There are two different weights, [ <em>regular nodes</em>, <em>dummy nodes</em>
-										], that impact the curvature through those node types. Setting regular
-										nodes to positive will create a type of flow of edges going through a
-										node, while setting dummy nodes will enforce the longer edges should try
-									to be stright.</p>
+									<p>Set the weight for curviness. Higher weights mean an edge going through a
+										node type should be roughly straight.  There are two different weights, [
+										<em>regular nodes</em>, <em>dummy nodes</em> ], that impact the curvature through those
+										node types. Setting regular nodes to positive will create a type of flow
+										of edges going through a node, while setting dummy nodes will enforce the
+									longer edges should try to be stright. (default: [0, 1])</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>val: <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>val: <span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/quad.ts#L120">src/sugiyama/coord/quad.ts:120</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/quad.ts#L132">src/sugiyama/coord/quad.ts:132</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get the current vertical weights which defaults to [0, 1]. By setting the
-										weight of non-dummy nodes to zero, we only care about the curvature of
-									edges, not lines that pass through nodes.</p>
+									<p>Get the current vertical weights. By setting the weight of non-dummy nodes
+										to zero, we only care about the curvature of edges, not lines that pass
+									through nodes.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4>
@@ -248,14 +255,14 @@
 					<a name="vertical" class="tsd-anchor"></a>
 					<h3>vertical</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">vertical<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">vertical<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a></li>
 						<li class="tsd-signature tsd-kind-icon">vertical<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/quad.ts#L98">src/sugiyama/coord/quad.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/quad.ts#L111">src/sugiyama/coord/quad.ts:111</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -265,30 +272,29 @@
 										lines. There are two different weights, [ <em>regular nodes</em>, <em>dummy nodes</em>
 										], the weight for a pair of connected nodes the sum of the weight value
 										for each node depending on whether not that node is a dummy node. Setting
-										them both to positive means all lines should ve roughly vertical, while
+										them both to positive means all lines should be roughly vertical, while
 										setting a weight to zero doesn&#39;t peanalize edges between those types of
-									nodes.</p>
+									nodes. (default: [1, 0])</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>val: <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>val: <span class="tsd-signature-symbol">readonly </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/coord/quad.ts#L104">src/sugiyama/coord/quad.ts:104</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/coord/quad.ts#L116">src/sugiyama/coord/quad.ts:116</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get the current vertical weights which defaults to [1, 0]. By setting the
-										weight of dummy nodes to zero, longer edges aren&#39;t penalized to be
-									straighter than short edges.</p>
+									<p>Get the current vertical weights. By setting the weight of dummy nodes to
+									zero, longer edges aren&#39;t penalized to be straighter than short edges.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4>
@@ -303,8 +309,74 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="../modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
@@ -328,7 +400,7 @@
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="../modules/sugiyama_coord_quad.html#quad" class="tsd-kind-icon">quad</a>
 					</li>
 				</ul>
@@ -350,10 +422,6 @@
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>

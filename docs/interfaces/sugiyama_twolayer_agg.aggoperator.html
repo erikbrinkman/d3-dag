@@ -1,0 +1,351 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>AggOperator | d3-dag</title>
+	<meta name="description" content="Documentation for d3-dag">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">d3-dag</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../modules.html">d3-dag</a>
+				</li>
+				<li>
+					<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+				</li>
+				<li>
+					<a href="sugiyama_twolayer_agg.aggoperator.html">AggOperator</a>
+				</li>
+			</ul>
+			<h1>Interface AggOperator&lt;Factory&gt;</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a> that orders nodes based off the aggregation of their
+						parents&#39; or children&#39;s indices.</p>
+					</div>
+					<p>This is much faster than <a href="sugiyama_decross_opt.optoperator.html">OptOperator</a>, and often produces comprable
+						or better layouts. If memory is an issue then <a href="../modules/sugiyama_twolayer_agg.html#meanfactory">meanFactory</a> uses a
+						little less memory, but there is little reason to use it. Nodes without
+						parents or children respectively will be placed first to minimize the
+						distance between nodes with common parents, and then to minimize rank
+					inversions with respect to the initial ordering.</p>
+					<p>Create with <a href="../modules/sugiyama_twolayer_agg.html#agg">agg</a>.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-type-parameters">
+				<h3>Type parameters</h3>
+				<ul class="tsd-type-parameters">
+					<li>
+						<h4>Factory<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_agg.html#aggfactory" class="tsd-signature-type" data-tsd-kind="Type alias">AggFactory</a> = <a href="../modules/sugiyama_twolayer_agg.html#aggfactory" class="tsd-signature-type" data-tsd-kind="Type alias">AggFactory</a></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="sugiyama_twolayer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwolayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">AggOperator</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3 class="tsd-before-signature">Callable</h3>
+				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">Agg<wbr>Operator<span class="tsd-signature-symbol">(</span>topLayer<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span>, bottomLayer<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span>, topDown<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/index.ts#L21">src/sugiyama/twolayer/index.ts:21</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>A <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a> that orders nodes based off the aggregation of their
+								parents&#39; or children&#39;s indices.</p>
+							</div>
+							<p>This is much faster than <a href="sugiyama_decross_opt.optoperator.html">OptOperator</a>, and often produces comprable
+								or better layouts. If memory is an issue then <a href="../modules/sugiyama_twolayer_agg.html#meanfactory">meanFactory</a> uses a
+								little less memory, but there is little reason to use it. Nodes without
+								parents or children respectively will be placed first to minimize the
+								distance between nodes with common parents, and then to minimize rank
+							inversions with respect to the initial ordering.</p>
+							<p>Create with <a href="../modules/sugiyama_twolayer_agg.html#agg">agg</a>.</p>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>topLayer: <a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+							<li>
+								<h5>bottomLayer: <a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+							<li>
+								<h5>topDown: <span class="tsd-signature-type">boolean</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="sugiyama_twolayer_agg.aggoperator.html#aggregator" class="tsd-kind-icon">aggregator</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="aggregator" class="tsd-anchor"></a>
+					<h3>aggregator</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">aggregator&lt;NewFactory&gt;<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewFactory</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_agg.aggoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">AggOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NewFactory</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">aggregator<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Factory</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/agg.ts#L86">src/sugiyama/twolayer/agg.ts:86</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the <a href="../modules/sugiyama_twolayer_agg.html#aggfactory">AggFactory</a> for this operator.</p>
+								</div>
+								<p>The aggregators that this produces are used to fuze the indices of parents
+									or children of an node into it&#39;s target index for ordering. The provided
+									<a href="../modules/sugiyama_twolayer_agg.html#medianfactory">medianFactory</a> works very well, but <a href="../modules/sugiyama_twolayer_agg.html#meanfactory">meanFactory</a> works too,
+								as will any user provided method. (default: <a href="../modules/sugiyama_twolayer_agg.html#medianfactory">medianFactory</a>)</p>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>NewFactory<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_agg.html#aggfactory" class="tsd-signature-type" data-tsd-kind="Type alias">AggFactory</a><span class="tsd-signature-symbol">&lt;</span><a href="sugiyama_twolayer_agg.aggregator.html" class="tsd-signature-type" data-tsd-kind="Interface">Aggregator</a><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>val: <span class="tsd-signature-type">NewFactory</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_twolayer_agg.aggoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">AggOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NewFactory</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/agg.ts#L92">src/sugiyama/twolayer/agg.ts:92</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the current aggregator factory.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Factory</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="../modules.html">Exports</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/zherebko.html">zherebko</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="sugiyama_twolayer_agg.aggoperator.html" class="tsd-kind-icon">Agg<wbr>Operator</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="sugiyama_twolayer_agg.aggoperator.html#aggregator" class="tsd-kind-icon">aggregator</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="sugiyama_twolayer_agg.aggregator.html" class="tsd-kind-icon">Aggregator</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../modules/sugiyama_twolayer_agg.html#aggfactory" class="tsd-kind-icon">Agg<wbr>Factory</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html#agg" class="tsd-kind-icon">agg</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html#meanfactory" class="tsd-kind-icon">mean<wbr>Factory</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html#medianfactory" class="tsd-kind-icon">median<wbr>Factory</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

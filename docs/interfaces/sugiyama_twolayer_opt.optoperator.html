@@ -61,26 +61,30 @@
 					<a href="sugiyama_twolayer_opt.optoperator.html">OptOperator</a>
 				</li>
 			</ul>
-			<h1>Interface OptOperator&lt;NodeType&gt;</h1>
+			<h1>Interface OptOperator</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-type-parameters">
-				<h3>Type parameters</h3>
-				<ul class="tsd-type-parameters">
-					<li>
-						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a></h4>
-					</li>
-				</ul>
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a> for optimal decrossing of a single target layer</p>
+					</div>
+					<p>The opt order operator orders the relevant layer to minimize the number of
+						crossings. This is expensive, but not nearly as expensive as optimizing all
+					crossings initially.</p>
+					<p>Create with <a href="../modules/sugiyama_twolayer_opt.html#opt">opt</a>.</p>
+					<img alt="two layer opt example" src="../media/two_layer_opt.png" width="400">
+				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="sugiyama_twolayer.operator.html" class="tsd-signature-type" data-tsd-kind="Interface">Operator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span>
+						<a href="sugiyama_twolayer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwolayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">OptOperator</span>
@@ -91,23 +95,36 @@
 			</section>
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
-				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">Opt<wbr>Operator<span class="tsd-signature-symbol">(</span>topLayer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span>, bottomLayer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module">
+					<li class="tsd-signature tsd-kind-icon">Opt<wbr>Operator<span class="tsd-signature-symbol">(</span>topLayer<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span>, bottomLayer<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span>, topDown<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/twolayer/index.ts#L17">src/sugiyama/twolayer/index.ts:17</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/index.ts#L21">src/sugiyama/twolayer/index.ts:21</a></li>
 							</ul>
 						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>A <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a> for optimal decrossing of a single target layer</p>
+							</div>
+							<p>The opt order operator orders the relevant layer to minimize the number of
+								crossings. This is expensive, but not nearly as expensive as optimizing all
+							crossings initially.</p>
+							<p>Create with <a href="../modules/sugiyama_twolayer_opt.html#opt">opt</a>.</p>
+							<img alt="two layer opt example" src="../media/two_layer_opt.png" width="400">
+						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>topLayer: <span class="tsd-signature-symbol">(</span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>topLayer: <a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 							<li>
-								<h5>bottomLayer: <span class="tsd-signature-symbol">(</span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>bottomLayer: <a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+							<li>
+								<h5>topDown: <span class="tsd-signature-type">boolean</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -121,6 +138,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="sugiyama_twolayer_opt.optoperator.html#dist" class="tsd-kind-icon">dist</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="sugiyama_twolayer_opt.optoperator.html#large" class="tsd-kind-icon">large</a></li>
 							</ul>
 						</section>
@@ -130,27 +148,70 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="dist" class="tsd-anchor"></a>
+					<h3>dist</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">dist<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a></li>
+						<li class="tsd-signature tsd-kind-icon">dist<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/opt.ts#L50">src/sugiyama/twolayer/opt.ts:50</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set whether to also minimize distance between nodes that share a parent or
+									child</p>
+								</div>
+								<p>This adds more variables and constraints so will take longer, but will
+								likely produce a better layout. (default: false)</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>val: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/opt.ts#L52">src/sugiyama/twolayer/opt.ts:52</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>get whether the current layout minimized distance</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
 					<a name="large" class="tsd-anchor"></a>
 					<h3>large</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">large<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">large<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a></li>
 						<li class="tsd-signature tsd-kind-icon">large<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/twolayer/opt.ts#L28">src/sugiyama/twolayer/opt.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/opt.ts#L39">src/sugiyama/twolayer/opt.ts:39</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Set the large dag handling which will error if you try to decross a dag
-										that is too large. <code>&quot;small&quot;</code> the default only allows small graphs.
-										<code>&quot;medium&quot;</code> will allow large graphs that may take an unreasonable amount of
-										time to finish. <code>&quot;large&quot;</code> allows all graphs, including ones that will
-									likely crash the vm.</p>
+									<p>Set the large dag handling</p>
 								</div>
+								<p>Setting to anything but <code>&quot;small&quot;</code> will allow running on larger dags, but
+								the layout may run forever, or crash the vm. (default: <code>&quot;small&quot;</code>)</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -158,12 +219,12 @@
 									<h5>val: <a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-signature-type" data-tsd-kind="Type alias">LargeHandling</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">OptOperator</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/twolayer/opt.ts#L30">src/sugiyama/twolayer/opt.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/twolayer/opt.ts#L41">src/sugiyama/twolayer/opt.ts:41</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -183,8 +244,74 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="../modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
@@ -192,9 +319,12 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+					<li class="current tsd-kind-interface tsd-parent-kind-module">
 						<a href="sugiyama_twolayer_opt.optoperator.html" class="tsd-kind-icon">Opt<wbr>Operator</a>
 						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="sugiyama_twolayer_opt.optoperator.html#dist" class="tsd-kind-icon">dist</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
 								<a href="sugiyama_twolayer_opt.optoperator.html#large" class="tsd-kind-icon">large</a>
 							</li>
@@ -205,7 +335,7 @@
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
 						<a href="../modules/sugiyama_twolayer_opt.html#largehandling" class="tsd-kind-icon">Large<wbr>Handling</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="../modules/sugiyama_twolayer_opt.html#opt" class="tsd-kind-icon">opt</a>
 					</li>
 				</ul>
@@ -227,10 +357,6 @@
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>

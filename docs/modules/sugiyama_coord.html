@@ -68,22 +68,9 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>A coordinate assignmnet operator is any function that complies with the
-							<a href="../interfaces/sugiyama_coord.operator.html">Operator</a> interface, and assigns each node an x coordinate between zero
-							and one, respecting node order within in a layer, and the node separation
-						function.</p>
+						<p><a href="../interfaces/sugiyama_coord.coordoperator.html">CoordOperator</a>s assign <code>x</code> coordinations to every node, while
+						respecting the <a href="../interfaces/sugiyama_coord.coordnodesizeaccessor.html">CoordNodeSizeAccessor</a>.</p>
 					</div>
-					<p>There are three built in coordinate assignment operators, which are all
-					constructed in a fluent fashion:</p>
-					<ul>
-						<li>{@link &quot;sugiyama/twolayer/quad&quot; | Quadratic Optimization } (formerly <em>Vert</em>)</li>
-						<li>{@link &quot;sugiyama/twolayer/greedy&quot; | Greedy}</li>
-						<li>{@link &quot;sugiyama/twolayer/center&quot; | Center}</li>
-						<li>{@link &quot;sugiyama/twolayer/topological&quot; | Topological}</li>
-					</ul>
-					<p>The operator {@link &quot;sugiyama/twolayer/min-curve&quot; | minimize curves} is
-						deprecated as it is identical to quad with equal weights for <em>vertical</em> and
-					<em>curve</em>.</p>
 				</div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -93,9 +80,8 @@
 						<section class="tsd-index-section ">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/sugiyama_coord.horizablenode.html" class="tsd-kind-icon">Horizable<wbr>Node</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama_coord.nodesizeaccessor.html" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama_coord.operator.html" class="tsd-kind-icon">Operator</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama_coord.coordnodesizeaccessor.html" class="tsd-kind-icon">Coord<wbr>Node<wbr>Size<wbr>Accessor</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama_coord.coordoperator.html" class="tsd-kind-icon">Coord<wbr>Operator</a></li>
 							</ul>
 						</section>
 					</div>
@@ -108,21 +94,84 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama.html">sugiyama</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/sugiyama_coord.horizablenode.html" class="tsd-kind-icon">Horizable<wbr>Node</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/sugiyama_coord.coordnodesizeaccessor.html" class="tsd-kind-icon">Coord<wbr>Node<wbr>Size<wbr>Accessor</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../interfaces/sugiyama_coord.nodesizeaccessor.html" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../interfaces/sugiyama_coord.operator.html" class="tsd-kind-icon">Operator</a>
+						<a href="../interfaces/sugiyama_coord.coordoperator.html" class="tsd-kind-icon">Coord<wbr>Operator</a>
 					</li>
 				</ul>
 			</nav>
@@ -142,10 +191,6 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>

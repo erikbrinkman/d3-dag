@@ -61,21 +61,31 @@
 					<a href="sugiyama_decross_two_layer.twolayeroperator.html">TwoLayerOperator</a>
 				</li>
 			</ul>
-			<h1>Interface TwoLayerOperator&lt;NodeType, Ops&gt;</h1>
+			<h1>Interface TwoLayerOperator&lt;Order&gt;</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A decrossing operator that minimizes the number of crossings by looking at every pair of layers.</p>
+					</div>
+					<p>This method can be very fast and is a general heuristic for efficient
+						minimization. Customize with a two layer operator with <a href="sugiyama_decross_two_layer.twolayeroperator.html#order">order</a> or use
+					one of the built-in <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a>s.</p>
+					<p>This methos can also make multiple <a href="sugiyama_decross_two_layer.twolayeroperator.html#passes">passes</a> in an attempt to produce a
+					better layout.</p>
+					<img alt="two layer example" src="../media/two_layer_greedy.png" width="400">
+				</div>
+			</section>
 			<section class="tsd-panel tsd-type-parameters">
 				<h3>Type parameters</h3>
 				<ul class="tsd-type-parameters">
 					<li>
-						<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../modules/dag_node.html#dagnode" class="tsd-signature-type" data-tsd-kind="Type alias">DagNode</a></h4>
-					</li>
-					<li>
-						<h4>Ops<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Operators</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span> = <span class="tsd-signature-type">Operators</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4>Order<span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwolayerOperator</a> = <a href="sugiyama_twolayer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwolayerOperator</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -83,7 +93,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="sugiyama_decross.operator.html" class="tsd-signature-type" data-tsd-kind="Interface">Operator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span>
+						<a href="sugiyama_decross.decrossoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">DecrossOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">OpNodeDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OpLinkDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">TwoLayerOperator</span>
@@ -95,19 +105,30 @@
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">Two<wbr>Layer<wbr>Operator<span class="tsd-signature-symbol">(</span>layers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> | </span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">Two<wbr>Layer<wbr>Operator<span class="tsd-signature-symbol">(</span>layers<span class="tsd-signature-symbol">: </span><a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">OpNodeDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OpLinkDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/decross/index.ts#L18">src/sugiyama/decross/index.ts:18</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/decross/index.ts#L22">src/sugiyama/decross/index.ts:22</a></li>
 							</ul>
 						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>A decrossing operator that minimizes the number of crossings by looking at every pair of layers.</p>
+							</div>
+							<p>This method can be very fast and is a general heuristic for efficient
+								minimization. Customize with a two layer operator with <a href="sugiyama_decross_two_layer.twolayeroperator.html#order">order</a> or use
+							one of the built-in <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a>s.</p>
+							<p>This methos can also make multiple <a href="sugiyama_decross_two_layer.twolayeroperator.html#passes">passes</a> in an attempt to produce a
+							better layout.</p>
+							<img alt="two layer example" src="../media/two_layer_greedy.png" width="400">
+						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>layers: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol"> | </span><a href="../classes/sugiyama_dummy.dummynode.html" class="tsd-signature-type" data-tsd-kind="Class">DummyNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>layers: <a href="../modules/sugiyama_utils.html#suginode" class="tsd-signature-type" data-tsd-kind="Type alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">OpNodeDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OpLinkDatum</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -122,6 +143,7 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="sugiyama_decross_two_layer.twolayeroperator.html#order" class="tsd-kind-icon">order</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="sugiyama_decross_two_layer.twolayeroperator.html#passes" class="tsd-kind-icon">passes</a></li>
 							</ul>
 						</section>
 					</div>
@@ -133,27 +155,26 @@
 					<a name="order" class="tsd-anchor"></a>
 					<h3>order</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">order&lt;NewOrder&gt;<span class="tsd-signature-symbol">(</span>ord<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/utils.html#replace" class="tsd-signature-type" data-tsd-kind="Type alias">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;order&quot;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon">order<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">&quot;order&quot;</span><span class="tsd-signature-symbol">]</span></li>
+						<li class="tsd-signature tsd-kind-icon">order&lt;NewOrder&gt;<span class="tsd-signature-symbol">(</span>ord<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">order<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Order</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/decross/two-layer.ts#L33">src/sugiyama/decross/two-layer.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/decross/two-layer.ts#L42">src/sugiyama/decross/two-layer.ts:42</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Sets the order accessor to the specified {@link OrderOperator} and returns
-										this {@link TwoLayerOperator}. See the {@link &quot;sugiyama/twolayer/index&quot; | two
-									layer} module for more information on order operators.</p>
+									<p>Sets the order accessor to the specified <a href="sugiyama_twolayer.twolayeroperator.html">TwolayerOperator</a> and returns
+									a new operator. (default: {@link MedianOperator}).</p>
 								</div>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
-									<h4>NewOrder<span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer.operator.html" class="tsd-signature-type" data-tsd-kind="Interface">Operator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">&gt;</span></h4>
+									<h4>NewOrder<span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwolayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">&gt;</span></h4>
 								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -162,20 +183,63 @@
 									<h5>ord: <span class="tsd-signature-type">NewOrder</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><a href="../modules/utils.html#replace" class="tsd-signature-type" data-tsd-kind="Type alias">Replace</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;order&quot;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NewOrder</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/decross/two-layer.ts#L39">src/sugiyama/decross/two-layer.ts:39</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/decross/two-layer.ts#L48">src/sugiyama/decross/two-layer.ts:48</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get the current {@link OrderOperator} which defaults to <a href="../modules/sugiyama_twolayer_median.html#median">median</a>.</p>
+									<p>Get the current {@link OrderOperator}.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Ops</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">&quot;order&quot;</span><span class="tsd-signature-symbol">]</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Order</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="passes" class="tsd-anchor"></a>
+					<h3>passes</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">passes<span class="tsd-signature-symbol">(</span>val<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">passes<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/decross/two-layer.ts#L54">src/sugiyama/decross/two-layer.ts:54</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the number of passes to make, more takes longer, but might result in
+									a better output. (default: 1)</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>val: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Order</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/decross/two-layer.ts#L58">src/sugiyama/decross/two-layer.ts:58</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the current number of passes</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -187,8 +251,74 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="../modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
@@ -202,11 +332,14 @@
 							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
 								<a href="sugiyama_decross_two_layer.twolayeroperator.html#order" class="tsd-kind-icon">order</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="sugiyama_decross_two_layer.twolayeroperator.html#passes" class="tsd-kind-icon">passes</a>
+							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="../modules/sugiyama_decross_two_layer.html#twolayer" class="tsd-kind-icon">two<wbr>Layer</a>
 					</li>
 				</ul>
@@ -227,10 +360,7 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 		</div>
 	</div>

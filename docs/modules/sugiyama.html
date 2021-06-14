@@ -68,29 +68,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>This module contains methods for constructing a layered representation of
-							the DAG meant for visualization.  The algorithm is based off ideas presented
-							in K. Sugiyama et al. [1979], but described by <a href="http://www.it.usyd.edu.au/~shhong/fab.pdf">S.
-							Hong</a>.  The sugiyama layout can
-							be configured with different algorithms for each stage of the layout.  For
-							each stage there should be adecuate choices for methods that balance speed
-							and quality for your desired layout, but any function that meets the
-							interface for that stage is valid, but custom methods can also be provided,
-						assuming they do what&#39;s necessary in that step.</p>
+						<p>A <a href="../interfaces/sugiyama.sugiyamaoperator.html">SugiyamaOperator</a> for computing a layered layout of a dag</p>
 					</div>
-					<p>The method <a href="sugiyama.html#sugiyama-1">sugiyama</a> is used to create a new <a href="../interfaces/sugiyama.sugiyamaoperator.html">SugiyamaOperator</a>. This
-						can be customized with all of the methods available, but in particular the
-					method is broken down into three steps:</p>
-					<ol>
-						<li>{@link &quot;sugiyama/layering/index&quot; | layering} - in this step, every node is
-							assigned an integer later such that children are guaranteed to have
-						higher layers than their parents.</li>
-						<li>{@link &quot;sugiyama/decross/index&quot; | decrossing} - in the step, nodes in each
-						layer are reordered to minimize the number of crossings.</li>
-						<li>{@link &quot;sugiyama/coord/index&quot; | coordinate assignment} - in the step, the
-							nodes are assigned x and y coordinates that respect their layer, and
-						layer ordering.</li>
-					</ol>
 				</div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -100,15 +79,17 @@
 						<section class="tsd-index-section ">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama.sugiyamalayout.html" class="tsd-kind-icon">Sugiyama<wbr>Layout</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/sugiyama.sugiyamanode.html" class="tsd-kind-icon">Sugiyama<wbr>Node</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama.nodesizeaccessor.html" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama.suginodesizeaccessor.html" class="tsd-kind-icon">Sugi<wbr>Node<wbr>Size<wbr>Accessor</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/sugiyama.sugiyamainfo.html" class="tsd-kind-icon">Sugiyama<wbr>Info</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama.sugiyamaoperator.html" class="tsd-kind-icon">Sugiyama<wbr>Operator</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter"><a href="../interfaces/sugiyama.wrappednodesizeaccessor.html" class="tsd-kind-icon">Wrapped<wbr>Node<wbr>Size<wbr>Accessor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter"><a href="sugiyama.html#sugiyama-1" class="tsd-kind-icon">sugiyama</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="sugiyama.html#sugiyama-1" class="tsd-kind-icon">sugiyama</a></li>
 							</ul>
 						</section>
 					</div>
@@ -116,17 +97,17 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="sugiyama-1" class="tsd-anchor"></a>
 					<h3>sugiyama</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">sugiyama&lt;NodeType&gt;<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama.sugiyamaoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>coord<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>decross<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>order<span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_median.html#medianoperator" class="tsd-signature-type" data-tsd-kind="Type alias">MedianOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>layering<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>nodeSize<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_coord.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">sugiyama<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama.sugiyamaoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>coord<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">; </span>decross<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/sugiyama_twolayer_agg.aggoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">AggOperator</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>layering<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>group<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering.groupaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">GroupAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>rank<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering.rankaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">RankAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>nodeSize<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>sugiNodeSize<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama.wrappednodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">WrappedNodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/sugiyama.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/7fe4906/src/sugiyama/index.ts#L418">src/sugiyama/index.ts:418</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/29790da/src/sugiyama/index.ts#L506">src/sugiyama/index.ts:506</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -134,19 +115,13 @@
 									<p>Construct a new <a href="../interfaces/sugiyama.sugiyamaoperator.html">SugiyamaOperator</a> with the default settings.</p>
 								</div>
 							</div>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>NodeType<span class="tsd-signature-symbol">: </span><a href="../classes/dag_node.layoutdagnode.html" class="tsd-signature-type" data-tsd-kind="Class">LayoutDagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span></h4>
-								</li>
-							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>args: <span class="tsd-signature-type">never</span><span class="tsd-signature-symbol">[]</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/sugiyama.sugiyamaoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>coord<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>decross<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{ </span>order<span class="tsd-signature-symbol">: </span><a href="sugiyama_twolayer_median.html#medianoperator" class="tsd-signature-type" data-tsd-kind="Type alias">MedianOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>layering<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>nodeSize<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_coord.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/sugiyama.sugiyamaoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SugiyamaOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>coord<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_coord_quad.quadoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">QuadOperator</a><span class="tsd-signature-symbol">; </span>decross<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_decross_two_layer.twolayeroperator.html" class="tsd-signature-type" data-tsd-kind="Interface">TwoLayerOperator</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/sugiyama_twolayer_agg.aggoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">AggOperator</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>layering<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering_simplex.simplexoperator.html" class="tsd-signature-type" data-tsd-kind="Interface">SimplexOperator</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>group<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering.groupaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">GroupAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>rank<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama_layering.rankaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">RankAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>nodeSize<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>sugiNodeSize<span class="tsd-signature-symbol">: </span><a href="../interfaces/sugiyama.wrappednodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">WrappedNodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/sugiyama.nodesizeaccessor.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeSizeAccessor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -158,23 +133,95 @@
 					<li class=" ">
 						<a href="../modules.html">Exports</a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="iters.html">iters</a>
+					</li>
 					<li class="current tsd-kind-module">
 						<a href="sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="zherebko.html">zherebko</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../interfaces/sugiyama.sugiyamalayout.html" class="tsd-kind-icon">Sugiyama<wbr>Layout</a>
+						<a href="../interfaces/sugiyama.nodesizeaccessor.html" class="tsd-kind-icon">Node<wbr>Size<wbr>Accessor</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/sugiyama.suginodesizeaccessor.html" class="tsd-kind-icon">Sugi<wbr>Node<wbr>Size<wbr>Accessor</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/sugiyama.sugiyamanode.html" class="tsd-kind-icon">Sugiyama<wbr>Node</a>
+						<a href="../interfaces/sugiyama.sugiyamainfo.html" class="tsd-kind-icon">Sugiyama<wbr>Info</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="../interfaces/sugiyama.sugiyamaoperator.html" class="tsd-kind-icon">Sugiyama<wbr>Operator</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/sugiyama.wrappednodesizeaccessor.html" class="tsd-kind-icon">Wrapped<wbr>Node<wbr>Size<wbr>Accessor</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="sugiyama.html#sugiyama-1" class="tsd-kind-icon">sugiyama</a>
 					</li>
 				</ul>
@@ -195,10 +242,6 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
 				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
 			</ul>
 		</div>
 	</div>
