@@ -1,7 +1,6 @@
 import { createLayers, getIndex } from "../utils";
 
-import { mean } from "../../../src/sugiyama/twolayer/mean";
-import { median } from "../../../src/sugiyama/twolayer/median";
+import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
 
 const square = () => createLayers([[[0, 1]], [[], []]]);
@@ -17,7 +16,7 @@ const doub = () =>
   ]);
 
 for (const dat of [square, ccoz, doub]) {
-  for (const method of [mean(), median(), opt()]) {
+  for (const method of [agg(), opt()]) {
     test(`invariants apply to ${dat.name} decrossed by ${method.name}`, () => {
       const [topLayer, bottomLayer] = dat();
 

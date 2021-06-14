@@ -65,10 +65,11 @@ export {
   TopologicalOperator as TopologicalCoordOperator
 } from "./sugiyama/coord/topological";
 export {
-  median as twolayerMedian,
-  MedianOperator
-} from "./sugiyama/twolayer/median";
-export { mean as twolayerMean, MeanOperator } from "./sugiyama/twolayer/mean";
+  agg as twolayerAgg,
+  AggOperator,
+  meanFactory as aggMeanFactory,
+  medianFactory as aggMedianFactory
+} from "./sugiyama/twolayer/agg";
 export {
   opt as twolayerOpt,
   OptOperator as OptTwolayerOperator

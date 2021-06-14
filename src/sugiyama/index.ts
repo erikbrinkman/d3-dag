@@ -19,8 +19,8 @@ import { SimplexOperator, simplex } from "./layering/simplex";
 import { TwoLayerOperator, twoLayer } from "./decross/two-layer";
 import { Up, assert, def, js } from "../utils";
 
+import { AggOperator } from "./twolayer/agg";
 import { DecrossOperator } from "./decross";
-import { MedianOperator } from "./twolayer/median";
 
 /**
  * The return from calling {@link SugiyamaOperator}
@@ -508,7 +508,7 @@ export function sugiyama(...args: never[]): SugiyamaOperator<{
     rank: RankAccessor<unknown, unknown>;
     group: GroupAccessor<unknown, unknown>;
   }>;
-  decross: TwoLayerOperator<MedianOperator>;
+  decross: TwoLayerOperator<AggOperator>;
   coord: QuadOperator;
   nodeSize: NodeSizeAccessor<unknown, unknown>;
   sugiNodeSize: WrappedNodeSizeAccessor<NodeSizeAccessor<unknown, unknown>>;

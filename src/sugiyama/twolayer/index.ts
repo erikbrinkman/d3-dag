@@ -14,10 +14,9 @@ import { SugiNode } from "../utils";
  * false` then `topLayer` should be rearranged, and `bottomLayer` should remain
  * fixed.
  *
- * There are three built in two-layer operators:
+ * There are two built in two-layer operators:
  * - {@link OptOperator} - optimal corssing minimization for the layer in question
- * - {@link MedianOperator} - order according to median of parent indices
- * - {@link MeanOperator} - order according to mean of parent indices
+ * - {@link AggOperator} - order according to the aggregate of parent indices, fast
  */
 export interface TwolayerOperator<NodeDatum = never, LinkDatum = never> {
   (

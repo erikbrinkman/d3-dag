@@ -1,8 +1,7 @@
+import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { createLayers } from "../utils";
 import { opt as decrossOpt } from "../../../src/sugiyama/decross/opt";
 import { getIndex } from "../utils";
-import { mean } from "../../../src/sugiyama/twolayer/mean";
-import { median } from "../../../src/sugiyama/twolayer/median";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
 import { opt as twolayerOpt } from "../../../src/sugiyama/twolayer/opt";
 
@@ -17,8 +16,7 @@ const doub = () =>
 
 for (const dat of [square, ccoz, dtopo, doub]) {
   for (const method of [
-    twoLayer().order(mean()),
-    twoLayer().order(median()),
+    twoLayer().order(agg()),
     twoLayer().order(twolayerOpt()),
     decrossOpt()
   ]) {

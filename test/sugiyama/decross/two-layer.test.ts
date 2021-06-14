@@ -1,7 +1,6 @@
 import { createLayers, getIndex } from "../utils";
 
-import { mean } from "../../../src/sugiyama/twolayer/mean";
-import { median } from "../../../src/sugiyama/twolayer/median";
+import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
 
@@ -44,7 +43,7 @@ test("twoLayer() can be set", () => {
     [[0], [1]],
     [[], []]
   ]);
-  const twolayer = median();
+  const twolayer = agg();
   const decross = twoLayer().order(twolayer).passes(2);
   expect(decross.order()).toBe(twolayer);
   expect(decross.passes()).toBe(2);
@@ -60,8 +59,7 @@ test("twoLayer() can be set", () => {
 test("twoLayer() can be set with all built in methods", () => {
   const layers = createLayers([[[0]], [[]]]);
   const decross = twoLayer();
-  decross.order(mean());
-  decross.order(median());
+  decross.order(agg());
   decross.order(opt());
   decross(layers);
   const inds = layers.map((layer) => layer.map(getIndex));

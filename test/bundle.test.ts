@@ -71,16 +71,14 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // d3-array
-  test("twolayerMedian() works for very simple case", async () => {
+  test("aggMedianFactory() gets median", async () => {
     const d3dag = await load();
-    // independent links that need to be swapped
-    const [topLayer, bottomLayer] = createLayers([
-      [[1], [0]],
-      [[], []]
-    ]);
-    d3dag.twolayerMedian()(topLayer, bottomLayer, true);
-    const inds = bottomLayer.map(getIndex);
-    expect(inds).toEqual([1, 0]);
+    const agg = d3dag.aggMedianFactory();
+    expect(agg.val()).toBeUndefined();
+    agg.add(1);
+    agg.add(2);
+    agg.add(4);
+    expect(agg.val()).toEqual(2);
   });
 
   // fastpriorityqueue

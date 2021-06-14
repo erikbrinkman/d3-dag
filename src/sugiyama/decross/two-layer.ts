@@ -5,8 +5,8 @@
  * @module
  */
 
+import { AggOperator, agg } from "../twolayer/agg";
 import { LinkDatum, NodeDatum, SugiDataDagNode } from "../utils";
-import { MedianOperator, median } from "../twolayer/median";
 import { bigrams, def } from "../../utils";
 
 import { DecrossOperator } from ".";
@@ -125,11 +125,11 @@ function buildOperator<O extends OrderOperator>(options: {
  * Create a default {@link TwoLayerOperator}, bundled as
  * {@link decrossTwoLayer}.
  */
-export function twoLayer(...args: never[]): TwoLayerOperator<MedianOperator> {
+export function twoLayer(...args: never[]): TwoLayerOperator<AggOperator> {
   if (args.length) {
     throw new Error(
       `got arguments to twoLayer(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator({ order: median(), passes: 1 });
+  return buildOperator({ order: agg(), passes: 1 });
 }

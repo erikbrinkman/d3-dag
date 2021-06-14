@@ -1,4 +1,6 @@
 import {
+  aggMeanFactory,
+  aggMedianFactory,
   coordCenter,
   coordGreedy,
   coordQuad,
@@ -13,8 +15,7 @@ import {
   layeringSimplex,
   layeringTopological,
   sugiyama,
-  twolayerMean,
-  twolayerMedian,
+  twolayerAgg,
   twolayerOpt,
   zherebko
 } from "../src";
@@ -23,10 +24,10 @@ test("can loosly call the api", () => {
   dagStratify()([{ id: "" }]);
   dagHierarchy()({});
   const dag = dagConnect()([["a", "b"]]);
-  const decross = decrossTwoLayer()
-    .order(twolayerOpt())
-    .order(twolayerMean())
-    .order(twolayerMedian());
+  const agg = twolayerAgg()
+    .aggregator(aggMeanFactory)
+    .aggregator(aggMedianFactory);
+  const decross = decrossTwoLayer().order(twolayerOpt()).order(agg);
   const layout = sugiyama()
     .layering(layeringTopological())
     .layering(layeringCoffmanGraham())
