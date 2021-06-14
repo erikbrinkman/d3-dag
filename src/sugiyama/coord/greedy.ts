@@ -24,7 +24,7 @@ import { SugiNode } from "../utils";
  *
  * Create with {@link greedy}.
  *
- * <img alt="greedy example" src="media://greedy_coordinate.png" width="400">
+ * <img alt="greedy example" src="media://sugi-simplex-opt-greedy.png" width="400">
  */
 export type GreedyOperator = CoordOperator<unknown, unknown>;
 

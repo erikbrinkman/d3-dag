@@ -22,7 +22,7 @@ import { LayeringOperator } from ".";
  *
  * Create with {@link topological}.
  *
- * <img alt="topological example" src="media://topological.png" width="400">
+ * <img alt="topological example" src="media://sugi-topological-opt-topological.png" width="1000">
  */
 export type TopologicalOperator = LayeringOperator<unknown, unknown>;
 

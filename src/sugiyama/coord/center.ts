@@ -18,7 +18,7 @@ import { def } from "../../utils";
  *
  * Create with {@link center}.
  *
- * <img alt="center example" src="media://center_coordinate.png" width="400">
+ * <img alt="center example" src="media://sugi-simplex-opt-center.png" width="400">
  */
 export type CenterOperator = CoordOperator<unknown, unknown>;
 

@@ -27,7 +27,7 @@ export type LargeHandling = "small" | "medium" | "large";
  *
  * Create with {@link opt}.
  *
- * <img alt="two layer opt example" src="media://two_layer_opt.png" width="400">
+ * <img alt="two layer opt example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
 export interface OptOperator extends TwolayerOperator<unknown, unknown> {
   /**

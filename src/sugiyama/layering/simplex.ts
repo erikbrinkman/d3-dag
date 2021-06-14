@@ -51,7 +51,7 @@ type OpsDagNode<Ops extends Operators> = DagNode<
  *
  * Create with {@link simplex}.
  *
- * <img alt="simplex example" src="media://simplex.png" width="400">
+ * <img alt="simplex example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
 export interface SimplexOperator<Ops extends Operators = Operators>
   extends LayeringOperator<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {

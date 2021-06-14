@@ -144,6 +144,8 @@ type OpsDag<Ops extends Operators> = Dag<
  * valid.
  *
  * Create with {@link sugiyama}.
+ *
+ * <img alt="Sugiyama example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
 export interface SugiyamaOperator<Ops extends Operators = Operators> {
   /**

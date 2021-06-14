@@ -26,7 +26,7 @@ import { def } from "../../utils";
  *
  * Create with {@link coffmanGraham}.
  *
- * <img alt="Coffman-Graham example" src="media://coffman_graham.png" width="400">
+ * <img alt="Coffman-Graham example" src="media://sugi-coffmangraham-opt-quad.png" width="400">
  */
 export interface CoffmanGrahamOperator
   extends LayeringOperator<unknown, unknown> {

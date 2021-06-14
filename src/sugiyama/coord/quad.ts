@@ -95,7 +95,7 @@ function splitComponentLayers<N, L>(
  *
  * Create with {@link quad}.
  *
- * <img alt="quad example" src="media://simplex.png" width="400">
+ * <img alt="quad example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
 export interface QuadOperator extends CoordOperator<unknown, unknown> {
   /**

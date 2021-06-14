@@ -72,6 +72,8 @@ export const medianFactory = (): Aggregator => new Median();
  * inversions with respect to the initial ordering.
  *
  * Create with {@link agg}.
+ *
+ * <img alt="two layer agg example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
 export interface AggOperator<Factory extends AggFactory = AggFactory>
   extends TwolayerOperator<unknown, unknown> {

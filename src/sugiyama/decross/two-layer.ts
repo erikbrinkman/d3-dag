@@ -31,7 +31,7 @@ type OpLinkDatum<O extends OrderOperator> = LinkDatum<
  * This methos can also make multiple {@link passes} in an attempt to produce a
  * better layout.
  *
- * <img alt="two layer example" src="media://two_layer_greedy.png" width="400">
+ * <img alt="two layer example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
 export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
   extends DecrossOperator<OpNodeDatum<Order>, OpLinkDatum<Order>> {

@@ -16,7 +16,7 @@ import { def } from "../../utils";
  *
  * Create with {@link longestPath}.
  *
- * <img alt="longest path example" src="media://longest_path.png" width="400">
+ * <img alt="longest path example" src="media://sugi-longestpath-opt-quad.png" width="400">
  */
 export interface LongestPathOperator
   extends LayeringOperator<unknown, unknown> {

@@ -30,7 +30,7 @@ export type LargeHandling = "small" | "medium" | "large";
  *
  * Create with {@link opt}.
  *
- * <img alt="optimal decross example" src="media://simplex.png" width="400">
+ * <img alt="optimal decross example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
 export interface OptOperator extends DecrossOperator<unknown, unknown> {
   /**
