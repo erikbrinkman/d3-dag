@@ -24,19 +24,16 @@ If you use node, `npm i d3-dag` or `yarn add d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag@0.6.0"></script>
+<script src="https://unpkg.com/d3-dag@0.7.0"></script>
 <script>
-
-var dag = d3.sugiyama();
-
+const dag = d3.dagStratify(...);
+const layout = d3.sugiyama();
+layout(dag);
+// ... render dag
 </script>
 ```
 
 ## API Reference
-
-> :warning: **Documentation links aren't consistent**: Due to the evolving nature of tsdoc and typedoc, internal linking between various points in the codebase doesn't work well.
-> Notably, it's currently impossible to differentiate linking between two symbols with the same name.
-> While there are workarounds, they are painful. Until this is addressed in typedoc, it's unlikely the documentation will be fixed.
 
 * [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/index.html) - methods exported to flat javascript
 * [DAG](https://erikbrinkman.github.io/d3-dag/modules/dag_node.html) - documentation on the DAG structure
@@ -87,26 +84,45 @@ Information for major changes between releases
 ### Updating from 0.7 to 0.8
 
 This update features a large rewrite of much of the library, and as a result has some new features coupled with a lot of breaking changes.
-With this, the library is nearing stability and version 1.0 may be released soon.
+Most of the breaking changes are in the backend, so if you've only been using the bundled methods, most things should still work.
+With this, the library is nearing stability, and I expected to release 1.0 soon
 
-New features:
+**Large Breaking Changes:**
+- The largest breaking change was the removal of the arquint layout from this library.
+  The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
+  If possible, I would like to bring it back.
+- `twolayerMedian` and `twolayerMean` were merged into `twolayerAgg`.
+  To get `twolayerMean` you now use `twolayerAgg().aggregator(aggMeanFactory)`.
+- `sugiyama` and `zherebko` no longer return a dag, instead they just modify the dag that was passed in.
+  This isn't that different from the old behavior as the old dag was always modified, but in typescript there's no assertion that x and y exist on the returned dag.
+- `sugiyama().nodeSize` changed slightly.
+  You used to have to check if the input extended `SugiDummyNode`, now you just check if it's undefined.
 
+**Minor Breaking Changes:**
+These changes should only affect you if you were writing custom operators or using infrequent or experimental apis.
+- The Typescript types are much more coherent, and should make much more sense.
+  The old types had a lot of manual assertions and casting to get them to work, the new ones don't.
+  Most mthods should just work now without the need of manual annotation.
+- `LayeringOperators` now modify a node's `value` instead of setting a `layer` propery.
+- The API for custom sugiyama operators has changed significantly. I don't think this API was actually used very frequently, but if you did, look at the new operator definitions. Roughly instead of having a `DummyNode` or the actual `DagNode`, you will have a `SugiDagNode` which is a normal dag node with node data that either has a single `node` attribute for normal nodes, or a `parent` and `child` attribute for dummy nodes.
+- Many operator types were renamed from `Operator` in the appropriate module to a named operator like `TwolayerOperator`.
+  This should only affect you if you were using the experimental ES6 module api.
+- The build system was switched from rollup to esbuild.
+  There was one error with the bundling that was caught in development, and is now being tested.
+- The definition of Dag changed from being a union of `DagNode` and `DagRoot`, to just being a subset of `DagNode` without the local node operations.
+  This is arguably a cleaner api, but will change the behavior of things like conditional types.
+- The definition of `TwolayerOperator` must now support going bottom to top.
+- Layout* (e.g. `LayoutDagNode`) has been completely isolated, so it's impossible to create dags manually without implementing the interface yourself.
+  The purpose is to enforce that dags remain dags, and most operators can be do by clever application of the construction methods (see `sugify`).
 
-- New features:
-  - Better type checking / appropriate types in typescript.
-  - Dags no longer require ids.
-- Javascript breaking changes: (changes that affect everyone)
-  - The largest breaking change was the removal of the arquint layout from this library.
-    The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
-    If possible, I would like to bring it back.
-  - The layout algorithms Sugiyama and Zherebko don't return the dag anymore, but since the dag was always modified, those changes still hold.
-  - Layering now changes the value, so if you set the `value` of a node before using a layout, and expected the value to be preserved that no longer happens
-  - The API for custom sugiyama accessor changed significantly. I don't think this API was actually used very frequently, but if you did, look at the new operator definitions. Roughly instead of having a `DummyNode` or the actual `DagNode`, you will have a `SugiDagNode` which is a normal dag node with node data that either has a single `node` attribute for normal nodes, or a `parent` and `child` attribute for dummy nodes.
-- Typescript breaking changes: (changes that only affect typescript users)
-- Unlikely breaking changes: (changes to private apis that shouldn't break things, but might in strange circumstances)
-  - Many operator types were renamed from `Operator` in the appropriate module to a named operator like `TwolayerOperator`. This should only affect you if you were using the experimental 
-  - The build system was switched from rollup to esbuild. There was one error with the bundling that was caught in development, otherwise everything should still work.
-  - The definition of Dag changed from being a union of Dag and Dag root, to just being a subset of DagNode without the local node operations
+**New features:**
+- All built-in decrossing operators now preserve the order of layers if there's nothing else to do.
+- All built-in ecrossing operators now all have an option to (or always) minimize the distance between nodes that have a common parent or child.
+- `decrossTwoLayer` does a bottom to top pass as well, and supports multiple passes.
+- `nodeSize` is usable without checking for `SugiDummyNode` instances (now they're just undefined).
+- `dagConnect` supports adding single nodes.
+- `layeringSimplex` allows equality groups, these are similar to setting rank the same, but there's no ordering constraint between groups.
+- Much better typescript typings, and better tests to ensure they make sense.
 
 ### Updating from 0.6 to 0.7
 
