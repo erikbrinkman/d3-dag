@@ -12,9 +12,10 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 
 ## Examples
 
-- [Examples with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout.
-- [Examples with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
-- [Example with Arrows](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows) - This example shows a simple, if inexact, way to render edge arrows with d3.
+- [Observable with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout to understand the effects of different options.
+- [Observable with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
+- [Codepen with Sugiyama Layout](https://codepen.io/brinkbot/pen/oNZJXqK) - For people who want a straight javascript example without the Observable fanciness.
+- [Observable with Arrows](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows) - This example shows a simple, if inexact, way to render edge arrows with d3.
 - [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
 
@@ -36,14 +37,14 @@ layout(dag);
 ## API Reference
 
 * [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/index.html) - methods exported to flat javascript
-* [DAG](https://erikbrinkman.github.io/d3-dag/modules/dag_node.html) - documentation on the DAG structure
+* [DAG](https://erikbrinkman.github.io/d3-dag/interfaces/dag.dag-1.html) - documentation on the DAG structure
 * Creating DAGs from data
-  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/modules/dag_hierarchy.html) - data in dag format
-  * [Stratify](https://erikbrinkman.github.io/d3-dag/modules/dag_stratify.html) - data in tabular format
-  * [Connect](https://erikbrinkman.github.io/d3-dag/modules/dag_connect.html) - data in edge format
+  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.hierarchyoperator.html) - data in dag format
+  * [Stratify](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.stratifyoperator.html) - data in tabular format
+  * [Connect](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.connectoperator.html) - data in edge format
 * Layout algorithms
-  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/modules/sugiyama.html) - standard layout
-  * [Zherebko](https://erikbrinkman.github.io/d3-dag/modules/zherebko.html) - topological layout
+  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/interfaces/sugiyama.sugiyamaoperator.html) - standard layout
+  * [Zherebko](https://erikbrinkman.github.io/d3-dag/interfaces/zherebko.zherebkooperator.html) - topological layout
 
 ## General Usage Notes
 
