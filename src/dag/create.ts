@@ -40,11 +40,11 @@ class LayoutLink<NodeDatum, LinkDatum>
  * The concrete implementation backing {@link Dag}.
  */
 class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
-  readonly #roots?: DagNode<NodeDatum, LinkDatum>[];
+  private readonly proots?: DagNode<NodeDatum, LinkDatum>[];
 
   constructor(roots?: DagNode<NodeDatum, LinkDatum>[]) {
     if (roots) {
-      this.#roots = roots;
+      this.proots = roots;
     }
   }
 
@@ -53,7 +53,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
   }
 
   iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
-    return fluent(def(this.#roots));
+    return fluent(def(this.proots));
   }
 
   roots(): DagNode<NodeDatum, LinkDatum>[] {
