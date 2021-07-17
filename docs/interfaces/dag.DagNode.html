@@ -1,0 +1,882 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>DagNode | d3-dag</title>
+	<meta name="description" content="Documentation for d3-dag">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">d3-dag</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../modules.html">d3-dag</a>
+				</li>
+				<li>
+					<a href="../modules/dag.html">dag</a>
+				</li>
+				<li>
+					<a href="dag.DagNode.html">DagNode</a>
+				</li>
+			</ul>
+			<h1>Interface DagNode&lt;NodeDatum, LinkDatum&gt;</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A node in a dag</p>
+					</div>
+					<p>All methods inherented from dag apply as if this node were the sole root of
+						the dag. In adition, nodes have several properties that can be set and read.
+					There are also methods to access this nodes children and links.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-type-parameters">
+				<h3>Type parameters</h3>
+				<ul class="tsd-type-parameters">
+					<li>
+						<h4>NodeDatum = <span class="tsd-signature-type">unknown</span></h4>
+					</li>
+					<li>
+						<h4>LinkDatum = <span class="tsd-signature-type">unknown</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">DagNode</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dag.DagNode.html#data" class="tsd-kind-icon">data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dag.DagNode.html#value" class="tsd-kind-icon">value</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dag.DagNode.html#x" class="tsd-kind-icon">x</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dag.DagNode.html#y" class="tsd-kind-icon">y</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-external"><a href="dag.DagNode.html#_iterator_" class="tsd-kind-icon">[iterator]</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="dag.DagNode.html#childLinks" class="tsd-kind-icon">child<wbr>Links</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="dag.DagNode.html#children" class="tsd-kind-icon">children</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#connected" class="tsd-kind-icon">connected</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#count" class="tsd-kind-icon">count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#depth" class="tsd-kind-icon">depth</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#descendants" class="tsd-kind-icon">descendants</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#height" class="tsd-kind-icon">height</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="dag.DagNode.html#ichildLinks" class="tsd-kind-icon">ichild<wbr>Links</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="dag.DagNode.html#ichildren" class="tsd-kind-icon">ichildren</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#idescendants" class="tsd-kind-icon">idescendants</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#ilinks" class="tsd-kind-icon">ilinks</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#iroots" class="tsd-kind-icon">iroots</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#isplit" class="tsd-kind-icon">isplit</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#links" class="tsd-kind-icon">links</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#roots" class="tsd-kind-icon">roots</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#size" class="tsd-kind-icon">size</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#split" class="tsd-kind-icon">split</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="dag.DagNode.html#sum" class="tsd-kind-icon">sum</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="data" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> data</h3>
+					<div class="tsd-signature tsd-kind-icon">data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NodeDatum</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L169">src/dag/index.ts:169</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="value" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> value</h3>
+					<div class="tsd-signature tsd-kind-icon">value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L170">src/dag/index.ts:170</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="x" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> x</h3>
+					<div class="tsd-signature tsd-kind-icon">x<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L171">src/dag/index.ts:171</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="y" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> y</h3>
+					<div class="tsd-signature tsd-kind-icon">y<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L172">src/dag/index.ts:172</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-external">
+					<a name="_iterator_" class="tsd-anchor"></a>
+					<h3>[iterator]</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">[iterator]<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#_iterator_">[iterator]</a></p>
+								<ul>
+									<li>Defined in node_modules/typescript/lib/lib.es2015.iterable.d.ts:51</li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="childLinks" class="tsd-anchor"></a>
+					<h3>child<wbr>Links</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">child<wbr>Links<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L192">src/dag/index.ts:192</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an array of links between this node and its children</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="children" class="tsd-anchor"></a>
+					<h3>children</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">children<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L182">src/dag/index.ts:182</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return an array of this node&#39;s child nodes</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="connected" class="tsd-anchor"></a>
+					<h3>connected</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">connected<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#connected">connected</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L157">src/dag/index.ts:157</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return true if every node in the dag is reachable from every other.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="count" class="tsd-anchor"></a>
+					<h3>count</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">count<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#count">count</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L128">src/dag/index.ts:128</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the value of each node to be the number of leaves beneath the node.
+									If this node is a leaf, its value is one.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="depth" class="tsd-anchor"></a>
+					<h3>depth</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">depth<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#depth">depth</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L138">src/dag/index.ts:138</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Assign each node a value equal to its longest distance to a leaf.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="descendants" class="tsd-anchor"></a>
+					<h3>descendants</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">descendants<span class="tsd-signature-symbol">(</span>style<span class="tsd-signature-symbol">?: </span><a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#descendants">descendants</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L95">src/dag/index.ts:95</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an array of all descendants of this node</p>
+								</div>
+								<p>See <a href="dag.DagNode.html#idescendants">idescendants</a>.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> style: <a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="height" class="tsd-anchor"></a>
+					<h3>height</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">height<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#height">height</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L133">src/dag/index.ts:133</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Assign each node a value equal to its longest distance from a root.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="ichildLinks" class="tsd-anchor"></a>
+					<h3>ichild<wbr>Links</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">ichild<wbr>Links<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L187">src/dag/index.ts:187</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return an iterator of links between this node and its children</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="ichildren" class="tsd-anchor"></a>
+					<h3>ichildren</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">ichildren<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L177">src/dag/index.ts:177</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return an iterable over this node&#39;s child nodes</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="idescendants" class="tsd-anchor"></a>
+					<h3>idescendants</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">idescendants<span class="tsd-signature-symbol">(</span>style<span class="tsd-signature-symbol">?: </span><a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#idescendants">idescendants</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L86">src/dag/index.ts:86</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an iterator over all descendants of this node, e.g. every node in
+										the <a href="dag.Dag.html">Dag</a>. An <a href="../modules/dag.html#IterStyle">IterStyle</a> can be passed in to influence the
+										iteration order, the default (<code>&#39;depth&#39;</code>) should generally be the fastest,
+										but note that in general, traversal in a dag takes linear time and linear
+									space as we need to track what nodes we&#39;ve already visited.</p>
+								</div>
+								<ul>
+									<li><code>&#39;depth&#39;</code> - starting from the left most root, visit a nodes left most
+									child, progressing down to children before yielding any other node.</li>
+									<li><code>&#39;breadth&#39;</code> - starting from the left most root, yield each of it&#39;s
+									children, before yielding the children of its left most child.</li>
+									<li><code>&#39;before&#39;</code> - yield all of the roots, progressing downward, never
+									yielding a node before all of its parents have been yielded.</li>
+									<li><code>&#39;after&#39;</code> - yield all leaf nodes, progressing upward, never yielding a
+									node before all of its children have been yielded.</li>
+								</ul>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> style: <a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="ilinks" class="tsd-anchor"></a>
+					<h3>ilinks</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">ilinks<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#ilinks">ilinks</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L100">src/dag/index.ts:100</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an iterator over every <a href="dag.DagLink.html">DagLink</a></p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="iroots" class="tsd-anchor"></a>
+					<h3>iroots</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">iroots<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#iroots">iroots</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L61">src/dag/index.ts:61</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return an iterator over the dag&#39;s roots</p>
+								</div>
+								<p>A root is a node without parents. If a dag has multiple roots, this will
+									return more than one object, if this represents a single node, then only
+								that node will be returned.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="isplit" class="tsd-anchor"></a>
+					<h3>isplit</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">isplit<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#isplit">isplit</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L145">src/dag/index.ts:145</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Split a dag into connected components</p>
+								</div>
+								<p>Returns an iterable over each connected component as a new dag.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="links" class="tsd-anchor"></a>
+					<h3>links</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">links<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#links">links</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L107">src/dag/index.ts:107</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an array of every <a href="dag.DagLink.html">DagLink</a></p>
+								</div>
+								<p>See <a href="dag.DagNode.html#ilinks">ilinks</a>.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="roots" class="tsd-anchor"></a>
+					<h3>roots</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">roots<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#roots">roots</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L68">src/dag/index.ts:68</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an array of roots</p>
+								</div>
+								<p>See <a href="dag.DagNode.html#iroots">iroots</a>.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="size" class="tsd-anchor"></a>
+					<h3>size</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#size">size</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L110">src/dag/index.ts:110</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Count the number of nodes in the dag</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="split" class="tsd-anchor"></a>
+					<h3>split</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">split<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#split">split</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L152">src/dag/index.ts:152</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Split a dag into connected components</p>
+								</div>
+								<p>See <a href="dag.DagNode.html#isplit">isplit</a>.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="sum" class="tsd-anchor"></a>
+					<h3>sum</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">sum<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span>, index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="dag.Dag.html">Dag</a>.<a href="dag.Dag.html#sum">sum</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/83dc6e5/src/dag/index.ts#L120">src/dag/index.ts:120</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Compute values over the dag</p>
+								</div>
+								<p>Provide a callback that computes a number for each node, then set a node&#39;s
+									<code>value</code> to the sum of this number for this node and all of its
+									descendants. Note, if another node is a child via two separate paths, that
+								child&#39;s value will only factor into this node&#39;s value once.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>callback: <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span>, index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">number</span></h5>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-signature">
+											<ul class="tsd-signatures tsd-kind-type-literal">
+												<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span>, index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+											</ul>
+											<ul class="tsd-descriptions">
+												<li class="tsd-description">
+													<h4 class="tsd-parameters-title">Parameters</h4>
+													<ul class="tsd-parameters">
+														<li>
+															<h5>node: <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h5>
+														</li>
+														<li>
+															<h5>index: <span class="tsd-signature-type">number</span></h5>
+														</li>
+													</ul>
+													<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="../modules.html">Modules</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/dag.html">dag</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/dag_create.html">dag/create</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/index.html">index</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/iters.html">iters</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama.html">sugiyama</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord.html">sugiyama/coord</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross.html">sugiyama/decross</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering.html">sugiyama/layering</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/sugiyama_utils.html">sugiyama/utils</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="../modules/zherebko.html">zherebko</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="dag.Dag.html" class="tsd-kind-icon">Dag</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="dag.DagLink.html" class="tsd-kind-icon">Dag<wbr>Link</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="dag.DagNode.html" class="tsd-kind-icon">Dag<wbr>Node</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#data" class="tsd-kind-icon">data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#value" class="tsd-kind-icon">value</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#x" class="tsd-kind-icon">x</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#y" class="tsd-kind-icon">y</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited tsd-is-external">
+								<a href="dag.DagNode.html#_iterator_" class="tsd-kind-icon">[iterator]</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#childLinks" class="tsd-kind-icon">child<wbr>Links</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#children" class="tsd-kind-icon">children</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#connected" class="tsd-kind-icon">connected</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#count" class="tsd-kind-icon">count</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#depth" class="tsd-kind-icon">depth</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#descendants" class="tsd-kind-icon">descendants</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#height" class="tsd-kind-icon">height</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#ichildLinks" class="tsd-kind-icon">ichild<wbr>Links</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="dag.DagNode.html#ichildren" class="tsd-kind-icon">ichildren</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#idescendants" class="tsd-kind-icon">idescendants</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#ilinks" class="tsd-kind-icon">ilinks</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#iroots" class="tsd-kind-icon">iroots</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#isplit" class="tsd-kind-icon">isplit</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#links" class="tsd-kind-icon">links</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#roots" class="tsd-kind-icon">roots</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#size" class="tsd-kind-icon">size</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#split" class="tsd-kind-icon">split</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="dag.DagNode.html#sum" class="tsd-kind-icon">sum</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/dag.html#IterStyle" class="tsd-kind-icon">Iter<wbr>Style</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
