@@ -41,8 +41,8 @@
     "bundle-cjs": "esbuild dist/index.js --bundle --minify --format=cjs --define:this=global --platform=node --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.cjs.min.js",
     "bundle-esm": "esbuild dist/index.js --bundle --minify --format=esm --define:this=undefined --external:fs --external:child_process --banner:js=\"$(preamble)\" --outfile=bundle/d3-dag.esm.min.js",
     "bundle": "rm -rf bundle && yarn bundle-iife && yarn bundle-cjs && yarn bundle-esm",
-    "test": "tsc && jest --coverage && yarn build && tsd && yarn lint",
-    "prepare": "jest --clear-cache && yarn test && yarn build && yarn bundle",
+    "test": "tsc && yarn lint && jest /test/ --coverage && yarn build && tsd && yarn bundle && jest bundle.test.ts",
+    "prepare": "jest --clear-cache && yarn test && yarn build && yarn bundle-esm",
     "todo": "grep -rI --color TODO src test types",
     "docs": "rm -rf docs && typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
   },

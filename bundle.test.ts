@@ -1,21 +1,14 @@
-import * as d3types from "../src";
+import * as d3types from "./src";
+import * as d3runtime from ".";
+import { createLayers, getIndex, getLayers, nodeSize } from "./test/sugiyama/utils";
+import { square } from "./test/examples";
 
-import { createLayers, getIndex, getLayers, nodeSize } from "./sugiyama/utils";
+// so that the runtime types align with the test utilties types
+const d3dag = d3runtime as unknown as typeof d3types;
 
-import { square } from "./examples";
-
-// NOTE these are skipped bceause they require a built bundle
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip("tests that require a built bundle", () => {
-  async function load(): Promise<typeof d3types> {
-    // NOTE as string prevents compile time check of path
-    const mod = await import(".." as string);
-    return mod as unknown as typeof d3types;
-  }
-
+describe("tests that require a built bundle", () => {
   // javascript=lp-solver
-  test("decrossOpt() propogates to both layers when bundled", async () => {
-    const d3dag = await load();
+  test("decrossOpt() propogates to both layers when bundled", () => {
     // o o    o o
     //  X     | |
     // o o -> o o
@@ -36,8 +29,7 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // javascript-lp-solver
-  test("twolayerOpt() works for very simple case", async () => {
-    const d3dag = await load();
+  test("twolayerOpt() works for very simple case", () => {
     // independent links that need to be swapped
     const [topLayer, bottomLayer] = createLayers([
       [[1], [0]],
@@ -49,8 +41,7 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // javascript=lp-solver
-  test("layeringSimplex() works for square", async () => {
-    const d3dag = await load();
+  test("layeringSimplex() works for square", () => {
     const dag = square();
     d3dag.layeringSimplex()(dag);
     const layers = getLayers(dag);
@@ -58,8 +49,7 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // quadprog
-  test("coordQuad() works for square like layout", async () => {
-    const d3dag = await load();
+  test("coordQuad() works for square like layout", () => {
     const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);
     const [[head], [left, right], [tail]] = layers;
     d3dag.coordQuad()(layers, nodeSize);
@@ -71,8 +61,7 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // d3-array
-  test("aggMedianFactory() gets median", async () => {
-    const d3dag = await load();
+  test("aggMedianFactory() gets median", () => {
     const agg = d3dag.aggMedianFactory();
     expect(agg.val()).toBeUndefined();
     agg.add(1);
@@ -82,8 +71,7 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // fastpriorityqueue
-  test("layeringCoffmanGraham() works for square", async () => {
-    const d3dag = await load();
+  test("layeringCoffmanGraham() works for square", () => {
     const dag = square();
     d3dag.layeringCoffmanGraham()(dag);
     const layers = getLayers(dag);
@@ -91,8 +79,7 @@ describe.skip("tests that require a built bundle", () => {
   });
 
   // denque
-  test("slice() works with negatives", async () => {
-    const d3dag = await load();
+  test("slice() works with negatives", () => {
     const dag = d3dag.dagConnect()([
       ["0", "1"],
       ["1", "2"]
