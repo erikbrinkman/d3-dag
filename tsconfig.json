@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es6",
     "lib": ["esnext"],
-    "module": "esnext",
+    "module": "es6",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
     "noEmit": true,
     "strict": true,
     "typeRoots": ["./types", "./node_modules/@types"]
