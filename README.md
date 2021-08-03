@@ -37,14 +37,14 @@ layout(dag);
 ## API Reference
 
 * [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/index.html) - methods exported to flat javascript
-* [DAG](https://erikbrinkman.github.io/d3-dag/interfaces/dag.dag-1.html) - documentation on the DAG structure
+* [DAG](https://erikbrinkman.github.io/d3-dag/interfaces/dag.Dag.html) - documentation on the DAG structure
 * Creating DAGs from data
-  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.hierarchyoperator.html) - data in dag format
-  * [Stratify](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.stratifyoperator.html) - data in tabular format
-  * [Connect](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.connectoperator.html) - data in edge format
+  * [Hierarchy](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.HierarchyOperator.html) - data in dag format
+  * [Stratify](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.StratifyOperator.html) - data in tabular format
+  * [Connect](https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.ConnectOperator.html) - data in edge format
 * Layout algorithms
-  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/interfaces/sugiyama.sugiyamaoperator.html) - standard layout
-  * [Zherebko](https://erikbrinkman.github.io/d3-dag/interfaces/zherebko.zherebkooperator.html) - topological layout
+  * [Sugiyama](https://erikbrinkman.github.io/d3-dag/interfaces/sugiyama.SugiyamaOperator.html) - standard layout
+  * [Zherebko](https://erikbrinkman.github.io/d3-dag/interfaces/zherebko.ZherebkoOperator.html) - topological layout
 
 ## General Usage Notes
 
