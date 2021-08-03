@@ -1,8 +1,7 @@
-import { SimpleDatum, doub, ex, square } from "../../examples";
-
 import { DagNode } from "../../../src/dag";
-import { getLayers } from "../utils";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
+import { doub, ex, SimpleDatum, square } from "../../examples";
+import { getLayers } from "../utils";
 
 test("simplex() works for square", () => {
   const dag = square();

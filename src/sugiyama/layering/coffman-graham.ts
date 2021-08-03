@@ -4,11 +4,9 @@
  *
  * @module
  */
-
-import { Dag, DagNode } from "../../dag";
-
 import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";
+import { Dag, DagNode } from "../../dag";
 import { def } from "../../utils";
 
 /**

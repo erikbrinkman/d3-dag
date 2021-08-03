@@ -3,9 +3,8 @@
  *
  * @module
  */
-
-import { Dag } from "../../dag";
 import { LayeringOperator } from ".";
+import { Dag } from "../../dag";
 
 /**
  * A layering that assigns every node a distinct layer, creating a topological

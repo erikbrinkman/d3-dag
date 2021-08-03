@@ -4,11 +4,9 @@
  *
  * @module
  */
-
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
-
-import { SugiNode } from "../utils";
 import { def } from "../../utils";
+import { SugiNode } from "../utils";
 
 /**
  * A {@link CoordOperator} that spaces every node out by node size, and then

@@ -1,5 +1,5 @@
-import { SimpleDatum } from "../examples";
 import { stratify } from "../../src/dag/create";
+import { SimpleDatum } from "../examples";
 
 const single = [
   {

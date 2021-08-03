@@ -5,10 +5,9 @@
  * @module
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { init, layout, minBend, solve } from "./utils";
-
-import { SugiNode } from "../utils";
 import { def } from "../../utils";
+import { SugiNode } from "../utils";
+import { init, layout, minBend, solve } from "./utils";
 
 /**
  * A {@link CoordOperator} for positioning edges of a topological layout.

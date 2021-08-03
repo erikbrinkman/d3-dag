@@ -11,7 +11,6 @@
  *
  * @module
  */
-
 import { FluentIterable } from "../iters";
 
 /**

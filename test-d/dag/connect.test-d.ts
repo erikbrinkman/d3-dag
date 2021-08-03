@@ -1,7 +1,6 @@
-import { ConnectDatum, IdOperator, connect } from "../../src/dag/create";
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-
 import { Dag } from "../../src/dag";
+import { connect, ConnectDatum, IdOperator } from "../../src/dag/create";
 
 // initial types
 interface Init {

@@ -1,6 +1,5 @@
-import { createLayers, crossings, getIndex } from "../utils";
-
 import { opt } from "../../../src/sugiyama/twolayer/opt";
+import { createLayers, crossings, getIndex } from "../utils";
 
 test("opt() allows setting options", () => {
   const layering = opt().large("large").dist(true);

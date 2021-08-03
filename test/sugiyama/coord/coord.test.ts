@@ -1,9 +1,8 @@
-import { createLayers, nodeSize } from "../utils";
-
-import { SugiNode } from "../../../src/sugiyama/utils";
 import { center } from "../../../src/sugiyama/coord/center";
 import { greedy } from "../../../src/sugiyama/coord/greedy";
 import { quad } from "../../../src/sugiyama/coord/quad";
+import { SugiNode } from "../../../src/sugiyama/utils";
+import { createLayers, nodeSize } from "../utils";
 
 const square = () => createLayers([[[0], [1]], [[0], [0]], [[]]]);
 const ccoz = () => createLayers([[[0, 1], [2], [3]], [[0], [0], [], []], [[]]]);

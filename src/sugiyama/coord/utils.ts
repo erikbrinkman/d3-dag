@@ -4,11 +4,10 @@
  * @internal
  * @module
  */
-import { assert, bigrams, def } from "../../utils";
-
-import { CoordNodeSizeAccessor } from ".";
-import { SugiNode } from "../utils";
 import { solveQP } from "quadprog";
+import { CoordNodeSizeAccessor } from ".";
+import { assert, bigrams, def } from "../../utils";
+import { SugiNode } from "../utils";
 
 /** wrapper for solveQP */
 function qp(

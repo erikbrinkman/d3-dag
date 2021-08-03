@@ -1,3 +1,4 @@
+import { def } from "../../src/utils";
 import {
   doub,
   doubleVee,
@@ -8,8 +9,6 @@ import {
   square,
   vee
 } from "../examples";
-
-import { def } from "../../src/utils";
 
 test("roots() works for square", () => {
   const dag = square();

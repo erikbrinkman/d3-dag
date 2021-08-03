@@ -4,12 +4,11 @@
  *
  * @module
  */
-
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
-import { Dag, DagNode } from "../../dag";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
+import { Dag, DagNode } from "../../dag";
+import { assert, bigrams, def, Up } from "../../utils";
 import { LinkDatum, NodeDatum } from "../utils";
-import { Up, assert, bigrams, def } from "../../utils";
 
 interface Operators {
   rank: RankAccessor;

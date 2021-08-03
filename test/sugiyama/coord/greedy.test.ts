@@ -1,6 +1,5 @@
-import { createLayers, nodeSize } from "../utils";
-
 import { greedy } from "../../../src/sugiyama/coord/greedy";
+import { createLayers, nodeSize } from "../utils";
 
 test("greedy() works for N", () => {
   // degree matters

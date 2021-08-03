@@ -1,8 +1,7 @@
-import { SugiNode, sugify } from "../../src/sugiyama/utils";
-import { assert, bigrams, def } from "../../src/utils";
-
 import { Dag } from "../../src/dag";
 import { hierarchy } from "../../src/dag/create";
+import { sugify, SugiNode } from "../../src/sugiyama/utils";
+import { assert, bigrams, def } from "../../src/utils";
 
 export function getLayers(dag: Dag<{ id: string }>): number[][] {
   const layers: number[][] = [];

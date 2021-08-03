@@ -1,7 +1,6 @@
-import { ccoz, square } from "../../examples";
-
-import { coffmanGraham } from "../../../src/sugiyama/layering/coffman-graham";
 import { connect } from "../../../src/dag/create";
+import { coffmanGraham } from "../../../src/sugiyama/layering/coffman-graham";
+import { ccoz, square } from "../../examples";
 import { getLayers } from "../utils";
 
 test("coffmanGraham() works for square", () => {

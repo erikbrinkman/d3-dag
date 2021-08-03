@@ -1,6 +1,5 @@
-import { createLayers, nodeSize } from "../utils";
-
 import { center } from "../../../src/sugiyama/coord/center";
+import { createLayers, nodeSize } from "../utils";
 
 test("center() works for square like layout", () => {
   const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);

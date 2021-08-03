@@ -1,8 +1,7 @@
-import { ccoz, square } from "../../examples";
-
-import { getLayers } from "../utils";
-import { longestPath } from "../../../src/sugiyama/layering/longest-path";
 import { stratify } from "../../../src/dag/create";
+import { longestPath } from "../../../src/sugiyama/layering/longest-path";
+import { ccoz, square } from "../../examples";
+import { getLayers } from "../utils";
 
 const changes = [{ id: "0" }, { id: "1" }, { id: "2", parentIds: ["1"] }];
 

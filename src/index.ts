@@ -14,47 +14,47 @@
  *
  * @module
  */
-export type { Dag, DagNode, DagLink } from "./dag";
+export type { Dag, DagLink, DagNode } from "./dag";
 export {
-  stratify as dagStratify,
   connect as dagConnect,
-  hierarchy as dagHierarchy
+  hierarchy as dagHierarchy,
+  stratify as dagStratify
 } from "./dag/create";
 export type {
-  StratifyOperator,
   ConnectOperator,
-  HierarchyOperator
+  HierarchyOperator,
+  StratifyOperator
 } from "./dag/create";
 export { sugiyama } from "./sugiyama";
 export type {
-  SugiyamaOperator,
   NodeSizeAccessor,
-  SugiNodeSizeAccessor
+  SugiNodeSizeAccessor,
+  SugiyamaOperator
 } from "./sugiyama";
-export { topological as layeringTopological } from "./sugiyama/layering/topological";
-export type { TopologicalOperator as TopologicalLayeringOperator } from "./sugiyama/layering/topological";
-export { simplex as layeringSimplex } from "./sugiyama/layering/simplex";
-export type { SimplexOperator } from "./sugiyama/layering/simplex";
-export type { LayeringOperator } from "./sugiyama/layering";
-export type { TwolayerOperator } from "./sugiyama/twolayer";
-export type { DecrossOperator } from "./sugiyama/decross";
-export type { CoordOperator, CoordNodeSizeAccessor } from "./sugiyama/coord";
-export { longestPath as layeringLongestPath } from "./sugiyama/layering/longest-path";
-export type { LongestPathOperator } from "./sugiyama/layering/longest-path";
-export { coffmanGraham as layeringCoffmanGraham } from "./sugiyama/layering/coffman-graham";
-export type { CoffmanGrahamOperator } from "./sugiyama/layering/coffman-graham";
-export { twoLayer as decrossTwoLayer } from "./sugiyama/decross/two-layer";
-export type { TwoLayerOperator } from "./sugiyama/decross/two-layer";
-export { opt as decrossOpt } from "./sugiyama/decross/opt";
-export type { OptOperator as OptLayeringOperator } from "./sugiyama/decross/opt";
+export type { CoordNodeSizeAccessor, CoordOperator } from "./sugiyama/coord";
 export { center as coordCenter } from "./sugiyama/coord/center";
 export type { CenterOperator } from "./sugiyama/coord/center";
-export { quad as coordQuad } from "./sugiyama/coord/quad";
-export type { QuadOperator } from "./sugiyama/coord/quad";
 export { greedy as coordGreedy } from "./sugiyama/coord/greedy";
 export type { GreedyOperator } from "./sugiyama/coord/greedy";
+export { quad as coordQuad } from "./sugiyama/coord/quad";
+export type { QuadOperator } from "./sugiyama/coord/quad";
 export { topological as coordTopological } from "./sugiyama/coord/topological";
 export type { TopologicalOperator as TopologicalCoordOperator } from "./sugiyama/coord/topological";
+export type { DecrossOperator } from "./sugiyama/decross";
+export { opt as decrossOpt } from "./sugiyama/decross/opt";
+export type { OptOperator as OptLayeringOperator } from "./sugiyama/decross/opt";
+export { twoLayer as decrossTwoLayer } from "./sugiyama/decross/two-layer";
+export type { TwoLayerOperator } from "./sugiyama/decross/two-layer";
+export type { LayeringOperator } from "./sugiyama/layering";
+export { coffmanGraham as layeringCoffmanGraham } from "./sugiyama/layering/coffman-graham";
+export type { CoffmanGrahamOperator } from "./sugiyama/layering/coffman-graham";
+export { longestPath as layeringLongestPath } from "./sugiyama/layering/longest-path";
+export type { LongestPathOperator } from "./sugiyama/layering/longest-path";
+export { simplex as layeringSimplex } from "./sugiyama/layering/simplex";
+export type { SimplexOperator } from "./sugiyama/layering/simplex";
+export { topological as layeringTopological } from "./sugiyama/layering/topological";
+export type { TopologicalOperator as TopologicalLayeringOperator } from "./sugiyama/layering/topological";
+export type { TwolayerOperator } from "./sugiyama/twolayer";
 export {
   agg as twolayerAgg,
   meanFactory as aggMeanFactory,

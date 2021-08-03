@@ -1,22 +1,21 @@
 import { Dag, DagNode } from "../../src/dag";
-import { SimpleDatum, doub, dummy, single, three, trip } from "../examples";
 import { SugiNodeSizeAccessor, sugiyama } from "../../src/sugiyama";
-
 import { CoordOperator } from "../../src/sugiyama/coord";
-import { DecrossOperator } from "../../src/sugiyama/decross";
-import { LayeringOperator } from "../../src/sugiyama/layering";
-import { SugiNode } from "../../src/sugiyama/utils";
 import { center } from "../../src/sugiyama/coord/center";
-import { coffmanGraham } from "../../src/sugiyama/layering/coffman-graham";
-import { topological as coordTopological } from "../../src/sugiyama/coord/topological";
-import { def } from "../../src/utils";
 import { greedy } from "../../src/sugiyama/coord/greedy";
-import { topological as layeringTopological } from "../../src/sugiyama/layering/topological";
-import { longestPath } from "../../src/sugiyama/layering/longest-path";
-import { opt } from "../../src/sugiyama/decross/opt";
 import { quad } from "../../src/sugiyama/coord/quad";
-import { simplex } from "../../src/sugiyama/layering/simplex";
+import { topological as coordTopological } from "../../src/sugiyama/coord/topological";
+import { DecrossOperator } from "../../src/sugiyama/decross";
+import { opt } from "../../src/sugiyama/decross/opt";
 import { twoLayer } from "../../src/sugiyama/decross/two-layer";
+import { LayeringOperator } from "../../src/sugiyama/layering";
+import { coffmanGraham } from "../../src/sugiyama/layering/coffman-graham";
+import { longestPath } from "../../src/sugiyama/layering/longest-path";
+import { simplex } from "../../src/sugiyama/layering/simplex";
+import { topological as layeringTopological } from "../../src/sugiyama/layering/topological";
+import { SugiNode } from "../../src/sugiyama/utils";
+import { def } from "../../src/utils";
+import { doub, dummy, SimpleDatum, single, three, trip } from "../examples";
 
 test("sugiyama() works for single node", () => {
   const dag = single();

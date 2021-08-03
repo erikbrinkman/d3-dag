@@ -4,10 +4,10 @@
  *
  * @module
  */
-import { SugiNode } from "../utils";
+import { median } from "d3-array";
 import { TwolayerOperator } from ".";
 import { def } from "../../utils";
-import { median } from "d3-array";
+import { SugiNode } from "../utils";
 
 /**
  * Am interface for aggregating numbers

@@ -6,9 +6,8 @@
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { bigrams, def, dfs, setIntersect } from "../../utils";
-import { indices, init, layout, minBend, minDist, solve } from "./utils";
-
 import { SugiNode } from "../utils";
+import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
 /**
  * Compute a map from node ids to a connected component index. This is useful

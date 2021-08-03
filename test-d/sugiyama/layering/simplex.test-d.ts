@@ -1,7 +1,6 @@
-import { GroupAccessor, RankAccessor } from "../../../src/sugiyama/layering";
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-
 import { Dag } from "../../../src/dag";
+import { GroupAccessor, RankAccessor } from "../../../src/sugiyama/layering";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
 
 const init = simplex();

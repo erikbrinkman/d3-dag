@@ -7,8 +7,8 @@
  * @module
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
-import { FluentIterable, fluent } from "../iters";
-import { Up, assert, def, dfs, js } from "../utils";
+import { fluent, FluentIterable } from "../iters";
+import { assert, def, dfs, js, Up } from "../utils";
 
 /**********************
  * Dag Implementation *

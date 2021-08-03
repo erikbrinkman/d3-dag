@@ -3,24 +3,22 @@
  *
  * @module
  */
-
-import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
 import { Dag, DagNode } from "../dag";
+import { assert, def, js, Up } from "../utils";
+import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
+import { quad, QuadOperator } from "./coord/quad";
+import { DecrossOperator } from "./decross";
+import { twoLayer, TwoLayerOperator } from "./decross/two-layer";
 import { GroupAccessor, LayeringOperator, RankAccessor } from "./layering";
+import { simplex, SimplexOperator } from "./layering/simplex";
+import { AggOperator } from "./twolayer/agg";
 import {
   LinkDatum,
   NodeDatum,
   SugiDataDagNode,
-  SugiNode,
-  sugify
+  sugify,
+  SugiNode
 } from "./utils";
-import { QuadOperator, quad } from "./coord/quad";
-import { SimplexOperator, simplex } from "./layering/simplex";
-import { TwoLayerOperator, twoLayer } from "./decross/two-layer";
-import { Up, assert, def, js } from "../utils";
-
-import { AggOperator } from "./twolayer/agg";
-import { DecrossOperator } from "./decross";
 
 /**
  * The return from calling {@link SugiyamaOperator}

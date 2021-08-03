@@ -4,9 +4,8 @@
  * @module
  */
 import { Model, Solve } from "javascript-lp-solver";
-import { bigrams, def } from "../../utils";
-
 import { DecrossOperator } from ".";
+import { bigrams, def } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**

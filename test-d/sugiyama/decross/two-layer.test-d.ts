@@ -1,8 +1,7 @@
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-
-import { SugiNode } from "../../../src/sugiyama/utils";
-import { TwolayerOperator } from "../../../src/sugiyama/twolayer";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
+import { TwolayerOperator } from "../../../src/sugiyama/twolayer";
+import { SugiNode } from "../../../src/sugiyama/utils";
 
 const init = twoLayer();
 expectAssignable<(inp: SugiNode[][]) => void>(init);

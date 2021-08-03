@@ -1,8 +1,7 @@
 import { connect, hierarchy, stratify } from "../../src/dag/create";
-import { createLayers, crossings, getLayers } from "./utils";
-
-import { dummy } from "../examples";
 import { sugify } from "../../src/sugiyama/utils";
+import { dummy } from "../examples";
+import { createLayers, crossings, getLayers } from "./utils";
 
 test("sugify() works with dummy nodes", () => {
   const dag = dummy().depth();

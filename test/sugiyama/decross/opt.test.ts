@@ -1,6 +1,5 @@
-import { createLayers, crossings, getIndex } from "../utils";
-
 import { opt } from "../../../src/sugiyama/decross/opt";
+import { createLayers, crossings, getIndex } from "../utils";
 
 test("opt() allows setting options", () => {
   const decross = opt().large("large").dist(true);

@@ -1,6 +1,5 @@
-import { createLayers, nodeSize } from "../utils";
-
 import { quad } from "../../../src/sugiyama/coord/quad";
+import { createLayers, nodeSize } from "../utils";
 
 test("quad() modifiers work", () => {
   const vert = [0.1, 0.2] as const;

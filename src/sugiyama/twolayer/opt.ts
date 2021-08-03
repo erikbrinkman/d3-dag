@@ -5,10 +5,9 @@
  * @module
  */
 import { Model, Solve } from "javascript-lp-solver";
-
-import { SugiNode } from "../utils";
 import { TwolayerOperator } from ".";
 import { def } from "../../utils";
+import { SugiNode } from "../utils";
 
 /**
  * How to handle large dags

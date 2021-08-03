@@ -4,13 +4,11 @@
  *
  * @module
  */
-
-import { AggOperator, agg } from "../twolayer/agg";
-import { LinkDatum, NodeDatum, SugiDataDagNode } from "../utils";
-import { bigrams, def } from "../../utils";
-
 import { DecrossOperator } from ".";
+import { bigrams, def } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
+import { agg, AggOperator } from "../twolayer/agg";
+import { LinkDatum, NodeDatum, SugiDataDagNode } from "../utils";
 
 type OpSugiNode<O extends OrderOperator> = Parameters<O>[0][number];
 type OpSugiData<O extends OrderOperator> = OpSugiNode<O>["data"];

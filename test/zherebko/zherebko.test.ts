@@ -1,7 +1,6 @@
-import { doub, single } from "../examples";
-
 import { connect } from "../../src/dag/create";
 import { zherebko } from "../../src/zherebko";
+import { doub, single } from "../examples";
 
 test("zherebko() works for a point", () => {
   const dag = single();

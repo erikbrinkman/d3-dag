@@ -1,9 +1,8 @@
-import { agg } from "../../../src/sugiyama/twolayer/agg";
-import { createLayers } from "../utils";
 import { opt as decrossOpt } from "../../../src/sugiyama/decross/opt";
-import { getIndex } from "../utils";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
+import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { opt as twolayerOpt } from "../../../src/sugiyama/twolayer/opt";
+import { createLayers, getIndex } from "../utils";
 
 const square = () => createLayers([[[0, 1]], [[0], [0]], [[]]]);
 const ccoz = () => createLayers([[[1], [0, 3], [2]], [[0], [], [], [0]], [[]]]);

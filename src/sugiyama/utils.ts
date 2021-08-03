@@ -7,11 +7,9 @@
  *
  * @module
  */
-
 import { Dag, DagNode } from "../dag";
-import { assert, def, js } from "../utils";
-
 import { hierarchy } from "../dag/create";
+import { assert, def, js } from "../utils";
 
 /**
  * The NodeDatum used for layered {@link SugiyamaOperator} layouts

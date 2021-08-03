@@ -5,7 +5,6 @@
  * @module
  */
 // TODO turn this into an operator for zherebko
-
 import { DagNode } from "../dag";
 import { def } from "../utils";
 

@@ -4,13 +4,10 @@
  *
  * @module
  */
-
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
-
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { assert, def } from "../../utils";
-
 import { SugiNode } from "../utils";
 
 /**

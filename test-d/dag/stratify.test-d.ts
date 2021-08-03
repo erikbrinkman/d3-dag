@@ -1,12 +1,11 @@
+import { expectAssignable, expectNotAssignable, expectType } from "tsd";
+import { Dag } from "../../src/dag";
 import {
   IdOperator,
   ParentDataOperator,
   ParentIdsOperator,
   stratify
 } from "../../src/dag/create";
-import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-
-import { Dag } from "../../src/dag";
 
 // initial types
 interface Init {

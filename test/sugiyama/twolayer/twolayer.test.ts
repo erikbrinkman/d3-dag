@@ -1,7 +1,6 @@
-import { createLayers, getIndex } from "../utils";
-
 import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
+import { createLayers, getIndex } from "../utils";
 
 const square = () => createLayers([[[0, 1]], [[], []]]);
 const ccoz = () =>

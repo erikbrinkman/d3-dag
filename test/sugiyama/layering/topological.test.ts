@@ -1,7 +1,6 @@
-import { doub, square } from "../../examples";
-
-import { getLayers } from "../utils";
 import { topological } from "../../../src/sugiyama/layering/topological";
+import { doub, square } from "../../examples";
+import { getLayers } from "../utils";
 
 test("topological() works for square", () => {
   const dag = square();

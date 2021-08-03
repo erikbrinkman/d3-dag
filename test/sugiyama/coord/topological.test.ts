@@ -1,6 +1,5 @@
-import { createLayers, nodeSize } from "../utils";
-
 import { topological } from "../../../src/sugiyama/coord/topological";
+import { createLayers, nodeSize } from "../utils";
 
 test("topological() works for triangle", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);

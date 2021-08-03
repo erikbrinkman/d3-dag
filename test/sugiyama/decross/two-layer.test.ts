@@ -1,8 +1,7 @@
-import { createLayers, getIndex } from "../utils";
-
+import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
 import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
-import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
+import { createLayers, getIndex } from "../utils";
 
 test("twoLayer() propogates to both layers", () => {
   // o o    o o

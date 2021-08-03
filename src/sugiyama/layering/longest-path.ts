@@ -3,8 +3,8 @@
  *
  * @module
  */
-import { Dag } from "../../dag";
 import { LayeringOperator } from ".";
+import { Dag } from "../../dag";
 import { def } from "../../utils";
 
 /**
