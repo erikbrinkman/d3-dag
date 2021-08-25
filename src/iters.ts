@@ -6,7 +6,7 @@
  *
  * @module
  */
-import Denque from "denque";
+import { Queue } from "quetie";
 
 /**
  * A fluent iterable
@@ -262,7 +262,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   indexOf(query: T, fromIndex: number = 0): number {
     if (fromIndex < 0) {
       let index = 0;
-      const queue = new Denque();
+      const queue = new Queue();
       for (const elem of this) {
         if (index >= -fromIndex) {
           queue.shift();
@@ -270,7 +270,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
         queue.push(elem);
         index++;
       }
-      const ind = queue.toArray().indexOf(query);
+      const ind = [...queue].indexOf(query);
       if (ind === -1) {
         return -1;
       } else {
@@ -304,12 +304,12 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   lastIndexOf(query: T, fromIndex: number = Infinity): number {
     let lastIndex = -1;
     if (fromIndex < 0) {
-      const queue = new Denque();
+      const queue = new Queue();
       for (const [index, element] of this.gentries()) {
         if (element === query) {
           queue.push(index);
         }
-        const next = queue.peekFront();
+        const next = queue.get(0) as number;
         if (next !== undefined && next <= index + fromIndex + 1) {
           queue.shift();
           lastIndex = next;
@@ -418,11 +418,12 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   }
 
   private *gnegslice(start: number, end: number): Generator<T> {
-    const queue = new Denque();
+    const queue = new Queue();
     const pop = start - end;
+
     for (const [index, elem] of this.gentries()) {
       if (index >= pop) {
-        yield queue.shift();
+        yield queue.shift() as T;
         queue.push(elem);
       } else if (index >= start) {
         queue.push(elem);
@@ -433,7 +434,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
   slice(start: number = 0, end: number = Infinity): FluentIterable<T> {
     if (start < 0) {
       let index = 0;
-      const queue = new Denque();
+      const queue = new Queue<T>();
       for (const elem of this) {
         if (index >= -start) {
           queue.shift();
@@ -441,7 +442,7 @@ class LazyFluentIterable<T> implements FluentIterable<T> {
         queue.push(elem);
         index++;
       }
-      const array = queue.toArray();
+      const array = [...queue];
       const num = end - index - start;
       if (end < 0) {
         return fluent(array.slice(0, end));

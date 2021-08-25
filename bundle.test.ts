@@ -78,7 +78,7 @@ describe("tests that require a built bundle", () => {
     expect([[0], [1, 2], [3]]).toEqual(layers);
   });
 
-  // denque
+  // quetie
   test("slice() works with negatives", () => {
     const dag = d3dag.dagConnect()([
       ["0", "1"],
