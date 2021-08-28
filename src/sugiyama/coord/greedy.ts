@@ -7,6 +7,7 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
+import { length } from "../../iters";
 import { assert, def } from "../../utils";
 import { SugiNode } from "../utils";
 
@@ -51,7 +52,7 @@ export function greedy(...args: never[]): GreedyOperator {
         // below any other valid node
         degrees.set(
           node,
-          node.ichildren().length + ("node" in node.data ? 0 : -3)
+          length(node.ichildren()) + ("node" in node.data ? 0 : -3)
         );
       }
     }

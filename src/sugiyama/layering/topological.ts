@@ -5,6 +5,7 @@
  */
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";
+import { entries } from "../../iters";
 
 /**
  * A layering that assigns every node a distinct layer, creating a topological
@@ -39,7 +40,7 @@ export function topological(...args: never[]): TopologicalOperator {
   // then grow each layer to minimize dummy nodes. Its unclear how hard that
   // permutation is to optimize
   function topologicalCall(dag: Dag): void {
-    for (const [layer, node] of dag.idescendants("before").entries()) {
+    for (const [layer, node] of entries(dag.idescendants("before"))) {
       node.value = layer;
     }
   }

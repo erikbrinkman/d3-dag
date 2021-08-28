@@ -6,6 +6,7 @@
  */
 import { Model, Solve } from "javascript-lp-solver";
 import { TwolayerOperator } from ".";
+import { length } from "../../iters";
 import { def } from "../../utils";
 import { SugiNode } from "../utils";
 
@@ -64,7 +65,7 @@ function buildOperator(options: {
     // check if input is too large
     const reordered = topDown ? bottomLayer : topLayer;
     const numVars = (reordered.length * Math.max(reordered.length - 1, 0)) / 2;
-    const numEdges = topLayer.reduce((t, n) => t + n.ichildren().length, 0);
+    const numEdges = topLayer.reduce((t, n) => t + length(n.ichildren()), 0);
     if (options.large !== "large" && numVars > 1200) {
       throw new Error(
         `size of dag to twolayerOpt is too large and will likely crash, enable "large" dags to run anyway`
@@ -107,7 +108,7 @@ function buildOperator(options: {
         .map((node) => node.children())
         .filter((cs) => cs.length > 1);
     } else {
-      unconstrained = topLayer.filter((n) => !n.ichildren().length);
+      unconstrained = topLayer.filter((n) => !length(n.ichildren()));
       const parents = new Map<SugiNode, SugiNode[]>();
       for (const node of topLayer) {
         for (const child of node.ichildren()) {

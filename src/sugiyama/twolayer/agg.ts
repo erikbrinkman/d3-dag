@@ -6,6 +6,7 @@
  */
 import { median } from "d3-array";
 import { TwolayerOperator } from ".";
+import { map } from "../../iters";
 import { def } from "../../utils";
 import { SugiNode } from "../utils";
 
@@ -218,7 +219,7 @@ function buildOperator<Factory extends AggFactory>({
         topLayer.map((node) => {
           const agg = aggregate(
             factory,
-            node.ichildren().map((child) => def(inds.get(child)))
+            map(node.ichildren(), (child) => def(inds.get(child)))
           );
           return [node, agg] as const;
         })

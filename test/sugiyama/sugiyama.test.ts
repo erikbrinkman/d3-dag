@@ -1,4 +1,5 @@
 import { Dag, DagNode } from "../../src/dag";
+import { entries } from "../../src/iters";
 import { SugiNodeSizeAccessor, sugiyama } from "../../src/sugiyama";
 import { CoordOperator } from "../../src/sugiyama/coord";
 import { center } from "../../src/sugiyama/coord/center";
@@ -124,7 +125,7 @@ test("sugiyama() allows changing nodeSize", () => {
 test("sugiyama() allows changing operators", () => {
   const dag = dummy();
   const layering: LayeringOperator<SimpleDatum, unknown> = (dag) => {
-    for (const [i, node] of dag.idescendants("before").entries()) {
+    for (const [i, node] of entries(dag.idescendants("before"))) {
       node.value = i;
     }
   };

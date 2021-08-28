@@ -1,4 +1,5 @@
 import { connect } from "../../src/dag/create";
+import { map } from "../../src/iters";
 
 const simpleSquare = [
   ["a", "b"],
@@ -50,7 +51,7 @@ test("connect() parses a simple square", () => {
   expect([
     ["a", "b", "c", "d"],
     ["a", "c", "b", "d"]
-  ]).toContainEqual([...dag.idescendants("before").map((n) => n.data.id)]);
+  ]).toContainEqual([...map(dag.idescendants("before"), (n) => n.data.id)]);
 });
 
 test("connect() handles single nodes", () => {
@@ -66,7 +67,7 @@ test("connect() handles single nodes", () => {
 
   const dag = build([["a", "a"]]);
   expect(dag.size()).toBeCloseTo(1);
-  const ids = [...dag.idescendants("before").map((n) => n.data.id)];
+  const ids = [...map(dag.idescendants("before"), (n) => n.data.id)];
   expect(ids).toEqual(["a"]);
 });
 

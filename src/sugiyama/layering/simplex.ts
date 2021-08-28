@@ -7,6 +7,7 @@
 import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { Dag, DagNode } from "../../dag";
+import { entries, map } from "../../iters";
 import { assert, bigrams, def, Up } from "../../utils";
 import { LinkDatum, NodeDatum } from "../utils";
 
@@ -92,10 +93,10 @@ function buildOperator<Ops extends Operators>(
     const constraints: SolverDict<Constraint> = {};
 
     const ids = new Map(
-      dag
-        .idescendants()
-        .entries()
-        .map(([i, node]) => [node, i.toString()] as const)
+      map(
+        entries(dag.idescendants()),
+        ([i, node]) => [node, i.toString()] as const
+      )
     );
 
     /** get node id */

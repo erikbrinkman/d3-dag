@@ -1,4 +1,6 @@
 import { connect } from "../../src/dag/create";
+import { map } from "../../src/iters";
+import { def } from "../../src/utils";
 import { zherebko } from "../../src/zherebko";
 import { doub, single } from "../examples";
 
@@ -85,12 +87,9 @@ test("zherebko() works specific case", () => {
 test("zherebko() works on disconnected dag", () => {
   const dag = doub();
   zherebko().size([2, 2])(dag);
-  expect([
-    ...dag
-      .idescendants()
-      .map((n) => n.y)
-      .sort()
-  ]).toEqual([0, 2]);
+  expect(
+    [...map(dag.idescendants(), (n) => def(n.y))].sort((a, b) => a - b)
+  ).toEqual([0, 2]);
   for (const node of dag) {
     expect(node.x).toEqual(1);
   }

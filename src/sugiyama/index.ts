@@ -4,6 +4,7 @@
  * @module
  */
 import { Dag, DagNode } from "../dag";
+import { map } from "../iters";
 import { assert, def, js, Up } from "../utils";
 import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
 import { quad, QuadOperator } from "./coord/quad";
@@ -343,9 +344,10 @@ function buildOperator<Ops extends Operators>(
         sugi.data.node.y = sugi.y;
 
         const pointsMap = new Map(
-          sugi.data.node
-            .ichildLinks()
-            .map(({ points, target }) => [target, points] as const)
+          map(
+            sugi.data.node.ichildLinks(),
+            ({ points, target }) => [target, points] as const
+          )
         );
         for (let child of sugi.ichildren()) {
           const points = [{ x: sugi.x, y: sugi.y }];

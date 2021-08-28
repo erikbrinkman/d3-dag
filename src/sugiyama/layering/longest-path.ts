@@ -5,6 +5,7 @@
  */
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";
+import { map } from "../../iters";
 import { def } from "../../utils";
 
 /**
@@ -37,7 +38,7 @@ function buildOperator(options: { topDown: boolean }): LongestPathOperator {
       dag.depth();
     } else {
       dag.height();
-      const maxHeight = Math.max(...dag.iroots().map((d) => def(d.value)));
+      const maxHeight = Math.max(...map(dag.iroots(), (d) => def(d.value)));
       for (const node of dag) {
         node.value = maxHeight - def(node.value);
       }

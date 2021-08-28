@@ -11,7 +11,6 @@
  *
  * @module
  */
-import { FluentIterable } from "../iters";
 
 /**
  * All available styles of node iteration.
@@ -39,11 +38,8 @@ export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
  * return parents of the current just just the current node during iteration.
  * The same principle holds true for all methods.
  *
- * Methods names preceeded by an `i` will return a {@link FluentIterable} which
- * is a wrapper around native EMCA iterators that also adds most methods found
- * in the `Array` prototype making them much more useful for fluent functional
- * programming.
- *
+ * Methods names preceeded by an `i` will return am Iterable, and without the
+ * `i` will return an array.
  */
 export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
   extends Iterable<DagNode<NodeDatum, LinkDatum>> {
@@ -57,7 +53,7 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
    * return more than one object, if this represents a single node, then only
    * that node will be returned.
    */
-  iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>>;
+  iroots(): Iterable<DagNode<NodeDatum, LinkDatum>>;
 
   /**
    * Returns an array of roots
@@ -82,9 +78,7 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
    * - `'after'` - yield all leaf nodes, progressing upward, never yielding a
    *   node before all of its children have been yielded.
    */
-  idescendants(
-    style?: IterStyle
-  ): FluentIterable<DagNode<NodeDatum, LinkDatum>>;
+  idescendants(style?: IterStyle): Iterable<DagNode<NodeDatum, LinkDatum>>;
 
   /**
    * Returns an array of all descendants of this node
@@ -96,7 +90,7 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
   /**
    * Returns an iterator over every {@link DagLink}
    */
-  ilinks(): FluentIterable<DagLink<NodeDatum, LinkDatum>>;
+  ilinks(): Iterable<DagLink<NodeDatum, LinkDatum>>;
 
   /**
    * Returns an array of every {@link DagLink}
@@ -141,7 +135,7 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
    *
    * Returns an iterable over each connected component as a new dag.
    */
-  isplit(): FluentIterable<Dag<NodeDatum, LinkDatum>>;
+  isplit(): Iterable<Dag<NodeDatum, LinkDatum>>;
 
   /**
    * Split a dag into connected components
@@ -173,7 +167,7 @@ export interface DagNode<NodeDatum = unknown, LinkDatum = unknown>
   /**
    * Return an iterable over this node's child nodes
    */
-  ichildren(): FluentIterable<DagNode<NodeDatum, LinkDatum>>;
+  ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>>;
 
   /**
    * Return an array of this node's child nodes
@@ -183,7 +177,7 @@ export interface DagNode<NodeDatum = unknown, LinkDatum = unknown>
   /**
    * Return an iterator of links between this node and its children
    */
-  ichildLinks(): FluentIterable<DagLink<NodeDatum, LinkDatum>>;
+  ichildLinks(): Iterable<DagLink<NodeDatum, LinkDatum>>;
 
   /**
    * Returns an array of links between this node and its children

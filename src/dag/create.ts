@@ -7,7 +7,7 @@
  * @module
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
-import { fluent, FluentIterable } from "../iters";
+import { entries, every, flatMap, length, map, reduce } from "../iters";
 import { assert, def, dfs, js, Up } from "../utils";
 
 /**********************
@@ -52,20 +52,21 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     return this.idescendants()[Symbol.iterator]();
   }
 
-  iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
-    return fluent(def(this.proots));
+  iroots(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+    const nonnull = def(this.proots);
+    return { [Symbol.iterator]: () => nonnull[Symbol.iterator]() };
   }
 
   roots(): DagNode<NodeDatum, LinkDatum>[] {
     return [...this.iroots()];
   }
 
-  private *gdepth(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *idepth(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     const ch = (node: DagNode<NodeDatum, LinkDatum>) => node.ichildren();
     yield* dfs(ch, ...this.iroots());
   }
 
-  private *gbreadth(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *ibreadth(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     const seen = new Set<DagNode>();
     let next = this.roots();
     let current: DagNode<NodeDatum, LinkDatum>[] = [];
@@ -83,7 +84,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     } while (next.length);
   }
 
-  private *gbefore(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *ibefore(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     const numBefore = new Map<DagNode, number>();
     for (const node of this) {
       for (const child of node.ichildren()) {
@@ -106,14 +107,14 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     }
   }
 
-  private *gafter(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  private *iafter(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     const queue = this.roots();
     const seen = new Set<DagNode>();
     let node;
     while ((node = queue.pop())) {
       if (seen.has(node)) {
         // noop
-      } else if (node.ichildren().every((c) => seen.has(c))) {
+      } else if (every(node.ichildren(), (c) => seen.has(c))) {
         seen.add(node);
         yield node;
       } else {
@@ -125,15 +126,15 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
 
   idescendants(
     style: IterStyle = "depth"
-  ): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
+  ): Iterable<DagNode<NodeDatum, LinkDatum>> {
     if (style === "depth") {
-      return fluent(this.gdepth());
+      return this.idepth();
     } else if (style === "breadth") {
-      return fluent(this.gbreadth());
+      return this.ibreadth();
     } else if (style === "before") {
-      return fluent(this.gbefore());
+      return this.ibefore();
     } else if (style === "after") {
-      return fluent(this.gafter());
+      return this.iafter();
     } else {
       throw new Error(`unknown iteration style: ${style}`);
     }
@@ -143,8 +144,8 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     return [...this.idescendants(style)];
   }
 
-  ilinks(): FluentIterable<DagLink<NodeDatum, LinkDatum>> {
-    return this.idescendants().flatMap((node) => node.ichildLinks());
+  ilinks(): Iterable<DagLink<NodeDatum, LinkDatum>> {
+    return flatMap(this.idescendants(), (node) => node.ichildLinks());
   }
 
   links(): DagLink<NodeDatum, LinkDatum>[] {
@@ -152,14 +153,14 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
   }
 
   size(): number {
-    return this.idescendants().reduce((s) => s + 1, 0);
+    return reduce(this.idescendants(), (s) => s + 1, 0);
   }
 
   sum(
     callback: (node: DagNode<NodeDatum, LinkDatum>, index: number) => number
   ): this {
     const descendantVals = new Map<DagNode, Map<DagNode, number>>();
-    for (const [index, node] of this.idescendants("after").entries()) {
+    for (const [index, node] of entries(this.idescendants("after"))) {
       const val = callback(node, index);
       const nodeVals = new Map<DagNode, number>();
       nodeVals.set(node, val);
@@ -169,7 +170,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
           nodeVals.set(child, v);
         }
       }
-      node.value = fluent(nodeVals.values()).reduce((a, b) => a + b);
+      node.value = reduce(nodeVals.values(), (a, b) => a + b, 0);
       descendantVals.set(node, nodeVals);
     }
     return this;
@@ -200,7 +201,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     for (const node of this.idescendants("after")) {
       node.value = Math.max(
         0,
-        ...node.ichildren().map((child) => def(child.value) + 1)
+        ...map(node.ichildren(), (child) => def(child.value) + 1)
       );
     }
     return this;
@@ -221,13 +222,13 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     for (const node of this.idescendants("before")) {
       node.value = Math.max(
         0,
-        ...(parents.get(node) || []).map((par) => def(par.value) + 1)
+        ...map(parents.get(node) || [], (par) => def(par.value) + 1)
       );
     }
     return this;
   }
 
-  private *gsplit(): Generator<Dag<NodeDatum, LinkDatum>> {
+  *isplit(): Iterable<Dag<NodeDatum, LinkDatum>> {
     // create parents
     const parents = new Map<DagNode, DagNode<NodeDatum, LinkDatum>[]>();
     for (const node of this) {
@@ -265,10 +266,6 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     }
   }
 
-  isplit(): FluentIterable<Dag<NodeDatum, LinkDatum>> {
-    return fluent(this.gsplit());
-  }
-
   split(): Dag<NodeDatum, LinkDatum>[] {
     return [...this.isplit()];
   }
@@ -297,32 +294,25 @@ class LayoutDagNode<NodeDatum, LinkDatum>
 
   // NOTE everything extends from iroots, so by overriding this, we allow
   // dagnodes to work effectively
-  iroots(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
-    return fluent([this]);
+  iroots(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+    const singleton = [this];
+    return { [Symbol.iterator]: () => singleton[Symbol.iterator]() };
   }
 
-  private *gchildren(): Generator<DagNode<NodeDatum, LinkDatum>> {
+  *ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     for (const { child } of this.dataChildren) {
       yield child;
     }
-  }
-
-  ichildren(): FluentIterable<DagNode<NodeDatum, LinkDatum>> {
-    return fluent(this.gchildren());
   }
 
   children(): DagNode<NodeDatum, LinkDatum>[] {
     return [...this.ichildren()];
   }
 
-  private *gchildLinks(): Generator<DagLink<NodeDatum, LinkDatum>> {
+  *ichildLinks(): Iterable<DagLink<NodeDatum, LinkDatum>> {
     for (const { child, data, points } of this.dataChildren) {
       yield new LayoutLink(this, child, data, points);
     }
-  }
-
-  ichildLinks(): FluentIterable<DagLink<NodeDatum, LinkDatum>> {
-    return fluent(this.gchildLinks());
   }
 
   childLinks(): DagLink<NodeDatum, LinkDatum>[] {
@@ -330,12 +320,12 @@ class LayoutDagNode<NodeDatum, LinkDatum>
   }
 
   // NOTE these are simpler for a single node, so we override
-  isplit(): FluentIterable<Dag<NodeDatum, LinkDatum>> {
-    return fluent([this]);
+  isplit(): Iterable<Dag<NodeDatum, LinkDatum>> {
+    return this.iroots();
   }
 
   split(): DagNode<NodeDatum, LinkDatum>[] {
-    return [this];
+    return this.roots();
   }
 
   connected(): true {
@@ -365,7 +355,7 @@ function verifyDag(roots: DagNode[]): void {
   // make sure there's no duplicate edges
   for (const node of new LayoutDag(roots)) {
     const childIdSet = new Set(node.ichildren());
-    if (childIdSet.size !== node.ichildren().length) {
+    if (childIdSet.size !== length(node.ichildren())) {
       throw new Error(js`node '${node.data}' contained duplicate children`);
     }
   }

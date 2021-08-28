@@ -7,6 +7,7 @@
 import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";
 import { Dag, DagNode } from "../../dag";
+import { map } from "../../iters";
 import { def } from "../../utils";
 
 /**
@@ -44,15 +45,11 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
 
     // initialize node data
     const data = new Map(
-      dag
-        .idescendants()
-        .map(
-          (node) =>
-            [
-              node,
-              { before: [] as number[], parents: [] as DagNode[] }
-            ] as const
-        )
+      map(
+        dag.idescendants(),
+        (node) =>
+          [node, { before: [] as number[], parents: [] as DagNode[] }] as const
+      )
     );
     for (const node of dag) {
       for (const child of node.ichildren()) {

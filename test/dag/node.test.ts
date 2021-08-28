@@ -1,3 +1,4 @@
+import { map } from "../../src/iters";
 import { def } from "../../src/utils";
 import {
   doub,
@@ -27,7 +28,7 @@ test("roots() works for N", () => {
 test("childLinks() works for square", () => {
   const dag = square();
   const [root] = dag.iroots();
-  const childIds = new Set(root.ichildren().map((c) => c.data.id));
+  const childIds = new Set(map(root.ichildren(), (c) => c.data.id));
   const links = root.childLinks();
   expect(links).toHaveLength(2);
   for (const link of links) {
@@ -70,7 +71,7 @@ test("links() is correct for N", () => {
 
 test("idescendants('breadth') is correct for square", () => {
   const dag = square();
-  const breadthIds = [...dag.idescendants("breadth").map((n) => n.data.id)];
+  const breadthIds = [...map(dag.idescendants("breadth"), (n) => n.data.id)];
   expect([
     ["0", "1", "2", "3"],
     ["0", "2", "1", "3"]

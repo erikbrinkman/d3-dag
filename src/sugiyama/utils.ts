@@ -9,6 +9,7 @@
  */
 import { Dag, DagNode } from "../dag";
 import { hierarchy } from "../dag/create";
+import { map } from "../iters";
 import { assert, def, js } from "../utils";
 
 /**
@@ -75,9 +76,10 @@ function vlayer(node: DagNode): number {
 export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
   // NOTE we need to cache so that the returned 'SugiData' are the same
   const cache = new Map(
-    dag
-      .idescendants()
-      .map((node) => [node, { node, layer: vlayer(node) }] as const)
+    map(
+      dag.idescendants(),
+      (node) => [node, { node, layer: vlayer(node) }] as const
+    )
   );
 
   // children function
@@ -98,7 +100,7 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
 
   // create sugi dag
   const sugi = hierarchy().children(augment)(
-    ...dag.iroots().map((node) => def(cache.get(node)))
+    ...map(dag.iroots(), (node) => def(cache.get(node)))
   );
 
   // assign nodes to layer
