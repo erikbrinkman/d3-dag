@@ -120,7 +120,7 @@
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L156">src/sugiyama/index.ts:156</a></li>
+								<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L155">src/sugiyama/index.ts:155</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -191,7 +191,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L183">src/sugiyama/index.ts:183</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L182">src/sugiyama/index.ts:182</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -216,7 +216,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L189">src/sugiyama/index.ts:189</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L188">src/sugiyama/index.ts:188</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -239,7 +239,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L172">src/sugiyama/index.ts:172</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L171">src/sugiyama/index.ts:171</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -264,7 +264,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L178">src/sugiyama/index.ts:178</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L177">src/sugiyama/index.ts:177</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -287,7 +287,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L161">src/sugiyama/index.ts:161</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L160">src/sugiyama/index.ts:160</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -312,7 +312,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L167">src/sugiyama/index.ts:167</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L166">src/sugiyama/index.ts:166</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -335,15 +335,21 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L209">src/sugiyama/index.ts:209</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L213">src/sugiyama/index.ts:213</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Sets the <a href="sugiyama.NodeSizeAccessor.html">NodeSizeAccessor</a>, which assigns how much space is
 										necessary between nodes. (defaults to [1, 1] for normal nodes and [0, 0]
-									for dummy nodes)</p>
+									for dummy nodes [undefined values]).</p>
 								</div>
+								<dl class="tsd-comment-tags">
+									<dt>remarks</dt>
+									<dd><p>When overriding, make sure you handle the case where the node is
+										undefined. Failure to do so may result in unexpected layouts.</p>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
@@ -362,7 +368,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L225">src/sugiyama/index.ts:225</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L229">src/sugiyama/index.ts:229</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -386,7 +392,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L198">src/sugiyama/index.ts:198</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L197">src/sugiyama/index.ts:197</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -409,7 +415,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L202">src/sugiyama/index.ts:202</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L201">src/sugiyama/index.ts:201</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -432,7 +438,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L234">src/sugiyama/index.ts:234</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L238">src/sugiyama/index.ts:238</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -460,7 +466,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/sugiyama/index.ts#L243">src/sugiyama/index.ts:243</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/sugiyama/index.ts#L247">src/sugiyama/index.ts:247</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

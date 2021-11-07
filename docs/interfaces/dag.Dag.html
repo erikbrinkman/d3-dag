@@ -78,10 +78,8 @@
 						defined only as all nodes reachable from the current node, so roots will not
 						return parents of the current just just the current node during iteration.
 					The same principle holds true for all methods.</p>
-					<p>Methods names preceeded by an <code>i</code> will return a <a href="iters.FluentIterable.html">FluentIterable</a> which
-						is a wrapper around native EMCA iterators that also adds most methods found
-						in the <code>Array</code> prototype making them much more useful for fluent functional
-					programming.</p>
+					<p>Methods names preceeded by an <code>i</code> will return am Iterable, and without the
+					<code>i</code> will return an array.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-type-parameters">
@@ -170,7 +168,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L157">src/dag/index.ts:157</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L150">src/dag/index.ts:150</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -192,7 +190,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L128">src/dag/index.ts:128</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L121">src/dag/index.ts:121</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -215,7 +213,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L138">src/dag/index.ts:138</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L131">src/dag/index.ts:131</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -237,7 +235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L95">src/dag/index.ts:95</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L88">src/dag/index.ts:88</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -266,7 +264,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L133">src/dag/index.ts:133</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L126">src/dag/index.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -282,13 +280,13 @@
 					<a name="idescendants" class="tsd-anchor"></a>
 					<h3>idescendants</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">idescendants<span class="tsd-signature-symbol">(</span>style<span class="tsd-signature-symbol">?: </span><a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">idescendants<span class="tsd-signature-symbol">(</span>style<span class="tsd-signature-symbol">?: </span><a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L86">src/dag/index.ts:86</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L81">src/dag/index.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -316,7 +314,7 @@
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> style: <a href="../modules/dag.html#IterStyle" class="tsd-signature-type" data-tsd-kind="Type alias">IterStyle</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -324,13 +322,13 @@
 					<a name="ilinks" class="tsd-anchor"></a>
 					<h3>ilinks</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">ilinks<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">ilinks<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L100">src/dag/index.ts:100</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L93">src/dag/index.ts:93</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -338,7 +336,7 @@
 									<p>Returns an iterator over every <a href="dag.DagLink.html">DagLink</a></p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagLink.html" class="tsd-signature-type" data-tsd-kind="Interface">DagLink</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -346,13 +344,13 @@
 					<a name="iroots" class="tsd-anchor"></a>
 					<h3>iroots</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">iroots<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">iroots<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L61">src/dag/index.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L56">src/dag/index.ts:56</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -363,7 +361,7 @@
 									return more than one object, if this represents a single node, then only
 								that node will be returned.</p>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.DagNode.html" class="tsd-signature-type" data-tsd-kind="Interface">DagNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -371,13 +369,13 @@
 					<a name="isplit" class="tsd-anchor"></a>
 					<h3>isplit</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">isplit<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">isplit<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L145">src/dag/index.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L138">src/dag/index.ts:138</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -386,7 +384,7 @@
 								</div>
 								<p>Returns an iterable over each connected component as a new dag.</p>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="iters.FluentIterable.html" class="tsd-signature-type" data-tsd-kind="Interface">FluentIterable</a><span class="tsd-signature-symbol">&lt;</span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterable</span><span class="tsd-signature-symbol">&lt;</span><a href="dag.Dag.html" class="tsd-signature-type" data-tsd-kind="Interface">Dag</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">NodeDatum</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">LinkDatum</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -400,7 +398,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L107">src/dag/index.ts:107</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L100">src/dag/index.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -423,7 +421,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L68">src/dag/index.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L63">src/dag/index.ts:63</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -446,7 +444,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L110">src/dag/index.ts:110</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L103">src/dag/index.ts:103</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -468,7 +466,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L152">src/dag/index.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L145">src/dag/index.ts:145</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -491,7 +489,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/e19a5b9/src/dag/index.ts#L120">src/dag/index.ts:120</a></li>
+									<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/b9a4555/src/dag/index.ts#L113">src/dag/index.ts:113</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
