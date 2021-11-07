@@ -67,6 +67,13 @@ const myStratify = stratify.id(({ myid }: { myid: string }) => myid);
 const dag = myStratify([{ myid: "parent" }, { myid: "child", parentIds: ["parent"] }]);
 ```
 
+### Node Sizes
+
+It can be useful to set a custom node size for the layout.
+There is an important detail to node sizes that can be easy to miss, namely that "dummy nodes" or nodes that represent part of a long edge also have a custom size.
+If setting `sugiyama`'s `nodeSize` accessor, make sure to handle the case when the node being sized is `undefined` if you want to mimic the default behavior but with custom sizes you probably want to use something like `.nodeSize(node => node === undefined ? [0, 0] : <my node size>)`.
+To get even more flexible layouts, check `sugiNodeSize`.
+
 ### Typescript Notes
 
 - Default operators will expect the necessary types for them to work, but will also do runtime checks in case javascript users use them inappropriately.
