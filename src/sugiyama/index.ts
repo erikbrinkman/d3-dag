@@ -203,7 +203,12 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
   /**
    * Sets the {@link NodeSizeAccessor}, which assigns how much space is
    * necessary between nodes. (defaults to [1, 1] for normal nodes and [0, 0]
-   * for dummy nodes)
+   * for dummy nodes [undefined values]).
+   *
+   * @remarks
+   *
+   * When overriding, make sure you handle the case where the node is
+   * undefined. Failure to do so may result in unexpected layouts.
    */
   nodeSize<NewNodeSize extends NodeSizeAccessor>(
     acc: NewNodeSize
