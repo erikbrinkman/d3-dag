@@ -168,14 +168,18 @@ export function layout<N, L>(
       solution[def(inds.get(last))] + nodeSize(last) / 2
     );
   }
+  const width = finish - start;
 
   // assign inds based off of span
   for (const layer of layers) {
     for (const node of layer) {
-      node.x = solution[def(inds.get(node))] - start;
+      node.x = Math.min(
+        Math.max(0, solution[def(inds.get(node))] - start),
+        width
+      );
     }
   }
 
   // return width
-  return finish - start;
+  return width;
 }
