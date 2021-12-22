@@ -266,18 +266,42 @@ export function ex(): Dag<SimpleDatum, undefined> {
 // dag from issue #43
 // 0   1
 // |\  |
-// 3 7 2
+// 3 4 2
 // |/
-// 4   5
+// 7   5
 //     |
 //     6
 export function ccoz(): Dag<ConnectDatum, SimpleLinkDatum> {
   return connect()([
     ["0", "3"],
-    ["0", "7"],
+    ["0", "4"],
     ["1", "2"],
-    ["3", "4"],
+    ["3", "7"],
     ["5", "6"],
-    ["7", "4"]
+    ["4", "7"]
+  ]);
+}
+
+// zherebko example
+export function zhere(): Dag<ConnectDatum, SimpleLinkDatum> {
+  return connect()([
+    ["1", "2"],
+    ["1", "5"],
+    ["1", "7"],
+    ["2", "3"],
+    ["2", "4"],
+    ["2", "5"],
+    ["2", "7"],
+    ["2", "8"],
+    ["3", "6"],
+    ["3", "8"],
+    ["4", "7"],
+    ["5", "7"],
+    ["5", "8"],
+    ["5", "9"],
+    ["6", "8"],
+    ["7", "8"],
+    ["9", "10"],
+    ["9", "11"]
   ]);
 }

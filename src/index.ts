@@ -25,6 +25,13 @@ export type {
   HierarchyOperator,
   StratifyOperator
 } from "./dag/create";
+export { grid } from "./grid";
+export type { GridOperator } from "./grid";
+export type { LaneOperator } from "./grid/lane";
+export { greedy as laneGreedy } from "./grid/lane/greedy";
+export type { GreedyOperator as GreedyLaneOperator } from "./grid/lane/greedy";
+export { opt as laneOpt } from "./grid/lane/opt";
+export type { OptOperator as OptLaneOperator } from "./grid/lane/opt";
 export { sugiyama } from "./sugiyama";
 export type {
   NodeSizeAccessor,
@@ -35,7 +42,7 @@ export type { CoordNodeSizeAccessor, CoordOperator } from "./sugiyama/coord";
 export { center as coordCenter } from "./sugiyama/coord/center";
 export type { CenterOperator } from "./sugiyama/coord/center";
 export { greedy as coordGreedy } from "./sugiyama/coord/greedy";
-export type { GreedyOperator } from "./sugiyama/coord/greedy";
+export type { GreedyOperator as GreedyCoordOperator } from "./sugiyama/coord/greedy";
 export { quad as coordQuad } from "./sugiyama/coord/quad";
 export type { QuadOperator } from "./sugiyama/coord/quad";
 export { topological as coordTopological } from "./sugiyama/coord/topological";

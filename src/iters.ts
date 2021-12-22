@@ -1,9 +1,6 @@
 /**
  * Stopgap for esnext iterable features
  *
- * We use this over `fluent-iterable` because that package is out of date, and
- * there's no need to invoke another dependency just for this.
- *
  * @module
  */
 
@@ -60,6 +57,13 @@ export function every<T>(
   }
   return true;
 }
+
+export function* reverse<T>(arr: readonly T[]): Iterable<T> {
+  for (let i = arr.length; i != 0; ) {
+    yield arr[--i];
+  }
+}
+
 export function length(iter: Iterable<unknown>): number {
   return reduce(iter, (a) => a + 1, 0);
 }

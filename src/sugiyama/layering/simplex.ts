@@ -4,7 +4,7 @@
  *
  * @module
  */
-import { Constraint, Solve, SolverDict, Variable } from "javascript-lp-solver";
+import { Constraint, Solve, Variable } from "javascript-lp-solver";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { Dag, DagNode } from "../../dag";
 import { entries, map } from "../../iters";
@@ -88,9 +88,9 @@ function buildOperator<Ops extends Operators>(
   options: Ops
 ): SimplexOperator<Ops> {
   function simplexCall(dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>): void {
-    const variables: SolverDict<Variable> = {};
-    const ints: SolverDict<number> = {};
-    const constraints: SolverDict<Constraint> = {};
+    const variables: Record<string, Variable> = {};
+    const ints: Record<string, 1> = {};
+    const constraints: Record<string, Constraint> = {};
 
     const ids = new Map(
       map(

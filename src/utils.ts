@@ -24,6 +24,20 @@ export function assert(statement: unknown): asserts statement {
   }
 }
 
+/** determines if two sets are equal */
+export function setEqual<T>(first: Set<T>, second: Set<T>): boolean {
+  if (second.size !== first.size) {
+    return false;
+  } else {
+    for (const element of first) {
+      if (!second.has(element)) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 /** determines if two sets intersect */
 export function setIntersect<T>(first: Set<T>, second: Set<T>): boolean {
   if (second.size < first.size) {
