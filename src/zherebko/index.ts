@@ -29,6 +29,18 @@ export interface ZherebkoInfo {
  *
  * @example
  * <img alt="zherebko example" src="media://zherebko.png" width="1000">
+ *
+ * @example
+ * ```typescript
+ * const data = [["parent", "child"], ...];
+ * const create = connect();
+ * const dag = create(data);
+ * const layout = zherebko();
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
  */
 export interface ZherebkoOperator {
   /** Layout the input dag */

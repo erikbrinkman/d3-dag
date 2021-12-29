@@ -15,10 +15,12 @@ import { assert, def } from "../../utils";
  * Create with {@link greedy}.
  *
  * @example
- * <img alt="grid example" src="media://grid-greedy-topdown.png" width="400">
+ * A top down example
+ * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
  *
  * @example
- * <img alt="grid example" src="media://grid-greedy-bottomup.png" width="400">
+ * A bottom up example
+ * <img alt="grid example" src="media://grid-greedy-bottomup.png" width="200">
  */
 export interface GreedyOperator extends LaneOperator<unknown, unknown> {
   /**

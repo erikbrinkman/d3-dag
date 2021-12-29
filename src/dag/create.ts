@@ -457,12 +457,20 @@ type ConnectLinkDatum<Ops extends ConnectOperators> = IdDatum<Ops["sourceId"]> &
  *
  * Links in the dag will have the same data as the objects passed in, and nodes
  * will have the ids referenced as either the source or the target.
+ *
+ * @example
+ * ```typescript
+ * const data = [["parent", "child"]];
+ * const create = connect();
+ * const dag = create(data);
+ * ```
  */
 export interface ConnectOperator<Ops extends ConnectOperators> {
   /**
    * Construct a {@link Dag} from the specified data. The data should be an array of
-   * data elements that contain info about links in the graph. For example:
+   * data elements that contain info about links in the graph.
    *
+   * @example
    * ```json
    * [
    *   ["Eve", "Cain"],
@@ -610,7 +618,8 @@ function buildConnect<Ops extends ConnectOperators>(
   return connect;
 }
 
-interface ZeroString {
+/** default interface for tuples that start with a string */
+export interface ZeroString {
   readonly [0]: string;
 }
 
@@ -632,7 +641,8 @@ function defaultSourceId(d: ZeroString): string {
   }
 }
 
-interface OneString {
+/** default interface for functions whos second element is a string */
+export interface OneString {
   readonly [1]: string;
 }
 
@@ -773,6 +783,13 @@ type ChildrenDataHierarchyOperator<
  * then link data will also be included. This method uses object identity, so
  * for two nodes to point to the same object, they must both return the same
  * object in their children.
+ *
+ * @example
+ * ```typescript
+ * const data = { id: "parent", children: [{ id: "child" }] };
+ * const create = hierarchy();
+ * const dag = create(data);
+ * ```
  */
 export interface HierarchyOperator<
   NodeDatum,
@@ -781,8 +798,8 @@ export interface HierarchyOperator<
   /**
    * Construct a {@link Dag} from the specified root nodes.
    * Each root node must be an object representing a root node.
-   * For example:
    *
+   * @example
    * ```json
    * {
    *   "id": "Eve",
@@ -1132,13 +1149,20 @@ type UpData<
  * Create a default operator with {@link stratify}. The accessors for a node's
  * {@link id} or {@link parentIds | parents' ids} can be altered, or {@link
  * parentData} can be specified to attach link data to each edge.
+ *
+ * @example
+ * ```typescript
+ * const data = [{ id: "parent" }, { id: "child", parents: ["parent"] }];
+ * const create = stratify().parentIds(({ parents }) => parents);
+ * const dag = create(data);
+ * ```
  */
 export interface StratifyOperator<Ops extends StratifyOperators> {
   /**
    * Construct a dag from the specified `data`. The data should be an array
-   * of data elements that contain information about their parents' ids. For
-   * example:
+   * of data elements that contain information about their parents' ids.
    *
+   * @example
    * ```json
    * [
    *   {
@@ -1359,7 +1383,8 @@ function wrapParentData<D extends ParentDataOperator>(
   return wrapper;
 }
 
-interface HasId {
+/** default interface for types with an id */
+export interface HasId {
   readonly id: string;
 }
 
@@ -1381,7 +1406,8 @@ function defaultId(data: unknown): string {
   }
 }
 
-interface HasParentIds {
+/** default interface for data types with parent ids */
+export interface HasParentIds {
   readonly parentIds?: readonly string[] | undefined;
 }
 

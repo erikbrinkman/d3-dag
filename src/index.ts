@@ -11,6 +11,24 @@
  * To layout a dag see the two dag layout algorithms:
  * - {@link SugiyamaOperator} - for a general layered dag representation
  * - {@link ZherebkoOperator} - for a simple topological layout
+ * - {@link GridOperator} - for an alternate topological layout
+ *
+ * @example
+ * Using d3-dag is usually a two step process, first you choose a creation
+ * method for your given data structure, this turns data like data into a dag
+ * structure, then you lay it out using one of the layout algorithms. The
+ * creation methods follow a similar structure, as do the layout methods. Each
+ * can be tweaked with a fluent api.
+ * ```typescript
+ * const creation = dagConnect(); // optionally use fluent interface to customize
+ * const dag = creation(data);
+ * const layout = sugiyama(); // optionally customize with fluent interface
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   // dag connect creates data with the node id
+ *   console.log(node.data.id, node.x, node.y);
+ * }
+ * ```
  *
  * @module
  */

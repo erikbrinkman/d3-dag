@@ -15,7 +15,7 @@ import { def } from "../../utils";
  * Create with {@link opt}.
  *
  * @example
- * <img alt="grid greedy example" src="media://grid-opt.png" width="400">
+ * <img alt="grid greedy example" src="media://grid-opt.png" width="200">
  */
 export interface OptOperator extends LaneOperator<unknown, unknown> {
   /**

@@ -38,7 +38,19 @@ export interface GridInfo {
  * Create with {@link grid}.
  *
  * @example
- * <img alt="grid example" src="media://grid-greedy-topdown.png" width="400">
+ * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
+ *
+ * @example
+ * ```typescript
+ * const data = [["parent", "child"], ...];
+ * const create = connect();
+ * const dag = create(data);
+ * const layout = grid();
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
  */
 export interface GridOperator<Lane extends LaneOperator> {
   /** Layout the input dag */

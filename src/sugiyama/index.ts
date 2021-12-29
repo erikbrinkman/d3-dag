@@ -144,7 +144,35 @@ type OpsDag<Ops extends Operators> = Dag<
  *
  * Create with {@link sugiyama}.
  *
+ * @example
  * <img alt="Sugiyama example" src="media://sugi-simplex-opt-quad.png" width="400">
+ *
+ * @example
+ * ```typescript
+ * const data = [["parent", "child"], ...];
+ * const create = connect();
+ * const dag = create(data);
+ * const layout = sugiyama();
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
+ *
+ * @example
+ * This example highlights tweaking several aspects of dag rendering
+ * ```typescript
+ * const data = [["parent", "child"], ...];
+ * const create = connect();
+ * const dag = create(data);
+ * const layout = sugiyama()
+ *   .nodeSize(n => n === undefined ? [0, 0] : [n.data.id.length, 2])
+ *   .coord(greedy());
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
  */
 export interface SugiyamaOperator<Ops extends Operators = Operators> {
   /**
@@ -509,6 +537,16 @@ function defaultNodeSize(node?: DagNode): [number, number] {
 
 /**
  * Construct a new {@link SugiyamaOperator} with the default settings.
+ *
+ * @example
+ * ```typescript
+ * const dag = hierarchy()(...);
+ * const layout = sugiyama().nodeSize(d => d === undefined ? [0, 0] : [d.width, d.height]);
+ * layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
  */
 export function sugiyama(...args: never[]): SugiyamaOperator<{
   layering: SimplexOperator<{
