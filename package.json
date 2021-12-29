@@ -44,7 +44,7 @@
     "test": "tsc && yarn lint && jest /test/ --coverage && yarn build && tsd && yarn bundle && jest bundle.test.ts",
     "prepare": "jest --clear-cache && yarn test && yarn build && yarn bundle-esm",
     "todo": "grep -rI --color TODO src test types",
-    "doc": "rm -rf docs && typedoc --out docs --excludeInternal --media resources src && touch docs/.nojekyll"
+    "doc": "typedoc"
   },
   "dependencies": {
     "d3-array": "^3.1.1",
@@ -73,6 +73,7 @@
     "prettier-plugin-organize-imports": "^2.3.4",
     "tsd": "^0.19.0",
     "typedoc": "^0.22.10",
+    "typedoc-plugin-missing-exports": "^0.22.6",
     "typescript": "^4.5.4"
   }
 }

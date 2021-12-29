@@ -1,0 +1,10 @@
+{
+  "entryPoints": ["src"],
+  "media": "resources",
+  "out": "docs",
+  "entryPointStrategy": "expand",
+  "excludeInternal": true,
+  "cleanOutputDir": true,
+  "githubPages": true,
+  "treatWarningsAsErrors": true
+}
