@@ -15,7 +15,6 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 - [Observable with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout to understand the effects of different options.
 - [Observable with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
 - [Codepen with Sugiyama Layout](https://codepen.io/brinkbot/pen/oNZJXqK) - For people who want a straight javascript example without the Observable fanciness.
-- [Observable with Arrows](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows) - This example shows a simple, if inexact, way to render edge arrows with d3.
 - [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
 
