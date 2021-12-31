@@ -4,8 +4,18 @@
  * @module
  */
 import { Dag } from "../dag";
-import { assert } from "../utils";
+import { assert, def } from "../utils";
 import { greedy } from "./greedy";
+
+/**
+ * The return from calling {@link ZherebkoOperator}
+ *
+ * This is the final width and height of the laidout dag.
+ */
+export interface ZherebkoInfo {
+  width: number;
+  height: number;
+}
 
 /**
  * A simple topological layout operator.
@@ -17,43 +27,56 @@ import { greedy } from "./greedy";
  *
  * Create with {@link zherebko}.
  *
+ * @example
  * <img alt="zherebko example" src="media://zherebko.png" width="1000">
  */
 export interface ZherebkoOperator {
   /** Layout the input dag */
-  (dag: Dag): void;
+  (dag: Dag): ZherebkoInfo;
 
   /**
-   * Sets this zherebko layout's size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns a new operator. (default: [1,
-   * 1])
+   * Set the zherebko layout's node size
+   *
+   * Set the size to the specified three-element array of numbers [
+   * *nodeWidth*, *nodeHeight*, *edgeGap* ] and returns a new operator. Nodes
+   * are spaced apart vertically by nodeHeight, and each node is given space of
+   * nodeWidth. Edges that wrap around the nodes are given space edgeGap.
+   *
+   * (default: [1, 1, 1])
    */
-  size(sz: readonly [number, number]): ZherebkoOperator;
-  /** Get the current size. */
-  size(): [number, number];
+  nodeSize(val: readonly [number, number, number]): ZherebkoOperator;
+  /** Get the current node size. */
+  nodeSize(): [number, number, number];
+
+  /**
+   * Set the zherebko layouts full size
+   *
+   * Set the size to the specified two-element array of numbers [ *width*,
+   * *height* ] and returns a new operator. The dag is resized to fit within
+   * width and height if they are specified. (default: null)
+   */
+  size(val: null | readonly [number, number]): ZherebkoOperator;
+  /** Get the current size */
+  size(): null | [number, number];
 }
 
 /** @internal */
-function buildOperator(width: number, height: number): ZherebkoOperator {
-  function zherebkoCall(dag: Dag): void {
+function buildOperator(
+  nodeWidth: number,
+  nodeHeight: number,
+  edgeGap: number,
+  sizeVal: null | readonly [number, number]
+): ZherebkoOperator {
+  function zherebkoCall(dag: Dag): ZherebkoInfo {
     // topological sort
     const ordered = [...dag.idescendants("before")];
 
-    const maxLayer = ordered.length - 1;
-    if (maxLayer === 0) {
-      // center if only one node
-      const [node] = ordered;
-      node.x = width / 2;
-      node.y = height / 2;
-      return;
-    }
     // get link indices
     const indices = greedy(ordered);
 
     // map to coordinates
-    // include at least one "gap" in each side even if graph is as line
-    let minIndex = -1;
-    let maxIndex = 1;
+    let minIndex = 0;
+    let maxIndex = 0;
     for (const { source, target } of dag.ilinks()) {
       const index = indices.get(source)?.get(target);
       if (index === undefined) continue; // assumed short link
@@ -62,10 +85,10 @@ function buildOperator(width: number, height: number): ZherebkoOperator {
     }
 
     // assign node positions
-    const layerSize = height / maxLayer;
+    const nodex = -minIndex * edgeGap + nodeWidth / 2;
     for (const [layer, node] of ordered.entries()) {
-      node.x = (-minIndex * width) / (maxIndex - minIndex);
-      node.y = layer * layerSize;
+      node.x = nodex;
+      node.y = (layer + 0.5) * nodeHeight;
     }
 
     // assign link points
@@ -78,10 +101,12 @@ function buildOperator(width: number, height: number): ZherebkoOperator {
 
       if (index !== undefined) {
         // assumed long link
-        const x = ((index - minIndex) / (maxIndex - minIndex)) * width;
-        const y1 = source.y + layerSize;
-        const y2 = target.y - layerSize;
-        if (y2 - y1 > layerSize / 2) {
+        const x =
+          (index - minIndex + 0.5) * edgeGap +
+          (index > 0 ? nodeWidth - edgeGap : 0);
+        const y1 = source.y + nodeHeight;
+        const y2 = target.y - nodeHeight;
+        if (y2 - y1 > nodeHeight / 2) {
           points.push({ x: x, y: y1 }, { x: x, y: y2 });
         } else {
           points.push({ x: x, y: y1 });
@@ -90,23 +115,59 @@ function buildOperator(width: number, height: number): ZherebkoOperator {
 
       points.push({ x: target.x, y: target.y });
     }
+
+    const width = (maxIndex - minIndex) * edgeGap + nodeWidth;
+    const height = ordered.length * nodeHeight;
+    if (sizeVal === null) {
+      return { width, height };
+    } else {
+      // rescale to new size
+      const [newWidth, newHeight] = sizeVal;
+      for (const node of ordered) {
+        assert(node.x !== undefined && node.y !== undefined);
+        node.x *= newWidth / width;
+        node.y *= newHeight / height;
+      }
+      for (const { points } of dag.ilinks()) {
+        const newPoints = points.map(({ x, y }) => ({
+          x: (def(x) * newWidth) / width,
+          y: (def(y) * newHeight) / height
+        }));
+        points.splice(0, points.length, ...newPoints);
+      }
+      return { width: newWidth, height: newHeight };
+    }
   }
 
-  function size(): [number, number];
-  function size(sz: readonly [number, number]): ZherebkoOperator;
-  function size(
-    sz?: readonly [number, number]
-  ): [number, number] | ZherebkoOperator {
-    if (sz === undefined) {
-      return [width, height];
+  function nodeSize(): [number, number, number];
+  function nodeSize(val: readonly [number, number, number]): ZherebkoOperator;
+  function nodeSize(
+    val?: readonly [number, number, number]
+  ): [number, number, number] | ZherebkoOperator {
+    if (val === undefined) {
+      return [nodeWidth, nodeHeight, edgeGap];
     } else {
-      const [newWidth, newHeight] = sz;
-      return buildOperator(newWidth, newHeight);
+      const [newWidth, newHeight, newGap] = val;
+      return buildOperator(newWidth, newHeight, newGap, sizeVal);
+    }
+  }
+  zherebkoCall.nodeSize = nodeSize;
+
+  function size(): [number, number];
+  function size(val: null | readonly [number, number]): ZherebkoOperator;
+  function size(
+    val?: null | readonly [number, number]
+  ): null | [number, number] | ZherebkoOperator {
+    if (val !== undefined) {
+      return buildOperator(nodeWidth, nodeHeight, edgeGap, val);
+    } else if (sizeVal === null) {
+      return sizeVal;
+    } else {
+      const [width, height] = sizeVal;
+      return [width, height];
     }
   }
   zherebkoCall.size = size;
-
-  // TODO add nodeSized
 
   return zherebkoCall;
 }
@@ -120,5 +181,5 @@ export function zherebko(...args: never[]): ZherebkoOperator {
       `got arguments to zherebko(${args}), but constructor takes no aruguments.`
     );
   }
-  return buildOperator(1, 1);
+  return buildOperator(1, 1, 1, null);
 }

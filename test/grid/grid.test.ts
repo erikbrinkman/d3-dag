@@ -5,7 +5,7 @@ import { dummy, zhere } from "../examples";
 
 test("greedy() works for triangle", () => {
   const dag = dummy();
-  const layout = grid().nodeSize([2, 2]);
+  const layout = grid().nodeSize([2, 2] as const);
   expect(layout.nodeSize()).toEqual([2, 2]);
   expect(layout.size()).toBeNull();
   const { width, height } = layout(dag);
