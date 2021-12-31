@@ -1,389 +1,226 @@
-<!doctype html>
-<html class="default no-js">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>d3-dag</title>
-	<meta name="description" content="Documentation for d3-dag">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="assets/css/main.css">
-	<script async src="assets/js/search.js" id="search-script"></script>
-</head>
-<body>
-<header>
-	<div class="tsd-page-toolbar">
-		<div class="container">
-			<div class="table-wrap">
-				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
-					<div class="field">
-						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
-						<input id="tsd-search-field" type="text" />
-					</div>
-					<ul class="results">
-						<li class="state loading">Preparing search index...</li>
-						<li class="state failure">The search index is not available</li>
-					</ul>
-					<a href="index.html" class="title">d3-dag</a>
-				</div>
-				<div class="table-cell" id="tsd-widgets">
-					<div id="tsd-filter">
-						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
-						<div class="tsd-filter-group">
-							<div class="tsd-select" id="tsd-filter-visibility">
-								<span class="tsd-select-label">All</span>
-								<ul class="tsd-select-list">
-									<li data-value="public">Public</li>
-									<li data-value="protected">Public/Protected</li>
-									<li data-value="private" class="selected">All</li>
-								</ul>
-							</div>
-							<input type="checkbox" id="tsd-filter-inherited" checked />
-							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-externals" checked />
-							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-						</div>
-					</div>
-					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="tsd-page-title">
-		<div class="container">
-			<h1>d3-dag</h1>
-		</div>
-	</div>
-</header>
-<div class="container container-main">
-	<div class="row">
-		<div class="col-8 col-content">
-			<div class="tsd-panel tsd-typography">
-				<a href="#d3-dag" id="d3-dag" style="color: inherit; text-decoration: none;">
-					<h1>d3-dag</h1>
-				</a>
-				<p><a href="https://www.npmjs.com/package/d3-dag"><img src="https://img.shields.io/npm/v/d3-dag.svg" alt="npm"></a>
-					<a href="https://github.com/erikbrinkman/d3-dag/actions"><img src="https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg" alt="build"></a>
-				<a href="https://erikbrinkman.github.io/d3-dag/"><img src="https://img.shields.io/badge/docs-docs-informational" alt="docs"></a></p>
-				<p>Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
-					In these instances <code>d3-hierarchy</code> may not suit your needs, which is why <code>d3-dag</code> (Directed Acyclic Graph) exists.
-					This module implements a data structure for manipulating DAGs.
-				Old versions were designed to mimic <code>d3-hierarchy</code>&#39;s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard set by d3.</p>
-				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
-					<h2>Examples</h2>
-				</a>
-				<ul>
-					<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama">Observable with Sugiyama Layout</a> - Allows you to experiment with different layouts and different datasets for the sugiyama layout to understand the effects of different options.</li>
-					<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-topological">Observable with Topological Layout</a> - Allows you to experiment with different layouts and different datasets for topological layouts.</li>
-					<li><a href="https://codepen.io/brinkbot/pen/oNZJXqK">Codepen with Sugiyama Layout</a> - For people who want a straight javascript example without the Observable fanciness.</li>
-					<li><a href="https://observablehq.com/@erikbrinkman/d3-dag-sugiyama-with-arrows">Observable with Arrows</a> - This example shows a simple, if inexact, way to render edge arrows with d3.</li>
-					<li><a href="https://github.com/BenPortner/js_family_tree">Expandable Family Tree</a> - An expandable family tree rendered using d3-dag.</li>
-				</ul>
-				<a href="#installing" id="installing" style="color: inherit; text-decoration: none;">
-					<h2>Installing</h2>
-				</a>
-				<p>If you use node, <code>npm i d3-dag</code> or <code>yarn add d3-dag</code>.
-				Otherwise you can load it using <code>unpkg</code>:</p>
-				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://unpkg.com/d3-dag@0.8.1&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
-<span style="color: #800000">&lt;script&gt;</span>
-<span style="color: #0000FF">const</span><span style="color: #000000FF"> </span><span style="color: #0070C1">dag</span><span style="color: #000000FF"> </span><span style="color: #000000">=</span><span style="color: #000000FF"> </span><span style="color: #001080">d3</span><span style="color: #000000FF">.</span><span style="color: #795E26">dagStratify</span><span style="color: #000000FF">(</span><span style="color: #000000">...</span><span style="color: #000000FF">);</span>
-<span style="color: #0000FF">const</span><span style="color: #000000FF"> </span><span style="color: #0070C1">layout</span><span style="color: #000000FF"> </span><span style="color: #000000">=</span><span style="color: #000000FF"> </span><span style="color: #001080">d3</span><span style="color: #000000FF">.</span><span style="color: #795E26">sugiyama</span><span style="color: #000000FF">();</span>
-<span style="color: #795E26">layout</span><span style="color: #000000FF">(</span><span style="color: #001080">dag</span><span style="color: #000000FF">);</span>
-<span style="color: #008000">// ... render dag</span>
-<span style="color: #800000">&lt;/script&gt;</span>
-</code></pre>
-				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
-					<h2>API Reference</h2>
-				</a>
-				<ul>
-					<li><a href="https://erikbrinkman.github.io/d3-dag/modules/index.html">Javascript API</a> - methods exported to flat javascript</li>
-					<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag.Dag.html">DAG</a> - documentation on the DAG structure</li>
-					<li>Creating DAGs from data<ul>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.HierarchyOperator.html">Hierarchy</a> - data in dag format</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.StratifyOperator.html">Stratify</a> - data in tabular format</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.ConnectOperator.html">Connect</a> - data in edge format</li>
-						</ul>
-					</li>
-					<li>Layout algorithms<ul>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/sugiyama.SugiyamaOperator.html">Sugiyama</a> - standard layout</li>
-							<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/zherebko.ZherebkoOperator.html">Zherebko</a> - topological layout</li>
-						</ul>
-					</li>
-				</ul>
-				<a href="#general-usage-notes" id="general-usage-notes" style="color: inherit; text-decoration: none;">
-					<h2>General Usage Notes</h2>
-				</a>
-				<p>This library is built around the concept of operators.
-					Operators are functions with a fluent interface to modify their behavior.
-					Every function that modifies behavior returns a copy, and will not modify the original operator.
-				For example, the <code>stratify</code> operator creates dags from id-based parent data, can ve used like so:</p>
-				<pre><code class="language-ts"><span style="color: #008000">// note initial function call with no arguments to create default operator</span>
-<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">stratify</span><span style="color: #000000"> = </span><span style="color: #795E26">dagStratify</span><span style="color: #000000">();</span>
-<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dag</span><span style="color: #000000"> = </span><span style="color: #795E26">stratify</span><span style="color: #000000">([{ </span><span style="color: #001080">id:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000"> }, { </span><span style="color: #001080">id:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;child&quot;</span><span style="color: #000000">, </span><span style="color: #001080">parentIds:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000">] }]);</span>
+<!DOCTYPE html><html class="default"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>d3-dag</title><meta name="description" content="Documentation for d3-dag"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem("tsd-theme") || "os")</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">d3-dag</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1> d3-dag</h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
+<a href="#d3-dag" id="d3-dag" style="color: inherit; text-decoration: none;">
+  <h1>d3-dag</h1>
+</a>
+<p><a href="https://www.npmjs.com/package/d3-dag"><img src="https://img.shields.io/npm/v/d3-dag.svg" alt="npm"></a>
+<a href="https://github.com/erikbrinkman/d3-dag/actions"><img src="https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg" alt="build"></a>
+<a href="https://erikbrinkman.github.io/d3-dag/"><img src="https://img.shields.io/badge/docs-docs-informational" alt="docs"></a></p>
+<p>Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
+In these instances <code>d3-hierarchy</code> may not suit your needs, which is why <code>d3-dag</code> (Directed Acyclic Graph) exists.
+This module implements a data structure for manipulating DAGs.
+Old versions were designed to mimic <code>d3-hierarchy</code>&#39;s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard set by d3.</p>
 
-<span style="color: #001080">stratify</span><span style="color: #000000">.</span><span style="color: #795E26">id</span><span style="color: #000000">(({ </span><span style="color: #001080">myid</span><span style="color: #000000"> }: { </span><span style="color: #001080">myid</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000"> }) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">myid</span><span style="color: #000000">);</span>
-<span style="color: #008000">// doesn&#039;t work, stratify was not modified</span>
-<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dag</span><span style="color: #000000"> = </span><span style="color: #795E26">stratify</span><span style="color: #000000">([{ </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000"> }, { </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;child&quot;</span><span style="color: #000000">, </span><span style="color: #001080">parentIds:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000">] }]);</span>
+<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
+  <h2>Examples</h2>
+</a>
+<ul>
+<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama">Observable with Sugiyama Layout</a> - Allows you to experiment with different layouts and different datasets for the sugiyama layout to understand the effects of different options.</li>
+<li><a href="https://beta.observablehq.com/@erikbrinkman/d3-dag-topological">Observable with Topological Layout</a> - Allows you to experiment with different layouts and different datasets for topological layouts.</li>
+<li><a href="https://codepen.io/brinkbot/pen/oNZJXqK">Codepen with Sugiyama Layout</a> - For people who want a straight javascript example without the Observable fanciness.</li>
+<li><a href="https://github.com/BenPortner/js_family_tree">Expandable Family Tree</a> - An expandable family tree rendered using d3-dag.</li>
+</ul>
 
-<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">myStratify</span><span style="color: #000000"> = </span><span style="color: #001080">stratify</span><span style="color: #000000">.</span><span style="color: #795E26">id</span><span style="color: #000000">(({ </span><span style="color: #001080">myid</span><span style="color: #000000"> }: { </span><span style="color: #001080">myid</span><span style="color: #000000">: </span><span style="color: #267F99">string</span><span style="color: #000000"> }) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">myid</span><span style="color: #000000">);</span>
-<span style="color: #008000">// works!</span>
-<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dag</span><span style="color: #000000"> = </span><span style="color: #795E26">myStratify</span><span style="color: #000000">([{ </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000"> }, { </span><span style="color: #001080">myid:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;child&quot;</span><span style="color: #000000">, </span><span style="color: #001080">parentIds:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;parent&quot;</span><span style="color: #000000">] }]);</span>
+<a href="#installing" id="installing" style="color: inherit; text-decoration: none;">
+  <h2>Installing</h2>
+</a>
+<p>If you use node, <code>npm i d3-dag</code> or <code>yarn add d3-dag</code>.
+Otherwise you can load it using <code>unpkg</code>:</p>
+<pre><code class="language-html"><span class="hl-0">&lt;</span><span class="hl-1">script</span><span class="hl-2"> </span><span class="hl-3">src</span><span class="hl-2">=</span><span class="hl-4">&quot;https://unpkg.com/d3-dag@0.8.1&quot;</span><span class="hl-0">&gt;&lt;/</span><span class="hl-1">script</span><span class="hl-0">&gt;</span><br/><span class="hl-0">&lt;</span><span class="hl-1">script</span><span class="hl-0">&gt;</span><br/><span class="hl-5">const</span><span class="hl-2"> </span><span class="hl-6">dag</span><span class="hl-2"> </span><span class="hl-7">=</span><span class="hl-2"> </span><span class="hl-8">d3</span><span class="hl-2">.</span><span class="hl-9">dagStratify</span><span class="hl-2">(</span><span class="hl-7">...</span><span class="hl-2">);</span><br/><span class="hl-5">const</span><span class="hl-2"> </span><span class="hl-6">layout</span><span class="hl-2"> </span><span class="hl-7">=</span><span class="hl-2"> </span><span class="hl-8">d3</span><span class="hl-2">.</span><span class="hl-9">sugiyama</span><span class="hl-2">();</span><br/><span class="hl-9">layout</span><span class="hl-2">(</span><span class="hl-8">dag</span><span class="hl-2">);</span><br/><span class="hl-10">// ... render dag</span><br/><span class="hl-0">&lt;/</span><span class="hl-1">script</span><span class="hl-0">&gt;</span>
 </code></pre>
-				<a href="#typescript-notes" id="typescript-notes" style="color: inherit; text-decoration: none;">
-					<h3>Typescript Notes</h3>
-				</a>
-				<ul>
-					<li>Default operators will expect the necessary types for them to work, but will also do runtime checks in case javascript users use them inappropriately.</li>
-					<li>Due to what seems like a bug in typescript, passing operators that take no arguments, e.g. <code>dagStratify().id(() =&gt; &quot;&quot;)</code> will cause typescript to infer the data as <code>undefined</code>, which will then restrict the overall data-type to never in most circumstances.
-					If you encounter typescript errors saying types can&#39;t be assigned to <code>never</code> check that the appropraite types are being inferred from custom operators and accessors.</li>
-				</ul>
-				<a href="#experimental-es6-imports" id="experimental-es6-imports" style="color: inherit; text-decoration: none;">
-					<h2>Experimental ES6 Imports</h2>
-				</a>
-				<p>As of version 0.7, the full typescript build is released in the <code>dist</code> folder. That means in addition to importing from the bundled es6 module that was available before, you should be able to import arbitrary nested modules from <code>d3-dag/dist/...</code>. There may be issues with doing this, but it is at least an option. If people report success importing once private members from this more structured interface it may become stable.</p>
-				<a href="#updating" id="updating" style="color: inherit; text-decoration: none;">
-					<h2>Updating</h2>
-				</a>
-				<p>Information for major changes between releases</p>
-				<a href="#updating-from-07-to-08" id="updating-from-07-to-08" style="color: inherit; text-decoration: none;">
-					<h3>Updating from 0.7 to 0.8</h3>
-				</a>
-				<p>This update features a large rewrite of much of the library, and as a result has some new features coupled with a lot of breaking changes.
-					Most of the breaking changes are in the backend, so if you&#39;ve only been using the bundled methods, most things should still work.
-				With this, the library is nearing stability, and I expected to release 1.0 soon</p>
-				<p><strong>Large Breaking Changes:</strong></p>
-				<ul>
-					<li>The largest breaking change was the removal of the arquint layout from this library.
-						The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
-					If possible, I would like to bring it back.</li>
-					<li><code>twolayerMedian</code> and <code>twolayerMean</code> were merged into <code>twolayerAgg</code>.
-					To get <code>twolayerMean</code> you now use <code>twolayerAgg().aggregator(aggMeanFactory)</code>.</li>
-					<li><code>sugiyama</code> and <code>zherebko</code> no longer return a dag, instead they just modify the dag that was passed in.
-					This isn&#39;t that different from the old behavior as the old dag was always modified, but in typescript there&#39;s no assertion that x and y exist on the returned dag.</li>
-					<li><code>sugiyama().nodeSize</code> changed slightly.
-					You used to have to check if the input extended <code>SugiDummyNode</code>, now you just check if it&#39;s undefined.</li>
-				</ul>
-				<p><strong>Minor Breaking Changes:</strong>
-				These changes should only affect you if you were writing custom operators or using infrequent or experimental apis.</p>
-				<ul>
-					<li>The Typescript types are much more coherent, and should make much more sense.
-						The old types had a lot of manual assertions and casting to get them to work, the new ones don&#39;t.
-					Most mthods should just work now without the need of manual annotation.</li>
-					<li><code>LayeringOperators</code> now modify a node&#39;s <code>value</code> instead of setting a <code>layer</code> propery.</li>
-					<li>The API for custom sugiyama operators has changed significantly. I don&#39;t think this API was actually used very frequently, but if you did, look at the new operator definitions. Roughly instead of having a <code>DummyNode</code> or the actual <code>DagNode</code>, you will have a <code>SugiDagNode</code> which is a normal dag node with node data that either has a single <code>node</code> attribute for normal nodes, or a <code>parent</code> and <code>child</code> attribute for dummy nodes.</li>
-					<li>Many operator types were renamed from <code>Operator</code> in the appropriate module to a named operator like <code>TwolayerOperator</code>.
-					This should only affect you if you were using the experimental ES6 module api.</li>
-					<li>The build system was switched from rollup to esbuild.
-					There was one error with the bundling that was caught in development, and is now being tested.</li>
-					<li>The definition of Dag changed from being a union of <code>DagNode</code> and <code>DagRoot</code>, to just being a subset of <code>DagNode</code> without the local node operations.
-					This is arguably a cleaner api, but will change the behavior of things like conditional types.</li>
-					<li>The definition of <code>TwolayerOperator</code> must now support going bottom to top.</li>
-					<li>Layout* (e.g. <code>LayoutDagNode</code>) has been completely isolated, so it&#39;s impossible to create dags manually without implementing the interface yourself.
-					The purpose is to enforce that dags remain dags, and most operators can be do by clever application of the construction methods (see <code>sugify</code>).</li>
-				</ul>
-				<p><strong>New features:</strong></p>
-				<ul>
-					<li>All built-in decrossing operators now preserve the order of layers if there&#39;s nothing else to do.</li>
-					<li>All built-in ecrossing operators now all have an option to (or always) minimize the distance between nodes that have a common parent or child.</li>
-					<li><code>decrossTwoLayer</code> does a bottom to top pass as well, and supports multiple passes.</li>
-					<li><code>nodeSize</code> is usable without checking for <code>SugiDummyNode</code> instances (now they&#39;re just undefined).</li>
-					<li><code>dagConnect</code> supports adding single nodes.</li>
-					<li><code>layeringSimplex</code> allows equality groups, these are similar to setting rank the same, but there&#39;s no ordering constraint between groups.</li>
-					<li>Much better typescript typings, and better tests to ensure they make sense.</li>
-				</ul>
-				<a href="#updating-from-06-to-07" id="updating-from-06-to-07" style="color: inherit; text-decoration: none;">
-					<h3>Updating from 0.6 to 0.7</h3>
-				</a>
-				<p>There are a number of potentially breaking changes when upgrading from 0.6 to 0.7.
-				The first may be a big breaker, the the rest were for private apis or otherwise shouldn&#39;t have been used very often.</p>
-				<ul>
-					<li>The only large breaking change is the remove of node ids. Prior to 0.7, all nodes must have a string id.
-						The string id was necessary to detect loops and identical elements efficiently when iterating.
-						ES6 Sets and Maps make this constraint unnecessary, and so it was removed.
-						To fix the errors created, you&#39;ll need to go from accessing <code>node.id</code> to instead access <code>node.data.id</code> or whatever field was used for the id during creation.
-						Note that <code>connect</code> and <code>stratify</code> still need ids to create the dag, and so still have their accessors, but <code>hierarchy</code> doesn&#39;t.
-					Also note that because nodes don&#39;t take an id anymore, <code>connect</code> now produces nodes with data that stores the id, instead of undefined as before.</li>
-					<li>In <code>decrossOpt</code> and <code>twolayerOpt</code> the clowntown option was replaced with the <code>large</code> option.
-					This renaming should be more clear, and should fail more quickly, preventing people from running optimal decross algorithms on dags that are too big without knowing what&#39;s going on.</li>
-					<li>Deprecated members <code>coordVert</code> and <code>coordMinCurve</code> were removed. Note that their layouts can still be achieved with <code>coordQuad</code>.</li>
-					<li>The bundled outputs used to be in the <code>dist</code> folder, and now their in the <code>bundle</code> folder. Those paths shouldn&#39;t have been hard coded, and the new paths are updated in <code>package.json</code>, but if you did hardcode them, this will break.</li>
-					<li>Version 0.6 was tested on node 12, now the minimum node version is 14.</li>
-				</ul>
-				<p>There were a few nobreaking updates:</p>
-				<ul>
-					<li>The <code>zherebko</code> method should be a bit better, while running negligibly longer.</li>
-					<li>Now when creating a dag with <code>dagConnect</code> or <code>dagStratify</code> typescript will pick up the datatype actually passed in, rather than just what was defined when creating the operator.</li>
-				</ul>
-				<a href="#updating-from-05-to-06" id="updating-from-05-to-06" style="color: inherit; text-decoration: none;">
-					<h3>Updating from 0.5 to 0.6</h3>
-				</a>
-				<p>The only breaking change happens if you happend to use this library in
-					typescript, and happened store an operator with its types attached (e.g. <code>layout: SugiyamaOperator&lt;NodeType, ...&gt; = ...</code>). All of the individual attribute
-				modifier functions retained their generic signatures.</p>
-				<p>The typing for most operators changed to more easily allow adding new typed
-					attributes later on. <code>sugiyama</code> went from being typed like <code>sugiyama&lt;NodeType, LayeringType, DecrossType, ...&gt;</code> to <code>sugiyama&lt;NodeType, { layering: LayeringType, decross: DecrosType, ... }&gt;</code>. To update, you&#39;ll need to change
-				these declarations.</p>
-				<a href="#updating-from-04-to-05" id="updating-from-04-to-05" style="color: inherit; text-decoration: none;">
-					<h3>Updating from 0.4 to 0.5</h3>
-				</a>
-				<p>The way Sugiyama layout works was entirely rewritten. Instead of defaulting to
-					fitting nodes into [0, 1] in x and y, it now features a <code>nodeSize</code> accessor.
-					Nodes are spaced out to respect their nodeSizes, along x coordinates this is
-					exact, the y coordinates will respect the max height in each layer. As a result
-					of the this change, there is no longer a separation accessor, as the role of
-					that was replaced by specifying node sizes. Also, instead of sugiyama layout
-					just returning the laidout dag (nice for type script), it now return an object
-					with the dag, as well as the width and height of the final dag, including
-					&quot;padding&quot; for node sizes. The default size of dummy nodes is [0, 0]. To get
-					back to almost the old behavior, you can still specify a <code>size</code>. This will
-				rescale everything, but still keep the outside padding.</p>
-				<a href="#updating-from-03-to-04" id="updating-from-03-to-04" style="color: inherit; text-decoration: none;">
-					<h3>Updating from 0.3 to 0.4</h3>
-				</a>
-				<p>The update from 0.3 to 0.4 adds support for typescript, and makes a number of
-					backwards incompatible changes that arrise from the switch. Some are also the
-				result of cleaning up hasty early design decisions.</p>
-				<ul>
-					<li>Instead of having <code>linkData</code> accessors, builders <code>stratify</code> and <code>hierarchy</code>
-						now have either <code>children</code>/<code>parentIds</code> or <code>childrenData</code>/<code>parentData</code> that
-						combine the children/parents with the data for the link. The build link data
-						into the design of the dag and removes the messy handling of the fact that
-					data was tacked on.</li>
-					<li><code>points</code> was moved from a property on linkData to its own top level link
-						property, since it&#39;s somewhat required to be there and shouldn&#39;t be mutating
-					user supplied data.</li>
-					<li><code>copy</code>, <code>reverse</code>, and <code>equal</code> have been removed as the new structure made
-						them hard to support, as DAGs are viewed more immutably now. Support could
-					potentially be added back.</li>
-					<li>Some DAG methods likes <code>some</code> and <code>every</code> have been removed because they&#39;re
-					better supported by the fulent iterators returned by <code>idescendants</code>.</li>
-					<li>In arquint, the height ratio property was switched to an accessor to be more
-					inline with other methods.</li>
-					<li>Documention has moved from the README to inline, and a github pages generated
-					by typedoc.</li>
-					<li>Switched from npm to yarn.</li>
-				</ul>
-				<a href="#updating-from-01-to-02" id="updating-from-01-to-02" style="color: inherit; text-decoration: none;">
-					<h3>Updating from 0.1 to 0.2</h3>
-				</a>
-				<p>The update from 0.1 to 0.2 includes a few small backwards incompatible changes.</p>
-				<ul>
-					<li><code>dratify</code> was renamed to <code>dagStratify</code> and <code>dierarchy</code> was renamed to <code>dagHierarchy</code> in order to pollute the d3 namespace less.</li>
-					<li>After running a <code>sugiyama</code> layout, the <code>points</code> attribute will always exist for every links data, and it now also contains the start and end points.</li>
-					<li><code>coordSpread</code> was removed in favor of <code>coordCenter</code> which produces a slightly better layout in the same amount of time.</li>
-					<li><code>test/data</code> was moved to <code>examples</code>. This isn&#39;t technically part of the api, but it may break examples that required the old file location.</li>
-					<li>Link data is created at dag creation time. This also isn&#39;t technically backwards compatible but might increase memory consumption.</li>
-				</ul>
-				<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
-					<h2>Contributing</h2>
-				</a>
-				<p>Contributions, issues, and PRs are all welcome!</p>
-			</div>
-		</div>
-		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
-			<nav class="tsd-navigation primary">
-				<ul>
-					<li class=" ">
-						<a href="modules.html">Modules</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag.html">dag</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/dag_create.html">dag/create</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/index.html">index</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/iters.html">iters</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama.html">sugiyama</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord.html">sugiyama/coord</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord_center.html">sugiyama/coord/center</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_decross.html">sugiyama/decross</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr>layer</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_layering.html">sugiyama/layering</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr>graham</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr>path</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_twolayer.html">sugiyama/twolayer</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/sugiyama_utils.html">sugiyama/utils</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/zherebko.html">zherebko</a>
-					</li>
-				</ul>
-			</nav>
-			<nav class="tsd-navigation secondary menu-sticky">
-				<ul class="before-current">
-				</ul>
-			</nav>
-		</div>
-	</div>
-</div>
-<footer class="with-border-bottom">
-	<div class="container">
-		<h2>Legend</h2>
-		<div class="tsd-legend-group">
-			<ul class="tsd-legend">
-				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
-				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
-				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
-				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
-				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-			</ul>
-		</div>
-	</div>
-</footer>
-<div class="container tsd-generator">
-	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
-</div>
-<div class="overlay"></div>
-<script src="assets/js/main.js"></script>
-</body>
-</html>
+
+<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
+  <h2>API Reference</h2>
+</a>
+<ul>
+<li><a href="https://erikbrinkman.github.io/d3-dag/modules/index.html">Javascript API</a> - methods exported to flat javascript</li>
+<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag.Dag.html">DAG</a> - documentation on the DAG structure</li>
+<li>Creating DAGs from data<ul>
+<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.HierarchyOperator.html">Hierarchy</a> - data in dag format</li>
+<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.StratifyOperator.html">Stratify</a> - data in tabular format</li>
+<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/dag_create.ConnectOperator.html">Connect</a> - data in edge format</li>
+</ul>
+</li>
+<li>Layout algorithms<ul>
+<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/sugiyama.SugiyamaOperator.html">Sugiyama</a> - standard layout</li>
+<li><a href="https://erikbrinkman.github.io/d3-dag/interfaces/zherebko.ZherebkoOperator.html">Zherebko</a> - topological layout</li>
+</ul>
+</li>
+</ul>
+
+<a href="#general-usage-notes" id="general-usage-notes" style="color: inherit; text-decoration: none;">
+  <h2>General Usage Notes</h2>
+</a>
+<p>This library is built around the concept of operators.
+Operators are functions with a fluent interface to modify their behavior.
+Every function that modifies behavior returns a copy, and will not modify the original operator.
+For example, the <code>stratify</code> operator creates dags from id-based parent data, can ve used like so:</p>
+<pre><code class="language-ts"><span class="hl-10">// note initial function call with no arguments to create default operator</span><br/><span class="hl-5">const</span><span class="hl-7"> </span><span class="hl-6">stratify</span><span class="hl-7"> = </span><span class="hl-9">dagStratify</span><span class="hl-7">();</span><br/><span class="hl-5">const</span><span class="hl-7"> </span><span class="hl-6">dag</span><span class="hl-7"> = </span><span class="hl-9">stratify</span><span class="hl-7">([{ </span><span class="hl-8">id:</span><span class="hl-7"> </span><span class="hl-11">&quot;parent&quot;</span><span class="hl-7"> }, { </span><span class="hl-8">id:</span><span class="hl-7"> </span><span class="hl-11">&quot;child&quot;</span><span class="hl-7">, </span><span class="hl-8">parentIds:</span><span class="hl-7"> [</span><span class="hl-11">&quot;parent&quot;</span><span class="hl-7">] }]);</span><br/><br/><span class="hl-8">stratify</span><span class="hl-7">.</span><span class="hl-9">id</span><span class="hl-7">(({ </span><span class="hl-8">myid</span><span class="hl-7"> }: { </span><span class="hl-8">myid</span><span class="hl-7">: </span><span class="hl-12">string</span><span class="hl-7"> }) </span><span class="hl-5">=&gt;</span><span class="hl-7"> </span><span class="hl-8">myid</span><span class="hl-7">);</span><br/><span class="hl-10">// doesn&#39;t work, stratify was not modified</span><br/><span class="hl-5">const</span><span class="hl-7"> </span><span class="hl-6">dag</span><span class="hl-7"> = </span><span class="hl-9">stratify</span><span class="hl-7">([{ </span><span class="hl-8">myid:</span><span class="hl-7"> </span><span class="hl-11">&quot;parent&quot;</span><span class="hl-7"> }, { </span><span class="hl-8">myid:</span><span class="hl-7"> </span><span class="hl-11">&quot;child&quot;</span><span class="hl-7">, </span><span class="hl-8">parentIds:</span><span class="hl-7"> [</span><span class="hl-11">&quot;parent&quot;</span><span class="hl-7">] }]);</span><br/><br/><span class="hl-5">const</span><span class="hl-7"> </span><span class="hl-6">myStratify</span><span class="hl-7"> = </span><span class="hl-8">stratify</span><span class="hl-7">.</span><span class="hl-9">id</span><span class="hl-7">(({ </span><span class="hl-8">myid</span><span class="hl-7"> }: { </span><span class="hl-8">myid</span><span class="hl-7">: </span><span class="hl-12">string</span><span class="hl-7"> }) </span><span class="hl-5">=&gt;</span><span class="hl-7"> </span><span class="hl-8">myid</span><span class="hl-7">);</span><br/><span class="hl-10">// works!</span><br/><span class="hl-5">const</span><span class="hl-7"> </span><span class="hl-6">dag</span><span class="hl-7"> = </span><span class="hl-9">myStratify</span><span class="hl-7">([{ </span><span class="hl-8">myid:</span><span class="hl-7"> </span><span class="hl-11">&quot;parent&quot;</span><span class="hl-7"> }, { </span><span class="hl-8">myid:</span><span class="hl-7"> </span><span class="hl-11">&quot;child&quot;</span><span class="hl-7">, </span><span class="hl-8">parentIds:</span><span class="hl-7"> [</span><span class="hl-11">&quot;parent&quot;</span><span class="hl-7">] }]);</span>
+</code></pre>
+
+<a href="#node-sizes" id="node-sizes" style="color: inherit; text-decoration: none;">
+  <h3>Node Sizes</h3>
+</a>
+<p>It can be useful to set a custom node size for the layout.
+There is an important detail to node sizes that can be easy to miss, namely that &quot;dummy nodes&quot; or nodes that represent part of a long edge also have a custom size.
+If setting <code>sugiyama</code>&#39;s <code>nodeSize</code> accessor, make sure to handle the case when the node being sized is <code>undefined</code> if you want to mimic the default behavior but with custom sizes you probably want to use something like <code>.nodeSize(node =&gt; node === undefined ? [0, 0] : &lt;my node size&gt;)</code>.
+To get even more flexible layouts, check <code>sugiNodeSize</code>.</p>
+
+<a href="#typescript-notes" id="typescript-notes" style="color: inherit; text-decoration: none;">
+  <h3>Typescript Notes</h3>
+</a>
+<ul>
+<li>Default operators will expect the necessary types for them to work, but will also do runtime checks in case javascript users use them inappropriately.</li>
+<li>Due to what seems like a bug in typescript, passing operators that take no arguments, e.g. <code>dagStratify().id(() =&gt; &quot;&quot;)</code> will cause typescript to infer the data as <code>undefined</code>, which will then restrict the overall data-type to never in most circumstances.
+If you encounter typescript errors saying types can&#39;t be assigned to <code>never</code> check that the appropraite types are being inferred from custom operators and accessors.</li>
+</ul>
+
+<a href="#experimental-es6-imports" id="experimental-es6-imports" style="color: inherit; text-decoration: none;">
+  <h2>Experimental ES6 Imports</h2>
+</a>
+<p>As of version 0.7, the full typescript build is released in the <code>dist</code> folder. That means in addition to importing from the bundled es6 module that was available before, you should be able to import arbitrary nested modules from <code>d3-dag/dist/...</code>. There may be issues with doing this, but it is at least an option. If people report success importing once private members from this more structured interface it may become stable.</p>
+
+<a href="#updating" id="updating" style="color: inherit; text-decoration: none;">
+  <h2>Updating</h2>
+</a>
+<p>Information for major changes between releases</p>
+
+<a href="#updating-from-07-to-08" id="updating-from-07-to-08" style="color: inherit; text-decoration: none;">
+  <h3>Updating from 0.7 to 0.8</h3>
+</a>
+<p>This update features a large rewrite of much of the library, and as a result has some new features coupled with a lot of breaking changes.
+Most of the breaking changes are in the backend, so if you&#39;ve only been using the bundled methods, most things should still work.
+With this, the library is nearing stability, and I expected to release 1.0 soon</p>
+<p><strong>Large Breaking Changes:</strong></p>
+<ul>
+<li>The largest breaking change was the removal of the arquint layout from this library.
+The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
+If possible, I would like to bring it back.</li>
+<li><code>twolayerMedian</code> and <code>twolayerMean</code> were merged into <code>twolayerAgg</code>.
+To get <code>twolayerMean</code> you now use <code>twolayerAgg().aggregator(aggMeanFactory)</code>.</li>
+<li><code>sugiyama</code> and <code>zherebko</code> no longer return a dag, instead they just modify the dag that was passed in.
+This isn&#39;t that different from the old behavior as the old dag was always modified, but in typescript there&#39;s no assertion that x and y exist on the returned dag.</li>
+<li><code>sugiyama().nodeSize</code> changed slightly.
+You used to have to check if the input extended <code>SugiDummyNode</code>, now you just check if it&#39;s undefined.</li>
+</ul>
+<p><strong>Minor Breaking Changes:</strong>
+These changes should only affect you if you were writing custom operators or using infrequent or experimental apis.</p>
+<ul>
+<li>The Typescript types are much more coherent, and should make much more sense.
+The old types had a lot of manual assertions and casting to get them to work, the new ones don&#39;t.
+Most mthods should just work now without the need of manual annotation.</li>
+<li><code>LayeringOperators</code> now modify a node&#39;s <code>value</code> instead of setting a <code>layer</code> propery.</li>
+<li>The API for custom sugiyama operators has changed significantly. I don&#39;t think this API was actually used very frequently, but if you did, look at the new operator definitions. Roughly instead of having a <code>DummyNode</code> or the actual <code>DagNode</code>, you will have a <code>SugiDagNode</code> which is a normal dag node with node data that either has a single <code>node</code> attribute for normal nodes, or a <code>parent</code> and <code>child</code> attribute for dummy nodes.</li>
+<li>Many operator types were renamed from <code>Operator</code> in the appropriate module to a named operator like <code>TwolayerOperator</code>.
+This should only affect you if you were using the experimental ES6 module api.</li>
+<li>The build system was switched from rollup to esbuild.
+There was one error with the bundling that was caught in development, and is now being tested.</li>
+<li>The definition of Dag changed from being a union of <code>DagNode</code> and <code>DagRoot</code>, to just being a subset of <code>DagNode</code> without the local node operations.
+This is arguably a cleaner api, but will change the behavior of things like conditional types.</li>
+<li>The definition of <code>TwolayerOperator</code> must now support going bottom to top.</li>
+<li>Layout* (e.g. <code>LayoutDagNode</code>) has been completely isolated, so it&#39;s impossible to create dags manually without implementing the interface yourself.
+The purpose is to enforce that dags remain dags, and most operators can be do by clever application of the construction methods (see <code>sugify</code>).</li>
+</ul>
+<p><strong>New features:</strong></p>
+<ul>
+<li>All built-in decrossing operators now preserve the order of layers if there&#39;s nothing else to do.</li>
+<li>All built-in ecrossing operators now all have an option to (or always) minimize the distance between nodes that have a common parent or child.</li>
+<li><code>decrossTwoLayer</code> does a bottom to top pass as well, and supports multiple passes.</li>
+<li><code>nodeSize</code> is usable without checking for <code>SugiDummyNode</code> instances (now they&#39;re just undefined).</li>
+<li><code>dagConnect</code> supports adding single nodes.</li>
+<li><code>layeringSimplex</code> allows equality groups, these are similar to setting rank the same, but there&#39;s no ordering constraint between groups.</li>
+<li>Much better typescript typings, and better tests to ensure they make sense.</li>
+</ul>
+
+<a href="#updating-from-06-to-07" id="updating-from-06-to-07" style="color: inherit; text-decoration: none;">
+  <h3>Updating from 0.6 to 0.7</h3>
+</a>
+<p>There are a number of potentially breaking changes when upgrading from 0.6 to 0.7.
+The first may be a big breaker, the the rest were for private apis or otherwise shouldn&#39;t have been used very often.</p>
+<ul>
+<li>The only large breaking change is the remove of node ids. Prior to 0.7, all nodes must have a string id.
+The string id was necessary to detect loops and identical elements efficiently when iterating.
+ES6 Sets and Maps make this constraint unnecessary, and so it was removed.
+To fix the errors created, you&#39;ll need to go from accessing <code>node.id</code> to instead access <code>node.data.id</code> or whatever field was used for the id during creation.
+Note that <code>connect</code> and <code>stratify</code> still need ids to create the dag, and so still have their accessors, but <code>hierarchy</code> doesn&#39;t.
+Also note that because nodes don&#39;t take an id anymore, <code>connect</code> now produces nodes with data that stores the id, instead of undefined as before.</li>
+<li>In <code>decrossOpt</code> and <code>twolayerOpt</code> the clowntown option was replaced with the <code>large</code> option.
+This renaming should be more clear, and should fail more quickly, preventing people from running optimal decross algorithms on dags that are too big without knowing what&#39;s going on.</li>
+<li>Deprecated members <code>coordVert</code> and <code>coordMinCurve</code> were removed. Note that their layouts can still be achieved with <code>coordQuad</code>.</li>
+<li>The bundled outputs used to be in the <code>dist</code> folder, and now their in the <code>bundle</code> folder. Those paths shouldn&#39;t have been hard coded, and the new paths are updated in <code>package.json</code>, but if you did hardcode them, this will break.</li>
+<li>Version 0.6 was tested on node 12, now the minimum node version is 14.</li>
+</ul>
+<p>There were a few nobreaking updates:</p>
+<ul>
+<li>The <code>zherebko</code> method should be a bit better, while running negligibly longer.</li>
+<li>Now when creating a dag with <code>dagConnect</code> or <code>dagStratify</code> typescript will pick up the datatype actually passed in, rather than just what was defined when creating the operator.</li>
+</ul>
+
+<a href="#updating-from-05-to-06" id="updating-from-05-to-06" style="color: inherit; text-decoration: none;">
+  <h3>Updating from 0.5 to 0.6</h3>
+</a>
+<p>The only breaking change happens if you happend to use this library in
+typescript, and happened store an operator with its types attached (e.g. <code>layout: SugiyamaOperator&lt;NodeType, ...&gt; = ...</code>). All of the individual attribute
+modifier functions retained their generic signatures.</p>
+<p>The typing for most operators changed to more easily allow adding new typed
+attributes later on. <code>sugiyama</code> went from being typed like <code>sugiyama&lt;NodeType, LayeringType, DecrossType, ...&gt;</code> to <code>sugiyama&lt;NodeType, { layering: LayeringType, decross: DecrosType, ... }&gt;</code>. To update, you&#39;ll need to change
+these declarations.</p>
+
+<a href="#updating-from-04-to-05" id="updating-from-04-to-05" style="color: inherit; text-decoration: none;">
+  <h3>Updating from 0.4 to 0.5</h3>
+</a>
+<p>The way Sugiyama layout works was entirely rewritten. Instead of defaulting to
+fitting nodes into [0, 1] in x and y, it now features a <code>nodeSize</code> accessor.
+Nodes are spaced out to respect their nodeSizes, along x coordinates this is
+exact, the y coordinates will respect the max height in each layer. As a result
+of the this change, there is no longer a separation accessor, as the role of
+that was replaced by specifying node sizes. Also, instead of sugiyama layout
+just returning the laidout dag (nice for type script), it now return an object
+with the dag, as well as the width and height of the final dag, including
+&quot;padding&quot; for node sizes. The default size of dummy nodes is [0, 0]. To get
+back to almost the old behavior, you can still specify a <code>size</code>. This will
+rescale everything, but still keep the outside padding.</p>
+
+<a href="#updating-from-03-to-04" id="updating-from-03-to-04" style="color: inherit; text-decoration: none;">
+  <h3>Updating from 0.3 to 0.4</h3>
+</a>
+<p>The update from 0.3 to 0.4 adds support for typescript, and makes a number of
+backwards incompatible changes that arrise from the switch. Some are also the
+result of cleaning up hasty early design decisions.</p>
+<ul>
+<li>Instead of having <code>linkData</code> accessors, builders <code>stratify</code> and <code>hierarchy</code>
+now have either <code>children</code>/<code>parentIds</code> or <code>childrenData</code>/<code>parentData</code> that
+combine the children/parents with the data for the link. The build link data
+into the design of the dag and removes the messy handling of the fact that
+data was tacked on.</li>
+<li><code>points</code> was moved from a property on linkData to its own top level link
+property, since it&#39;s somewhat required to be there and shouldn&#39;t be mutating
+user supplied data.</li>
+<li><code>copy</code>, <code>reverse</code>, and <code>equal</code> have been removed as the new structure made
+them hard to support, as DAGs are viewed more immutably now. Support could
+potentially be added back.</li>
+<li>Some DAG methods likes <code>some</code> and <code>every</code> have been removed because they&#39;re
+better supported by the fulent iterators returned by <code>idescendants</code>.</li>
+<li>In arquint, the height ratio property was switched to an accessor to be more
+inline with other methods.</li>
+<li>Documention has moved from the README to inline, and a github pages generated
+by typedoc.</li>
+<li>Switched from npm to yarn.</li>
+</ul>
+
+<a href="#updating-from-01-to-02" id="updating-from-01-to-02" style="color: inherit; text-decoration: none;">
+  <h3>Updating from 0.1 to 0.2</h3>
+</a>
+<p>The update from 0.1 to 0.2 includes a few small backwards incompatible changes.</p>
+<ul>
+<li><code>dratify</code> was renamed to <code>dagStratify</code> and <code>dierarchy</code> was renamed to <code>dagHierarchy</code> in order to pollute the d3 namespace less.</li>
+<li>After running a <code>sugiyama</code> layout, the <code>points</code> attribute will always exist for every links data, and it now also contains the start and end points.</li>
+<li><code>coordSpread</code> was removed in favor of <code>coordCenter</code> which produces a slightly better layout in the same amount of time.</li>
+<li><code>test/data</code> was moved to <code>examples</code>. This isn&#39;t technically part of the api, but it may break examples that required the old file location.</li>
+<li>Link data is created at dag creation time. This also isn&#39;t technically backwards compatible but might increase memory consumption.</li>
+</ul>
+
+<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+  <h2>Contributing</h2>
+</a>
+<p>Contributions, issues, and PRs are all welcome!</p>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/dag.html">dag</a></li><li class=" tsd-kind-module"><a href="modules/dag_create.html">dag/create</a></li><li class=" tsd-kind-module"><a href="modules/grid.html">grid</a></li><li class=" tsd-kind-module"><a href="modules/grid_lane.html">grid/lane</a></li><li class=" tsd-kind-module"><a href="modules/grid_lane_greedy.html">grid/lane/greedy</a></li><li class=" tsd-kind-module"><a href="modules/grid_lane_opt.html">grid/lane/opt</a></li><li class=" tsd-kind-module"><a href="modules/index.html">index</a></li><li class=" tsd-kind-module"><a href="modules/iters.html">iters</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama.html">sugiyama</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_coord.html">sugiyama/coord</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_coord_center.html">sugiyama/coord/center</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_coord_greedy.html">sugiyama/coord/greedy</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_coord_quad.html">sugiyama/coord/quad</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_coord_topological.html">sugiyama/coord/topological</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_decross.html">sugiyama/decross</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_decross_opt.html">sugiyama/decross/opt</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_decross_two_layer.html">sugiyama/decross/two-<wbr/>layer</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_layering.html">sugiyama/layering</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_layering_coffman_graham.html">sugiyama/layering/coffman-<wbr/>graham</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_layering_longest_path.html">sugiyama/layering/longest-<wbr/>path</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_layering_simplex.html">sugiyama/layering/simplex</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_layering_topological.html">sugiyama/layering/topological</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_twolayer.html">sugiyama/twolayer</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_twolayer_agg.html">sugiyama/twolayer/agg</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_twolayer_opt.html">sugiyama/twolayer/opt</a></li><li class=" tsd-kind-module"><a href="modules/sugiyama_utils.html">sugiyama/utils</a></li><li class=" tsd-kind-module"><a href="modules/zherebko.html">zherebko</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-namespace"><span class="tsd-kind-icon">Namespace</span></li><li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li><li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li><li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li><li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li><li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>
