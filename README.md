@@ -13,7 +13,7 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 ## Examples
 
 - [Observable with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout to understand the effects of different options.
-- [Observable with Topological Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
+- [Observable with Topological Layouts](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
 - [Codepen with Sugiyama Layout](https://codepen.io/brinkbot/pen/oNZJXqK) - For people who want a straight javascript example without the Observable fanciness.
 - [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
@@ -24,7 +24,7 @@ If you use node, `npm i d3-dag` or `yarn add d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag@0.8.1"></script>
+<script src="https://unpkg.com/d3-dag@0.9.0"></script>
 <script>
 const dag = d3.dagStratify(...);
 const layout = d3.sugiyama();
@@ -44,6 +44,7 @@ layout(dag);
 * Layout algorithms
   * [Sugiyama](https://erikbrinkman.github.io/d3-dag/interfaces/sugiyama.SugiyamaOperator.html) - standard layout
   * [Zherebko](https://erikbrinkman.github.io/d3-dag/interfaces/zherebko.ZherebkoOperator.html) - topological layout
+  * [Grid](https://erikbrinkman.github.io/d3-dag/interfaces/grid.GridOperator.html) - grid based topological layout
 
 ## General Usage Notes
 
@@ -87,6 +88,17 @@ As of version 0.7, the full typescript build is released in the `dist` folder. T
 ## Updating
 
 Information for major changes between releases
+
+### Updating from 0.8 to 0.9
+
+This update has relatively minor breaking changes.
+1. In order to reduce bundle size, methods no longer return custom fluent iterables that allow mapping an reducing.
+   You'll need to import a fluent iterable library of choice (e.g. [`lfi`](https://www.npmjs.com/package/lfi)).
+2. `zherebko` now functions similarly to `sugiyama` in that it handles a node size and includes that padding, rather than pushing coordinates right to 0,0.
+3. Some exported operator interface names were renamed to include their type of operator in the name, e.g. `SimplexOperator` was renamed to `SimplexLayeringOperator`.
+   This is to prevent future name conflicts and standardize the exported intreface as some operators already required the name change. 
+
+In a non-breaking change, this update added a new grid based topological layout.
 
 ### Updating from 0.7 to 0.8
 
