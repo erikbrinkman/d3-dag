@@ -145,9 +145,11 @@ type OpsDag<Ops extends Operators> = Dag<
  * Create with {@link sugiyama}.
  *
  * @example
+ *
  * <img alt="Sugiyama example" src="media://sugi-simplex-opt-quad.png" width="400">
  *
  * @example
+ *
  * ```typescript
  * const data = [["parent", "child"], ...];
  * const create = connect();
@@ -160,6 +162,7 @@ type OpsDag<Ops extends Operators> = Dag<
  * ```
  *
  * @example
+ *
  * This example highlights tweaking several aspects of dag rendering
  * ```typescript
  * const data = [["parent", "child"], ...];

@@ -448,27 +448,23 @@ interface ConnectOperators {
 type ConnectLinkDatum<Ops extends ConnectOperators> = IdDatum<Ops["sourceId"]> &
   IdDatum<Ops["targetId"]>;
 
-/**
- * An operator that constructs a {@link Dag} from link data.
- *
- * Create a default connect operator with {@link connect}. The accessor for the
- * {@link sourceId | source id string}, {@link targetId | target id string},
- * and whether to allow {@link single} nodes can all be modified.
- *
- * Links in the dag will have the same data as the objects passed in, and nodes
- * will have the ids referenced as either the source or the target.
- *
- * @example
- * ```typescript
- * const data = [["parent", "child"]];
- * const create = connect();
- * const dag = create(data);
- * ```
- */
 export interface ConnectOperator<Ops extends ConnectOperators> {
   /**
-   * Construct a {@link Dag} from the specified data. The data should be an array of
-   * data elements that contain info about links in the graph.
+   * An operator that constructs a {@link Dag} from link data.
+   *
+   * Create a default connect operator with {@link connect}. The accessor for the
+   * {@link sourceId | source id string}, {@link targetId | target id string},
+   * and whether to allow {@link single} nodes can all be modified.
+   *
+   * Links in the dag will have the same data as the objects passed in, and nodes
+   * will have the ids referenced as either the source or the target.
+   *
+   * @example
+   * ```typescript
+   * const data = [["parent", "child"]];
+   * const create = connect();
+   * const dag = create(data);
+   * ```
    *
    * @example
    * ```json
@@ -771,33 +767,29 @@ type ChildrenDataHierarchyOperator<
   }
 >;
 
-/**
- * An operator that constructs a {@link Dag} from hierarchy data.
- *
- * A default operator can be created with {@link hierarchy}. How to access a
- * piece of data's {@link children} or {@link childrenData | children with
- * associated link data} can be altered. Similarly you can disable whether to
- * check that all initial nodes are actually {@link roots}.
- *
- * Data passed in will become node data, if {@link childrenData} is specified,
- * then link data will also be included. This method uses object identity, so
- * for two nodes to point to the same object, they must both return the same
- * object in their children.
- *
- * @example
- * ```typescript
- * const data = { id: "parent", children: [{ id: "child" }] };
- * const create = hierarchy();
- * const dag = create(data);
- * ```
- */
 export interface HierarchyOperator<
   NodeDatum,
   Ops extends HierarchyOperators<NodeDatum>
 > {
   /**
-   * Construct a {@link Dag} from the specified root nodes.
-   * Each root node must be an object representing a root node.
+   * An operator that constructs a {@link Dag} from hierarchy data.
+   *
+   * A default operator can be created with {@link hierarchy}. How to access a
+   * piece of data's {@link children} or {@link childrenData | children with
+   * associated link data} can be altered. Similarly you can disable whether to
+   * check that all initial nodes are actually {@link roots}.
+   *
+   * Data passed in will become node data, if {@link childrenData} is specified,
+   * then link data will also be included. This method uses object identity, so
+   * for two nodes to point to the same object, they must both return the same
+   * object in their children.
+   *
+   * @example
+   * ```typescript
+   * const data = { id: "parent", children: [{ id: "child" }] };
+   * const create = hierarchy();
+   * const dag = create(data);
+   * ```
    *
    * @example
    * ```json
@@ -1142,25 +1134,21 @@ type UpData<
   }
 >;
 
-/**
- * The operator that constructs a {@link Dag} from stratified tabularesque
- * data.
- *
- * Create a default operator with {@link stratify}. The accessors for a node's
- * {@link id} or {@link parentIds | parents' ids} can be altered, or {@link
- * parentData} can be specified to attach link data to each edge.
- *
- * @example
- * ```typescript
- * const data = [{ id: "parent" }, { id: "child", parents: ["parent"] }];
- * const create = stratify().parentIds(({ parents }) => parents);
- * const dag = create(data);
- * ```
- */
 export interface StratifyOperator<Ops extends StratifyOperators> {
   /**
-   * Construct a dag from the specified `data`. The data should be an array
-   * of data elements that contain information about their parents' ids.
+   * The operator that constructs a {@link Dag} from stratified tabularesque
+   * data.
+   *
+   * Create a default operator with {@link stratify}. The accessors for a node's
+   * {@link id} or {@link parentIds | parents' ids} can be altered, or {@link
+   * parentData} can be specified to attach link data to each edge.
+   *
+   * @example
+   * ```typescript
+   * const data = [{ id: "parent" }, { id: "child", parents: ["parent"] }];
+   * const create = stratify().parentIds(({ parents }) => parents);
+   * const dag = create(data);
+   * ```
    *
    * @example
    * ```json
