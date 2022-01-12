@@ -15,7 +15,7 @@ import { SugiNode } from "../utils";
  * fixed.
  *
  * There are two built in two-layer operators:
- * - {@link OptOperator} - optimal corssing minimization for the layer in question
+ * - {@link OptOperator} - optimal crossing minimization for the layer in question
  * - {@link AggOperator} - order according to the aggregate of parent indices, fast
  */
 export interface TwolayerOperator<NodeDatum = never, LinkDatum = never> {
