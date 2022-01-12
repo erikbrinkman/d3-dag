@@ -17,7 +17,7 @@ import { SugiNode } from "../utils";
  *
  * There are two built-in decrossing operators:
  * - {@link OptOperator} - fully minimizes decrossings, but may crash or run forever
- * - {@link TwoLayerOperator} - a base heuristic decrossing method that can be further simplified with
+ * - {@link TwoLayerOperator} - a base heuristic decrossing method considering adjacent pairs of layers at a time that can be further customized by specifying bottom up vs. top down and the specific algorithm used for the pairwise decrossing.
  */
 export interface DecrossOperator<NodeDatum = never, LinkDatum = never> {
   (layers: SugiNode<NodeDatum, LinkDatum>[][]): void;

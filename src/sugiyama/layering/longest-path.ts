@@ -11,7 +11,7 @@ import { def } from "../../utils";
 /**
  * A {@link LayeringOperator} that minimizes the height of the final layout.
  *
- * This often results in very wide and unplease graphs, but is very fast. The
+ * This often results in very wide and unpleasing graphs, but is very fast. The
  * layout can go {@link topDown | top-down} or bottom-up, either assigning all roots to layer 0
  * or all leaves to the last layer.
  *

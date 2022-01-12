@@ -27,7 +27,7 @@ export interface GroupAccessor<NodeDatum = never, LinkDatum = never> {
 }
 
 /**
- * An operator for laying a dag.
+ * An operator for layering a dag.
  *
  * After calling a layering operator on a dag, every node's value should be set
  * to a non-negative integer layer, starting at 0.
@@ -36,7 +36,7 @@ export interface GroupAccessor<NodeDatum = never, LinkDatum = never> {
  * - {@link LongestPathOperator} - minimum height layout
  * - {@link CoffmanGrahamOperator} - fixed node with layout
  * - {@link SimplexOperator} - minimize the length of edges
- * - {@link TopologicalOperatior} - topological layering (one node per layer)
+ * - {@link TopologicalOperator} - topological layering (one node per layer)
  */
 export interface LayeringOperator<NodeDatum = never, LinkDatum = never> {
   (dag: Dag<NodeDatum, LinkDatum>): void;
