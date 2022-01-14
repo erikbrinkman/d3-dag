@@ -3,7 +3,7 @@
  *
  * This module should only really matter for those looking to develop custom
  * {@link CoordOperator}s, {@link DecrossOperator}s, or in the rare case
- * advanced {@link SugiNodeSizeAccessors}.
+ * advanced {@link SugiNodeSizeAccessor}s.
  *
  * @module
  */

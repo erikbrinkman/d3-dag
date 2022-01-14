@@ -5,6 +5,7 @@
   "entryPointStrategy": "expand",
   "excludeInternal": true,
   "cleanOutputDir": true,
+  "validation": true,
   "githubPages": true,
   "treatWarningsAsErrors": true
 }

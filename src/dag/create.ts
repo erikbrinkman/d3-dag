@@ -461,7 +461,7 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
    *
    * @example
    * ```typescript
-   * const data = [["parent", "child"]];
+   * const data = [ ["parent", "child"] ];
    * const create = connect();
    * const dag = create(data);
    * ```
@@ -482,7 +482,7 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
 
   /**
    * Sets the source accessor to the given {@link IdOperator} and returns this
-   * {@link ConnectOperator}. This should return the source id of the link
+   * ConnectOperator. This should return the source id of the link
    * data. The default accessor is:
    *
    * ```js
@@ -499,7 +499,7 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
 
   /**
    * Sets the target accessor to the given {@link IdOperator} and returns this
-   * {@link ConnectOperator}. This should return the target id of the link
+   * ConnectOperator. This should return the target id of the link
    * data. The default accessor is:
    *
    * ```js
@@ -855,7 +855,7 @@ export interface HierarchyOperator<
   ): ChildrenHierarchyOperator<NewDatum, NewChildren>;
   /**
    * Gets the current {@link ChildrenOperator}, If {@link childrenData} was specified,
-   * this will return a {@link WrappedChildrenOperatoe | wrapped version} that
+   * this will return a {@link WrappedChildrenOperator | wrapped version} that
    * returns only the children of that operator.
    */
   children(): Ops["children"];
@@ -1060,7 +1060,7 @@ export function hierarchy(
  * array of the ids of every parent of this node. `i` will increment in the
  * order nodes are processed.
  *
- * This can be modified with the {@link parentIds} method.
+ * This can be modified with the {@link StratifyOperator.parentIds} method.
  */
 export interface ParentIdsOperator<NodeDatum = never> {
   (d: NodeDatum, i: number): readonly string[] | undefined;
@@ -1071,7 +1071,7 @@ export interface ParentIdsOperator<NodeDatum = never> {
  * data. This must return an array of parent ids coupled with data for the link
  * between this node and the parent id.
  *
- * This can be modified with the {@link parentData} method.
+ * This can be modified with the {@link StratifyOperator.parentData} method.
  */
 export interface ParentDataOperator<NodeDatum = never, LinkDatum = unknown> {
   (d: NodeDatum, i: number):
@@ -1090,7 +1090,7 @@ type StratifyLinkDatum<Ops extends StratifyOperators> = Exclude<
 >[number][1];
 
 /**
- * What gets returned by {@link parentData}() when {@link parentIds} is set.
+ * What gets returned by {@link StratifyOperator.parentData}() when {@link StratifyOperator.parentIds} is set.
  */
 export interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
   extends ParentDataOperator<OpNodeDatum<ParentIds>, undefined> {
@@ -1098,7 +1098,7 @@ export interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
 }
 
 /**
- * What gets returned by {@link parentIds}() when {@link parentData} is set.
+ * What gets returned by {@link StratifyOperator.parentIds}() when {@link StratifyOperator.parentData} is set.
  */
 export interface WrappedParentDataOperator<
   ParentData extends ParentDataOperator
@@ -1198,7 +1198,7 @@ export interface StratifyOperator<Ops extends StratifyOperators> {
 
   /**
    * Sets the id accessor to the given {@link IdOperator} and returns a
-   * {@link StratifyOperator}. The default operator is:
+   * StratifyOperator. The default operator is:
    *
    * ```js
    * function id(d) {

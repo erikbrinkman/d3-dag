@@ -35,13 +35,13 @@ export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
   extends DecrossOperator<OpNodeDatum<Order>, OpLinkDatum<Order>> {
   /**
    * Sets the order accessor to the specified {@link TwolayerOperator} and returns
-   * a new operator. (default: {@link MedianOperator}).
+   * a new operator. (default: {@link AggOperator}).
    */
   order<NewOrder extends OrderOperator>(
     ord: NewOrder
   ): TwoLayerOperator<NewOrder>;
   /**
-   * Get the current {@link OrderOperator}.
+   * Get the current {@link TwolayerOperator} for ordering.
    */
   order(): Order;
 
