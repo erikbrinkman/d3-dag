@@ -5,6 +5,6 @@ test("assert throws", () => {
   expect(() => assert(false)).toThrow("internal error: failed assert");
 });
 
-test("setEquals faisl for different sizes", () => {
+test("setEquals fails for different sizes", () => {
   expect(setEqual(new Set(), new Set([1]))).toBe(false);
 });

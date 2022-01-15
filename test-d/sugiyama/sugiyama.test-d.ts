@@ -71,7 +71,7 @@ expectType<MyCoord>(nodeSize.coord());
 expectType<MyNodeSize>(nodeSize.nodeSize());
 expectType<MyNodeSize>(nodeSize.sugiNodeSize().wrapped);
 
-// now "un-narrow" with compatible type
+// now expand with compatible type
 interface MySugiNodeSize extends SugiNodeSizeAccessor<{ sugi: true }, unknown> {
   mySugiNodeSize: true;
 }

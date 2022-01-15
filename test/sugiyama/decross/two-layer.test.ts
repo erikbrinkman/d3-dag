@@ -3,7 +3,7 @@ import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
 import { createLayers, getIndex } from "../utils";
 
-test("twoLayer() propogates to both layers", () => {
+test("twoLayer() propagates to both layers", () => {
   // o o    o o
   //  X     | |
   // o o -> o o
@@ -23,7 +23,7 @@ test("twoLayer() propogates to both layers", () => {
   ]);
 });
 
-test("twoLayer() propogates down and up", () => {
+test("twoLayer() propagates down and up", () => {
   const layers = createLayers([
     [[1], [1], [0], [1]],
     [[], []]

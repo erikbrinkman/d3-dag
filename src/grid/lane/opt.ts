@@ -52,7 +52,7 @@ function getCompressedWidth(ordered: readonly DagNode[]): number {
       indices[ind] = ny;
     }
 
-    // iterate over children from farthest away to closest assigning inds
+    // iterate over children from farthest away to closest assigning indices
     for (const [child, cy] of [
       ...map(node.ichildren(), (c) => [c, def(c.y)] as const)
     ].sort(([, ay], [, by]) => by - ay)) {
@@ -65,7 +65,7 @@ function getCompressedWidth(ordered: readonly DagNode[]): number {
     }
   }
 
-  // return number of inds necessary
+  // return number of indices necessary
   return indices.length;
 }
 
@@ -185,7 +185,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
         node.x = lanes[ind] ?? 0;
       }
     } else {
-      // otherwise we have to remove the inds that were skipped over
+      // otherwise we have to remove the indices that were skipped over
       const vals = new Set<number>();
       for (const ind of ordered.keys()) {
         vals.add(lanes[ind] ?? 0);
@@ -228,7 +228,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
 export function opt(...args: never[]): OptOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to opt(${args}), but constructor takes no aruguments.`
+      `got arguments to opt(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator(false, true);

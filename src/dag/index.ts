@@ -1,9 +1,9 @@
 /**
  * A {@link Dag} is simply a collection of {@link DagNode}s, defined by every reachable
  * child node from the current returned node.  If a DAG contains multiple
- * roots, then the returned object will not have accessable children or data,
+ * roots, then the returned object will not have accessible children or data,
  * e.g. it will be a {@link Dag} but not a {@link DagNode}. It will still
- * support gettings the roots or iteration over all nodes.
+ * support getting the roots or iteration over all nodes.
  *
  * There are three built-in methods for creating dags from data:
  * {@link HierarchyOperator}, {@link StratifyOperator}, and
@@ -19,7 +19,7 @@ export type IterStyle = "depth" | "breadth" | "before" | "after";
 
 /**
  * A link between nodes, with attached data, and `points` for how to render the
- * link if the {@link Dag} has been laidout.
+ * link if the {@link Dag} has been laid out.
  */
 export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
   readonly source: DagNode<NodeDatum, LinkDatum>;
@@ -43,7 +43,7 @@ export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
  */
 export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
   extends Iterable<DagNode<NodeDatum, LinkDatum>> {
-  /** @internal this is unused, but necessary for typescript to typecheck */
+  /** @internal this is unused, but necessary for typescript to type check */
   __sentinel__?: NodeDatum;
 
   /**
@@ -153,8 +153,8 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
 /**
  * A node in a dag
  *
- * All methods inherented from dag apply as if this node were the sole root of
- * the dag. In adition, nodes have several properties that can be set and read.
+ * All methods inherited from dag apply as if this node were the sole root of
+ * the dag. In addition, nodes have several properties that can be set and read.
  * There are also methods to access this nodes children and links.
  */
 export interface DagNode<NodeDatum = unknown, LinkDatum = unknown>

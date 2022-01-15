@@ -83,7 +83,7 @@ test("connect() parses a more complex square", () => {
   expect(dag.size()).toBeCloseTo(4);
 });
 
-test("connect() parses vee", () => {
+test("connect() parses v", () => {
   const dag = connect()(simpleVee);
   expect(dag.size()).toBeCloseTo(3);
   expect(dag.roots()).toHaveLength(2);

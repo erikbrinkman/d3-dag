@@ -49,7 +49,7 @@ test("hierarchy() parses a simple square", () => {
   expect(leftc).toBe(rightc);
 });
 
-test("hierarchy() parses simple vee", () => {
+test("hierarchy() parses simple v", () => {
   const dag = hierarchy()(...square.children);
   expect(dag.size()).toBeCloseTo(3);
   const [left, right] = dag.iroots();

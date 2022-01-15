@@ -121,7 +121,7 @@ export function minDist(
 
 /**
  * update Q that minimizes curve of edges through a node where curve is
- * calcukates as the squared distance of the middle node from the midpoint of
+ * calculates as the squared distance of the middle node from the midpoint of
  * the first and last, multiplied by four for some reason
  */
 export function minBend(
@@ -170,7 +170,7 @@ export function layout<N, L>(
   }
   const width = finish - start;
 
-  // assign inds based off of span
+  // assign indices based off of span
   for (const layer of layers) {
     for (const node of layer) {
       node.x = Math.min(

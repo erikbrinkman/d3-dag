@@ -1,5 +1,5 @@
 /**
- * {@link CoordOperator}s assign `x` coordinations to every node, while
+ * {@link CoordOperator}s assign `x` coordinates to every node, while
  * respecting the {@link CoordNodeSizeAccessor}.
  *
  * @module
@@ -31,7 +31,7 @@ export interface CoordNodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
  *
  * There are four built-in coordinate assignment operators:
  * - {@link QuadOperator} - positions nodes according to quadratic optimization
- * - {@link GreedyOperator} - positions nodes greedly according to their parent's positions
+ * - {@link GreedyOperator} - positions nodes greedily according to their parent's positions
  * - {@link CenterOperator} - positions nodes close together centering each layer
  * - {@link TopologicalOperator} - positions nodes using quadratic optimization if they were layered using topological layering
  */

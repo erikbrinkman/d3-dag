@@ -20,7 +20,7 @@ import {
   zherebko
 } from "../src";
 
-test("can loosly call the api", () => {
+test("can loosely call the api", () => {
   dagStratify()([{ id: "" }]);
   dagHierarchy()({});
   const dag = dagConnect()([["a", "b"]]);

@@ -32,7 +32,7 @@ export type TopologicalOperator = LayeringOperator<unknown, unknown>;
 export function topological(...args: never[]): TopologicalOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to topological(${args}), but constructor takes no aruguments.`
+      `got arguments to topological(${args}), but constructor takes no arguments.`
     );
   }
 

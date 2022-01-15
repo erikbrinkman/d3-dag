@@ -1,7 +1,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "jest"],
+  "plugins": ["@typescript-eslint", "jest", "spellcheck"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -23,6 +23,67 @@
     "no-warning-comments": [
       "error",
       { "terms": ["fixme"], "location": "anywhere" }
+    ],
+    "spellcheck/spell-checker": [
+      "error",
+      {
+        "identifiers": false,
+        "skipWords": [
+          "Awan",
+          "Azura",
+          "Noam",
+          "accessor",
+          "accessors",
+          "agg",
+          "aggregator",
+          "aggregators",
+          "bidirectionalizes",
+          "bigrams",
+          "bottomup",
+          "coffman",
+          "coffmangraham",
+          "contravariant",
+          "coord",
+          "covariant",
+          "curviness",
+          "customizable",
+          "decross",
+          "decrossed",
+          "decrossing",
+          "decrossings",
+          "dfs",
+          "esnext",
+          "idescendants",
+          "ilinks",
+          "invariants",
+          "iroots",
+          "isplit",
+          "iter",
+          "javascript",
+          "longestpath",
+          "lp",
+          "minimizers",
+          "negatable",
+          "num",
+          "parametrize",
+          "quadprog",
+          "radix",
+          "replacer",
+          "rescale",
+          "rescaled",
+          "resized",
+          "suboptimal",
+          "sugi",
+          "sugify",
+          "sugiyama",
+          "tabularesque",
+          "topdown",
+          "twolayer",
+          "vm",
+          "ys",
+          "zherebko"
+        ]
+      }
     ]
   }
 }

@@ -66,7 +66,7 @@ function buildOperator(options: { topDown: boolean }): LongestPathOperator {
 export function longestPath(...args: never[]): LongestPathOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to longestPath(${args}), but constructor takes no aruguments.`
+      `got arguments to longestPath(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ topDown: true });

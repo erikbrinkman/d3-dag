@@ -26,7 +26,7 @@ type OpLinkDatum<O extends OrderOperator> = LinkDatum<
  * minimization. Customize with a two layer operator with {@link order} or use
  * one of the built-in {@link TwolayerOperator}s.
  *
- * This methos can also make multiple {@link passes} in an attempt to produce a
+ * This method can also make multiple {@link passes} in an attempt to produce a
  * better layout.
  *
  * <img alt="two layer example" src="media://sugi-simplex-twolayer-quad.png" width="400">
@@ -126,7 +126,7 @@ function buildOperator<O extends OrderOperator>(options: {
 export function twoLayer(...args: never[]): TwoLayerOperator<AggOperator> {
   if (args.length) {
     throw new Error(
-      `got arguments to twoLayer(${args}), but constructor takes no aruguments.`
+      `got arguments to twoLayer(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ order: agg(), passes: 1 });

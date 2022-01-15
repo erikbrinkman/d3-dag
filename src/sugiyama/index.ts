@@ -24,7 +24,7 @@ import {
 /**
  * The return from calling {@link SugiyamaOperator}
  *
- * This is the final width and height of the laidout dag.
+ * This is the final width and height of the laid out dag.
  */
 export interface SugiyamaInfo {
   width: number;
@@ -53,7 +53,7 @@ export interface NodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
  * An accessor for computing the size of a node in the layout
  *
  * This interface exposes a full {@link SugiNode}, which has more information
- * about dummy nodes availble in case different dummy nodes should have
+ * about dummy nodes available in case different dummy nodes should have
  * different sizes.
  *
  * For most cases {@link NodeSizeAccessor} should be enough.
@@ -351,7 +351,7 @@ function buildOperator<Ops extends Operators>(
           throw new Error(js`coord didn't assign an x to node '${node}'`);
         } else if (node.x < 0 || node.x > width) {
           throw new Error(
-            `coord assgined an x (${node.x}) outside of [0, ${width}]`
+            `coord assigned an x (${node.x}) outside of [0, ${width}]`
           );
         }
       }
@@ -563,7 +563,7 @@ export function sugiyama(...args: never[]): SugiyamaOperator<{
 }> {
   if (args.length) {
     throw new Error(
-      `got arguments to sugiyama(${args}), but constructor takes no aruguments.`
+      `got arguments to sugiyama(${args}), but constructor takes no arguments.`
     );
   } else {
     return buildOperator({

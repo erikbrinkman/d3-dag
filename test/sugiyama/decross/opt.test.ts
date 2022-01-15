@@ -7,7 +7,7 @@ test("opt() allows setting options", () => {
   expect(decross.dist()).toBeTruthy();
 });
 
-test("opt() propogates to both layers", () => {
+test("opt() propagates to both layers", () => {
   // o o    o o
   //  X     | |
   // o o -> o o

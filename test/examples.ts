@@ -125,7 +125,7 @@ export function three(): Dag<SimpleDatum, undefined> {
   ]);
 }
 
-// simple two soruce dag shaped like an N
+// simple two source dag shaped like an N
 // 0 1
 // |\|
 // 2 3
@@ -222,7 +222,7 @@ export function doubleVee(): Dag<SimpleDatum, undefined> {
   ]);
 }
 
-// simple dag shaped liek an x, requires offset nodes
+// simple dag shaped like an x, requires offset nodes
 // 0
 // |
 // 1   2

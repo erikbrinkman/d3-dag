@@ -72,7 +72,7 @@ interface Indexer {
 }
 
 /**
- * an indexer that only assigns non-negatibe indices
+ * an indexer that only assigns non-negatable indices
  *
  * @internal
  */
@@ -187,7 +187,7 @@ function indexer(compressed: boolean, bidirectional: boolean): Indexer {
  * assign lanes based on top down approach
  *
  * This method assigns lanes to each of nodes children as soon as it finds
- * them, giving the farthest awat children lanes first.
+ * them, giving the farthest away children lanes first.
  *
  * @internal
  */
@@ -228,7 +228,7 @@ function topDownOp(nodes: readonly DagNode[], inds: Indexer): void {
  * assign lanes based on bottom up approach
  *
  * This method assigns a nodes highest parent the same lane as it, and
- * otherwise deferrs from assigning lanes.
+ * otherwise defers from assigning lanes.
  *
  * @internal
  */
@@ -250,7 +250,7 @@ function bottomUpOp(nodes: readonly DagNode[], inds: Indexer): void {
     // if node wasn't a highest parent, find it a lane
     if (node.x === undefined) {
       const target = median(map(node.ichildren(), (c) => c.x));
-      // note wi invert y because we're going bottom up
+      // note we invert y because we're going bottom up
       node.x = inds.getIndex(nodes.length - def(node.y), target);
     }
 
@@ -327,7 +327,7 @@ function buildOperator(
 export function greedy(...args: never[]): GreedyOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to greedy(${args}), but constructor takes no aruguments.`
+      `got arguments to greedy(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator(true, true, false);

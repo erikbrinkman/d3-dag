@@ -26,7 +26,7 @@ export type CenterOperator = CoordOperator<unknown, unknown>;
 export function center(...args: never[]): CenterOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to center(${args}), but constructor takes no aruguments.`
+      `got arguments to center(${args}), but constructor takes no arguments.`
     );
   }
 

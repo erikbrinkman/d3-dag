@@ -10,7 +10,7 @@ import { greedy } from "./greedy";
 /**
  * The return from calling {@link ZherebkoOperator}
  *
- * This is the final width and height of the laidout dag.
+ * This is the final width and height of the laid out dag.
  */
 export interface ZherebkoInfo {
   width: number;
@@ -190,7 +190,7 @@ function buildOperator(
 export function zherebko(...args: never[]): ZherebkoOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to zherebko(${args}), but constructor takes no aruguments.`
+      `got arguments to zherebko(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator(1, 1, 1, null);

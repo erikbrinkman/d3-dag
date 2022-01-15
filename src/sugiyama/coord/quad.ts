@@ -37,7 +37,7 @@ function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
     yield* parents.get(node) || [];
   }
 
-  // dfs over all nodes
+  // depth first search over all nodes
   let component = 0;
   const compMap = new Map<SugiNode, number>();
   for (const layer of layers) {
@@ -56,7 +56,7 @@ function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
 /**
  * If disconnected components exist in the same layer, then we can minimize the
  * distance between them to make a reasonable objective. If, however, layers
- * share no common components then they are truely independent in assignment of
+ * share no common components then they are truly independent in assignment of
  * x coordinates and should be solved separately.
  *
  * @internal
@@ -120,7 +120,7 @@ export interface QuadOperator extends CoordOperator<unknown, unknown> {
    * *regular nodes*, *dummy nodes* ], that impact the curvature through those
    * node types. Setting regular nodes to positive will create a type of flow
    * of edges going through a node, while setting dummy nodes will enforce the
-   * longer edges should try to be stright. (default: [0, 1])
+   * longer edges should try to be straight. (default: [0, 1])
    */
   curve(val: readonly [number, number]): QuadOperator;
   /**
@@ -291,7 +291,7 @@ function buildOperator(options: {
 export function quad(...args: never[]): QuadOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to quad(${args}), but constructor takes no aruguments.`
+      `got arguments to quad(${args}), but constructor takes no arguments.`
     );
   }
 

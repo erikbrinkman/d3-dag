@@ -65,7 +65,7 @@ export const medianFactory = (): Aggregator => new Median();
  * A {@link TwolayerOperator} that orders nodes based off the aggregation of their
  * parents' or children's indices.
  *
- * This is much faster than {@link OptOperator}, and often produces comprable
+ * This is much faster than {@link OptOperator}, and often produces comparable
  * or better layouts. If memory is an issue then {@link meanFactory} uses a
  * little less memory, but there is little reason to use it. Nodes without
  * parents or children respectively will be placed first to minimize the
@@ -81,7 +81,7 @@ export interface AggOperator<Factory extends AggFactory = AggFactory>
   /**
    * Set the {@link AggFactory} for this operator.
    *
-   * The aggregators that this produces are used to fuze the indices of parents
+   * The aggregators that this produces are used to fuse the indices of parents
    * or children of an node into it's target index for ordering. The provided
    * {@link medianFactory} works very well, but {@link meanFactory} works too,
    * as will any user provided method. (default: {@link medianFactory})
@@ -252,7 +252,7 @@ function buildOperator<Factory extends AggFactory>({
 export function agg(...args: never[]): AggOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to agg(${args}), but constructor takes no aruguments.`
+      `got arguments to agg(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ factory: medianFactory });

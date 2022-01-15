@@ -189,7 +189,7 @@ function buildOperator<Ops extends Operators>(
       }
     }
 
-    // NOTE bundling sets `this` to undefined, and we need it to be setable
+    // NOTE bundling sets `this` to undefined, and we need it to be settable
     const { feasible, ...assignment } = Solve.call(
       {},
       {
@@ -203,7 +203,7 @@ function buildOperator<Ops extends Operators>(
     if (!feasible) {
       assert(ranks.length || groups.size);
       throw new Error(
-        "could not find a feasbile simplex layout, check that rank or group accessors are not ill-defined"
+        "could not find a feasible simplex layout, check that rank or group accessors are not ill-defined"
       );
     }
 
@@ -262,7 +262,7 @@ export function simplex(...args: never[]): SimplexOperator<{
 }> {
   if (args.length) {
     throw new Error(
-      `got arguments to simplex(${args}), but constructor takes no aruguments.`
+      `got arguments to simplex(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ rank: defaultAccessor, group: defaultAccessor });

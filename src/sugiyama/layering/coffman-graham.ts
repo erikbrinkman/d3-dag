@@ -130,7 +130,7 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
 export function coffmanGraham(...args: never[]): CoffmanGrahamOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to coffmanGraham(${args}), but constructor takes no aruguments.`
+      `got arguments to coffmanGraham(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ width: 0 });

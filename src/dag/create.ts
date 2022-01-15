@@ -293,7 +293,7 @@ class LayoutDagNode<NodeDatum, LinkDatum>
   }
 
   // NOTE everything extends from iroots, so by overriding this, we allow
-  // dagnodes to work effectively
+  // dag nodes to work effectively
   iroots(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     const singleton = [this];
     return { [Symbol.iterator]: () => singleton[Symbol.iterator]() };
@@ -519,7 +519,7 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
    * the target id, then a single node with no parents will be created.
    * Otherwise a self loop will be created which will result in an error. Note
    * only single nodes without parents or children need to be specified this
-   * way, otherwise any other connection to a node will creat it. (default: false)
+   * way, otherwise any other connection to a node will create it. (default: false)
    */
   single(val: boolean): ConnectOperator<Ops>;
   /** get the current single node setting. */
@@ -637,7 +637,7 @@ function defaultSourceId(d: ZeroString): string {
   }
 }
 
-/** default interface for functions whos second element is a string */
+/** default interface for functions whose second element is a string */
 export interface OneString {
   readonly [1]: string;
 }
@@ -670,7 +670,7 @@ export function connect(...args: never[]): ConnectOperator<{
 }> {
   if (args.length) {
     throw new Error(
-      `got arguments to connect(${args}), but constructor takes no aruguments. ` +
+      `got arguments to connect(${args}), but constructor takes no arguments. ` +
         "These were probably meant as data which should be called as connect()(...)"
     );
   } else {
@@ -705,7 +705,7 @@ export interface ChildrenOperator<NodeDatum> {
 /**
  * The interface for getting children data and associated link data from node
  * data. This function must return data for every child of the given node, and
- * data for link between the two. `i` will increment for each node processesed.
+ * data for link between the two. `i` will increment for each node processed.
  *
  * Can be modified with {@link childrenData}.
  */
@@ -916,7 +916,7 @@ function buildHierarchy<N, Ops extends HierarchyOperators<N>>(
       );
     }
 
-    // verifty roots are roots
+    // verify roots are roots
     const rootSet = new Set(roots);
     for (const node of mapping.values()) {
       for (const child of node.ichildren()) {
@@ -1039,7 +1039,7 @@ export function hierarchy(
 ): ChildrenHierarchyOperator<HasChildren, ChildrenOperator<HasChildren>> {
   if (args.length) {
     throw new Error(
-      `got arguments to hierarchy(${args}), but constructor takes no aruguments. ` +
+      `got arguments to hierarchy(${args}), but constructor takes no arguments. ` +
         "These were probably meant as data which should be called as hierarchy()(...)"
     );
   } else {
@@ -1433,7 +1433,7 @@ export function stratify(...args: never[]): StratifyOperator<{
 }> {
   if (args.length) {
     throw new Error(
-      `got arguments to stratify(${args}), but constructor takes no aruguments. ` +
+      `got arguments to stratify(${args}), but constructor takes no arguments. ` +
         "These were probably meant as data which should be called as stratify()(...)"
     );
   } else {

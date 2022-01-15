@@ -20,7 +20,7 @@ export function getLayers(dag: Dag<{ id: string }>): number[][] {
 
 /**
  * Arrange an array based off the indices of its elements. This is loosely a
- * very simple inplace radix sort. It uses an O(n) additional cache to avoid
+ * very simple in-place radix sort. It uses an O(n) additional cache to avoid
  * calling `ind` more than once per element.
  */
 function arrange<T>(array: T[], ind: (elem: T) => number): T[] {
@@ -92,7 +92,7 @@ export function createLayers(
       }
       assert(next !== undefined);
 
-      // store dummy indicies
+      // store dummy indices
       for (const [i, index] of dummies.entries()) {
         const dinds = dummyInds[datum.layer + i + 1];
         const key = [datum.layer, datum.index, layer, ind].join(",");

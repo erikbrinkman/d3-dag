@@ -77,7 +77,7 @@ function buildOperator(options: {
     );
     if (options.large !== "large" && numVars > 1200) {
       throw new Error(
-        `size of dag to decrossOpt is too large and will likely crash instead of complete, enable "large" grahps to run anyway`
+        `size of dag to decrossOpt is too large and will likely crash instead of complete, enable "large" graphs to run anyway`
       );
     } else if (
       options.large !== "large" &&
@@ -85,7 +85,7 @@ function buildOperator(options: {
       (numVars > 400 || numEdges > 100)
     ) {
       throw new Error(
-        `size of dag to decrossOpt is too large and will likely not complete, enable "medium" grahps to run anyway`
+        `size of dag to decrossOpt is too large and will likely not complete, enable "medium" graphs to run anyway`
       );
     }
 
@@ -119,7 +119,7 @@ function buildOperator(options: {
     }
 
     // NOTE distance cost for an unconstrained node ina group can't violate
-    // all pairs at once, so cose is ~(n/2)^2 not n(n-1)/2
+    // all pairs at once, so cost is ~(n/2)^2 not n(n-1)/2
     const maxDistCost =
       distanceConstraints.reduce(
         (cost, [unc, gs]) =>
@@ -309,7 +309,7 @@ function buildOperator(options: {
     }
 
     // solve objective
-    // NOTE bundling sets this to undefined, and we need it to be setable
+    // NOTE bundling sets this to undefined, and we need it to be settable
     const ordering = Solve.call({}, model);
 
     // sort layers
@@ -349,7 +349,7 @@ function buildOperator(options: {
 export function opt(...args: never[]): OptOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to opt(${args}), but constructor takes no aruguments.`
+      `got arguments to opt(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ large: "small", dist: false });

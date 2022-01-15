@@ -1,4 +1,4 @@
-// TODO when tpes are published as part of package, use those instead
+// TODO when types are published as part of package, use those instead
 declare module "javascript-lp-solver" {
   export interface Constraint {
     min?: number;

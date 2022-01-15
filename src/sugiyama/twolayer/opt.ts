@@ -13,7 +13,7 @@ import { SugiNode } from "../utils";
 /**
  * How to handle large dags
  *
- * Setting this higher than `"small"` may result in very long runtimes or
+ * Setting this higher than `"small"` may result in very long run times or
  * crashes.
  */
 export type LargeHandling = "small" | "medium" | "large";
@@ -123,7 +123,7 @@ function buildOperator(options: {
       groups = [...parents.values()];
     }
     // NOTE distance cost for an unconstrained node ina group can't violate
-    // all pairs at once, so cose is ~(n/2)^2 not n(n-1)/2
+    // all pairs at once, so the cost is ~(n/2)^2 not n(n-1)/2
     const groupSize = groups.reduce((t, cs) => t + cs.length * cs.length, 0);
     const maxDistCost = (groupSize * unconstrained.length) / 4;
     const distWeight = 1 / (maxDistCost + 1);
@@ -198,7 +198,7 @@ function buildOperator(options: {
 
     // add distance minimization
     if (options.dist) {
-      // NOTE this works by looking at tripples of nodes with a common ancestor
+      // NOTE this works by looking at triples of nodes with a common ancestor
       // (parent / child) and an unconstrained node. We add a slack variable
       // responsible for the cost to the objective with a weight such that if
       // all constraints are violated, it's still less than one crossing. We
@@ -250,7 +250,7 @@ function buildOperator(options: {
     }
 
     // solve objective
-    // NOTE bundling sets this to undefined, and we need it to be setable
+    // NOTE bundling sets this to undefined, and we need it to be settable
     const ordering = Solve.call({}, model);
 
     // sort layers
@@ -288,7 +288,7 @@ function buildOperator(options: {
 export function opt(...args: never[]): OptOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to opt(${args}), but constructor takes no aruguments.`
+      `got arguments to opt(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator({ large: "small", dist: false });

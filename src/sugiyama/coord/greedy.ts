@@ -32,7 +32,7 @@ export type GreedyOperator = CoordOperator<unknown, unknown>;
 export function greedy(...args: never[]): GreedyOperator {
   if (args.length) {
     throw new Error(
-      `got arguments to greedy(${args}), but constructor takes no aruguments.`
+      `got arguments to greedy(${args}), but constructor takes no arguments.`
     );
   }
 
@@ -132,7 +132,7 @@ export function greedy(...args: never[]): GreedyOperator {
 
 // TODO this is very similar to the twolayerMean method, there might be a
 // clever way to combine then, but it's not immediately obvious since twolayer
-// uses the index of toplayer, and this uses the x value
+// uses the index of top layer, and this uses the x value
 /** @internal */
 function meanAssignment(topLayer: SugiNode[], bottomLayer: SugiNode[]): void {
   for (const node of bottomLayer) {

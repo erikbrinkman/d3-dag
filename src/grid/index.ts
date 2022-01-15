@@ -17,7 +17,7 @@ type OpLinkDatum<L extends LaneOperator> = LinkDatum<OpDagNode<L>>;
 /**
  * The return from calling {@link GridOperator}
  *
- * This is the final width and height of the laidout dag.
+ * This is the final width and height of the laid out dag.
  */
 export interface GridInfo {
   width: number;
@@ -100,7 +100,7 @@ function verifyLanes(ordered: DagNode[]): number {
     if (node.x === undefined) {
       throw new Error(js`coord didn't assign an x to node '${node}'`);
     } else if (node.x < 0) {
-      throw new Error(`coord assgined an x (${node.x}) less than 0`);
+      throw new Error(`coord assigned an x (${node.x}) less than 0`);
     }
   }
 
@@ -242,7 +242,7 @@ function buildOperator<L extends LaneOperator>(
 export function grid(...args: never[]): GridOperator<GreedyOperator> {
   if (args.length) {
     throw new Error(
-      `got arguments to grid(${args}), but constructor takes no aruguments.`
+      `got arguments to grid(${args}), but constructor takes no arguments.`
     );
   }
   return buildOperator(greedy(), 1, 1, null);

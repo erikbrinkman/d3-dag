@@ -42,7 +42,7 @@ test("grid() throws for invalid lane operators", () => {
     }
   }
   const neg = grid().lane(negOp);
-  expect(() => neg(dag)).toThrow("assgined an x (-1) less than 0");
+  expect(() => neg(dag)).toThrow("assigned an x (-1) less than 0");
 
   function skipOp(ordered: readonly DagNode[]) {
     for (const [i, n] of ordered.entries()) {

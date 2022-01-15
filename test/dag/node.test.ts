@@ -78,10 +78,10 @@ test("idescendants('breadth') is correct for square", () => {
   ]).toContainEqual(breadthIds);
 });
 
-test("idescendants('unk') throws", () => {
+test("idescendants(unknown) throws", () => {
   const dag = single();
-  expect(() => dag.idescendants("unk" as "depth")).toThrow(
-    "unknown iteration style: unk"
+  expect(() => dag.idescendants("unknown" as "depth")).toThrow(
+    "unknown iteration style: unknown"
   );
 });
 
@@ -315,7 +315,7 @@ test("split() is correct for point", () => {
   expect(split).toBe(dag);
 });
 
-test("split() is correct for doub", () => {
+test("split() is correct for two independent nodes", () => {
   const dag = doub();
   const roots = new Set(dag.iroots());
   const isplit = new Set(dag.isplit());
