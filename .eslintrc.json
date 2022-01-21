@@ -8,6 +8,9 @@
     "plugin:jest/recommended",
     "prettier"
   ],
+  "env": {
+    "node": true
+  },
   "rules": {
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -40,6 +43,7 @@
           "bidirectionalizes",
           "bigrams",
           "bottomup",
+          "cjs",
           "coffman",
           "coffmangraham",
           "contravariant",
@@ -52,8 +56,10 @@
           "decrossing",
           "decrossings",
           "dfs",
+          "esm",
           "esnext",
           "idescendants",
+          "iife",
           "ilinks",
           "invariants",
           "iroots",

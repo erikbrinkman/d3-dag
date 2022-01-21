@@ -1,7 +1,12 @@
-import * as d3types from "./src";
 import * as d3runtime from ".";
-import { createLayers, getIndex, getLayers, nodeSize } from "./test/sugiyama/utils";
+import * as d3types from "./src";
 import { square } from "./test/examples";
+import {
+  createLayers,
+  getIndex,
+  getLayers,
+  nodeSize
+} from "./test/sugiyama/utils";
 
 // so that the runtime types align with the test utilties types
 const d3dag = d3runtime as unknown as typeof d3types;
