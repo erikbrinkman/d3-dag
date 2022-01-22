@@ -11,7 +11,7 @@ import { def } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**
- * Am interface for aggregating numbers
+ * An interface for aggregating numbers
  */
 export interface Aggregator {
   add(inp: number): void;

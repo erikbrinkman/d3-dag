@@ -105,7 +105,7 @@ export interface LinkWeightAccessor<NodeDatum = never, LinkDatum = never> {
 }
 
 /**
- * a {@link NodeAccessor} or {@link LinkAccessor} that returns a constant value
+ * a {@link NodeWeightAccessor} or {@link LinkWeightAccessor} that returns a constant value
  *
  * If using a constant value, this provides some small memory and time savings
  * over a regular accessor.

@@ -9,6 +9,7 @@ import { TwolayerOperator } from ".";
 import { length } from "../../iters";
 import { def } from "../../utils";
 import { SugiNode } from "../utils";
+import { getParents } from "./utils";
 
 /**
  * How to handle large dags
@@ -109,17 +110,7 @@ function buildOperator(options: {
         .filter((cs) => cs.length > 1);
     } else {
       unconstrained = topLayer.filter((n) => !length(n.ichildren()));
-      const parents = new Map<SugiNode, SugiNode[]>();
-      for (const node of topLayer) {
-        for (const child of node.ichildren()) {
-          const group = parents.get(child);
-          if (group) {
-            group.push(node);
-          } else {
-            parents.set(child, [node]);
-          }
-        }
-      }
+      const parents = getParents(topLayer);
       groups = [...parents.values()];
     }
     // NOTE distance cost for an unconstrained node ina group can't violate

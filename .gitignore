@@ -5,6 +5,7 @@
 /node_modules
 /coverage
 /yarn-error.log
+/.eslintcache
 .pnp.*
 .yarn/*
 !.yarn/patches

@@ -35,7 +35,7 @@
   "scripts": {
     "prettier": "prettier {src,test,test-d,types}/**/*.ts {,.}*.{json,mjs,ts}",
     "fmt": "yarn prettier --write",
-    "lint": "yarn prettier --check && eslint {src,test,test-d,types}/**/*.ts *.mjs",
+    "lint": "yarn prettier --check && eslint --cache {src,test,test-d,types}/**/*.ts *.mjs",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "bundle": "rm -rf bundle && node bundle.mjs",
     "test": "tsc && yarn lint && jest /test --coverage && yarn build && tsd && yarn bundle && jest bundle.test.ts",

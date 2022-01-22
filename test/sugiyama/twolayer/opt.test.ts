@@ -63,6 +63,18 @@ test("opt() works where median is suboptimal bottom-up", () => {
   expect(inds).toEqual([3, 2, 0, 1]);
 });
 
+test("opt() works where greedy scan is suboptimal", () => {
+  const [topLayer, bottomLayer] = createLayers([
+    [[0, 3, 4], [1, 4], [2]],
+    [[], [], [], [], []]
+  ]);
+  const layout = opt();
+  layout(topLayer, bottomLayer, false);
+  expect(crossings([topLayer, bottomLayer])).toBeCloseTo(4);
+  const inds = topLayer.map(getIndex);
+  expect(inds).toEqual([2, 0, 1]);
+});
+
 test("opt() preserves order of easy unconstrained nodes", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [2]],

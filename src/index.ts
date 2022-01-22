@@ -108,8 +108,12 @@ export {
   agg as twolayerAgg,
   meanFactory as aggMeanFactory,
   medianFactory as aggMedianFactory,
-  type AggOperator
+  type AggOperator as AggTwolayerOperator
 } from "./sugiyama/twolayer/agg";
+export {
+  greedy as twolayerGreedy,
+  type GreedyOperator as GreedyTwolayerOperator
+} from "./sugiyama/twolayer/greedy";
 export {
   opt as twolayerOpt,
   type OptOperator as OptTwolayerOperator

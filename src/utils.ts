@@ -86,9 +86,7 @@ export function js(
 }
 
 /** iterate over bigrams of an array */
-export function* bigrams<T>(
-  array: readonly T[]
-): Generator<readonly [T, T], void> {
+export function* bigrams<T>(array: readonly T[]): IterableIterator<[T, T]> {
   let [first, ...rest] = array;
   for (const second of rest) {
     yield [first, second];
