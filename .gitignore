@@ -16,3 +16,4 @@
 # Typescript #
 ##############
 /src/**/*.js
+/tsconfig.tsbuildinfo
