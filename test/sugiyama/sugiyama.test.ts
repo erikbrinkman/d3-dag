@@ -233,7 +233,7 @@ test("sugiyama() throws with bad coord width", () => {
     return 1; // 1 < 2
   });
   expect(() => layout(dag)).toThrow(
-    "coord assigned an x (2) outside of [0, 1]"
+    "coord assigned an x (2) greater than width (1)"
   );
 });
 

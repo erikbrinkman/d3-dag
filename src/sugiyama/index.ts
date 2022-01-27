@@ -4,8 +4,7 @@
  * @module
  */
 import { Dag, DagNode } from "../dag";
-import { map } from "../iters";
-import { assert, def, js, Up } from "../utils";
+import { js, Up } from "../utils";
 import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
 import { quad, QuadOperator } from "./coord/quad";
 import { DecrossOperator } from "./decross";
@@ -16,9 +15,12 @@ import { AggOperator } from "./twolayer/agg";
 import {
   LinkDatum,
   NodeDatum,
+  scaleLayers,
   SugiDataDagNode,
   sugify,
-  SugiNode
+  SugiNode,
+  unsugify,
+  verifyCoordAssignment
 } from "./utils";
 
 /**
@@ -78,7 +80,12 @@ export interface WrappedNodeSizeAccessor<NodeSize extends NodeSizeAccessor>
   wrapped: NodeSize;
 }
 
-function wrapNodeSizeAccessor<NS extends NodeSizeAccessor>(
+/**
+ * wrap a {@link NodeSizeAccessor} turning it into an {@link SugiNodeSizeAccessor}
+ *
+ * Mostly useful for running the steps of {@link sugiyama} independently.
+ */
+export function wrapNodeSizeAccessor<NS extends NodeSizeAccessor>(
   acc: NS
 ): WrappedNodeSizeAccessor<NS> {
   const empty = acc();
@@ -143,6 +150,14 @@ type OpsDag<Ops extends Operators> = Dag<
  * valid.
  *
  * Create with {@link sugiyama}.
+ *
+ * @remarks
+ *
+ * If one wants even more control over the algorithm, each step is broken down
+ * in the source code and can be achieved by calling an exported utility
+ * function. If one wants to call certain pieces incrementally, or adjust how
+ * things are called, it's recommended to look at the source and call each
+ * component function successively.
  *
  * @example
  *
@@ -279,12 +294,19 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
 }
 
 /**
- * A checked and cached node size accessor wrapper.
+ * Verify, cache, and split the results of an {@link SugiNodeSizeAccessor} into
+ * an x and y {@link CoordNodeSizeAccessor}.
  *
- * @internal
+ * This allows you to split an {@link SugiNodeSizeAccessor} into independent x
+ * and y accessors, while also caching the result to prevent potentially
+ * expensive computation from being duplicated.
+ *
+ * The only real reason to use this would be to run the steps of {@link
+ * sugiyama} independently.
  */
-function cachedNodeSize<N, L>(
-  nodeSize: SugiNodeSizeAccessor<N, L>
+export function cachedNodeSize<N, L>(
+  nodeSize: SugiNodeSizeAccessor<N, L>,
+  check: boolean = true
 ): readonly [CoordNodeSizeAccessor<N, L>, CoordNodeSizeAccessor<N, L>] {
   const cache = new Map<SugiNode, readonly [number, number]>();
 
@@ -293,7 +315,7 @@ function cachedNodeSize<N, L>(
     if (val === undefined) {
       val = nodeSize(node);
       const [width, height] = val;
-      if (width < 0 || height < 0) {
+      if (check && (width < 0 || height < 0)) {
         throw new Error(
           js`all node sizes must be non-negative, but got width ${width} and height ${height} for node '${node}'`
         );
@@ -309,6 +331,28 @@ function cachedNodeSize<N, L>(
   return [cachedX, cachedY];
 }
 
+/**
+ * Given layers and node heights, assign y coordinates.
+ *
+ * This is only exported so that each step of {@link sugiyama} can be executed
+ * independently or controlled. In the future it may make sense to make
+ * vertical coordinates part of the sugiyama operators.
+ */
+export function verticalCoord<N, L>(
+  layers: readonly (readonly SugiNode<N, L>[])[],
+  size: CoordNodeSizeAccessor<N, L>
+): number {
+  let height = 0;
+  for (const layer of layers) {
+    const layerHeight = Math.max(...layer.map(size));
+    for (const node of layer) {
+      node.y = height + layerHeight / 2;
+    }
+    height += layerHeight;
+  }
+  return height;
+}
+
 /** @internal */
 function buildOperator<Ops extends Operators>(
   options: Ops & {
@@ -322,16 +366,11 @@ function buildOperator<Ops extends Operators>(
     // create layers
     const layers = sugify(dag);
 
-    // assign y
+    // cache and split node sizes
     const [xSize, ySize] = cachedNodeSize(options.sugiNodeSize);
-    let height = 0;
-    for (const layer of layers) {
-      const layerHeight = Math.max(...layer.map(ySize));
-      for (const node of layer) {
-        node.y = height + layerHeight / 2;
-      }
-      height += layerHeight;
-    }
+
+    // assign y
+    let height = verticalCoord(layers, ySize);
     if (height <= 0) {
       throw new Error(
         "at least one node must have positive height, but total height was zero"
@@ -345,62 +384,18 @@ function buildOperator<Ops extends Operators>(
     let width = options.coord(layers, xSize);
 
     // verify
-    for (const layer of layers) {
-      for (const node of layer) {
-        if (node.x === undefined) {
-          throw new Error(js`coord didn't assign an x to node '${node}'`);
-        } else if (node.x < 0 || node.x > width) {
-          throw new Error(
-            `coord assigned an x (${node.x}) outside of [0, ${width}]`
-          );
-        }
-      }
-    }
+    verifyCoordAssignment(layers, width);
 
     // scale x
     if (options.size !== null) {
       const [newWidth, newHeight] = options.size;
-      for (const layer of layers) {
-        for (const node of layer) {
-          assert(node.x !== undefined && node.y !== undefined);
-          node.x *= newWidth / width;
-          node.y *= newHeight / height;
-        }
-      }
+      scaleLayers(layers, newWidth / width, newHeight / height);
       width = newWidth;
       height = newHeight;
     }
 
     // Update original dag with values
-    for (const layer of layers) {
-      for (const sugi of layer) {
-        assert(sugi.x !== undefined && sugi.y !== undefined);
-        if ("target" in sugi.data) continue;
-        sugi.data.node.x = sugi.x;
-        sugi.data.node.y = sugi.y;
-
-        const pointsMap = new Map(
-          map(
-            sugi.data.node.ichildLinks(),
-            ({ points, target }) => [target, points] as const
-          )
-        );
-        for (let child of sugi.ichildren()) {
-          const points = [{ x: sugi.x, y: sugi.y }];
-          while ("target" in child.data) {
-            assert(child.x !== undefined && child.y !== undefined);
-            points.push({ x: child.x, y: child.y });
-            [child] = child.ichildren();
-          }
-          assert(child.x !== undefined && child.y !== undefined);
-          points.push({ x: child.x, y: child.y });
-
-          // update
-          const assign = def(pointsMap.get(child.data.node));
-          assign.splice(0, assign.length, ...points);
-        }
-      }
-    }
+    unsugify(layers);
 
     // layout info
     return { width, height };

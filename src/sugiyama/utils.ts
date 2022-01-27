@@ -66,12 +66,21 @@ function vlayer(node: DagNode): number {
 }
 
 /**
- * Convert a layered dag (one where each node has a non-negative integer value
- * that corresponds to its layer) into a layered set of sugi nodes, which
- * contain the wrapped nodes for real nodes, or links to the source and target
- * nodes for dummy nodes.
+ * Create a dag of layered {@link SugiNode}s from a layered dag.
  *
- * @internal
+ * Internally the {@link sugiyama} layout converts a dag into {@link SugiNode}s
+ * to store metadata about the layout before copying the data back to the
+ * original dag. {@link SugiNode}s are normal dag nodes who's data have a
+ * special relation to the underlying dag's structure. Each new node contain
+ * the wrapped nodes for real nodes, or links to the source and target nodes
+ * for dummy nodes.
+ *
+ * This method returns the nodes in their appropriate layers. After updating
+ * metadata on the layered nodes, call {@link unsugify} to copy the data to the
+ * underling dag.
+ *
+ * The only reason to use this is if calling parts of the sugiyama chain
+ * independently.
  */
 export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
   // NOTE we need to cache so that the returned 'SugiData' are the same
@@ -116,4 +125,95 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
     assert(layer && layer.length);
   }
   return layers;
+}
+
+/**
+ * Copy layout from a layered sugiyama dag back to it's underling dag.
+ *
+ * For normal nodes this just sets their x and y equal to the {@link
+ * SugiNode}'s x and y. Chains of dummy nodes have their x and y's copied over
+ * the link's points attribute.
+ *
+ * The only reason to call this is if laying out parts of the {@link sugiyama}
+ * method independently.
+ */
+export function unsugify(layers: readonly (readonly SugiNode[])[]): void {
+  for (const layer of layers) {
+    for (const sugi of layer) {
+      assert(sugi.x !== undefined && sugi.y !== undefined);
+      if ("target" in sugi.data) continue;
+      sugi.data.node.x = sugi.x;
+      sugi.data.node.y = sugi.y;
+
+      const pointsMap = new Map(
+        map(
+          sugi.data.node.ichildLinks(),
+          ({ points, target }) => [target, points] as const
+        )
+      );
+      for (let child of sugi.ichildren()) {
+        const points = [{ x: sugi.x, y: sugi.y }];
+        while ("target" in child.data) {
+          assert(child.x !== undefined && child.y !== undefined);
+          points.push({ x: child.x, y: child.y });
+          [child] = child.ichildren();
+        }
+        assert(child.x !== undefined && child.y !== undefined);
+        points.push({ x: child.x, y: child.y });
+
+        // update
+        const assign = def(pointsMap.get(child.data.node));
+        assign.splice(0, assign.length, ...points);
+      }
+    }
+  }
+}
+
+/**
+ * Verify that x coordinates of a layering are consistent
+ *
+ * Note, we don't verify that node widths were respected.
+ */
+export function verifyCoordAssignment(
+  layers: readonly (readonly SugiNode[])[],
+  width: number
+): void {
+  for (const layer of layers) {
+    let last = 0;
+    for (const node of layer) {
+      if (node.x === undefined) {
+        throw new Error(js`coord didn't assign an x to node '${node}'`);
+      } else if (node.x < last) {
+        throw new Error(
+          js`coord assigned an x (${node.x}) smaller than a previous node in the layer '${node}'`
+        );
+      }
+      last = node.x;
+    }
+    if (last > width) {
+      throw new Error(
+        `coord assigned an x (${last}) greater than width (${width})`
+      );
+    }
+  }
+}
+
+/**
+ * Scale the x and y of a layered dag
+ *
+ * Note that this only scales the x and y of nodes, not of link points, so this
+ * is often called on layered {@link SugiNode}s before calling {@link unsugify}.
+ */
+export function scaleLayers(
+  layers: readonly (readonly DagNode[])[],
+  xscale: number,
+  yscale: number
+): void {
+  for (const layer of layers) {
+    for (const node of layer) {
+      assert(node.x !== undefined && node.y !== undefined);
+      node.x *= xscale;
+      node.y *= yscale;
+    }
+  }
 }
