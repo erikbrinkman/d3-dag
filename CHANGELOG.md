@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - A way to specify node data for the `connect` operator.
+- Node and link level customizations to the `quad` operator allowing one to specify certain edges be more vertical.
 - All of the internals of `sugiyama` are exposed in the ES6 module api making it possible to selectively run or rerun different parts of the sugiyama layout. This may make incremental updates or interactivity easier.
 
 ### Changed

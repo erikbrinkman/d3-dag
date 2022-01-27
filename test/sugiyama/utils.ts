@@ -53,7 +53,7 @@ export function getIndex(
 /** create layers for test dag */
 export function createLayers(
   children: (number[] | number)[][]
-): SugiNode<TestDatum>[][] {
+): SugiNode<TestDatum, undefined>[][] {
   // easy checks
   assert(children.length);
   for (const first of children[0]) {

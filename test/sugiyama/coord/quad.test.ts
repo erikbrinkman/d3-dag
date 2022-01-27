@@ -1,7 +1,10 @@
-import { quad } from "../../../src/sugiyama/coord/quad";
+import { DagLink } from "../../../src/dag";
+import { createConstAccessor, quad } from "../../../src/sugiyama/coord/quad";
 import { createLayers, nodeSize } from "../utils";
 
 test("quad() modifiers work", () => {
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
+
   const vert = [0.1, 0.2] as const;
   const curv = [0.3, 0.4] as const;
   const comp = 0.5;
@@ -9,6 +12,24 @@ test("quad() modifiers work", () => {
   expect(layout.vertical()).toEqual(vert);
   expect(layout.curve()).toEqual(curv);
   expect(layout.component()).toEqual(comp);
+  layout(layers, nodeSize);
+
+  const vertWeak = () => 2;
+  const vertStrong = () => 3;
+  const linkCurve = () => 4;
+  const nodeCurve = () => 5;
+  const advanced = layout
+    .vertWeak(vertWeak)
+    .vertStrong(vertStrong)
+    .linkCurve(linkCurve)
+    .nodeCurve(nodeCurve);
+  expect(advanced.vertWeak()).toBe(vertWeak);
+  expect(advanced.vertStrong()).toBe(vertStrong);
+  expect(advanced.linkCurve()).toBe(linkCurve);
+  expect(advanced.nodeCurve()).toBe(nodeCurve);
+  expect(advanced.vertical()).toBe(null);
+  expect(advanced.curve()).toBe(null);
+  advanced(layers, nodeSize);
 });
 
 test("quad() works for square like layout", () => {
@@ -64,18 +85,39 @@ test("quad() fails with invalid weights", () => {
 });
 
 test("quad() fails with two node zeros", () => {
-  const layers = createLayers([[[]]]);
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const layout = quad().vertical([0, 1]).curve([0, 1]);
   expect(() => layout(layers, nodeSize)).toThrow(
-    "node vertical weight or node curve weight needs to be positive"
+    "quad objective wasn't well defined"
   );
 });
 
-test("quad() fails with two dummy zeros", () => {
-  const layers = createLayers([[[]]]);
-  const layout = quad().vertical([1, 0]).curve([1, 0]);
+test("quad() fails with non-const value vertWeak", () => {
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
+
+  const vertWeak = ({ source, target }: DagLink<{ index: number }, unknown>) =>
+    source.data.index + target.data.index;
+  vertWeak.value = 1;
+
+  const layout = quad().vertWeak(vertWeak);
   expect(() => layout(layers, nodeSize)).toThrow(
-    "dummy vertical weight or dummy curve weight needs to be positive"
+    "passed in a vertWeak accessor with a `value` property that wasn't a const accessor"
+  );
+});
+
+test("quad() fails with negative link weight", () => {
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
+  const layout = quad().linkCurve(() => -1);
+  expect(() => layout(layers, nodeSize)).toThrow(
+    "link weights must be non-negative"
+  );
+});
+
+test("quad() fails with negative node weight", () => {
+  const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
+  const layout = quad().nodeCurve(() => -1);
+  expect(() => layout(layers, nodeSize)).toThrow(
+    "node weights must be non-negative"
   );
 });
 
@@ -87,5 +129,11 @@ test("quad() throws for zero width", () => {
   const layers = createLayers([[[]]]);
   expect(() => quad()(layers, () => 0)).toThrow(
     "must assign nonzero width to at least one node"
+  );
+});
+
+test("createConstAccessor() throws for negative value", () => {
+  expect(() => createConstAccessor(-1)).toThrow(
+    "const accessors should return non-negative values"
   );
 });

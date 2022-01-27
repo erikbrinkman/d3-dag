@@ -6,7 +6,7 @@
  */
 import { solveQP } from "quadprog";
 import { CoordNodeSizeAccessor } from ".";
-import { assert, bigrams, def } from "../../utils";
+import { bigrams, def } from "../../utils";
 import { SugiNode } from "../utils";
 
 /** wrapper for solveQP */
@@ -41,7 +41,9 @@ function qp(
   bvec.push(...b.map((v) => -v));
 
   const { solution, message } = solveQP(Dmat, dvec, Amat, bvec, meq);
-  assert(!message.length);
+  if (message.length) {
+    throw new Error(`quadratic program failed: ${message}`);
+  }
   solution.shift();
   return solution;
 }

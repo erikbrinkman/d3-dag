@@ -6,7 +6,7 @@
 import { Dag, DagNode } from "../dag";
 import { js, Up } from "../utils";
 import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
-import { quad, QuadOperator } from "./coord/quad";
+import { DefaultQuadOperator, quad } from "./coord/quad";
 import { DecrossOperator } from "./decross";
 import { DefaultTwoLayerOperator, twoLayer } from "./decross/two-layer";
 import { LayeringOperator } from "./layering";
@@ -524,7 +524,7 @@ function defaultNodeSize(node?: DagNode): [number, number] {
 export type DefaultSugiyamaOperator = SugiyamaOperator<{
   layering: DefaultSimplexOperator;
   decross: DefaultTwoLayerOperator;
-  coord: QuadOperator;
+  coord: DefaultQuadOperator;
   sugiNodeSize: WrappedNodeSizeAccessor<DefaultNodeSizeAccessor>;
   nodeSize: DefaultNodeSizeAccessor;
 }>;

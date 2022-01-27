@@ -1,18 +1,21 @@
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-import { Dag } from "../../../src/dag";
-import { GroupAccessor, RankAccessor } from "../../../src/sugiyama/layering";
+import {
+  GroupAccessor,
+  LayeringOperator,
+  RankAccessor
+} from "../../../src/sugiyama/layering";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
 
 const init = simplex();
-expectAssignable<(inp: Dag) => void>(init);
+expectAssignable<LayeringOperator<unknown, unknown>>(init);
 
 interface MyRank extends RankAccessor<{ rank: number }, { link: true }> {
   myRank: true;
 }
 declare const myRank: MyRank;
 const rank = init.rank(myRank);
-expectAssignable<(inp: Dag<{ rank: number }, { link: true }>) => void>(rank);
-expectNotAssignable<(inp: Dag) => void>(rank);
+expectAssignable<LayeringOperator<{ rank: number }, { link: true }>>(rank);
+expectNotAssignable<LayeringOperator<unknown, unknown>>(rank);
 expectType<MyRank>(rank.rank());
 
 interface MyGroup extends GroupAccessor<{ group: string }, { info: string }> {
@@ -21,12 +24,11 @@ interface MyGroup extends GroupAccessor<{ group: string }, { info: string }> {
 declare const myGroup: MyGroup;
 const group = rank.group(myGroup);
 expectAssignable<
-  (
-    inp: Dag<{ rank: number; group: string }, { link: true; info: string }>
-  ) => void
+  LayeringOperator<
+    { rank: number; group: string },
+    { link: true; info: string }
+  >
 >(group);
-expectNotAssignable<(inp: Dag<{ rank: number }, { link: true }>) => void>(
-  group
-);
+expectNotAssignable<LayeringOperator<{ rank: number }, { link: true }>>(group);
 expectType<MyRank>(group.rank());
 expectType<MyGroup>(group.group());
