@@ -120,7 +120,7 @@ export function createLayers(
       if ("node" in node.data) {
         return node.data.node.data.index;
       } else {
-        const { source, target } = node.data;
+        const { source, target } = node.data.link;
         const key = [
           source.data.layer,
           source.data.index,

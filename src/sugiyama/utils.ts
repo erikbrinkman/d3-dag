@@ -7,7 +7,7 @@
  *
  * @module
  */
-import { Dag, DagNode } from "../dag";
+import { Dag, DagLink, DagNode } from "../dag";
 import { hierarchy } from "../dag/create";
 import { map } from "../iters";
 import { assert, def, js } from "../utils";
@@ -24,8 +24,7 @@ export type SugiData<NodeDatum = unknown, LinkDatum = unknown> =
   | { layer: number; node: DagNode<NodeDatum, LinkDatum> }
   | {
       layer: number;
-      source: DagNode<NodeDatum, LinkDatum>;
-      target: DagNode<NodeDatum, LinkDatum>;
+      link: DagLink<NodeDatum, LinkDatum>;
     };
 /**
  * A {@link DagNode} with {@link SugiData}
@@ -94,16 +93,15 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
   // children function
   function augment(data: SugiData<N, L>): SugiData<N, L>[] {
     const layer = data.layer + 1;
-    const targets = "node" in data ? data.node.children() : [data.target];
-    const source = "node" in data ? data.node : data.source;
-    return targets.map((target) => {
-      const datum = def(cache.get(target));
+    const links = "node" in data ? data.node.childLinks() : [data.link];
+    return links.map((link) => {
+      const datum = def(cache.get(link.target));
       if (datum.layer < layer) {
         throw new Error(
-          js`layering left child data '${target.data}' (${target.value}) with greater or equal layer to parent data '${source.data}' (${source.value})`
+          js`layering left child data '${link.target.data}' (${link.target.value}) with greater or equal layer to parent data '${link.source.data}' (${link.source.value})`
         );
       }
-      return datum.layer === layer ? datum : { source, target, layer };
+      return datum.layer === layer ? datum : { link, layer };
     });
   }
 
@@ -141,7 +139,7 @@ export function unsugify(layers: readonly (readonly SugiNode[])[]): void {
   for (const layer of layers) {
     for (const sugi of layer) {
       assert(sugi.x !== undefined && sugi.y !== undefined);
-      if ("target" in sugi.data) continue;
+      if ("link" in sugi.data) continue;
       sugi.data.node.x = sugi.x;
       sugi.data.node.y = sugi.y;
 
@@ -153,7 +151,7 @@ export function unsugify(layers: readonly (readonly SugiNode[])[]): void {
       );
       for (let child of sugi.ichildren()) {
         const points = [{ x: sugi.x, y: sugi.y }];
-        while ("target" in child.data) {
+        while ("link" in child.data) {
           assert(child.x !== undefined && child.y !== undefined);
           points.push({ x: child.x, y: child.y });
           [child] = child.ichildren();

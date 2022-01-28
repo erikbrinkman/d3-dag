@@ -49,7 +49,7 @@ export function topological(...args: never[]): TopologicalOperator {
     let i = 0;
     for (const layer of layers) {
       for (const node of layer) {
-        if ("target" in node.data) {
+        if ("link" in node.data) {
           inds.set(node, i++);
         }
       }
@@ -70,7 +70,7 @@ export function topological(...args: never[]): TopologicalOperator {
         const pind = def(inds.get(par));
         for (const node of par.ichildren()) {
           const nind = def(inds.get(node));
-          if ("target" in node.data) {
+          if ("link" in node.data) {
             for (const child of node.ichildren()) {
               const cind = def(inds.get(child));
               minBend(Q, pind, nind, cind, 1);
