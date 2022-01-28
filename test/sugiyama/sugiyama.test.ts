@@ -222,7 +222,7 @@ test("sugiyama() throws with noop coord", () => {
   );
 });
 
-test("sugiyama() throws with bad coord width", () => {
+test("sugiyama() throws with large coord width", () => {
   const dag = dummy();
   const layout = sugiyama().coord((layers: SugiNode[][]): number => {
     for (const layer of layers) {
@@ -234,6 +234,21 @@ test("sugiyama() throws with bad coord width", () => {
   });
   expect(() => layout(dag)).toThrow(
     "coord assigned an x (2) greater than width (1)"
+  );
+});
+
+test("sugiyama() throws with negative width", () => {
+  const dag = dummy();
+  const layout = sugiyama().coord((layers: SugiNode[][]): number => {
+    for (const layer of layers) {
+      for (const node of layer) {
+        node.x = -1;
+      }
+    }
+    return 1; // 1 < 2
+  });
+  expect(() => layout(dag)).toThrow(
+    "coord assigned an x (-1) smaller than a previous node in the layer"
   );
 });
 
