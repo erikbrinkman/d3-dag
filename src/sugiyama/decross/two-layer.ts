@@ -8,15 +8,14 @@ import { DecrossOperator } from ".";
 import { bigrams, def } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
-import { LinkDatum, NodeDatum, SugiDataDagNode } from "../utils";
+import { LinkDatum, NodeDatum, SugiDagNode } from "../utils";
 
 type OpSugiNode<O extends OrderOperator> = Parameters<O>[0][number];
-type OpSugiData<O extends OrderOperator> = OpSugiNode<O>["data"];
 type OpNodeDatum<O extends OrderOperator> = NodeDatum<
-  SugiDataDagNode<OpSugiData<O>>
+  SugiDagNode<OpSugiNode<O>>
 >;
 type OpLinkDatum<O extends OrderOperator> = LinkDatum<
-  SugiDataDagNode<OpSugiData<O>>
+  SugiDagNode<OpSugiNode<O>>
 >;
 
 /**

@@ -16,7 +16,7 @@ import {
   LinkDatum,
   NodeDatum,
   scaleLayers,
-  SugiDataDagNode,
+  SugiDagNode,
   sugify,
   SugiNode,
   unsugify,
@@ -109,11 +109,11 @@ interface Operators {
 type LDagNode<Op extends LayeringOperator> = ReturnType<
   Parameters<Op>[0]["roots"]
 >[number];
-type OpDagNode<Op extends DecrossOperator | CoordOperator> = SugiDataDagNode<
-  Parameters<Op>[0][number][number]["data"]
+type OpDagNode<Op extends DecrossOperator | CoordOperator> = SugiDagNode<
+  Parameters<Op>[0][number][number]
 >;
-type SNSDagNode<Op extends SugiNodeSizeAccessor> = SugiDataDagNode<
-  Parameters<Op>[0]["data"]
+type SNSDagNode<Op extends SugiNodeSizeAccessor> = SugiDagNode<
+  Parameters<Op>[0]
 >;
 
 type OpsDag<Ops extends Operators> = Dag<
