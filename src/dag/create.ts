@@ -1068,7 +1068,8 @@ export interface ParentIdsOperator<NodeDatum = never> {
 
 /**
  * The interface for getting the parent ids and link data from the current node
- * data. This must return an array of parent ids coupled with data for the link
+ * data. This must return an array of parent ids coupled with data (i.e. an
+ * array of two element arrays of the form ["Parent Id", data]) for the link
  * between this node and the parent id.
  *
  * This can be modified with the {@link StratifyOperator.parentData} method.
@@ -1141,7 +1142,8 @@ export interface StratifyOperator<Ops extends StratifyOperators> {
    *
    * Create a default operator with {@link stratify}. The accessors for a node's
    * {@link id} or {@link parentIds | parents' ids} can be altered, or {@link
-   * parentData} can be specified to attach link data to each edge.
+   * parentData} can be specified to specify parent ids and attach data to the
+   * edge for that parent.
    *
    * @example
    * ```typescript
