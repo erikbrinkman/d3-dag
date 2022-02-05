@@ -5,6 +5,13 @@
 /node_modules
 /coverage
 /yarn-error.log
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # Typescript #
 ##############
