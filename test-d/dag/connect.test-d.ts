@@ -50,3 +50,16 @@ expectNotAssignable<(inp: Intermediate[]) => Dag<ConnectDatum, Intermediate>>(
 );
 expectType<MyTargetId>(sourceId.targetId());
 expectType<MySourceId>(sourceId.sourceId());
+
+interface MyDatum {
+  myid: string;
+  extra: true;
+}
+interface MyDatumAccessor {
+  (id: string): MyDatum;
+}
+declare const myNodeDatum: MyDatumAccessor;
+const nodeDatum = sourceId.nodeDatum(myNodeDatum);
+expectAssignable<(inp: Complex[]) => Dag<MyDatum, Complex>>(nodeDatum);
+expectNotAssignable<(inp: Complex[]) => Dag<ConnectDatum, Complex>>(nodeDatum);
+expectType<MyDatumAccessor>(nodeDatum.nodeDatum());

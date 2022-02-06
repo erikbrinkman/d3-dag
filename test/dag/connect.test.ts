@@ -94,6 +94,21 @@ test("connect() parses zherebko", () => {
   expect(dag.size()).toBeCloseTo(11);
 });
 
+test("connect() allows custom node data", () => {
+  const nodeDatum = (id: string) => ({ num: parseInt(id) });
+  const layout = connect().nodeDatum(nodeDatum);
+  expect(layout.nodeDatum()).toBe(nodeDatum);
+  const dag = layout(zherebko);
+  expect(dag.size()).toBeCloseTo(11);
+  const nums: number[] = [];
+  for (const { data } of dag) {
+    nums.push(data.num);
+  }
+  nums.sort((a, b) => a - b);
+  const expected = new Array(11).fill(undefined).map((_, i) => i + 1);
+  expect(nums).toEqual(expected);
+});
+
 test("connect() fails on empty", () => {
   expect(() => connect()([])).toThrow("can't connect empty data");
 });

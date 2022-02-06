@@ -424,6 +424,15 @@ export interface IdOperator<Datum = never> {
  ***********/
 
 /**
+ * An operator that creates node data from an id
+ *
+ * The index passed in is the edge index where the id is first seen.
+ */
+export interface IdNodeDatumOperator<D = unknown> {
+  (id: string, index: number): D;
+}
+
+/**
  * The default node data on dags built using {@link ConnectOperator}
  */
 export interface ConnectDatum {
@@ -433,9 +442,10 @@ export interface ConnectDatum {
 /**
  * The operators that parametrize {@link ConnectOperator}
  */
-interface ConnectOperators<L = never> {
+interface ConnectOperators<N = unknown, L = never> {
   sourceId: IdOperator<L>;
   targetId: IdOperator<L>;
+  nodeDatum: IdNodeDatumOperator<N>;
 }
 
 /**
@@ -443,9 +453,12 @@ interface ConnectOperators<L = never> {
  * conditioned on its operators.
  */
 type ConnectLinkDatum<Ops extends ConnectOperators> =
-  Ops extends ConnectOperators<infer L> ? L : never;
+  Ops extends ConnectOperators<unknown, infer L> ? L : never;
 
-export interface ConnectOperator<Ops extends ConnectOperators> {
+export interface ConnectOperator<
+  NodeDatum,
+  Ops extends ConnectOperators<NodeDatum>
+> {
   /**
    * An operator that constructs a {@link Dag} from link data.
    *
@@ -475,7 +488,7 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
    * ]
    * ```
    */
-  <L extends ConnectLinkDatum<Ops>>(data: readonly L[]): Dag<ConnectDatum, L>;
+  <L extends ConnectLinkDatum<Ops>>(data: readonly L[]): Dag<NodeDatum, L>;
 
   /**
    * Sets the source accessor to the given {@link IdOperator} and returns this
@@ -490,7 +503,7 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
    */
   sourceId<NewId extends IdOperator>(
     id: NewId
-  ): ConnectOperator<Up<Ops, { sourceId: NewId }>>;
+  ): ConnectOperator<NodeDatum, Up<Ops, { sourceId: NewId }>>;
   /** Gets the current sourceId accessor. */
   sourceId(): Ops["sourceId"];
 
@@ -507,9 +520,29 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
    */
   targetId<NewId extends IdOperator>(
     id: NewId
-  ): ConnectOperator<Up<Ops, { targetId: NewId }>>;
+  ): ConnectOperator<NodeDatum, Up<Ops, { targetId: NewId }>>;
   /** Gets the current targetId accessor. */
   targetId(): Ops["targetId"];
+
+  /**
+   * Sets the id node datum  accessor to the given {@link IdNodeDatumOperator} and returns this
+   * ConnectOperator. This function allows you to decide what data to attach to nodes created via the connect method. The default simple wraps it in an object with an `id` field.
+   * data. The default accessor is:
+   *
+   * ```js
+   * function nodeDatumAccessor(id) {
+   *   return { id };
+   * }
+   * ```
+   */
+  nodeDatum<
+    NewNodeDatum,
+    NewNodeDatumOp extends IdNodeDatumOperator<NewNodeDatum>
+  >(
+    data: NewNodeDatumOp & IdNodeDatumOperator<NewNodeDatum>
+  ): ConnectOperator<NewNodeDatum, Up<Ops, { nodeDatum: NewNodeDatumOp }>>;
+  /** Get the current id node datum operator */
+  nodeDatum(): Ops["nodeDatum"];
 
   /**
    * Sets the allowance for single nodes. If enabled and the source id equals
@@ -518,34 +551,32 @@ export interface ConnectOperator<Ops extends ConnectOperators> {
    * only single nodes without parents or children need to be specified this
    * way, otherwise any other connection to a node will create it. (default: false)
    */
-  single(val: boolean): ConnectOperator<Ops>;
+  single(val: boolean): ConnectOperator<NodeDatum, Ops>;
   /** get the current single node setting. */
   single(): boolean;
 }
 
-function buildConnect<LinkDatum, Ops extends ConnectOperators<LinkDatum>>(
-  operators: Ops & ConnectOperators<LinkDatum> & { single: boolean }
-): ConnectOperator<Ops> {
-  function connect<L extends LinkDatum>(
-    data: readonly L[]
-  ): Dag<ConnectDatum, L> {
+function buildConnect<N, LinkDatum, Ops extends ConnectOperators<N, LinkDatum>>(
+  operators: Ops & ConnectOperators<N, LinkDatum> & { single: boolean }
+): ConnectOperator<N, Ops> {
+  function connect<L extends LinkDatum>(data: readonly L[]): Dag<N, L> {
     if (!data.length) {
       throw new Error("can't connect empty data");
     }
-    const nodes = new Map<string, LayoutDagNode<ConnectDatum, L>>();
+    const nodes = new Map<string, LayoutDagNode<N, L>>();
     const hasParents = new Set<string>();
     for (const [i, datum] of data.entries()) {
       // create dag
       const source = verifyId(operators.sourceId(datum, i));
       let sourceNode = nodes.get(source);
       if (sourceNode === undefined) {
-        sourceNode = new LayoutDagNode<ConnectDatum, L>({ id: source });
+        sourceNode = new LayoutDagNode<N, L>(operators.nodeDatum(source, i));
         nodes.set(source, sourceNode);
       }
       const target = verifyId(operators.targetId(datum, i));
       let targetNode = nodes.get(target);
       if (targetNode === undefined) {
-        targetNode = new LayoutDagNode<ConnectDatum, L>({ id: target });
+        targetNode = new LayoutDagNode<N, L>(operators.nodeDatum(target, i));
         nodes.set(target, targetNode);
       }
 
@@ -555,7 +586,7 @@ function buildConnect<LinkDatum, Ops extends ConnectOperators<LinkDatum>>(
       }
     }
 
-    const roots: DagNode<ConnectDatum, L>[] = [];
+    const roots: DagNode<N, L>[] = [];
     for (const [id, node] of nodes.entries()) {
       if (!hasParents.has(id)) {
         roots.push(node);
@@ -568,10 +599,10 @@ function buildConnect<LinkDatum, Ops extends ConnectOperators<LinkDatum>>(
   function sourceId(): Ops["sourceId"];
   function sourceId<NI extends IdOperator>(
     id: NI
-  ): ConnectOperator<Up<Ops, { sourceId: NI }>>;
+  ): ConnectOperator<N, Up<Ops, { sourceId: NI }>>;
   function sourceId<NI extends IdOperator>(
     id?: NI
-  ): Ops["sourceId"] | ConnectOperator<Up<Ops, { sourceId: NI }>> {
+  ): Ops["sourceId"] | ConnectOperator<N, Up<Ops, { sourceId: NI }>> {
     if (id === undefined) {
       return operators.sourceId;
     } else {
@@ -584,10 +615,10 @@ function buildConnect<LinkDatum, Ops extends ConnectOperators<LinkDatum>>(
   function targetId(): Ops["targetId"];
   function targetId<NI extends IdOperator>(
     id: NI
-  ): ConnectOperator<Up<Ops, { targetId: NI }>>;
+  ): ConnectOperator<N, Up<Ops, { targetId: NI }>>;
   function targetId<NI extends IdOperator>(
     id?: NI
-  ): Ops["targetId"] | ConnectOperator<Up<Ops, { targetId: NI }>> {
+  ): Ops["targetId"] | ConnectOperator<N, Up<Ops, { targetId: NI }>> {
     if (id === undefined) {
       return operators.targetId;
     } else {
@@ -597,9 +628,25 @@ function buildConnect<LinkDatum, Ops extends ConnectOperators<LinkDatum>>(
   }
   connect.targetId = targetId;
 
+  function nodeDatum(): Ops["nodeDatum"];
+  function nodeDatum<NN, ND extends IdNodeDatumOperator<NN>>(
+    id: ND
+  ): ConnectOperator<NN, Up<Ops, { nodeDatum: ND }>>;
+  function nodeDatum<NN, ND extends IdNodeDatumOperator<NN>>(
+    id?: ND
+  ): Ops["nodeDatum"] | ConnectOperator<NN, Up<Ops, { nodeDatum: ND }>> {
+    if (id === undefined) {
+      return operators.nodeDatum;
+    } else {
+      const { nodeDatum: _, ...rest } = operators;
+      return buildConnect({ ...rest, nodeDatum: id });
+    }
+  }
+  connect.nodeDatum = nodeDatum;
+
   function single(): boolean;
-  function single(val: boolean): ConnectOperator<Ops>;
-  function single(val?: boolean): boolean | ConnectOperator<Ops> {
+  function single(val: boolean): ConnectOperator<N, Ops>;
+  function single(val?: boolean): boolean | ConnectOperator<N, Ops> {
     if (val === undefined) {
       return operators.single;
     } else {
@@ -657,10 +704,18 @@ function defaultTargetId(d: OneString): string {
   }
 }
 
-export type DefaultConnectOperator = ConnectOperator<{
-  sourceId: IdOperator<ZeroString>;
-  targetId: IdOperator<OneString>;
-}>;
+function defaultNodeDatum(id: string): ConnectDatum {
+  return { id };
+}
+
+export type DefaultConnectOperator = ConnectOperator<
+  ConnectDatum,
+  {
+    sourceId: IdOperator<ZeroString>;
+    targetId: IdOperator<OneString>;
+    nodeDatum: IdNodeDatumOperator<ConnectDatum>;
+  }
+>;
 
 /**
  * Creates a new {@link ConnectOperator} with the default settings. This is
@@ -673,15 +728,20 @@ export function connect(...args: never[]): DefaultConnectOperator {
         "These were probably meant as data which should be called as connect()(...)"
     );
   } else {
+    // NOTE I think because source and target are both IdOperators, typescript
+    // tries to cache the inference, but in so doing, gets it wrong.
     return buildConnect<
+      ConnectDatum,
       ZeroString & OneString,
       {
         sourceId: IdOperator<ZeroString>;
         targetId: IdOperator<OneString>;
+        nodeDatum: IdNodeDatumOperator<ConnectDatum>;
       }
     >({
       sourceId: defaultSourceId,
       targetId: defaultTargetId,
+      nodeDatum: defaultNodeDatum,
       single: false
     });
   }

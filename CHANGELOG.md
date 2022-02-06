@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A way to specify node data for the `connect` operator.
 - All of the internals of `sugiyama` are exposed in the ES6 module api making it possible to selectively run or rerun different parts of the sugiyama layout. This may make incremental updates or interactivity easier.
 
 ### Changed
