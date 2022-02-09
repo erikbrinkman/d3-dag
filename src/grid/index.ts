@@ -5,14 +5,16 @@
  */
 import { Dag, DagNode } from "../dag";
 import { map } from "../iters";
-import { LinkDatum, NodeDatum } from "../sugiyama/utils";
 import { assert, def, js, setEqual } from "../utils";
 import { LaneOperator } from "./lane";
 import { greedy, GreedyOperator } from "./lane/greedy";
 
-type OpDagNode<L extends LaneOperator> = Parameters<L>[0][number];
-type OpNodeDatum<L extends LaneOperator> = NodeDatum<OpDagNode<L>>;
-type OpLinkDatum<L extends LaneOperator> = LinkDatum<OpDagNode<L>>;
+type OpDag<Lop extends LaneOperator> = Lop extends LaneOperator<
+  infer N,
+  infer L
+>
+  ? Dag<N, L>
+  : never;
 
 /**
  * The return from calling {@link GridOperator}
@@ -54,7 +56,7 @@ export interface GridInfo {
  */
 export interface GridOperator<Lane extends LaneOperator> {
   /** Layout the input dag */
-  (dag: Dag<OpNodeDatum<Lane>, OpLinkDatum<Lane>>): GridInfo;
+  (dag: OpDag<Lane>): GridInfo;
 
   /**
    * Set the lane operator to the given {@link LaneOperator} and returns a new
@@ -138,13 +140,15 @@ function verifyLanes(ordered: DagNode[]): number {
 }
 
 /** @internal */
-function buildOperator<L extends LaneOperator>(
-  laneOp: L,
-  nodeWidth: number,
-  nodeHeight: number,
-  sizeVal: null | readonly [number, number]
-): GridOperator<L> {
-  function gridCall(dag: Dag<OpNodeDatum<L>, OpLinkDatum<L>>): GridInfo {
+function buildOperator<N, L, Lane extends LaneOperator<N, L>>(options: {
+  lane: Lane & LaneOperator<N, L>;
+  nodeWidth: number;
+  nodeHeight: number;
+  size: null | readonly [number, number];
+}): GridOperator<Lane> {
+  function gridCall(dag: Dag<N, L>): GridInfo {
+    const { nodeWidth, nodeHeight, size, lane } = options;
+
     // topological sort
     const ordered = [...dag.idescendants("before")];
 
@@ -154,7 +158,7 @@ function buildOperator<L extends LaneOperator>(
     }
 
     // get lanes
-    laneOp(ordered);
+    lane(ordered);
     const numLanes = verifyLanes(ordered);
 
     // adjust x and y by nodeSize
@@ -166,8 +170,8 @@ function buildOperator<L extends LaneOperator>(
     // scale for size
     let width = numLanes * nodeWidth;
     let height = ordered.length * nodeHeight;
-    if (sizeVal !== null) {
-      const [newWidth, newHeight] = sizeVal;
+    if (size !== null) {
+      const [newWidth, newHeight] = size;
       for (const node of ordered) {
         assert(node.x !== undefined && node.y !== undefined);
         node.x *= newWidth / width;
@@ -192,42 +196,44 @@ function buildOperator<L extends LaneOperator>(
     return { width, height };
   }
 
-  function lane(): L;
+  function lane(): Lane;
   function lane<NL extends LaneOperator>(val: NL): GridOperator<NL>;
-  function lane<NL extends LaneOperator>(val?: NL): GridOperator<NL> | L {
+  function lane<NL extends LaneOperator>(val?: NL): GridOperator<NL> | Lane {
     if (val === undefined) {
-      return laneOp;
+      return options.lane;
     } else {
-      return buildOperator(val, nodeWidth, nodeHeight, sizeVal);
+      const { lane: _, ...rest } = options;
+      return buildOperator({ ...rest, lane: val });
     }
   }
   gridCall.lane = lane;
 
   function nodeSize(): [number, number];
-  function nodeSize(sz: readonly [number, number]): GridOperator<L>;
+  function nodeSize(sz: readonly [number, number]): GridOperator<Lane>;
   function nodeSize(
     val?: readonly [number, number]
-  ): [number, number] | GridOperator<L> {
+  ): [number, number] | GridOperator<Lane> {
     if (val === undefined) {
+      const { nodeWidth, nodeHeight } = options;
       return [nodeWidth, nodeHeight];
     } else {
-      const [width, height] = val;
-      return buildOperator(laneOp, width, height, sizeVal);
+      const [nodeWidth, nodeHeight] = val;
+      return buildOperator({ ...options, nodeWidth, nodeHeight });
     }
   }
   gridCall.nodeSize = nodeSize;
 
   function size(): null | [number, number];
-  function size(sz: null | readonly [number, number]): GridOperator<L>;
+  function size(sz: null | readonly [number, number]): GridOperator<Lane>;
   function size(
     val?: null | readonly [number, number]
-  ): null | [number, number] | GridOperator<L> {
+  ): null | [number, number] | GridOperator<Lane> {
     if (val !== undefined) {
-      return buildOperator(laneOp, nodeWidth, nodeHeight, val);
-    } else if (sizeVal === null) {
+      return buildOperator({ ...options, size: val });
+    } else if (options.size === null) {
       return null;
     } else {
-      const [width, height] = sizeVal;
+      const [width, height] = options.size;
       return [width, height];
     }
   }
@@ -236,14 +242,21 @@ function buildOperator<L extends LaneOperator>(
   return gridCall;
 }
 
+export type DefaultGridOperator = GridOperator<GreedyOperator>;
+
 /**
  * Create a new {@link GridOperator} with default settings.
  */
-export function grid(...args: never[]): GridOperator<GreedyOperator> {
+export function grid(...args: never[]): DefaultGridOperator {
   if (args.length) {
     throw new Error(
       `got arguments to grid(${args}), but constructor takes no arguments.`
     );
   }
-  return buildOperator(greedy(), 1, 1, null);
+  return buildOperator({
+    lane: greedy(),
+    nodeWidth: 1,
+    nodeHeight: 1,
+    size: null
+  });
 }

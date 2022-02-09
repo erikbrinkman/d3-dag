@@ -40,4 +40,11 @@ export interface CoordOperator<NodeDatum = never, LinkDatum = never> {
     layers: SugiNode<N, L>[][],
     nodeSize: CoordNodeSizeAccessor<N, L>
   ): number;
+
+  /**
+   * This sentinel field is so that typescript can infer the types of NodeDatum
+   * and LinkDatum, because the extra generics make it otherwise hard to infer.
+   * It's a function to keep the same variance.
+   */
+  __sentinel__?: (_: NodeDatum, __: LinkDatum) => void;
 }

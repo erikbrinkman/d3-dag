@@ -9,28 +9,18 @@ import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { Dag, DagNode } from "../../dag";
 import { entries, map } from "../../iters";
 import { assert, bigrams, def, Up } from "../../utils";
-import { LinkDatum, NodeDatum } from "../utils";
 
-interface Operators {
-  rank: RankAccessor;
-  group: GroupAccessor;
+interface Operators<N = never, L = never> {
+  rank: RankAccessor<N, L>;
+  group: GroupAccessor<N, L>;
 }
 
-type OpDagNode<O extends RankAccessor | GroupAccessor> = Parameters<O>[0];
-type OpNodeDatum<O extends RankAccessor | GroupAccessor> = NodeDatum<
-  OpDagNode<O>
->;
-type OpLinkDatum<O extends RankAccessor | GroupAccessor> = LinkDatum<
-  OpDagNode<O>
->;
-type OpsNodeDatum<Ops extends Operators> = OpNodeDatum<Ops["rank"]> &
-  OpNodeDatum<Ops["group"]>;
-type OpsLinkDatum<Ops extends Operators> = OpLinkDatum<Ops["rank"]> &
-  OpLinkDatum<Ops["group"]>;
-type OpsDagNode<Ops extends Operators> = DagNode<
-  OpsNodeDatum<Ops>,
-  OpsLinkDatum<Ops>
->;
+type OpsNodeDatum<Ops extends Operators> = Ops extends Operators<infer N, never>
+  ? N
+  : never;
+type OpsLinkDatum<Ops extends Operators> = Ops extends Operators<never, infer L>
+  ? L
+  : never;
 
 /**
  * A layering operator that assigns layers to minimize the number of dummy
@@ -84,10 +74,10 @@ export interface SimplexOperator<Ops extends Operators = Operators>
 }
 
 /** @internal */
-function buildOperator<Ops extends Operators>(
-  options: Ops
+function buildOperator<N, L, Ops extends Operators<N, L>>(
+  options: Ops & Operators<N, L>
 ): SimplexOperator<Ops> {
-  function simplexCall(dag: Dag<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>>): void {
+  function simplexCall(dag: Dag<N, L>): void {
     const variables: Record<string, Variable> = {};
     const ints: Record<string, 1> = {};
     const constraints: Record<string, Constraint> = {};
@@ -100,12 +90,12 @@ function buildOperator<Ops extends Operators>(
     );
 
     /** get node id */
-    function n(node: OpsDagNode<Ops>): string {
+    function n(node: DagNode<N, L>): string {
       return def(ids.get(node));
     }
 
     /** get variable associated with a node */
-    function variable(node: OpsDagNode<Ops>): Variable {
+    function variable(node: DagNode<N, L>): Variable {
       return variables[n(node)];
     }
 
@@ -116,8 +106,8 @@ function buildOperator<Ops extends Operators>(
      */
     function before(
       prefix: string,
-      first: OpsDagNode<Ops>,
-      second: OpsDagNode<Ops>,
+      first: DagNode<N, L>,
+      second: DagNode<N, L>,
       strict: boolean = true
     ): void {
       const fvar = variable(first);
@@ -132,15 +122,15 @@ function buildOperator<Ops extends Operators>(
     /** enforce that first and second occur on the same layer */
     function equal(
       prefix: string,
-      first: OpsDagNode<Ops>,
-      second: OpsDagNode<Ops>
+      first: DagNode<N, L>,
+      second: DagNode<N, L>
     ): void {
       before(`${prefix} before`, first, second, false);
       before(`${prefix} after`, second, first, false);
     }
 
-    const ranks: [number, OpsDagNode<Ops>][] = [];
-    const groups = new Map<string, OpsDagNode<Ops>[]>();
+    const ranks: [number, DagNode<N, L>][] = [];
+    const groups = new Map<string, DagNode<N, L>[]>();
 
     // Add node variables and fetch ranks
     for (const node of dag) {
@@ -253,13 +243,15 @@ function defaultAccessor(): undefined {
   return undefined;
 }
 
+export type DefaultSimplexOperator = SimplexOperator<{
+  rank: RankAccessor<unknown, unknown>;
+  group: GroupAccessor<unknown, unknown>;
+}>;
+
 /**
  * Create a default {@link SimplexOperator}, bundled as {@link layeringSimplex}.
  */
-export function simplex(...args: never[]): SimplexOperator<{
-  rank: RankAccessor<unknown, unknown>;
-  group: GroupAccessor<unknown, unknown>;
-}> {
+export function simplex(...args: never[]): DefaultSimplexOperator {
   if (args.length) {
     throw new Error(
       `got arguments to simplex(${args}), but constructor takes no arguments.`

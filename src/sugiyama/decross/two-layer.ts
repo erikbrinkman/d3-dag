@@ -8,15 +8,20 @@ import { DecrossOperator } from ".";
 import { bigrams, def } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
-import { LinkDatum, NodeDatum, SugiDagNode } from "../utils";
+import { SugiNode } from "../utils";
 
-type OpSugiNode<O extends OrderOperator> = Parameters<O>[0][number];
-type OpNodeDatum<O extends OrderOperator> = NodeDatum<
-  SugiDagNode<OpSugiNode<O>>
->;
-type OpLinkDatum<O extends OrderOperator> = LinkDatum<
-  SugiDagNode<OpSugiNode<O>>
->;
+type OpNodeDatum<O extends OrderOperator> = O extends OrderOperator<
+  infer N,
+  never
+>
+  ? N
+  : never;
+type OpLinkDatum<O extends OrderOperator> = O extends OrderOperator<
+  never,
+  infer L
+>
+  ? L
+  : never;
 
 /**
  * A decrossing operator that minimizes the number of crossings by looking at every pair of layers.
@@ -59,11 +64,11 @@ export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
 // TODO Add two layer noop. This only makes sense if there's a greedy swapping ability
 
 /** @internal */
-function buildOperator<O extends OrderOperator>(options: {
-  order: O;
+function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
+  order: O & OrderOperator<N, L>;
   passes: number;
 }): TwoLayerOperator<O> {
-  function twoLayerCall(layers: OpSugiNode<O>[][]): void {
+  function twoLayerCall(layers: SugiNode<N, L>[][]): void {
     const reversed = layers.slice().reverse();
 
     let changed = true;
@@ -118,11 +123,13 @@ function buildOperator<O extends OrderOperator>(options: {
   return twoLayerCall;
 }
 
+export type DefaultTwoLayerOperator = TwoLayerOperator<AggOperator>;
+
 /**
  * Create a default {@link TwoLayerOperator}, bundled as
  * {@link decrossTwoLayer}.
  */
-export function twoLayer(...args: never[]): TwoLayerOperator<AggOperator> {
+export function twoLayer(...args: never[]): DefaultTwoLayerOperator {
   if (args.length) {
     throw new Error(
       `got arguments to twoLayer(${args}), but constructor takes no arguments.`

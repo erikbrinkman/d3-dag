@@ -33,56 +33,6 @@ export type SugiNode<NodeDatum = unknown, LinkDatum = unknown> = DagNode<
   undefined
 >;
 
-// NOTE For an unknown reason, typescript is okay when we define types this
-// way, but fails if we try to infer them
-
-/**
- * get DagNode from SugiData
- *
- * For some reason, having this be a separate type allows typescript to
- * compile, but not combining it with {@link SugiDagNode}.
- */
-type SugiDataDagNode<S extends SugiData> = S extends {
-  node: DagNode;
-}
-  ? S["node"]
-  : never;
-
-/**
- * get the {@link DagNode} from {@link SugiNode}
- */
-export type SugiDagNode<S extends SugiNode> = SugiDataDagNode<S["data"]>;
-
-/**
- * get NodeDatum from {@link DagNode}
- */
-export type NodeDatum<D extends DagNode> = D["data"];
-
-/**
- * get LinkDatum from {@link DagNode}
- */
-export type LinkDatum<D extends DagNode> = LLinkDatum<NodeLink<D>>;
-
-/**
- * Get {@link DagLink} from {@link DagNode}
- */
-export type NodeLink<D extends DagNode> = ReturnType<D["childLinks"]>[number];
-
-/**
- * get NodeDatum from {@link DagLink}
- */
-export type LNodeDatum<D extends DagLink> = NodeDatum<LinkNode<D>>;
-
-/**
- * get LinkDatum from {@link DagLink}
- */
-export type LLinkDatum<D extends DagLink> = D["data"];
-
-/**
- * Get {@link DagNode} from {@link DagLink}
- */
-export type LinkNode<D extends DagLink> = D["source"];
-
 /** validate layer assignments @internal */
 function vlayer(node: DagNode): number {
   if (node.value === undefined) {
