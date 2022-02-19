@@ -8,7 +8,7 @@
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
 import { entries, every, flatMap, length, map, reduce } from "../iters";
-import { assert, def, dfs, js, Up } from "../utils";
+import { dfs, js, Up } from "../utils";
 
 /**********************
  * Dag Implementation *
@@ -40,6 +40,7 @@ class LayoutLink<NodeDatum, LinkDatum>
  * The concrete implementation backing {@link Dag}.
  */
 class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
+  // NOTE proots is undefined for normal nodes because we can't call super([this]);
   private readonly proots?: DagNode<NodeDatum, LinkDatum>[];
 
   constructor(roots?: DagNode<NodeDatum, LinkDatum>[]) {
@@ -53,8 +54,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
   }
 
   iroots(): Iterable<DagNode<NodeDatum, LinkDatum>> {
-    const nonnull = def(this.proots);
-    return { [Symbol.iterator]: () => nonnull[Symbol.iterator]() };
+    return { [Symbol.iterator]: () => this.proots![Symbol.iterator]() };
   }
 
   roots(): DagNode<NodeDatum, LinkDatum>[] {
@@ -97,7 +97,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     while ((node = queue.pop())) {
       yield node;
       for (const child of node.ichildren()) {
-        const before = def(numBefore.get(child));
+        const before = numBefore.get(child)!;
         if (before > 1) {
           numBefore.set(child, before - 1);
         } else {
@@ -165,7 +165,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
       const nodeVals = new Map<DagNode, number>();
       nodeVals.set(node, val);
       for (const child of node.ichildren()) {
-        const childMap = def(descendantVals.get(child));
+        const childMap = descendantVals.get(child)!;
         for (const [child, v] of childMap.entries()) {
           nodeVals.set(child, v);
         }
@@ -185,7 +185,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
       } else {
         const nodeLeaves = new Set<DagNode>();
         for (const child of node.ichildren()) {
-          const childLeaves = def(leaves.get(child));
+          const childLeaves = leaves.get(child)!;
           for (const leaf of childLeaves) {
             nodeLeaves.add(leaf);
           }
@@ -201,7 +201,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     for (const node of this.idescendants("after")) {
       node.value = Math.max(
         0,
-        ...map(node.ichildren(), (child) => def(child.value) + 1)
+        ...map(node.ichildren(), (child) => child.value! + 1)
       );
     }
     return this;
@@ -222,7 +222,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     for (const node of this.idescendants("before")) {
       node.value = Math.max(
         0,
-        ...map(parents.get(node) || [], (par) => def(par.value) + 1)
+        ...map(parents.get(node) || [], (par) => par.value! + 1)
       );
     }
     return this;
@@ -272,9 +272,8 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
 
   connected(): boolean {
     const iter = this.isplit()[Symbol.iterator]();
-    let { done } = iter.next();
-    assert(!done);
-    ({ done } = iter.next());
+    iter.next();
+    const { done } = iter.next();
     return !!done;
   }
 }

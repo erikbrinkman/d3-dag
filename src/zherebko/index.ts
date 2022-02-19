@@ -4,7 +4,6 @@
  * @module
  */
 import { Dag } from "../dag";
-import { assert, def } from "../utils";
 import { greedy } from "./greedy";
 
 /**
@@ -106,9 +105,7 @@ function buildOperator(
     // assign link points
     for (const { source, target, points } of dag.ilinks()) {
       points.length = 0;
-      assert(source.x !== undefined && source.y !== undefined);
-      assert(target.x !== undefined && target.y !== undefined);
-      points.push({ x: source.x, y: source.y });
+      points.push({ x: source.x!, y: source.y! });
       const index = indices.get(source)?.get(target);
 
       if (index !== undefined) {
@@ -116,8 +113,8 @@ function buildOperator(
         const x =
           (index - minIndex + 0.5) * edgeGap +
           (index > 0 ? nodeWidth - edgeGap : 0);
-        const y1 = source.y + nodeHeight;
-        const y2 = target.y - nodeHeight;
+        const y1 = source.y! + nodeHeight;
+        const y2 = target.y! - nodeHeight;
         if (y2 - y1 > nodeHeight / 2) {
           points.push({ x: x, y: y1 }, { x: x, y: y2 });
         } else {
@@ -125,7 +122,7 @@ function buildOperator(
         }
       }
 
-      points.push({ x: target.x, y: target.y });
+      points.push({ x: target.x!, y: target.y! });
     }
 
     const width = (maxIndex - minIndex) * edgeGap + nodeWidth;
@@ -136,14 +133,13 @@ function buildOperator(
       // rescale to new size
       const [newWidth, newHeight] = sizeVal;
       for (const node of ordered) {
-        assert(node.x !== undefined && node.y !== undefined);
-        node.x *= newWidth / width;
-        node.y *= newHeight / height;
+        node.x! *= newWidth / width;
+        node.y! *= newHeight / height;
       }
       for (const { points } of dag.ilinks()) {
         const newPoints = points.map(({ x, y }) => ({
-          x: (def(x) * newWidth) / width,
-          y: (def(y) * newHeight) / height
+          x: (x! * newWidth) / width,
+          y: (y! * newHeight) / height
         }));
         points.splice(0, points.length, ...newPoints);
       }

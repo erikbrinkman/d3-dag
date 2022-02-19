@@ -8,7 +8,7 @@ import { Constraint, Solve, Variable } from "javascript-lp-solver";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { Dag, DagNode } from "../../dag";
 import { entries, map } from "../../iters";
-import { assert, bigrams, def, Up } from "../../utils";
+import { assert, bigrams, Up } from "../../utils";
 
 interface Operators<N = never, L = never> {
   rank: RankAccessor<N, L>;
@@ -91,7 +91,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
 
     /** get node id */
     function n(node: DagNode<N, L>): string {
-      return def(ids.get(node));
+      return ids.get(node)!;
     }
 
     /** get variable associated with a node */
@@ -112,7 +112,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     ): void {
       const fvar = variable(first);
       const svar = variable(second);
-      const cons = `${prefix}: ${def(n(first))} -> ${def(n(second))}`;
+      const cons = `${prefix}: ${n(first)} -> ${n(second)}`;
 
       constraints[cons] = { min: +strict };
       fvar[cons] = -1;

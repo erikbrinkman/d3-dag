@@ -7,7 +7,6 @@ import { Model, Solve } from "javascript-lp-solver";
 import { LaneOperator } from ".";
 import { DagNode } from "../../dag";
 import { map } from "../../iters";
-import { def } from "../../utils";
 
 /**
  * A lane operator that assigns lanes to minimize edge crossings.
@@ -45,21 +44,18 @@ function getCompressedWidth(ordered: readonly DagNode[]): number {
 
   // if node is new (no children) git it a free index
   for (const node of ordered) {
-    const ny = def(node.y);
     if (!assigned.has(node)) {
-      const free = indices.findIndex((v) => v <= ny);
+      const free = indices.findIndex((v) => v <= node.y!);
       const ind = free === -1 ? indices.length : free;
-      indices[ind] = ny;
+      indices[ind] = node.y!;
     }
 
     // iterate over children from farthest away to closest assigning indices
-    for (const [child, cy] of [
-      ...map(node.ichildren(), (c) => [c, def(c.y)] as const)
-    ].sort(([, ay], [, by]) => by - ay)) {
+    for (const child of [...node.ichildren()].sort((a, b) => b.y! - a.y!)) {
       if (!assigned.has(child)) {
-        const free = indices.findIndex((v) => v <= ny);
+        const free = indices.findIndex((v) => v <= node.y!);
         const ind = free === -1 ? indices.length : free;
-        indices[ind] = cy;
+        indices[ind] = child.y!;
         assigned.add(child);
       }
     }
@@ -116,7 +112,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
             if (child === node) continue; // can't cross self
             // for each child of above node, we check if it crosses, and bound
             // trip node to be one of there's a crossing
-            const cind = def(inds.get(child));
+            const cind = inds.get(child)!;
             const trip = `${pair}-${cind}-cross`;
             model.variables[trip] = { opt: 1, [trip]: 1 };
             model.constraints[trip] = { max: 1 };
@@ -154,7 +150,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
       const numEdges = ordered.reduce((t, n) => t + n.children().length, 0);
       for (const [ind, node] of ordered.entries()) {
         for (const child of node.ichildren()) {
-          const cind = def(inds.get(child));
+          const cind = inds.get(child)!;
           const key = `${ind}-${cind}-dist`;
           model.variables[key] = { opt: 1 / numEdges };
 
@@ -192,7 +188,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
       }
       const mapping = new Map(map([...vals].sort(), (v, i) => [v, i] as const));
       for (const [ind, node] of ordered.entries()) {
-        node.x = def(mapping.get(lanes[ind] ?? 0));
+        node.x = mapping.get(lanes[ind] ?? 0)!;
       }
     }
   }

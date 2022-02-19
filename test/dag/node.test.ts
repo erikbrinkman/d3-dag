@@ -1,5 +1,4 @@
 import { map } from "../../src/iters";
-import { def } from "../../src/utils";
 import {
   doub,
   doubleVee,
@@ -49,7 +48,7 @@ test("links() is correct for square", () => {
   ]);
   for (const link of dag.links()) {
     expect(
-      def(links.get(link.source.data.id)).has(link.target.data.id)
+      links.get(link.source.data.id)?.has(link.target.data.id)
     ).toBeTruthy();
   }
 });
@@ -64,7 +63,7 @@ test("links() is correct for N", () => {
   ]);
   for (const link of dag.links()) {
     expect(
-      def(links.get(link.source.data.id)).has(link.target.data.id)
+      links.get(link.source.data.id)?.has(link.target.data.id)
     ).toBeTruthy();
   }
 });

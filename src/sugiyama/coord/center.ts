@@ -5,7 +5,6 @@
  * @module
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { def } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**
@@ -51,7 +50,7 @@ export function center(...args: never[]): CenterOperator {
       const width = widths[i];
       const offset = (maxWidth - width) / 2;
       for (const node of layer) {
-        node.x = def(node.x) + offset;
+        node.x! += offset;
       }
     }
 

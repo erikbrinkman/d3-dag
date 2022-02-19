@@ -7,7 +7,6 @@
 import { Model, Solve } from "javascript-lp-solver";
 import { TwolayerOperator } from ".";
 import { length } from "../../iters";
-import { def } from "../../utils";
 import { SugiNode } from "../utils";
 import { getParents } from "./utils";
 
@@ -96,7 +95,7 @@ function buildOperator(options: {
     /** create key from nodes */
     function key(...nodes: SugiNode[]): string {
       return nodes
-        .map((n) => def(inds.get(n)))
+        .map((n) => inds.get(n)!)
         .sort((a, b) => a - b)
         .join(" => ");
     }
@@ -180,7 +179,7 @@ function buildOperator(options: {
             }
             const pair = topDown ? key(c1, c2) : key(p1, p2);
             model.variables[pair].opt += Math.sign(
-              def(cinds.get(c1)) - def(cinds.get(c2))
+              cinds.get(c1)! - cinds.get(c2)!
             );
           }
         }
@@ -203,7 +202,7 @@ function buildOperator(options: {
               // want to minimize node being between start and end
               // NOTE we don't sort because we care which is in the center
               const base = [start, node, end]
-                .map((n) => def(inds.get(n)))
+                .map((n) => inds.get(n)!)
                 .join(" => ");
               const slack = `dist ${base}`;
               const normal = `${slack} normal`;
@@ -222,7 +221,7 @@ function buildOperator(options: {
                 [node, end]
               ]) {
                 const pair = key(n1, n2);
-                const sign = Math.sign(def(inds.get(n1)) - def(inds.get(n2)));
+                const sign = Math.sign(inds.get(n1)! - inds.get(n2)!);
                 pos += +(sign > 0);
                 model.variables[pair][normal] = -sign;
                 model.variables[pair][reversed] = sign;

@@ -8,7 +8,6 @@ import { TwolayerOperator } from ".";
 import { SugiNode } from "../utils";
 import { getParents } from "./utils";
 
-// FIXME switch some defs / asserts to ! instead where I know it's the case
 type OpNodeDatum<Op extends TwolayerOperator> = Op extends TwolayerOperator<
   infer D,
   never
@@ -149,7 +148,6 @@ function scanSwap(layer: SugiNode[], swapChange: SwapChange): void {
       for (let ti = fi + 1; ti < layer.length; ++ti) {
         cum += swapChange(layer[fi], layer[ti]);
         const val = costs[ind++] + cum;
-        console.log("swap", fi, ti, "->", val);
         if (val > max) {
           max = val;
           fromInd = fi;
@@ -160,7 +158,6 @@ function scanSwap(layer: SugiNode[], swapChange: SwapChange): void {
 
     // no more swaps;
     if (max === 0) break;
-    console.log("greedy", fromInd, toInd);
     // else do swap and try again
     [layer[fromInd], layer[toInd]] = [layer[toInd], layer[fromInd]];
   }

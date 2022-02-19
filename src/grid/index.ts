@@ -5,7 +5,7 @@
  */
 import { Dag, DagNode } from "../dag";
 import { map } from "../iters";
-import { assert, def, js, setEqual } from "../utils";
+import { js, setEqual } from "../utils";
 import { LaneOperator } from "./lane";
 import { greedy, GreedyOperator } from "./lane/greedy";
 
@@ -163,8 +163,8 @@ function buildOperator<N, L, Lane extends LaneOperator<N, L>>(options: {
 
     // adjust x and y by nodeSize
     for (const node of ordered) {
-      node.x = (def(node.x) + 0.5) * nodeWidth;
-      node.y = (def(node.y) + 0.5) * nodeHeight;
+      node.x = (node.x! + 0.5) * nodeWidth;
+      node.y = (node.y! + 0.5) * nodeHeight;
     }
 
     // scale for size
@@ -173,9 +173,8 @@ function buildOperator<N, L, Lane extends LaneOperator<N, L>>(options: {
     if (size !== null) {
       const [newWidth, newHeight] = size;
       for (const node of ordered) {
-        assert(node.x !== undefined && node.y !== undefined);
-        node.x *= newWidth / width;
-        node.y *= newHeight / height;
+        node.x! *= newWidth / width;
+        node.y! *= newHeight / height;
       }
       width = newWidth;
       height = newHeight;
@@ -184,13 +183,11 @@ function buildOperator<N, L, Lane extends LaneOperator<N, L>>(options: {
     // assign link points
     for (const { source, target, points } of dag.ilinks()) {
       points.length = 0;
-      assert(source.x !== undefined && source.y !== undefined);
-      assert(target.x !== undefined && target.y !== undefined);
-      if (source.x != target.x) {
-        points.push({ x: source.x, y: source.y });
+      if (source.x !== target.x) {
+        points.push({ x: source.x!, y: source.y! });
       }
-      points.push({ x: target.x, y: source.y });
-      points.push({ x: target.x, y: target.y });
+      points.push({ x: target.x!, y: source.y! });
+      points.push({ x: target.x!, y: target.y! });
     }
 
     return { width, height };

@@ -7,7 +7,6 @@ import { least, median } from "d3-array";
 import { LaneOperator } from ".";
 import { DagNode } from "../../dag";
 import { map, reverse } from "../../iters";
-import { assert, def } from "../../utils";
 
 /**
  * A lane operator that assigns lanes greedily, but quickly.
@@ -199,19 +198,16 @@ function topDownOp(nodes: readonly DagNode[], inds: Indexer): void {
 
   // if node is new (no children) give it an arbitrary index
   for (const node of nodes) {
-    assert(node.y !== undefined);
     if (node.x === undefined) {
-      node.x = inds.getIndex(node.y);
+      node.x = inds.getIndex(node.y!);
     }
 
     // iterate over children from farthest away to closest, assign each a lane
     // in order, trying to be as close to their parent as possible
-    for (const [child, cy] of [
-      ...map(node.ichildren(), (c) => [c, def(c.y)] as const)
-    ].sort(([, ay], [, by]) => by - ay)) {
+    for (const child of [...node.ichildren()].sort((a, b) => b.y! - a.y!)) {
       if (child.x === undefined) {
-        child.x = inds.getIndex(node.y, node.x);
-        inds.setIndex(child.x, cy);
+        child.x = inds.getIndex(node.y!, node.x);
+        inds.setIndex(child.x, child.y!);
       }
     }
   }
@@ -219,8 +215,7 @@ function topDownOp(nodes: readonly DagNode[], inds: Indexer): void {
   // update according to offset
   const offset = inds.offset();
   for (const node of nodes) {
-    assert(node.x !== undefined);
-    node.x += offset;
+    node.x! += offset;
   }
 }
 
@@ -237,10 +232,9 @@ function bottomUpOp(nodes: readonly DagNode[], inds: Indexer): void {
   const highestParent = new Map<DagNode, DagNode>();
   for (const node of nodes) {
     node.x = undefined;
-    assert(node.y !== undefined);
     for (const child of node.ichildren()) {
       const current = highestParent.get(child);
-      if (current === undefined || node.y < def(current.y)) {
+      if (current === undefined || node.y! < current.y!) {
         highestParent.set(child, node);
       }
     }
@@ -251,22 +245,21 @@ function bottomUpOp(nodes: readonly DagNode[], inds: Indexer): void {
     if (node.x === undefined) {
       const target = median(map(node.ichildren(), (c) => c.x));
       // note we invert y because we're going bottom up
-      node.x = inds.getIndex(nodes.length - def(node.y), target);
+      node.x = inds.getIndex(nodes.length - node.y!, target);
     }
 
     // if node has a highest parent, assign it to the same lane
     const par = highestParent.get(node);
     if (par !== undefined) {
       par.x ??= node.x;
-      inds.setIndex(node.x, nodes.length - def(par.y));
+      inds.setIndex(node.x, nodes.length - par.y!);
     }
   }
 
   // adjust for offset
   const offset = inds.offset();
   for (const node of nodes) {
-    assert(node.x != undefined);
-    node.x += offset;
+    node.x! += offset;
   }
 }
 

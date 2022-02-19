@@ -1,6 +1,5 @@
 import { connect } from "../../../src/dag/create";
 import { opt } from "../../../src/grid/lane/opt";
-import { def } from "../../../src/utils";
 import { dummy, zhere } from "../../examples";
 import { crossings, hard, prepare } from "./utils";
 
@@ -46,12 +45,12 @@ test("opt() works for compressed", () => {
   expect(layout.compressed()).toBe(false);
   layout(nodes);
   expect(crossings(nodes)).toEqual(0);
-  expect(Math.max(...nodes.map((n) => def(n.x)))).toEqual(4);
+  expect(Math.max(...nodes.map((n) => n.x!))).toEqual(4);
 
   const comp = layout.compressed(true);
   expect(comp.compressed()).toBe(true);
   comp(nodes);
-  expect(Math.max(...nodes.map((n) => def(n.x)))).toEqual(3);
+  expect(Math.max(...nodes.map((n) => n.x!))).toEqual(3);
   expect(crossings(nodes)).toEqual(1);
 });
 
@@ -90,13 +89,13 @@ test("opt() dist compacts slightly", () => {
   expect(layout.dist()).toBe(true);
   layout(nodes);
   expect(crossings(nodes)).toEqual(0);
-  expect(Math.max(...nodes.map((n) => def(n.x)))).toEqual(3);
+  expect(Math.max(...nodes.map((n) => n.x!))).toEqual(3);
 
   const dist = layout.dist(false);
   expect(dist.dist()).toBe(false);
   dist(nodes);
   expect(crossings(nodes)).toEqual(0);
-  expect(Math.max(...nodes.map((n) => def(n.x)))).toBeGreaterThan(3);
+  expect(Math.max(...nodes.map((n) => n.x!))).toBeGreaterThan(3);
 });
 
 test("opt() throws for arguments", () => {

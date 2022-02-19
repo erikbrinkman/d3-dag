@@ -6,7 +6,6 @@
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";
 import { map } from "../../iters";
-import { def } from "../../utils";
 
 /**
  * A {@link LayeringOperator} that minimizes the height of the final layout.
@@ -38,9 +37,9 @@ function buildOperator(options: { topDown: boolean }): LongestPathOperator {
       dag.depth();
     } else {
       dag.height();
-      const maxHeight = Math.max(...map(dag.iroots(), (d) => def(d.value)));
+      const maxHeight = Math.max(...map(dag.iroots(), (d) => d.value!));
       for (const node of dag) {
-        node.value = maxHeight - def(node.value);
+        node.value = maxHeight - node.value!;
       }
     }
   }

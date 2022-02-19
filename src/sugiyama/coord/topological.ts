@@ -5,7 +5,6 @@
  * @module
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { def } from "../../utils";
 import { SugiNode } from "../utils";
 import { init, layout, minBend, solve } from "./utils";
 
@@ -67,12 +66,12 @@ export function topological(...args: never[]): TopologicalOperator {
 
     for (const layer of layers) {
       for (const par of layer) {
-        const pind = def(inds.get(par));
+        const pind = inds.get(par)!;
         for (const node of par.ichildren()) {
-          const nind = def(inds.get(node));
+          const nind = inds.get(node)!;
           if ("link" in node.data) {
             for (const child of node.ichildren()) {
-              const cind = def(inds.get(child));
+              const cind = inds.get(child)!;
               minBend(Q, pind, nind, cind, 1);
             }
           }

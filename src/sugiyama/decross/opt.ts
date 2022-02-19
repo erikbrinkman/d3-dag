@@ -6,7 +6,7 @@
 import { Model, Solve } from "javascript-lp-solver";
 import { DecrossOperator } from ".";
 import { length } from "../../iters";
-import { bigrams, def } from "../../utils";
+import { bigrams } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**
@@ -154,7 +154,7 @@ function buildOperator(options: {
     /** create a key from nodes */
     function key(...nodes: SugiNode[]): string {
       return nodes
-        .map((n) => def(inds.get(n)))
+        .map((n) => inds.get(n)!)
         .sort((a, b) => a - b)
         .join(" => ");
     }
@@ -226,7 +226,7 @@ function buildOperator(options: {
                 [slackDown]: 1
               };
 
-              const sign = Math.sign(def(inds.get(c1)) - def(inds.get(c2)));
+              const sign = Math.sign(inds.get(c1)! - inds.get(c2)!);
               const flip = Math.max(sign, 0);
 
               model.constraints[slackUp] = {
@@ -254,7 +254,7 @@ function buildOperator(options: {
               // want to minimize node being between start and end
               // NOTE we don't sort because we care which is in the center
               const base = [start, node, end]
-                .map((n) => def(inds.get(n)))
+                .map((n) => inds.get(n)!)
                 .join(" => ");
               const slack = `dist ${base}`;
               const normal = `${slack} normal`;
@@ -273,7 +273,7 @@ function buildOperator(options: {
                 [node, end]
               ]) {
                 const pair = key(n1, n2);
-                const sign = Math.sign(def(inds.get(n1)) - def(inds.get(n2)));
+                const sign = Math.sign(inds.get(n1)! - inds.get(n2)!);
                 pos += +(sign > 0);
                 model.variables[pair][normal] = -sign;
                 model.variables[pair][reversed] = sign;

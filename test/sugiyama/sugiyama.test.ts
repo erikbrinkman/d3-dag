@@ -15,7 +15,6 @@ import { longestPath } from "../../src/sugiyama/layering/longest-path";
 import { simplex } from "../../src/sugiyama/layering/simplex";
 import { topological as layeringTopological } from "../../src/sugiyama/layering/topological";
 import { SugiNode } from "../../src/sugiyama/utils";
-import { def } from "../../src/utils";
 import { doub, dummy, SimpleDatum, single, three, trip } from "../examples";
 
 test("sugiyama() works for single node", () => {
@@ -72,9 +71,9 @@ test("sugiyama() works with a dummy node", () => {
   expect(first.x).toBeLessThan(1.0);
   expect(third.x).toBeGreaterThanOrEqual(0.5);
   expect(third.x).toBeLessThan(1.0);
-  expect(first.x).toBeCloseTo(def(third.x));
-  expect(first.x).not.toBeCloseTo(def(second.x));
-  expect(Math.abs(def(first.x) - def(second.x))).toBeLessThan(0.5);
+  expect(first.x).toBeCloseTo(third.x!);
+  expect(first.x).not.toBeCloseTo(second.x!);
+  expect(Math.abs(first.x! - second.x!)).toBeLessThan(0.5);
 });
 
 test("sugiyama() allows changing nodeSize", () => {

@@ -7,7 +7,6 @@
 import { median } from "d3-array";
 import { TwolayerOperator } from ".";
 import { map } from "../../iters";
-import { def } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**
@@ -158,12 +157,12 @@ function order(
     if (uend <= ustart) return;
     const umid = Math.floor((ustart + uend) / 2);
     const node = unassigned[umid];
-    const nind = def(inds.get(node));
+    const nind = inds.get(node)!;
 
     let last = 0;
     const inversions = [last];
     for (let i = ostart; i < oend; ++i) {
-      last += def(inds.get(ordered[i])) < nind ? -1 : 1;
+      last += inds.get(ordered[i])! < nind ? -1 : 1;
       inversions.push(last);
     }
     const placement = ostart + inversions.indexOf(Math.min(...inversions));
@@ -206,7 +205,7 @@ function buildOperator<Factory extends AggFactory>({
       );
       for (const [i, node] of topLayer.entries()) {
         for (const child of node.ichildren()) {
-          def(incr.get(child)).add(i);
+          incr.get(child)!.add(i);
         }
       }
       const aggs = new Map(
@@ -219,7 +218,7 @@ function buildOperator<Factory extends AggFactory>({
         topLayer.map((node) => {
           const agg = aggregate(
             factory,
-            map(node.ichildren(), (child) => def(inds.get(child)))
+            map(node.ichildren(), (child) => inds.get(child)!)
           );
           return [node, agg] as const;
         })

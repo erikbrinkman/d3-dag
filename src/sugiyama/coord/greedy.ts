@@ -8,7 +8,6 @@
 // better behavior
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { length } from "../../iters";
-import { assert, def } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**
@@ -59,7 +58,7 @@ export function greedy(...args: never[]): GreedyOperator {
     for (const layer of layers) {
       for (const node of layer) {
         for (const child of node.ichildren()) {
-          degrees.set(child, def(degrees.get(child)) + 1);
+          degrees.set(child, degrees.get(child)! + 1);
         }
       }
     }
@@ -83,8 +82,8 @@ export function greedy(...args: never[]): GreedyOperator {
       const ordered = layer
         .map((node, j) => [j, node] as const)
         .sort(([aj, anode], [bj, bnode]) => {
-          const adeg = def(degrees.get(anode));
-          const bdeg = def(degrees.get(bnode));
+          const adeg = degrees.get(anode)!;
+          const bdeg = degrees.get(bnode)!;
           return adeg === bdeg ? aj - bj : bdeg - adeg;
         });
       // Iterate over nodes in degree order
@@ -93,19 +92,19 @@ export function greedy(...args: never[]): GreedyOperator {
         // TODO we do left than right, but really we should do both and average
         const nwidth = nodeSize(node);
 
-        let end = def(node.x) + nwidth / 2;
+        let end = node.x! + nwidth / 2;
         for (const next of layer.slice(j + 1)) {
           const hsize = nodeSize(next) / 2;
-          const nx = (next.x = Math.max(def(next.x), end + hsize));
+          const nx = (next.x = Math.max(next.x!, end + hsize));
           end = nx + hsize;
         }
         finish = Math.max(finish, end);
 
         // then push from the right
-        let begin = def(node.x) - nwidth / 2;
+        let begin = node.x! - nwidth / 2;
         for (const next of layer.slice(0, j).reverse()) {
           const hsize = nodeSize(next) / 2;
-          const nx = (next.x = Math.min(def(next.x), begin - hsize));
+          const nx = (next.x = Math.min(next.x!, begin - hsize));
           begin = nx - hsize;
         }
         start = Math.min(start, begin);
@@ -117,7 +116,7 @@ export function greedy(...args: never[]): GreedyOperator {
     // separate for zero based
     for (const layer of layers) {
       for (const node of layer) {
-        node.x = def(node.x) - start;
+        node.x! -= start;
       }
     }
     const width = finish - start;
@@ -140,12 +139,10 @@ function meanAssignment(topLayer: SugiNode[], bottomLayer: SugiNode[]): void {
   }
   const counts = new Map<SugiNode, number>();
   for (const node of topLayer) {
-    assert(node.x !== undefined);
     for (const child of node.ichildren()) {
-      assert(child.x !== undefined);
       const newCount = (counts.get(child) || 0) + 1;
       counts.set(child, newCount);
-      child.x += (node.x - child.x) / newCount;
+      child.x! += (node.x! - child.x!) / newCount;
     }
   }
 }

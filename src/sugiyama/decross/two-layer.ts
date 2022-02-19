@@ -5,7 +5,7 @@
  * @module
  */
 import { DecrossOperator } from ".";
-import { bigrams, def } from "../../utils";
+import { bigrams } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
 import { SugiNode } from "../utils";
@@ -79,7 +79,7 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
       for (const [upper, bottom] of bigrams(layers)) {
         const init = new Map(bottom.map((node, i) => [node, i] as const));
         options.order(upper, bottom, true);
-        if (bottom.some((node, i) => def(init.get(node)) !== i)) {
+        if (bottom.some((node, i) => init.get(node) !== i)) {
           changed = true;
         }
       }
@@ -88,7 +88,7 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
       for (const [lower, topl] of bigrams(reversed)) {
         const init = new Map(topl.map((node, i) => [node, i] as const));
         options.order(topl, lower, false);
-        if (topl.some((node, i) => def(init.get(node)) !== i)) {
+        if (topl.some((node, i) => init.get(node) !== i)) {
           changed = true;
         }
       }

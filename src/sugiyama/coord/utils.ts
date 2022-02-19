@@ -6,7 +6,7 @@
  */
 import { solveQP } from "quadprog";
 import { CoordNodeSizeAccessor } from ".";
-import { bigrams, def } from "../../utils";
+import { bigrams } from "../../utils";
 import { SugiNode } from "../utils";
 
 /** wrapper for solveQP */
@@ -92,8 +92,8 @@ export function init<N, L>(
 
   for (const layer of layers) {
     for (const [first, second] of bigrams(layer)) {
-      const find = def(inds.get(first));
-      const sind = def(inds.get(second));
+      const find = inds.get(first)!;
+      const sind = inds.get(second)!;
       const cons = new Array(n).fill(0);
       cons[find] = 1;
       cons[sind] = -1;
@@ -161,24 +161,15 @@ export function layout<N, L>(
     const first = layer[0];
     const last = layer[layer.length - 1];
 
-    start = Math.min(
-      start,
-      solution[def(inds.get(first))] - nodeSize(first) / 2
-    );
-    finish = Math.max(
-      finish,
-      solution[def(inds.get(last))] + nodeSize(last) / 2
-    );
+    start = Math.min(start, solution[inds.get(first)!] - nodeSize(first) / 2);
+    finish = Math.max(finish, solution[inds.get(last)!] + nodeSize(last) / 2);
   }
   const width = finish - start;
 
   // assign indices based off of span
   for (const layer of layers) {
     for (const node of layer) {
-      node.x = Math.min(
-        Math.max(0, solution[def(inds.get(node))] - start),
-        width
-      );
+      node.x = Math.min(Math.max(0, solution[inds.get(node)!] - start), width);
     }
   }
 

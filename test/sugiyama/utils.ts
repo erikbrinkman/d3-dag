@@ -1,12 +1,13 @@
 import { Dag } from "../../src/dag";
 import { hierarchy } from "../../src/dag/create";
 import { sugify, SugiNode } from "../../src/sugiyama/utils";
-import { assert, bigrams, def } from "../../src/utils";
+import { assert, bigrams } from "../../src/utils";
 
 export function getLayers(dag: Dag<{ id: string }>): number[][] {
   const layers: number[][] = [];
   for (const node of dag) {
-    const layerId = def(node.value);
+    assert(node.value !== undefined);
+    const layerId = node.value;
     const layer = layers[layerId] || (layers[layerId] = []);
     layer.push(parseInt(node.data.id));
   }
@@ -99,7 +100,7 @@ export function createLayers(
         assert(!dinds.has(key));
         dinds.set(key, index);
       }
-      return def(data.get([layer, ind].join(",")));
+      return data.get([layer, ind].join(","))!;
     });
   }
 
@@ -127,7 +128,7 @@ export function createLayers(
           target.data.layer,
           target.data.index
         ].join(",");
-        return def(dinds.get(key));
+        return dinds.get(key)!;
       }
     });
   }
@@ -145,7 +146,7 @@ export function crossings(layers: readonly (readonly SugiNode[])[]): number {
       for (const p2 of topLayer.slice(j + 1)) {
         for (const c1 of p1.ichildren()) {
           for (const c2 of p2.ichildren()) {
-            if (c1 !== c2 && def(inds.get(c1)) > def(inds.get(c2))) {
+            if (c1 !== c2 && inds.get(c1)! > inds.get(c2)!) {
               crossings++;
             }
           }

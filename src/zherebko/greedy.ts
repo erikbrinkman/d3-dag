@@ -6,7 +6,6 @@
  */
 // TODO turn this into an operator for zherebko
 import { DagNode } from "../dag";
-import { def } from "../utils";
 
 function firstAvailable(inds: number[], target: number) {
   const index = inds.findIndex((i) => i <= target);
@@ -22,7 +21,7 @@ export function greedy(nodes: DagNode[]): Map<DagNode, Map<DagNode, number>> {
   const links = [];
   for (const [nodeLayer, node] of nodes.entries()) {
     for (const child of node.ichildren()) {
-      const childLayer = def(layers.get(child));
+      const childLayer = layers.get(child)!;
       if (childLayer > nodeLayer + 1) {
         links.push([node, nodeLayer, child, childLayer] as const);
       }

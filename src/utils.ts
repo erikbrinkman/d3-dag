@@ -8,15 +8,6 @@
 /** utility type for replacing keys with new value */
 export type Up<O, N> = Omit<O, keyof N> & N;
 
-/** helper for verifying things aren't undefined */
-export function def<T>(val: T | undefined): T {
-  if (val !== undefined) {
-    return val;
-  } else {
-    throw new Error("internal error: got unexpected undefined value");
-  }
-}
-
 /** assert something */
 export function assert(statement: unknown): asserts statement {
   if (!statement) {

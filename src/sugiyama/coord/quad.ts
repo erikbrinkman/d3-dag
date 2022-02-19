@@ -7,7 +7,7 @@
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { DagLink, DagNode } from "../../dag";
 import { map } from "../../iters";
-import { bigrams, def, dfs, setIntersect, Up } from "../../utils";
+import { bigrams, dfs, setIntersect, Up } from "../../utils";
 import { SugiNode } from "../utils";
 import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
@@ -74,7 +74,7 @@ function splitComponentLayers<N, L>(
   let newLayers = [];
   let lastComponents = new Set<number>();
   for (const layer of layers) {
-    const currentComponents = new Set(layer.map((n) => def(compMap.get(n))));
+    const currentComponents = new Set(layer.map((n) => compMap.get(n)!));
     if (!setIntersect(lastComponents, currentComponents)) {
       split.push((newLayers = []));
     }
@@ -382,7 +382,7 @@ function cacheVertWeak<N, L>(
       }
     }
     return (src: DagNode<N, L>, targ: DagNode<N, L>): number =>
-      def(vertWeakMap.get(src)?.get(targ));
+      vertWeakMap.get(src)!.get(targ)!;
   }
 }
 
@@ -471,11 +471,11 @@ function buildOperator<
     // add loss for nearby nodes and for curve of nodes
     for (const layer of layers) {
       for (const par of layer) {
-        const pind = def(inds.get(par));
+        const pind = inds.get(par)!;
         const pdata = par.data;
         const source = "node" in pdata ? pdata.node : pdata.link.source;
         for (const node of par.ichildren()) {
-          const nind = def(inds.get(node));
+          const nind = inds.get(node)!;
           const ndata = node.data;
           const target = "node" in ndata ? ndata.node : ndata.link.target;
 
@@ -493,7 +493,7 @@ function buildOperator<
               : cachedLinkCurve(ndata.link);
           minDist(Q, pind, nind, wpdist + wndist);
           for (const child of node.ichildren()) {
-            const cind = def(inds.get(child));
+            const cind = inds.get(child)!;
             minBend(Q, pind, nind, cind, wcurve);
           }
         }
@@ -503,8 +503,8 @@ function buildOperator<
     // for disconnected dags, add loss for being too far apart
     for (const layer of layers) {
       for (const [first, second] of bigrams(layer)) {
-        if (def(compMap.get(first)) !== def(compMap.get(second))) {
-          minDist(Q, def(inds.get(first)), def(inds.get(second)), comp);
+        if (compMap.get(first) !== compMap.get(second)) {
+          minDist(Q, inds.get(first)!, inds.get(second)!, comp);
         }
       }
     }
@@ -550,7 +550,7 @@ function buildOperator<
       const offset = (maxWidth - widths[i]) / 2;
       for (const layer of compon) {
         for (const node of layer) {
-          node.x = def(node.x) + offset;
+          node.x! += offset;
         }
       }
     }

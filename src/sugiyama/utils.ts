@@ -10,7 +10,7 @@
 import { Dag, DagLink, DagNode } from "../dag";
 import { hierarchy } from "../dag/create";
 import { map } from "../iters";
-import { assert, def, js } from "../utils";
+import { assert, js } from "../utils";
 
 /**
  * The NodeDatum used for layered {@link SugiyamaOperator} layouts
@@ -79,7 +79,7 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
     const layer = data.layer + 1;
     const links = "node" in data ? data.node.childLinks() : [data.link];
     return links.map((link) => {
-      const datum = def(cache.get(link.target));
+      const datum = cache.get(link.target)!;
       if (datum.layer < layer) {
         throw new Error(
           js`layering left child data '${link.target.data}' (${link.target.value}) with greater or equal layer to parent data '${link.source.data}' (${link.source.value})`
@@ -91,7 +91,7 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
 
   // create sugi dag
   const sugi = hierarchy().children(augment)(
-    ...map(dag.iroots(), (node) => def(cache.get(node)))
+    ...map(dag.iroots(), (node) => cache.get(node)!)
   );
 
   // assign nodes to layer
@@ -122,10 +122,9 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
 export function unsugify(layers: readonly (readonly SugiNode[])[]): void {
   for (const layer of layers) {
     for (const sugi of layer) {
-      assert(sugi.x !== undefined && sugi.y !== undefined);
       if ("link" in sugi.data) continue;
-      sugi.data.node.x = sugi.x;
-      sugi.data.node.y = sugi.y;
+      sugi.data.node.x = sugi.x!;
+      sugi.data.node.y = sugi.y!;
 
       const pointsMap = new Map(
         map(
@@ -134,17 +133,15 @@ export function unsugify(layers: readonly (readonly SugiNode[])[]): void {
         )
       );
       for (let child of sugi.ichildren()) {
-        const points = [{ x: sugi.x, y: sugi.y }];
+        const points = [{ x: sugi.x!, y: sugi.y! }];
         while ("link" in child.data) {
-          assert(child.x !== undefined && child.y !== undefined);
-          points.push({ x: child.x, y: child.y });
+          points.push({ x: child.x!, y: child.y! });
           [child] = child.ichildren();
         }
-        assert(child.x !== undefined && child.y !== undefined);
-        points.push({ x: child.x, y: child.y });
+        points.push({ x: child.x!, y: child.y! });
 
         // update
-        const assign = def(pointsMap.get(child.data.node));
+        const assign = pointsMap.get(child.data.node)!;
         assign.splice(0, assign.length, ...points);
       }
     }
@@ -193,9 +190,8 @@ export function scaleLayers(
 ): void {
   for (const layer of layers) {
     for (const node of layer) {
-      assert(node.x !== undefined && node.y !== undefined);
-      node.x *= xscale;
-      node.y *= yscale;
+      node.x! *= xscale;
+      node.y! *= yscale;
     }
   }
 }

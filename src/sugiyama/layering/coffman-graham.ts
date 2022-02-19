@@ -8,7 +8,6 @@ import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";
 import { Dag, DagNode } from "../../dag";
 import { map } from "../../iters";
-import { def } from "../../utils";
 
 /**
  * A {@link LayeringOperator} that restricts the layout to have a maximum
@@ -53,14 +52,14 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
     );
     for (const node of dag) {
       for (const child of node.ichildren()) {
-        def(data.get(child)).parents.push(node);
+        data.get(child)!.parents.push(node);
       }
     }
 
     // create queue
     function comp(left: DagNode, right: DagNode): boolean {
-      const leftBefore = def(data.get(left)).before;
-      const rightBefore = def(data.get(right)).before;
+      const leftBefore = data.get(left)!.before;
+      const rightBefore = data.get(right)!.before;
       for (const [i, leftb] of leftBefore.entries()) {
         const rightb = rightBefore[i];
         if (rightb === undefined) {
@@ -87,7 +86,7 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
     while ((node = queue.poll())) {
       if (
         width < maxWidth &&
-        def(data.get(node)).parents.every((p) => def(p.value) < layer)
+        data.get(node)!.parents.every((p) => p.value! < layer)
       ) {
         node.value = layer;
         width++;
@@ -96,7 +95,7 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
         width = 1;
       }
       for (const child of node.ichildren()) {
-        const { before, parents } = def(data.get(child));
+        const { before, parents } = data.get(child)!;
         before.push(i);
         if (before.length === parents.length) {
           before.sort((a, b) => b - a);
