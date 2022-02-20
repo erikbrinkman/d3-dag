@@ -4,7 +4,7 @@
  * @module
  */
 
-export function* entries<T>(iter: Iterable<T>): Iterable<readonly [number, T]> {
+export function* entries<T>(iter: Iterable<T>): IterableIterator<[number, T]> {
   let index = 0;
   for (const element of iter) {
     yield [index++, element];
@@ -14,7 +14,7 @@ export function* entries<T>(iter: Iterable<T>): Iterable<readonly [number, T]> {
 export function* flatMap<T, S>(
   iter: Iterable<T>,
   callback: (element: T, index: number) => Iterable<S>
-): Iterable<S> {
+): IterableIterator<S> {
   for (const [index, element] of entries(iter)) {
     yield* callback(element, index);
   }
@@ -40,9 +40,28 @@ export function reduce<T, S>(
 export function* map<T, S>(
   iter: Iterable<T>,
   callback: (element: T, index: number) => S
-): Iterable<S> {
+): IterableIterator<S> {
   for (const [index, element] of entries(iter)) {
     yield callback(element, index);
+  }
+}
+
+export function filter<T, S extends T>(
+  iter: Iterable<T>,
+  callback: (element: T, index: number) => element is S
+): IterableIterator<S>;
+export function filter<T>(
+  iter: Iterable<T>,
+  callback: (element: T, index: number) => boolean
+): IterableIterator<T>;
+export function* filter<T>(
+  iter: Iterable<T>,
+  callback: (element: T, index: number) => boolean
+): IterableIterator<T> {
+  for (const [index, element] of entries(iter)) {
+    if (callback(element, index)) {
+      yield element;
+    }
   }
 }
 
@@ -58,7 +77,7 @@ export function every<T>(
   return true;
 }
 
-export function* reverse<T>(arr: readonly T[]): Iterable<T> {
+export function* reverse<T>(arr: readonly T[]): IterableIterator<T> {
   for (let i = arr.length; i != 0; ) {
     yield arr[--i];
   }

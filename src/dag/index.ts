@@ -26,6 +26,7 @@ export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
   readonly target: DagNode<NodeDatum, LinkDatum>;
   readonly data: LinkDatum;
   readonly points: { readonly x: number; readonly y: number }[];
+  readonly reversed: boolean;
 }
 
 /**

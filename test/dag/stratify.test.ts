@@ -137,6 +137,27 @@ test("stratify() works with data accessor", () => {
   expect(left.children()[0]).toBe(right.children()[0]);
 });
 
+test("stratify() decycle works with cycle", () => {
+  const data = [
+    {
+      id: "1",
+      parentIds: ["3"]
+    },
+    {
+      id: "2",
+      parentIds: ["1"]
+    },
+    {
+      id: "3",
+      parentIds: ["2"]
+    }
+  ];
+  const layout = stratify().decycle(true);
+  expect(layout.decycle()).toBe(true);
+  const dag = layout(data);
+  expect(dag.size()).toBe(3);
+});
+
 test("stratify() fails with arguments", () => {
   expect(() => stratify(undefined as never)).toThrow(
     "got arguments to stratify"
@@ -188,7 +209,7 @@ test("stratify() fails without root", () => {
   expect(() => stratify()(data)).toThrow("no roots");
 });
 
-test("stratify() fails with cycle", () => {
+test("stratify() fails with self loop", () => {
   const data = [
     {
       id: "1"
@@ -199,7 +220,26 @@ test("stratify() fails with cycle", () => {
     }
   ];
   expect(() => stratify()(data)).toThrow(
-    /cycle: '{"id":"2",.*}' -> '{"id":"2",.*}'/
+    /node '{"id":"2",.*}' contained a self loop/
+  );
+});
+
+test("stratify() fails with cycle", () => {
+  const data = [
+    {
+      id: "1"
+    },
+    {
+      id: "2",
+      parentIds: ["1", "3"]
+    },
+    {
+      id: "3",
+      parentIds: ["2"]
+    }
+  ];
+  expect(() => stratify()(data)).toThrow(
+    /cycle: '{"id":"2",.*}' -> '{"id":"3",.*}' -> '{"id":"2",.*}'/
   );
 });
 

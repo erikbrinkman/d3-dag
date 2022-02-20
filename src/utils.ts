@@ -42,6 +42,51 @@ export function setIntersect<T>(first: Set<T>, second: Set<T>): boolean {
   return false;
 }
 
+/**
+ * removes a single arbitrary element from the Set, or undefined is missing
+ *
+ * @remarks
+ * if the set contains undefined, then this doesn't distinguish in output,
+ * but will properly remove it.
+ */
+export function setPop<T>(elems: Set<T>): T | undefined {
+  const { done, value } = elems.values().next();
+  if (done) {
+    return undefined;
+  } else {
+    elems.delete(value);
+    return value;
+  }
+}
+
+// FIXME doc and find places to use
+export function listMultimapPush<K, V>(
+  multimap: Map<K, V[]>,
+  key: K,
+  val: V
+): void {
+  const value = multimap.get(key);
+  if (value === undefined) {
+    multimap.set(key, [val]);
+  } else {
+    value.push(val);
+  }
+}
+
+// FIXME doc and find places to use
+export function setMultimapAdd<K, V>(
+  multimap: Map<K, Set<V>>,
+  key: K,
+  val: V
+): void {
+  const value = multimap.get(key);
+  if (value === undefined) {
+    multimap.set(key, new Set([val]));
+  } else {
+    value.add(val);
+  }
+}
+
 export interface Replacer {
   (key: string, value: unknown): unknown;
 }

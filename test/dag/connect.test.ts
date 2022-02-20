@@ -1,5 +1,5 @@
 import { connect } from "../../src/dag/create";
-import { map } from "../../src/iters";
+import { filter, map } from "../../src/iters";
 
 const simpleSquare = [
   ["a", "b"],
@@ -60,7 +60,7 @@ test("connect() handles single nodes", () => {
       ["b", "a"],
       ["a", "a"]
     ])
-  ).toThrow("cycle");
+  ).toThrow("self loop");
 
   const build = connect().single(true);
   expect(build.single()).toBeTruthy();
@@ -107,6 +107,75 @@ test("connect() allows custom node data", () => {
   nums.sort((a, b) => a - b);
   const expected = new Array(11).fill(undefined).map((_, i) => i + 1);
   expect(nums).toEqual(expected);
+});
+
+test("connect() decycle works with simple cycle", () => {
+  // this has two cycles that overlap with c -> a, so that's the edge that gets
+  // reversed
+  const cycle = [
+    ["a", "b"],
+    ["b", "c"],
+    ["c", "a"],
+    ["a", "d"],
+    ["d", "c"]
+  ] as const;
+  const layout = connect().decycle(true);
+  expect(layout.decycle()).toBe(true);
+  const dag = layout(cycle);
+  const [a] = dag.iroots();
+  expect(a.data.id).toBe("a");
+  expect(a.nchildren()).toBe(3);
+  const [clink] = filter(
+    a.ichildLinks(),
+    ({ target }) => target.data.id === "c"
+  );
+  expect(clink.reversed).toBe(true);
+});
+
+test("connect() decycle works with only sources and sinks", () => {
+  const cycle = [["a", "b"]] as const;
+  const layout = connect().decycle(true);
+  const dag = layout(cycle);
+  const ids = [...map(dag, (n) => n.data.id)];
+  expect(ids).toEqual(["a", "b"]);
+});
+
+test("connect() decycle works with complex cycle", () => {
+  // NOTE this tests more edges cases in decycle
+  // The two upwards edges in this graph are reversed, but the relevant nodes
+  // have two different "delta"s checking that we also appropriately decrement
+  //      a
+  //      |
+  //   ---b
+  //  /  /^\
+  // i  c | d
+  //  \  \|/^\
+  //   ---e | f
+  //       \|/
+  //        g
+  //        |
+  //        h
+  const cycle = [
+    ["a", "b"],
+    ["b", "c"],
+    ["b", "d"],
+    ["c", "e"],
+    ["d", "e"],
+    ["e", "b"],
+    ["d", "f"],
+    ["f", "g"],
+    ["e", "g"],
+    ["g", "d"],
+    ["b", "i"],
+    ["i", "e"],
+    ["g", "h"]
+  ] as const;
+  const layout = connect().decycle(true);
+  const dag = layout(cycle);
+  const [a] = dag.idescendants("before");
+  expect(a.data.id).toBe("a");
+  const [h] = dag.idescendants("after");
+  expect(h.data.id).toBe("h");
 });
 
 test("connect() fails on empty", () => {

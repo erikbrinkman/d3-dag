@@ -7,8 +7,8 @@
  * @module
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
-import { entries, every, flatMap, map, reduce } from "../iters";
-import { dfs, js, Up } from "../utils";
+import { entries, every, filter, flatMap, map, reduce } from "../iters";
+import { dfs, js, setMultimapAdd, setPop, Up } from "../utils";
 
 /**********************
  * Dag Implementation *
@@ -18,7 +18,8 @@ class LayoutChildLink<NodeDatum, LinkDatum> {
   constructor(
     readonly child: DagNode<NodeDatum, LinkDatum>,
     public data: LinkDatum,
-    public points: { x: number; y: number }[] = []
+    public points: { x: number; y: number }[] = [],
+    readonly reversed: boolean = false
   ) {}
 }
 
@@ -32,7 +33,8 @@ class LayoutLink<NodeDatum, LinkDatum>
     readonly source: DagNode<NodeDatum, LinkDatum>,
     readonly target: DagNode<NodeDatum, LinkDatum>,
     readonly data: LinkDatum,
-    readonly points: { x: number; y: number }[]
+    readonly points: { x: number; y: number }[],
+    readonly reversed: boolean
   ) {}
 }
 
@@ -313,8 +315,8 @@ class LayoutDagNode<NodeDatum, LinkDatum>
   }
 
   *ichildLinks(): Iterable<DagLink<NodeDatum, LinkDatum>> {
-    for (const { child, data, points } of this.dataChildren) {
-      yield new LayoutLink(this, child, data, points);
+    for (const { child, data, points, reversed } of this.dataChildren) {
+      yield new LayoutLink(this, child, data, points, reversed);
     }
   }
 
@@ -348,27 +350,25 @@ function verifyId(id: string): string {
 
 /**
  * Verify a DAG is valid.
+ *
+ * @param checkForCycles if true will check for all cycles, if false, will only
+ * check for trivial self-loops
  */
-function verifyDag(roots: DagNode[]): void {
-  // test that there are roots
+function verifyDag(roots: DagNode[], checkForCycles: boolean): void {
   if (!roots.length) {
     throw new Error("dag contained no roots; this often indicates a cycle");
   }
 
-  // make sure there's no duplicate edges
+  // make sure there's no duplicate edges or self loops
   for (const node of new LayoutDag(roots)) {
-    const childIdSet = new Set(node.ichildren());
-    if (childIdSet.size !== node.nchildren()) {
+    const childSet = new Set(node.ichildren());
+    if (childSet.size !== node.nchildren()) {
       throw new Error(js`node '${node.data}' contained duplicate children`);
     }
+    if (childSet.has(node)) {
+      throw new Error(js`node '${node.data}' contained a self loop`);
+    }
   }
-
-  // test that dag is free of cycles
-  // we attempt to take every unique path from each root and see if we ever see
-  // a node again
-  const seen = new Set<DagNode>(); // already processed
-  const past = new Set<DagNode>(); // seen down this path
-  let rec: DagNode | null = null;
 
   /** visit nodes returning cycle if found */
   function visit(node: DagNode): DagNode[] {
@@ -392,6 +392,15 @@ function verifyDag(roots: DagNode[]): void {
     }
   }
 
+  if (!checkForCycles) return;
+
+  // test that dag is free of cycles
+  // we attempt to take every unique path from each root and see if we ever see
+  // a node again
+  const seen = new Set<DagNode>(); // already processed
+  const past = new Set<DagNode>(); // seen down this path
+  let rec: DagNode | null = null;
+
   for (const root of roots) {
     const msg = visit(root);
     if (msg.length) {
@@ -402,6 +411,182 @@ function verifyDag(roots: DagNode[]): void {
       throw new Error(`dag contained a cycle: ${cycle}`);
     }
   }
+}
+
+interface AugmentedNode<N, L> {
+  indeg: number;
+  outdeg: number;
+  node: LayoutDagNode<N, L>;
+  rank?: number;
+}
+
+function setPopUndef<T>(elems: Set<T> | undefined): T | undefined {
+  return elems && setPop(elems);
+}
+
+/**
+ * Remove cycles from a constrcuted dag by reversing some edges
+ *
+ * This uses the algorithm from [P Eades, X Lin, WF Smyth - Information
+ * Processing Letters
+ * [1993]](https://www.sciencedirect.com/science/article/pii/002001909390079O)
+ */
+function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
+  const parents = new Map<DagNode, LayoutDagNode<N, L>[]>(
+    map(nodes, (n) => [n, []])
+  );
+  for (const node of nodes) {
+    for (const child of node.ichildren()) {
+      parents.get(child)!.push(node);
+    }
+  }
+
+  const augmented = new Map<DagNode, AugmentedNode<N, L>>(
+    map(nodes, (node) => [
+      node,
+      {
+        indeg: parents.get(node)!.length,
+        outdeg: node.nchildren(),
+        node
+      }
+    ])
+  );
+  const maxDelta = Math.max(
+    ...map(
+      filter(
+        augmented.values(),
+        ({ indeg, outdeg }) => indeg > 0 && outdeg > 0
+      ),
+      ({ indeg, outdeg }) => outdeg - indeg
+    )
+  );
+
+  if (maxDelta === -Infinity) {
+    // all nodes were sources or sinks, so roots are just all sources, and there are no cycles
+    const roots: DagNode<N, L>[] = [];
+    for (const { indeg, node } of augmented.values()) {
+      if (indeg === 0) {
+        roots.push(node);
+      }
+    }
+    return roots;
+  }
+
+  const sources = new Set<AugmentedNode<N, L>>();
+  const sinks = new Set<AugmentedNode<N, L>>();
+  const buckets = new Map<number, Set<AugmentedNode<N, L>>>();
+
+  for (const aug of augmented.values()) {
+    const { outdeg, indeg } = aug;
+    if (indeg === 0) {
+      sources.add(aug);
+    } else if (outdeg === 0) {
+      sinks.add(aug);
+    } else {
+      const delta = outdeg - indeg;
+      setMultimapAdd(buckets, delta, aug);
+    }
+  }
+
+  let minRank = 0;
+  let maxRank = nodes.length;
+  let delta = maxDelta;
+
+  // nodes in topological order after removing cycles
+  const ordered: Array<LayoutDagNode<N, L>> = new Array(nodes.length);
+
+  while (minRank < maxRank) {
+    const aug =
+      setPop(sources) ?? setPop(sinks) ?? setPopUndef(buckets.get(delta));
+    if (aug === undefined) {
+      --delta;
+    } else {
+      const { node, indeg, outdeg } = aug;
+      const rank = (aug.rank =
+        indeg > 0 && outdeg === 0 ? --maxRank : minRank++);
+      ordered[rank] = node;
+
+      // process parents
+      for (const par of parents.get(node)!) {
+        const paug = augmented.get(par)!;
+        if (paug.rank === undefined && paug.indeg > 0 && paug.outdeg > 0) {
+          // rank: not already ranked already ranked
+          // indeg: once a source always a source
+          // outdeg: unranked parents can't have 0 outdeg
+          const pdelta = paug.outdeg - paug.indeg;
+          buckets.get(pdelta)!.delete(paug);
+          --paug.outdeg;
+          if (paug.outdeg > 0) {
+            setMultimapAdd(buckets, pdelta - 1, paug);
+          } else {
+            sinks.add(paug);
+          }
+        }
+      }
+
+      // process children
+      for (const child of node.ichildren()) {
+        const caug = augmented.get(child)!;
+        if (caug.rank !== undefined || caug.indeg === 0) {
+          // no op, already ranked or impossible for unranked children to have 0 in degree
+        } else if (caug.outdeg === 0) {
+          // already a sink, removing could turn into a source
+          --caug.indeg;
+          if (caug.indeg === 0) {
+            // moved from sink to a source
+            sinks.delete(caug);
+            sources.add(caug);
+          }
+        } else {
+          const cdelta = caug.outdeg - caug.indeg;
+          if (cdelta === delta) {
+            // added a new node at a higher delta, need to step back
+            ++delta;
+          }
+          buckets.get(cdelta)!.delete(caug);
+          --caug.indeg;
+          if (caug.indeg === 0) {
+            sources.add(caug);
+          } else {
+            setMultimapAdd(buckets, cdelta + 1, caug);
+          }
+        }
+      }
+    }
+  }
+
+  const roots: DagNode<N, L>[] = [];
+  const hasParents = new Set<DagNode>();
+  for (const [rank, node] of ordered.entries()) {
+    // compute new children by reversing children with higher rank
+    const newDataChildren: LayoutChildLink<N, L>[] = [];
+    for (const link of node.dataChildren) {
+      const caug = augmented.get(link.child)!;
+      if (caug.rank! < rank) {
+        // reversing edge
+        caug.node.dataChildren.push(
+          new LayoutChildLink<N, L>(node, link.data, link.points, true)
+        );
+      } else {
+        newDataChildren.push(link);
+      }
+    }
+
+    // add node to roots if it hasn't been a child yet
+    if (newDataChildren.length === node.nchildren() && !hasParents.has(node)) {
+      roots.push(node);
+    }
+
+    // update has parents for all true children
+    for (const { child } of newDataChildren) {
+      hasParents.add(child);
+    }
+
+    // actually update children
+    node.dataChildren = newDataChildren;
+  }
+
+  return roots;
 }
 
 /***********
@@ -557,10 +742,38 @@ export interface ConnectOperator<
   single(val: boolean): ConnectOperator<NodeDatum, Ops>;
   /** get the current single node setting. */
   single(): boolean;
+
+  /**
+   * Sets whether edges should be reversed to remove cycles
+   *
+   * If true, after creating the initial "graph" of nodes, an algorithm will
+   * run to reverse enough edges to make the resulting data structure a valid
+   * dag. It does this by reversing links in the original dag. Note that since
+   * the structure is still a dag, old parents could now be positioned as
+   * children, and instead the link will have `reversed` set to true. It is up
+   * to the user to decide how to handle these links. (default: false)
+   */
+  decycle(val: boolean): ConnectOperator<NodeDatum, Ops>;
+  /** get the current decycle setting */
+  decycle(): boolean;
+}
+
+function getConnectRoots<N, L>(
+  nodes: Map<string, LayoutDagNode<N, L>>,
+  hasParents: Set<string>
+): DagNode<N, L>[] {
+  const roots: DagNode<N, L>[] = [];
+  for (const [id, node] of nodes.entries()) {
+    if (!hasParents.has(id)) {
+      roots.push(node);
+    }
+  }
+  return roots;
 }
 
 function buildConnect<N, LinkDatum, Ops extends ConnectOperators<N, LinkDatum>>(
-  operators: Ops & ConnectOperators<N, LinkDatum> & { single: boolean }
+  operators: Ops &
+    ConnectOperators<N, LinkDatum> & { single: boolean; decycle: boolean }
 ): ConnectOperator<N, Ops> {
   function connect<L extends LinkDatum>(data: readonly L[]): Dag<N, L> {
     if (!data.length) {
@@ -589,13 +802,10 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOperators<N, LinkDatum>>(
       }
     }
 
-    const roots: DagNode<N, L>[] = [];
-    for (const [id, node] of nodes.entries()) {
-      if (!hasParents.has(id)) {
-        roots.push(node);
-      }
-    }
-    verifyDag(roots);
+    const roots = operators.decycle
+      ? removeCycles([...nodes.values()])
+      : getConnectRoots(nodes, hasParents);
+    verifyDag(roots, !operators.decycle);
     return roots.length > 1 ? new LayoutDag(roots) : roots[0];
   }
 
@@ -657,6 +867,17 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOperators<N, LinkDatum>>(
     }
   }
   connect.single = single;
+
+  function decycle(): boolean;
+  function decycle(val: boolean): ConnectOperator<N, Ops>;
+  function decycle(val?: boolean): boolean | ConnectOperator<N, Ops> {
+    if (val === undefined) {
+      return operators.decycle;
+    } else {
+      return buildConnect({ ...operators, decycle: val });
+    }
+  }
+  connect.decycle = decycle;
 
   return connect;
 }
@@ -745,7 +966,8 @@ export function connect(...args: never[]): DefaultConnectOperator {
       sourceId: defaultSourceId,
       targetId: defaultTargetId,
       nodeDatum: defaultNodeDatum,
-      single: false
+      single: false,
+      decycle: false
     });
   }
 }
@@ -949,10 +1171,29 @@ export interface HierarchyOperator<
   roots(val: boolean): HierarchyOperator<NodeDatum, LinkDatum, Ops>;
   /** get the current roots value. */
   roots(): boolean;
+
+  /**
+   * Sets whether edges should be reversed to remove cycles
+   *
+   * If true, after creating the initial "graph" of nodes, an algorithm will
+   * run to reverse enough edges to make the resulting data structure a valid
+   * dag. It does this by reversing links in the original dag. Note that since
+   * the structure is still a dag, old parents could now be positioned as
+   * children, and instead the link will have `reversed` set to true. It is up
+   * to the user to decide how to handle these links.
+   *
+   * Also note that by default, all inputs still need to be roots, if a "root"
+   * node is in a cycle then {@link HierarchyOperator.roots} must also be set
+   * to `false`. (default: false)
+   */
+  decycle(val: boolean): HierarchyOperator<NodeDatum, LinkDatum, Ops>;
+  /** get the current decycle setting */
+  decycle(): boolean;
 }
 
 function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
-  operators: Ops & HierarchyOperators<N, L> & { roots: boolean }
+  operators: Ops &
+    HierarchyOperators<N, L> & { roots: boolean; decycle: boolean }
 ): HierarchyOperator<N, L, Ops> {
   function hierarchy(...data: N[]): Dag<N, L> {
     if (!data.length) {
@@ -990,14 +1231,18 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
         }
       }
     }
+
     // NOTE if rootSet is empty then we have a cycle, but we defer to verifyDag
     // to get better printing
-    const froots =
-      rootSet.size && rootSet.size !== roots.length ? [...rootSet] : roots;
+    const trueRoots = operators.decycle
+      ? removeCycles([...mapping.values()])
+      : rootSet.size
+      ? [...rootSet]
+      : roots;
 
     // create dag
-    verifyDag(froots);
-    return froots.length > 1 ? new LayoutDag(froots) : froots[0];
+    verifyDag(trueRoots, !operators.decycle);
+    return trueRoots.length > 1 ? new LayoutDag(trueRoots) : trueRoots[0];
   }
 
   function children(): Ops["children"];
@@ -1010,10 +1255,11 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
     if (childs === undefined) {
       return operators.children;
     } else {
+      const { children: _, childrenData: __, ...rest } = operators;
       return buildHierarchy({
+        ...rest,
         children: childs,
-        childrenData: wrapChildren(childs),
-        roots: operators.roots
+        childrenData: wrapChildren(childs)
       });
     }
   }
@@ -1029,10 +1275,11 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
     if (data === undefined) {
       return operators.childrenData;
     } else {
+      const { children: _, childrenData: __, ...rest } = operators;
       return buildHierarchy({
+        ...rest,
         children: wrapChildrenData(data),
-        childrenData: data,
-        roots: operators.roots
+        childrenData: data
       });
     }
   }
@@ -1048,6 +1295,17 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
     }
   }
   hierarchy.roots = roots;
+
+  function decycle(): boolean;
+  function decycle(val: boolean): HierarchyOperator<N, L, Ops>;
+  function decycle(val?: boolean): boolean | HierarchyOperator<N, L, Ops> {
+    if (val === undefined) {
+      return operators.decycle;
+    } else {
+      return buildHierarchy({ ...operators, decycle: val });
+    }
+  }
+  hierarchy.decycle = decycle;
 
   return hierarchy;
 }
@@ -1114,7 +1372,8 @@ export function hierarchy(...args: never[]): DefaultHierarchyOperator {
     return buildHierarchy({
       children: defaultChildren,
       childrenData: wrapChildren(defaultChildren),
-      roots: true
+      roots: true,
+      decycle: false
     });
   }
 }
@@ -1329,13 +1588,29 @@ export interface StratifyOperator<
    * with `undefined` data.
    */
   parentData(): Ops["parentData"];
+
+  /**
+   * Sets whether edges should be reversed to remove cycles
+   *
+   * If true, after creating the initial "graph" of nodes, an algorithm will
+   * run to reverse enough edges to make the resulting data structure a valid
+   * dag. It does this by reversing links in the original dag. Note that since
+   * the structure is still a dag, old parents could now be positioned as
+   * children, and instead the link will have `reversed` set to true. It is up
+   * to the user to decide how to handle these links. (default: false)
+   */
+  decycle(val: boolean): StratifyOperator<LinkDatum, Ops>;
+  /** get the current decycle setting */
+  decycle(): boolean;
 }
 
 function buildStratify<
   NodeDatum,
   L,
   Ops extends StratifyOperators<NodeDatum, L>
->(operators: Ops & StratifyOperators<NodeDatum, L>): StratifyOperator<L, Ops> {
+>(
+  operators: Ops & StratifyOperators<NodeDatum, L> & { decycle: boolean }
+): StratifyOperator<L, Ops> {
   function stratify<N extends StratifyNodeDatum<Ops>>(
     data: readonly N[]
   ): Dag<N, L> {
@@ -1356,7 +1631,7 @@ function buildStratify<
       }
     }
 
-    const roots: DagNode<N, L>[] = [];
+    const baseRoots: DagNode<N, L>[] = [];
     for (const [node, pdata] of mapping.values()) {
       for (const [pid, linkData] of pdata) {
         const info = mapping.get(pid);
@@ -1365,11 +1640,14 @@ function buildStratify<
         par.dataChildren.push(new LayoutChildLink(node, linkData));
       }
       if (!pdata.length) {
-        roots.push(node);
+        baseRoots.push(node);
       }
     }
 
-    verifyDag(roots);
+    const roots = operators.decycle
+      ? removeCycles([...map(mapping.values(), ([node]) => node)])
+      : baseRoots;
+    verifyDag(roots, !operators.decycle);
     return roots.length > 1 ? new LayoutDag(roots) : roots[0];
   }
 
@@ -1428,6 +1706,17 @@ function buildStratify<
     }
   }
   stratify.parentIds = parentIds;
+
+  function decycle(): boolean;
+  function decycle(val: boolean): StratifyOperator<L, Ops>;
+  function decycle(val?: boolean): StratifyOperator<L, Ops> | boolean {
+    if (val === undefined) {
+      return operators.decycle;
+    } else {
+      return buildStratify({ ...operators, decycle: val });
+    }
+  }
+  stratify.decycle = decycle;
 
   return stratify;
 }
@@ -1527,7 +1816,8 @@ export function stratify(...args: never[]): DefaultStratifyOperator {
     return buildStratify({
       id: defaultId,
       parentIds: defaultParentIds,
-      parentData: wrapParentIds(defaultParentIds)
+      parentData: wrapParentIds(defaultParentIds),
+      decycle: false
     });
   }
 }

@@ -118,7 +118,22 @@ test("hierarchy() passes with invalid root and roots", () => {
   } as const;
   const layout = hierarchy().roots(false);
   expect(layout.roots()).toBeFalsy();
-  layout(input, ...input.children);
+  const dag = layout(input, ...input.children);
+  expect(dag.size()).toBe(2);
+});
+
+test("hierarchy() decycle handles a cycle with a root", () => {
+  const three: Loop = { id: "3", children: [] };
+  const two: Loop = { id: "2", children: [three] };
+  const one = {
+    id: "1",
+    children: [two]
+  };
+  three.children.push(one);
+  const layout = hierarchy().decycle(true).roots(false);
+  expect(layout.decycle()).toBe(true);
+  const dag = layout(one);
+  expect(dag.size()).toBe(3);
 });
 
 interface Loop {
@@ -135,7 +150,7 @@ test("hierarchy() detects cycle with invalid roots", () => {
   );
 });
 
-test("hierarchy() fails with cycle", () => {
+test("hierarchy() fails with self loop", () => {
   const selfLoop: Loop = { id: "2", children: [] };
   selfLoop.children.push(selfLoop);
   const line = {
@@ -143,7 +158,21 @@ test("hierarchy() fails with cycle", () => {
     children: [selfLoop]
   };
   expect(() => hierarchy()(line)).toThrow(
-    /cycle: '{.*"id":"2".*}' -> '{.*"id":"2".*}'/
+    /node '{.*"id":"2".*}' contained a self loop/
+  );
+});
+
+test("hierarchy() fails with cycle", () => {
+  const three: Loop = { id: "3", children: [] };
+  const two: Loop = { id: "2", children: [three] };
+  three.children.push(two);
+  const one = {
+    id: "1",
+    children: [two]
+  };
+  const layout = hierarchy();
+  expect(() => layout(one)).toThrow(
+    /cycle: '{.*"id":"2".*}' -> '{.*"id":"3".*}' -> '{.*"id":"2".*}'/
   );
 });
 
