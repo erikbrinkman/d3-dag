@@ -70,6 +70,7 @@
           "longestpath",
           "lp",
           "minimizers",
+          "nchildren",
           "negatable",
           "num",
           "parametrize",

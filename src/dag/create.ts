@@ -7,7 +7,7 @@
  * @module
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
-import { entries, every, flatMap, length, map, reduce } from "../iters";
+import { entries, every, flatMap, map, reduce } from "../iters";
 import { dfs, js, Up } from "../utils";
 
 /**********************
@@ -298,6 +298,10 @@ class LayoutDagNode<NodeDatum, LinkDatum>
     return { [Symbol.iterator]: () => singleton[Symbol.iterator]() };
   }
 
+  nchildren(): number {
+    return this.dataChildren.length;
+  }
+
   *ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>> {
     for (const { child } of this.dataChildren) {
       yield child;
@@ -354,7 +358,7 @@ function verifyDag(roots: DagNode[]): void {
   // make sure there's no duplicate edges
   for (const node of new LayoutDag(roots)) {
     const childIdSet = new Set(node.ichildren());
-    if (childIdSet.size !== length(node.ichildren())) {
+    if (childIdSet.size !== node.nchildren()) {
       throw new Error(js`node '${node.data}' contained duplicate children`);
     }
   }

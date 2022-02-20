@@ -1,4 +1,4 @@
-import { entries, every, flatMap, length, map, reduce } from "../src/iters";
+import { entries, every, flatMap, map, reduce } from "../src/iters";
 
 test("entries()", () => {
   expect([...entries([])]).toEqual([]);
@@ -17,12 +17,6 @@ test("every()", () => {
 test("flatMap()", () => {
   expect([...flatMap([1, 2], (v, i) => [v, i])]).toEqual([1, 0, 2, 1]);
   expect([...flatMap([1, 2], (v) => [v])]).toEqual([1, 2]);
-});
-
-test("length", () => {
-  expect(length([])).toBeCloseTo(0);
-  expect(length([null])).toBeCloseTo(1);
-  expect(length([1, 2, 3])).toBeCloseTo(3);
 });
 
 test("map()", () => {

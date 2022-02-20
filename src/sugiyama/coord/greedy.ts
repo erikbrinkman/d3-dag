@@ -7,7 +7,6 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { length } from "../../iters";
 import { SugiNode } from "../utils";
 
 /**
@@ -49,10 +48,7 @@ export function greedy(...args: never[]): GreedyOperator {
         // the -3 at the end ensures that dummy nodes have the lowest priority,
         // as dummy nodes always have degree 2, degree -1 ensures they are
         // below any other valid node
-        degrees.set(
-          node,
-          length(node.ichildren()) + ("node" in node.data ? 0 : -3)
-        );
+        degrees.set(node, node.nchildren() + ("node" in node.data ? 0 : -3));
       }
     }
     for (const layer of layers) {

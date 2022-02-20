@@ -5,7 +5,6 @@
  */
 import { Model, Solve } from "javascript-lp-solver";
 import { DecrossOperator } from ".";
-import { length } from "../../iters";
 import { bigrams } from "../../utils";
 import { SugiNode } from "../utils";
 
@@ -72,7 +71,7 @@ function buildOperator(options: {
       0
     );
     const numEdges = layers.reduce(
-      (t, l) => t + l.reduce((s, n) => s + length(n.ichildren()), 0),
+      (t, l) => t + l.reduce((s, n) => s + n.nchildren(), 0),
       0
     );
     if (options.large !== "large" && numVars > 1200) {
@@ -100,9 +99,7 @@ function buildOperator(options: {
         .filter((cs) => cs.length > 1);
       distanceConstraints.push([topUnconstrained, topGroups]);
 
-      const bottomUnconstrained = topLayer.filter(
-        (n) => !length(n.ichildren())
-      );
+      const bottomUnconstrained = topLayer.filter((n) => !n.nchildren());
       const parents = new Map<SugiNode, SugiNode[]>();
       for (const node of topLayer) {
         for (const child of node.ichildren()) {

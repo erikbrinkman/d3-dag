@@ -24,6 +24,12 @@ test("roots() works for N", () => {
   expect(roots).toHaveLength(2);
 });
 
+test("nchildren() works for square", () => {
+  const dag = square();
+  const [root] = dag.iroots();
+  expect(root.nchildren()).toBe(2);
+});
+
 test("childLinks() works for square", () => {
   const dag = square();
   const [root] = dag.iroots();

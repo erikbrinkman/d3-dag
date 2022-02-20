@@ -63,7 +63,3 @@ export function* reverse<T>(arr: readonly T[]): Iterable<T> {
     yield arr[--i];
   }
 }
-
-export function length(iter: Iterable<unknown>): number {
-  return reduce(iter, (a) => a + 1, 0);
-}

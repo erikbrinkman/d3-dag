@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Node and link level customizations to the `quad` operator allowing one to specify certain edges be more vertical.
 - All of the internals of `sugiyama` are exposed in the ES6 module api making it possible to selectively run or rerun different parts of the sugiyama layout. This may make incremental updates or interactivity easier.
 - Add two-layer greedy to help improve two-layer layouts.
+- `nchildren()` method to DagNodes which is more efficient than any of the current methods for getting the number of children.
 
 ### Changed
 

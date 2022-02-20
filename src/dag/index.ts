@@ -165,6 +165,11 @@ export interface DagNode<NodeDatum = unknown, LinkDatum = unknown>
   y?: number;
 
   /**
+   * Return the number of child nodes
+   */
+  nchildren(): number;
+
+  /**
    * Return an iterable over this node's child nodes
    */
   ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>>;
