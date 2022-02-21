@@ -9,6 +9,7 @@
 import { Dag, DagLink, DagNode, IterStyle } from ".";
 import { entries, every, filter, flatMap, map, reduce } from "../iters";
 import { dfs, js, setMultimapAdd, setPop, Up } from "../utils";
+import { getParents } from "./utils";
 
 /**********************
  * Dag Implementation *
@@ -210,21 +211,11 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
   }
 
   depth(): this {
-    const parents = new Map<DagNode, DagNode[]>();
-    for (const node of this) {
-      for (const child of node.ichildren()) {
-        const pars = parents.get(child);
-        if (pars) {
-          pars.push(node);
-        } else {
-          parents.set(child, [node]);
-        }
-      }
-    }
+    const parents = getParents(this);
     for (const node of this.idescendants("before")) {
       node.value = Math.max(
         0,
-        ...map(parents.get(node) || [], (par) => par.value! + 1)
+        ...map(parents.get(node) ?? [], (par) => par.value! + 1)
       );
     }
     return this;
@@ -232,24 +223,14 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
 
   *isplit(): Iterable<Dag<NodeDatum, LinkDatum>> {
     // create parents
-    const parents = new Map<DagNode, DagNode<NodeDatum, LinkDatum>[]>();
-    for (const node of this) {
-      for (const child of node.ichildren()) {
-        const pars = parents.get(child);
-        if (pars) {
-          pars.push(node);
-        } else {
-          parents.set(child, [node]);
-        }
-      }
-    }
+    const parents = getParents(this);
 
     // "children" function that returns children and parents
     function* graph(
       node: DagNode<NodeDatum, LinkDatum>
-    ): Generator<DagNode<NodeDatum, LinkDatum>, void, undefined> {
+    ): IterableIterator<DagNode<NodeDatum, LinkDatum>> {
       yield* node.ichildren();
-      yield* parents.get(node) || [];
+      yield* parents.get(node) ?? [];
     }
 
     // dfs over roots, tracing parents too
@@ -432,20 +413,13 @@ function setPopUndef<T>(elems: Set<T> | undefined): T | undefined {
  * [1993]](https://www.sciencedirect.com/science/article/pii/002001909390079O)
  */
 function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
-  const parents = new Map<DagNode, LayoutDagNode<N, L>[]>(
-    map(nodes, (n) => [n, []])
-  );
-  for (const node of nodes) {
-    for (const child of node.ichildren()) {
-      parents.get(child)!.push(node);
-    }
-  }
+  const parents = getParents(nodes);
 
   const augmented = new Map<DagNode, AugmentedNode<N, L>>(
     map(nodes, (node) => [
       node,
       {
-        indeg: parents.get(node)!.length,
+        indeg: parents.get(node)?.length ?? 0,
         outdeg: node.nchildren(),
         node
       }
@@ -507,7 +481,7 @@ function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
       ordered[rank] = node;
 
       // process parents
-      for (const par of parents.get(node)!) {
+      for (const par of parents.get(node) ?? []) {
         const paug = augmented.get(par)!;
         if (paug.rank === undefined && paug.indeg > 0 && paug.outdeg > 0) {
           // rank: not already ranked already ranked
@@ -1216,7 +1190,7 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
     let node;
     let i = 0;
     while ((node = queue.pop())) {
-      node.dataChildren = (operators.childrenData(node.data, i++) || []).map(
+      node.dataChildren = (operators.childrenData(node.data, i++) ?? []).map(
         ([childDatum, linkDatum]) =>
           new LayoutChildLink(nodify(childDatum), linkDatum)
       );
@@ -1314,7 +1288,7 @@ function wrapChildren<N, C extends ChildrenOperator<N>>(
   children: C
 ): WrappedChildrenOperator<N, C> {
   function wrapped(d: N, i: number): [N, undefined][] {
-    return (children(d, i) || []).map((d) => [d, undefined]);
+    return (children(d, i) ?? []).map((d) => [d, undefined]);
   }
   wrapped.wrapped = children;
   return wrapped;
@@ -1324,7 +1298,7 @@ function wrapChildrenData<N, C extends ChildrenDataOperator<N>>(
   childrenData: C
 ): WrappedChildrenDataOperator<N, C> {
   function wrapped(d: N, i: number): N[] {
-    return (childrenData(d, i) || []).map(([d]) => d);
+    return (childrenData(d, i) ?? []).map(([d]) => d);
   }
   wrapped.wrapped = childrenData;
   return wrapped;
@@ -1622,7 +1596,7 @@ function buildStratify<
     >();
     for (const [i, datum] of data.entries()) {
       const nid = verifyId(operators.id(datum, i));
-      const pdata = operators.parentData(datum, i) || [];
+      const pdata = operators.parentData(datum, i) ?? [];
       const node = new LayoutDagNode<N, L>(datum);
       if (mapping.has(nid)) {
         throw new Error(`found a duplicate id: ${id}`);
@@ -1725,7 +1699,7 @@ function wrapParentIds<N, P extends ParentIdsOperator<N>>(
   parentIds: P & ParentIdsOperator<N>
 ): WrappedParentIdsOperator<P> {
   function wrapper(d: N, i: number): [string, undefined][] {
-    return (parentIds(d, i) || []).map((id) => [id, undefined]);
+    return (parentIds(d, i) ?? []).map((id) => [id, undefined]);
   }
   wrapper.wrapped = parentIds;
   return wrapper;
@@ -1735,7 +1709,7 @@ function wrapParentData<N, D extends ParentDataOperator<N>>(
   parentData: D & ParentDataOperator<N>
 ): WrappedParentDataOperator<D> {
   function wrapper(d: N, i: number): string[] {
-    return (parentData(d, i) || []).map(([id]) => id);
+    return (parentData(d, i) ?? []).map(([id]) => id);
   }
   wrapper.wrapped = parentData;
   return wrapper;

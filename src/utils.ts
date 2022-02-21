@@ -59,7 +59,9 @@ export function setPop<T>(elems: Set<T>): T | undefined {
   }
 }
 
-// FIXME doc and find places to use
+/**
+ * push val onto key list for multimap
+ */
 export function listMultimapPush<K, V>(
   multimap: Map<K, V[]>,
   key: K,
@@ -73,7 +75,9 @@ export function listMultimapPush<K, V>(
   }
 }
 
-// FIXME doc and find places to use
+/**
+ * add val to key set for multimap
+ */
 export function setMultimapAdd<K, V>(
   multimap: Map<K, Set<V>>,
   key: K,

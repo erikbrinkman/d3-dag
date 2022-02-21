@@ -5,6 +5,7 @@
  */
 import { Model, Solve } from "javascript-lp-solver";
 import { DecrossOperator } from ".";
+import { getParents } from "../../dag/utils";
 import { bigrams } from "../../utils";
 import { SugiNode } from "../utils";
 
@@ -100,17 +101,7 @@ function buildOperator(options: {
       distanceConstraints.push([topUnconstrained, topGroups]);
 
       const bottomUnconstrained = topLayer.filter((n) => !n.nchildren());
-      const parents = new Map<SugiNode, SugiNode[]>();
-      for (const node of topLayer) {
-        for (const child of node.ichildren()) {
-          const group = parents.get(child);
-          if (group) {
-            group.push(node);
-          } else {
-            parents.set(child, [node]);
-          }
-        }
-      }
+      const parents = getParents(topLayer);
       const bottomGroups = [...parents.values()];
       distanceConstraints.push([bottomUnconstrained, bottomGroups]);
     }

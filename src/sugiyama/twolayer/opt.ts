@@ -6,8 +6,8 @@
  */
 import { Model, Solve } from "javascript-lp-solver";
 import { TwolayerOperator } from ".";
+import { getParents } from "../../dag/utils";
 import { SugiNode } from "../utils";
-import { getParents } from "./utils";
 
 /**
  * How to handle large dags

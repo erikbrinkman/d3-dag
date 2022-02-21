@@ -5,8 +5,8 @@
  * @module
  */
 import { TwolayerOperator } from ".";
+import { getParents } from "../../dag/utils";
 import { SugiNode } from "../utils";
-import { getParents } from "./utils";
 
 type OpNodeDatum<Op extends TwolayerOperator> = Op extends TwolayerOperator<
   infer D,
@@ -58,18 +58,18 @@ export interface GreedyOperator<Op extends TwolayerOperator = TwolayerOperator>
   scan(): boolean;
 }
 
-interface SwapChange {
-  (left: SugiNode, right: SugiNode): number;
+interface SwapChange<N, L> {
+  (left: SugiNode<N, L>, right: SugiNode<N, L>): number;
 }
 
-function createSwapChange(
-  stationary: readonly SugiNode[],
-  children: (node: SugiNode) => Iterable<SugiNode>
-): SwapChange {
+function createSwapChange<N, L>(
+  stationary: readonly SugiNode<N, L>[],
+  children: (node: SugiNode<N, L>) => Iterable<SugiNode<N, L>>
+): SwapChange<N, L> {
   const cache = new Map<SugiNode, Map<SugiNode, number>>();
   const inds = new Map<SugiNode, number>(stationary.map((n, i) => [n, i]));
 
-  function swapChange(left: SugiNode, right: SugiNode): number {
+  function swapChange(left: SugiNode<N, L>, right: SugiNode<N, L>): number {
     const val = cache.get(left)?.get(right);
     if (val !== undefined) {
       return val;
@@ -102,7 +102,10 @@ function createSwapChange(
   return swapChange;
 }
 
-function adjacentSwap(layer: SugiNode[], swapChange: SwapChange): void {
+function adjacentSwap<N, L>(
+  layer: SugiNode<N, L>[],
+  swapChange: SwapChange<N, L>
+): void {
   const ranges: [number, number][] = [[0, layer.length]];
   let range;
   while ((range = ranges.pop())) {
@@ -124,7 +127,10 @@ function adjacentSwap(layer: SugiNode[], swapChange: SwapChange): void {
   }
 }
 
-function scanSwap(layer: SugiNode[], swapChange: SwapChange): void {
+function scanSwap<N, L>(
+  layer: SugiNode<N, L>[],
+  swapChange: SwapChange<N, L>
+): void {
   const costs: number[] = new Array((layer.length * (layer.length - 1)) / 2);
   for (;;) {
     let start = 0;
@@ -182,7 +188,7 @@ function buildOperator<N, L, Op extends TwolayerOperator<N, L>>({
       const parents = getParents(topLayer);
       swapChange = createSwapChange(
         topLayer,
-        (node: SugiNode) => parents.get(node) ?? []
+        (node: SugiNode<N, L>) => parents.get(node) ?? []
       );
       layer = bottomLayer;
     } else {

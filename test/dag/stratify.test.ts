@@ -81,7 +81,7 @@ test("stratify() parses a square with altered ids", () => {
     return alter(d.id);
   }
   function newParentIds(d: SimpleDatum): readonly string[] {
-    return (d.parentIds || []).map(alter);
+    return (d.parentIds ?? []).map(alter);
   }
   const layout = stratify().id(newId).parentIds(newParentIds);
   expect(layout.id()).toBe(newId);
@@ -124,8 +124,8 @@ test("stratify() works with data accessor", () => {
   // check that wrapper works
   const justIds = layout.parentIds();
   for (const data of complexSquare) {
-    expect((justIds(data, 0) || []).slice().sort()).toEqual(
-      (data.pd || []).map(([id]: readonly [string, string]) => id).sort()
+    expect((justIds(data, 0) ?? []).slice().sort()).toEqual(
+      (data.pd ?? []).map(([id]: readonly [string, string]) => id).sort()
     );
   }
 

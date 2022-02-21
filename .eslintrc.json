@@ -73,6 +73,7 @@
           "longestpath",
           "lp",
           "minimizers",
+          "multimap",
           "nchildren",
           "negatable",
           "num",

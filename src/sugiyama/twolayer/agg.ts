@@ -7,6 +7,7 @@
 import { median } from "d3-array";
 import { TwolayerOperator } from ".";
 import { map } from "../../iters";
+import { listMultimapPush } from "../../utils";
 import { SugiNode } from "../utils";
 
 /**
@@ -131,12 +132,7 @@ function order(
     if (val === undefined) {
       continue;
     }
-    const nodes = orderMap.get(val);
-    if (nodes === undefined) {
-      orderMap.set(val, [node]);
-    } else {
-      nodes.push(node);
-    }
+    listMultimapPush(orderMap, val, node);
   }
   const ordered = [...orderMap.entries()]
     .sort(([a], [b]) => a - b)

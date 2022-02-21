@@ -6,7 +6,8 @@
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { DagLink, DagNode } from "../../dag";
-import { map } from "../../iters";
+import { getParents } from "../../dag/utils";
+import { flatMap, map } from "../../iters";
 import { bigrams, dfs, setIntersect, Up } from "../../utils";
 import { SugiNode } from "../utils";
 import { indices, init, layout, minBend, minDist, solve } from "./utils";
@@ -19,24 +20,12 @@ import { indices, init, layout, minBend, minDist, solve } from "./utils";
  */
 function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
   // create parent map to allow accessing parents
-  const parents = new Map<SugiNode, SugiNode[]>();
-  for (const layer of layers) {
-    for (const node of layer) {
-      for (const child of node.ichildren()) {
-        const pars = parents.get(child);
-        if (pars) {
-          pars.push(node);
-        } else {
-          parents.set(child, [node]);
-        }
-      }
-    }
-  }
+  const parents = getParents(flatMap(layers, (lay) => lay));
 
   // "children" function that returns children and parents
   function* graph(node: SugiNode): Generator<SugiNode, void, undefined> {
     yield* node.ichildren();
-    yield* parents.get(node) || [];
+    yield* parents.get(node) ?? [];
   }
 
   // depth first search over all nodes
