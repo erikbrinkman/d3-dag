@@ -65,16 +65,23 @@ export function* filter<T>(
   }
 }
 
-export function every<T>(
+export function some<T>(
   iter: Iterable<T>,
   callback: (element: T, index: number) => boolean
 ): boolean {
   for (const [index, element] of entries(iter)) {
-    if (!callback(element, index)) {
-      return false;
+    if (callback(element, index)) {
+      return true;
     }
   }
-  return true;
+  return false;
+}
+
+export function every<T>(
+  iter: Iterable<T>,
+  callback: (element: T, index: number) => boolean
+): boolean {
+  return !some(iter, (e, i) => !callback(e, i));
 }
 
 export function* reverse<T>(arr: readonly T[]): IterableIterator<T> {

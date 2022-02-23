@@ -136,6 +136,18 @@ test("hierarchy() decycle handles a cycle with a root", () => {
   expect(dag.size()).toBe(3);
 });
 
+test("hierarchy() works for multidag", () => {
+  const two: Loop = { id: "2", children: [] };
+  const one: Loop = { id: "1", children: [two, two] };
+  const layout = hierarchy();
+  const dag = layout(one);
+  expect(dag.multidag()).toBe(true);
+  expect(dag.size()).toBe(2);
+  const [a] = dag.iroots();
+  expect(a.children()).toHaveLength(1);
+  expect(a.childLinks()).toHaveLength(2);
+});
+
 interface Loop {
   id: string;
   children: Loop[];

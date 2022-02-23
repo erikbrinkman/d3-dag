@@ -47,6 +47,23 @@ export function trip(): Dag<SimpleDatum, undefined> {
   ]);
 }
 
+// simplest multidag
+//  0
+// / \
+// \ /
+//  1
+export function multi(): Dag<SimpleDatum, undefined> {
+  return stratify()([
+    {
+      id: "0"
+    },
+    {
+      id: "1",
+      parentIds: ["0", "0"]
+    }
+  ]);
+}
+
 // square, simple with a cycle
 //   0
 //  / \

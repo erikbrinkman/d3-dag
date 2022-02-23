@@ -15,7 +15,15 @@ import { longestPath } from "../../src/sugiyama/layering/longest-path";
 import { simplex } from "../../src/sugiyama/layering/simplex";
 import { topological as layeringTopological } from "../../src/sugiyama/layering/topological";
 import { SugiNode } from "../../src/sugiyama/utils";
-import { doub, dummy, SimpleDatum, single, three, trip } from "../examples";
+import {
+  doub,
+  dummy,
+  multi,
+  SimpleDatum,
+  single,
+  three,
+  trip
+} from "../examples";
 
 test("sugiyama() works for single node", () => {
   const dag = single();
@@ -285,6 +293,12 @@ test("sugiyama() throws with zero node height", () => {
   expect(() => layout(dag)).toThrow(
     "at least one node must have positive height, but total height was zero"
   );
+});
+
+test("grid() fails for multidag", () => {
+  const dag = multi();
+  const layout = sugiyama();
+  expect(() => layout(dag)).toThrow("multidag");
 });
 
 test("sugiyama() fails passing an arg to constructor", () => {

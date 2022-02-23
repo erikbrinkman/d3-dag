@@ -147,6 +147,12 @@ function buildOperator<N, L, Lane extends LaneOperator<N, L>>(options: {
   size: null | readonly [number, number];
 }): GridOperator<Lane> {
   function gridCall(dag: Dag<N, L>): GridInfo {
+    if (dag.multidag()) {
+      throw new Error(
+        "grid layout doesn't make sense to apply to multidags, consider pruning the edges"
+      );
+    }
+
     const { nodeWidth, nodeHeight, size, lane } = options;
 
     // topological sort

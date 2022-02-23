@@ -7,18 +7,25 @@
  * @module
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
-import { entries, every, filter, flatMap, map, reduce } from "../iters";
-import { dfs, js, setMultimapAdd, setPop, Up } from "../utils";
+import { entries, every, filter, flatMap, map, reduce, some } from "../iters";
+import {
+  dfs,
+  js,
+  listMultimapPush,
+  setMultimapAdd,
+  setPop,
+  Up
+} from "../utils";
 import { getParents } from "./utils";
 
 /**********************
  * Dag Implementation *
  **********************/
 
-class LayoutChildLink<NodeDatum, LinkDatum> {
+class LayoutChildLink<N, L> {
   constructor(
-    readonly child: DagNode<NodeDatum, LinkDatum>,
-    public data: LinkDatum,
+    readonly child: DagNode<N, L>,
+    public data: L,
     public points: { x: number; y: number }[] = [],
     readonly reversed: boolean = false
   ) {}
@@ -27,13 +34,11 @@ class LayoutChildLink<NodeDatum, LinkDatum> {
 /**
  * The concrete class backing the {@link Link} interface.
  */
-class LayoutLink<NodeDatum, LinkDatum>
-  implements DagLink<NodeDatum, LinkDatum>
-{
+class LayoutLink<N, L> implements DagLink<N, L> {
   constructor(
-    readonly source: DagNode<NodeDatum, LinkDatum>,
-    readonly target: DagNode<NodeDatum, LinkDatum>,
-    readonly data: LinkDatum,
+    readonly source: DagNode<N, L>,
+    readonly target: DagNode<N, L>,
+    readonly data: L,
     readonly points: { x: number; y: number }[],
     readonly reversed: boolean
   ) {}
@@ -42,37 +47,38 @@ class LayoutLink<NodeDatum, LinkDatum>
 /**
  * The concrete implementation backing {@link Dag}.
  */
-class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
+class LayoutDag<N, L> implements Dag<N, L> {
   // NOTE proots is undefined for normal nodes because we can't call super([this]);
-  private readonly proots?: DagNode<NodeDatum, LinkDatum>[];
+  private readonly proots?: DagNode<N, L>[];
+  protected pmultidag?: boolean;
 
-  constructor(roots?: DagNode<NodeDatum, LinkDatum>[]) {
+  constructor(roots?: DagNode<N, L>[]) {
     if (roots) {
       this.proots = roots;
     }
   }
 
-  [Symbol.iterator](): Iterator<DagNode<NodeDatum, LinkDatum>> {
+  [Symbol.iterator](): Iterator<DagNode<N, L>> {
     return this.idescendants()[Symbol.iterator]();
   }
 
-  iroots(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+  iroots(): Iterable<DagNode<N, L>> {
     return { [Symbol.iterator]: () => this.proots![Symbol.iterator]() };
   }
 
-  roots(): DagNode<NodeDatum, LinkDatum>[] {
+  roots(): DagNode<N, L>[] {
     return [...this.iroots()];
   }
 
-  private *idepth(): Iterable<DagNode<NodeDatum, LinkDatum>> {
-    const ch = (node: DagNode<NodeDatum, LinkDatum>) => node.ichildren();
+  private *idepth(): Iterable<DagNode<N, L>> {
+    const ch = (node: DagNode<N, L>) => node.ichildren();
     yield* dfs(ch, ...this.iroots());
   }
 
-  private *ibreadth(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+  private *ibreadth(): Iterable<DagNode<N, L>> {
     const seen = new Set<DagNode>();
     let next = this.roots();
-    let current: DagNode<NodeDatum, LinkDatum>[] = [];
+    let current: DagNode<N, L>[] = [];
     do {
       current = next.reverse();
       next = [];
@@ -87,7 +93,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     } while (next.length);
   }
 
-  private *ibefore(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+  private *ibefore(): Iterable<DagNode<N, L>> {
     const numBefore = new Map<DagNode, number>();
     for (const node of this) {
       for (const child of node.ichildren()) {
@@ -110,7 +116,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     }
   }
 
-  private *iafter(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+  private *iafter(): Iterable<DagNode<N, L>> {
     const queue = this.roots();
     const seen = new Set<DagNode>();
     let node;
@@ -121,15 +127,13 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
         seen.add(node);
         yield node;
       } else {
-        queue.push(node); // need to revisit after children
-        queue.push(...node.ichildren());
+        // need to revisit after children
+        queue.push(node, ...node.ichildren());
       }
     }
   }
 
-  idescendants(
-    style: IterStyle = "depth"
-  ): Iterable<DagNode<NodeDatum, LinkDatum>> {
+  idescendants(style: IterStyle = "depth"): Iterable<DagNode<N, L>> {
     if (style === "depth") {
       return this.idepth();
     } else if (style === "breadth") {
@@ -143,25 +147,23 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     }
   }
 
-  descendants(style: IterStyle = "depth"): DagNode<NodeDatum, LinkDatum>[] {
+  descendants(style: IterStyle = "depth"): DagNode<N, L>[] {
     return [...this.idescendants(style)];
   }
 
-  ilinks(): Iterable<DagLink<NodeDatum, LinkDatum>> {
-    return flatMap(this.idescendants(), (node) => node.ichildLinks());
+  ilinks(): Iterable<DagLink<N, L>> {
+    return flatMap(this, (node) => node.ichildLinks());
   }
 
-  links(): DagLink<NodeDatum, LinkDatum>[] {
+  links(): DagLink<N, L>[] {
     return [...this.ilinks()];
   }
 
   size(): number {
-    return reduce(this.idescendants(), (s) => s + 1, 0);
+    return reduce(this, (s) => s + 1, 0);
   }
 
-  sum(
-    callback: (node: DagNode<NodeDatum, LinkDatum>, index: number) => number
-  ): this {
+  sum(callback: (node: DagNode<N, L>, index: number) => number): this {
     const descendantVals = new Map<DagNode, Map<DagNode, number>>();
     for (const [index, node] of entries(this.idescendants("after"))) {
       const val = callback(node, index);
@@ -221,14 +223,12 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     return this;
   }
 
-  *isplit(): Iterable<Dag<NodeDatum, LinkDatum>> {
+  *isplit(): Iterable<Dag<N, L>> {
     // create parents
     const parents = getParents(this);
 
     // "children" function that returns children and parents
-    function* graph(
-      node: DagNode<NodeDatum, LinkDatum>
-    ): IterableIterator<DagNode<NodeDatum, LinkDatum>> {
+    function* graph(node: DagNode<N, L>): IterableIterator<DagNode<N, L>> {
       yield* node.ichildren();
       yield* parents.get(node) ?? [];
     }
@@ -249,7 +249,7 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     }
   }
 
-  split(): Dag<NodeDatum, LinkDatum>[] {
+  split(): Dag<N, L>[] {
     return [...this.isplit()];
   }
 
@@ -259,63 +259,122 @@ class LayoutDag<NodeDatum, LinkDatum> implements Dag<NodeDatum, LinkDatum> {
     const { done } = iter.next();
     return !!done;
   }
+
+  multidag(): boolean {
+    if (this.pmultidag === undefined) {
+      return (this.pmultidag = some(this.iroots(), (n) => n.multidag()));
+    } else {
+      return this.pmultidag;
+    }
+  }
 }
 
 /**
  * Concrete implementation of {@link DagNode}.
  */
-class LayoutDagNode<NodeDatum, LinkDatum>
-  extends LayoutDag<NodeDatum, LinkDatum>
-  implements DagNode<NodeDatum, LinkDatum>
-{
-  dataChildren: LayoutChildLink<NodeDatum, LinkDatum>[] = [];
+class LayoutDagNode<N, L> extends LayoutDag<N, L> implements DagNode<N, L> {
+  dataChildren: LayoutChildLink<N, L>[] = [];
+  // NOTE we set to null when caching is not necessary
+  cachedChildrenCounts?: Map<DagNode<N, L>, number> | null;
 
-  constructor(public data: NodeDatum) {
+  constructor(public data: N) {
     super();
+  }
+
+  private childrenCountsMap(): Map<DagNode<N, L>, number> | null {
+    if (this.cachedChildrenCounts === undefined) {
+      const cache = new Map();
+      for (const { child } of this.dataChildren) {
+        cache.set(child, (cache.get(child) ?? 0) + 1);
+      }
+      return (this.cachedChildrenCounts =
+        cache.size === this.dataChildren.length ? null : cache);
+    } else {
+      return this.cachedChildrenCounts;
+    }
   }
 
   // NOTE everything extends from iroots, so by overriding this, we allow
   // dag nodes to work effectively
-  iroots(): Iterable<DagNode<NodeDatum, LinkDatum>> {
+  iroots(): Iterable<DagNode<N, L>> {
     const singleton = [this];
     return { [Symbol.iterator]: () => singleton[Symbol.iterator]() };
   }
 
   nchildren(): number {
+    return this.childrenCountsMap()?.size ?? this.dataChildren.length;
+  }
+
+  nchildLinks(): number {
     return this.dataChildren.length;
   }
 
-  *ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>> {
-    for (const { child } of this.dataChildren) {
-      yield child;
+  nchildLinksTo(node: DagNode<N, L>): number {
+    return this.childrenCountsMap()?.get(node) ?? 1;
+  }
+
+  *ichildren(): Iterable<DagNode<N, L>> {
+    const cache = this.childrenCountsMap();
+    if (cache === null) {
+      for (const { child } of this.dataChildren) {
+        yield child;
+      }
+    } else {
+      yield* cache.keys();
     }
   }
 
-  children(): DagNode<NodeDatum, LinkDatum>[] {
+  children(): DagNode<N, L>[] {
     return [...this.ichildren()];
   }
 
-  *ichildLinks(): Iterable<DagLink<NodeDatum, LinkDatum>> {
+  *ichildrenCounts(): Iterable<[DagNode<N, L>, number]> {
+    const cache = this.childrenCountsMap();
+    if (cache === null) {
+      for (const { child } of this.dataChildren) {
+        yield [child, 1];
+      }
+    } else {
+      yield* cache;
+    }
+  }
+
+  childrenCounts(): [DagNode<N, L>, number][] {
+    return [...this.ichildrenCounts()];
+  }
+
+  *ichildLinks(): Iterable<DagLink<N, L>> {
     for (const { child, data, points, reversed } of this.dataChildren) {
       yield new LayoutLink(this, child, data, points, reversed);
     }
   }
 
-  childLinks(): DagLink<NodeDatum, LinkDatum>[] {
+  childLinks(): DagLink<N, L>[] {
     return [...this.ichildLinks()];
   }
 
   // NOTE these are simpler for a single node, so we override
-  isplit(): Iterable<Dag<NodeDatum, LinkDatum>> {
+  isplit(): Iterable<Dag<N, L>> {
     return this.iroots();
   }
 
-  split(): DagNode<NodeDatum, LinkDatum>[] {
+  split(): DagNode<N, L>[] {
     return this.roots();
   }
 
   connected(): true {
     return true;
+  }
+
+  // NOTE we need to override this, or we get an infinity loop
+  multidag(): boolean {
+    if (this.pmultidag === undefined) {
+      return (this.pmultidag =
+        this.childrenCountsMap() !== null ||
+        some(this.ichildren(), (child) => child.multidag()));
+    } else {
+      return this.pmultidag;
+    }
   }
 }
 
@@ -340,16 +399,24 @@ function verifyDag(roots: DagNode[], checkForCycles: boolean): void {
     throw new Error("dag contained no roots; this often indicates a cycle");
   }
 
-  // make sure there's no duplicate edges or self loops
+  // make sure there's no self loops
   for (const node of new LayoutDag(roots)) {
-    const childSet = new Set(node.ichildren());
-    if (childSet.size !== node.nchildren()) {
-      throw new Error(js`node '${node.data}' contained duplicate children`);
-    }
-    if (childSet.has(node)) {
-      throw new Error(js`node '${node.data}' contained a self loop`);
+    for (const child of node.ichildren()) {
+      if (child === node) {
+        throw new Error(js`node '${node.data}' contained a self loop`);
+      }
     }
   }
+
+  // return early if no loops
+  if (!checkForCycles) return;
+
+  // test that dag is free of cycles
+  // we attempt to take every unique path from each root and see if we ever see
+  // a node again
+  const seen = new Set<DagNode>(); // already processed
+  const past = new Set<DagNode>(); // seen down this path
+  let rec: DagNode | null = null;
 
   /** visit nodes returning cycle if found */
   function visit(node: DagNode): DagNode[] {
@@ -372,15 +439,6 @@ function verifyDag(roots: DagNode[], checkForCycles: boolean): void {
       return result;
     }
   }
-
-  if (!checkForCycles) return;
-
-  // test that dag is free of cycles
-  // we attempt to take every unique path from each root and see if we ever see
-  // a node again
-  const seen = new Set<DagNode>(); // already processed
-  const past = new Set<DagNode>(); // seen down this path
-  let rec: DagNode | null = null;
 
   for (const root of roots) {
     const msg = visit(root);
@@ -413,14 +471,21 @@ function setPopUndef<T>(elems: Set<T> | undefined): T | undefined {
  * [1993]](https://www.sciencedirect.com/science/article/pii/002001909390079O)
  */
 function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
-  const parents = getParents(nodes);
+  // NOTE this doesn't use getParents, because we're still modifying the dag,
+  // we want to make sure not to cache children set
+  const parents = new Map<DagNode, LayoutDagNode<N, L>[]>();
+  for (const node of nodes) {
+    for (const { child } of node.dataChildren) {
+      listMultimapPush(parents, child, node);
+    }
+  }
 
   const augmented = new Map<DagNode, AugmentedNode<N, L>>(
     map(nodes, (node) => [
       node,
       {
         indeg: parents.get(node)?.length ?? 0,
-        outdeg: node.nchildren(),
+        outdeg: node.nchildLinks(),
         node
       }
     ])
@@ -499,7 +564,7 @@ function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
       }
 
       // process children
-      for (const child of node.ichildren()) {
+      for (const { child } of node.dataChildren) {
         const caug = augmented.get(child)!;
         if (caug.rank !== undefined || caug.indeg === 0) {
           // no op, already ranked or impossible for unranked children to have 0 in degree
@@ -547,7 +612,10 @@ function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
     }
 
     // add node to roots if it hasn't been a child yet
-    if (newDataChildren.length === node.nchildren() && !hasParents.has(node)) {
+    if (
+      newDataChildren.length === node.nchildLinks() &&
+      !hasParents.has(node)
+    ) {
       roots.push(node);
     }
 
@@ -1199,7 +1267,7 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
     // verify roots are roots
     const rootSet = new Set(roots);
     for (const node of mapping.values()) {
-      for (const child of node.ichildren()) {
+      for (const { child } of node.dataChildren) {
         if (rootSet.delete(child) && operators.roots) {
           throw new Error(js`node '${node.data}' pointed to a root`);
         }

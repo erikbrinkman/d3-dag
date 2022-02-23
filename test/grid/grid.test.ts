@@ -1,7 +1,7 @@
 import { DagNode } from "../../src/dag";
 import { grid } from "../../src/grid";
 import { greedy } from "../../src/grid/lane/greedy";
-import { dummy, zhere } from "../examples";
+import { dummy, multi, zhere } from "../examples";
 
 test("greedy() works for triangle", () => {
   const dag = dummy();
@@ -59,6 +59,12 @@ test("grid() throws for invalid lane operators", () => {
   }
   const invalid = grid().lane(invalidOp);
   expect(() => invalid(dag)).toThrow("assigned an overlapping lane");
+});
+
+test("grid() fails for multidag", () => {
+  const dag = multi();
+  const layout = grid();
+  expect(() => layout(dag)).toThrow("multidag");
 });
 
 test("grid() throws for arguments", () => {

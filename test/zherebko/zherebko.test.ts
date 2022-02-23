@@ -1,7 +1,7 @@
 import { connect } from "../../src/dag/create";
 import { map } from "../../src/iters";
 import { zherebko } from "../../src/zherebko";
-import { doub, single } from "../examples";
+import { doub, multi, single } from "../examples";
 
 test("zherebko() works for a point", () => {
   const dag = single();
@@ -122,6 +122,12 @@ test("zherebko() works on sink", () => {
     const [x = 1] = exes;
     expect([1, 7]).toContainEqual(x);
   }
+});
+
+test("zherebko() fails on multidag", () => {
+  const dag = multi();
+  const layout = zherebko();
+  expect(() => layout(dag)).toThrow("multidag");
 });
 
 test("zherebko() fails with args", () => {

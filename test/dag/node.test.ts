@@ -5,6 +5,7 @@ import {
   doubleYou,
   en,
   ex,
+  multi,
   single,
   square,
   vee
@@ -41,6 +42,42 @@ test("childLinks() works for square", () => {
     expect(childIds.has(link.target.data.id)).toBeTruthy();
     expect(link.points).toHaveLength(0);
     expect(link.data).toEqual(undefined);
+  }
+});
+
+test("childrenCounts() works for square", () => {
+  const dag = square();
+  const [root] = dag.iroots();
+  const counts = root.childrenCounts();
+  expect(counts).toHaveLength(2);
+  for (const [, count] of counts) {
+    expect(count).toBe(1);
+  }
+});
+
+test("childrenCounts() works for multi", () => {
+  const dag = multi();
+  const [root] = dag.iroots();
+  const counts = root.childrenCounts();
+  expect(counts).toHaveLength(1);
+  for (const [, count] of counts) {
+    expect(count).toBe(2);
+  }
+});
+
+test("nchildLinksTo() works for square", () => {
+  const dag = square();
+  const [root] = dag.iroots();
+  for (const node of root.ichildren()) {
+    expect(root.nchildLinksTo(node)).toBe(1);
+  }
+});
+
+test("nchildLinksTo() works for multi", () => {
+  const dag = multi();
+  const [root] = dag.iroots();
+  for (const node of root.ichildren()) {
+    expect(root.nchildLinksTo(node)).toBe(2);
   }
 });
 

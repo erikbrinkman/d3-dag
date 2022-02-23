@@ -18,14 +18,23 @@
 export type IterStyle = "depth" | "breadth" | "before" | "after";
 
 /**
- * A link between nodes, with attached data, and `points` for how to render the
- * link if the {@link Dag} has been laid out.
+ * A link between nodes, with attached information
  */
 export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
+  /** The dag node this link comes from */
   readonly source: DagNode<NodeDatum, LinkDatum>;
+  /** The dag node this link goes to */
   readonly target: DagNode<NodeDatum, LinkDatum>;
+  /** Arbitrary data attached to this link */
   readonly data: LinkDatum;
+  /**
+   * Points for how to render this node in a layout
+   *
+   * The property itself is read only, but the list is mutable to update or
+   * changes points as necessary.
+   */
   readonly points: { readonly x: number; readonly y: number }[];
+  /** If the link had to be reversed to handle cycles, this will be true */
   readonly reversed: boolean;
 }
 
@@ -149,6 +158,11 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
    * Return true if every node in the dag is reachable from every other.
    */
   connected(): boolean;
+
+  /**
+   * Return true if at least one node in this dag has multiple lints to the same child.
+   */
+  multidag(): boolean;
 }
 
 /**
@@ -165,28 +179,43 @@ export interface DagNode<NodeDatum = unknown, LinkDatum = unknown>
   x?: number;
   y?: number;
 
-  /**
-   * Return the number of child nodes
-   */
+  /** Return the number of unique child nodes */
   nchildren(): number;
 
-  /**
-   * Return an iterable over this node's child nodes
-   */
-  ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>>;
+  /** Return the number of child links */
+  nchildLinks(): number;
 
   /**
-   * Return an array of this node's child nodes
+   * Return the number of links to a child node
+   *
+   * For memory efficiency reasons behavior for non-child nodes is undefined,
+   * but for consistency currently all non-child nodes will return 1.
    */
+  nchildLinksTo(node: DagNode<NodeDatum, LinkDatum>): number;
+
+  /** Return an iterable over this node's unique child nodes */
+  ichildren(): Iterable<DagNode<NodeDatum, LinkDatum>>;
+
+  /** Return an array of this node's unique child nodes */
   children(): DagNode<NodeDatum, LinkDatum>[];
+
+  /** Return an iterable over this node's unique child nodes and the number of links to them */
+  ichildrenCounts(): Iterable<[DagNode<NodeDatum, LinkDatum>, number]>;
+
+  /** Return an array of this node's unique child nodes and the number of links to them */
+  childrenCounts(): [DagNode<NodeDatum, LinkDatum>, number][];
 
   /**
    * Return an iterator of links between this node and its children
+   *
+   * The order of links is guaranteed to not change between iterations.
    */
   ichildLinks(): Iterable<DagLink<NodeDatum, LinkDatum>>;
 
   /**
    * Returns an array of links between this node and its children
+   *
+   * The order of links is guaranteed to not change between iterations.
    */
   childLinks(): DagLink<NodeDatum, LinkDatum>[];
 }

@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The somewhat internal `SugiData` object has been changed to `{ link: DagLink<...> }` from `{ source: DagNode<...>, target: DagNode<...> }`. This simplifies the object and makes it easier to access link data for dummy nodes.
 - Various typings have been tweaked slightly to get better inference and clean up the messy types with more appropriate usage of `infer`.
 
+### Removed
+
+- The requirement that nodes only link to a child once. Note that layouts might
+  not support multigraphs immediately.
+
 ## [0.9.0] - 2021-12-31
 
 ### Added

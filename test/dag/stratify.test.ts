@@ -158,6 +158,26 @@ test("stratify() decycle works with cycle", () => {
   expect(dag.size()).toBe(3);
 });
 
+test("stratify() works for multidag", () => {
+  const data = [
+    {
+      id: "1",
+      parentIds: []
+    },
+    {
+      id: "2",
+      parentIds: ["1", "1"]
+    }
+  ];
+  const layout = stratify();
+  const dag = layout(data);
+  expect(dag.multidag()).toBe(true);
+  expect(dag.size()).toBe(2);
+  const [a] = dag.iroots();
+  expect(a.children()).toHaveLength(1);
+  expect(a.childLinks()).toHaveLength(2);
+});
+
 test("stratify() fails with arguments", () => {
   expect(() => stratify(undefined as never)).toThrow(
     "got arguments to stratify"

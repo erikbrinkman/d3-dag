@@ -79,6 +79,12 @@ function buildOperator(
   sizeVal: null | readonly [number, number]
 ): ZherebkoOperator {
   function zherebkoCall(dag: Dag): ZherebkoInfo {
+    if (dag.multidag()) {
+      throw new Error(
+        "zherebko layout isn't currently implemented for multidags"
+      );
+    }
+
     // topological sort
     const ordered = [...dag.idescendants("before")];
 

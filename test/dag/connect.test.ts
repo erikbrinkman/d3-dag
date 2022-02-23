@@ -42,6 +42,7 @@ const zherebko = [
 test("connect() parses a simple square", () => {
   const dag = connect()(simpleSquare);
   expect(dag.size()).toBeCloseTo(4);
+  expect(dag.multidag()).toBe(false);
   const [root] = dag.iroots();
   expect(root.data.id).toBe("a");
   const [left, right] = root.ichildren();
@@ -132,6 +133,29 @@ test("connect() decycle works with simple cycle", () => {
   expect(clink.reversed).toBe(true);
 });
 
+test("connect() decycle works with simple multidag", () => {
+  // this has two cycles that overlap with c -> a, so that's the edge that gets
+  // reversed
+  const cycle = [
+    ["a", "b"],
+    ["a", "b"],
+    ["b", "c"],
+    ["c", "a"]
+  ] as const;
+  const layout = connect().decycle(true);
+  expect(layout.decycle()).toBe(true);
+  const dag = layout(cycle);
+  const [a] = dag.iroots();
+  expect(a.data.id).toBe("a");
+  expect(a.nchildren()).toBe(2);
+  expect(a.nchildLinks()).toBe(3);
+  const [clink] = filter(
+    a.ichildLinks(),
+    ({ target }) => target.data.id === "c"
+  );
+  expect(clink.reversed).toBe(true);
+});
+
 test("connect() decycle works with only sources and sinks", () => {
   const cycle = [["a", "b"]] as const;
   const layout = connect().decycle(true);
@@ -176,6 +200,34 @@ test("connect() decycle works with complex cycle", () => {
   expect(a.data.id).toBe("a");
   const [h] = dag.idescendants("after");
   expect(h.data.id).toBe("h");
+});
+
+test("connect() works for multidag", () => {
+  const cycle = [
+    ["a", "b"],
+    ["a", "b"]
+  ] as const;
+  const layout = connect();
+  const dag = layout(cycle);
+  expect(dag.multidag()).toBe(true);
+  expect(dag.multidag()).toBe(true); // cache
+  expect(dag.size()).toBe(2);
+  const [a] = dag.iroots();
+  expect(a.children()).toHaveLength(1);
+  expect(a.childLinks()).toHaveLength(2);
+});
+
+test("connect() works for multidag dag", () => {
+  const cycle = [
+    ["a", "b"],
+    ["a", "b"],
+    ["c", "c"]
+  ] as const;
+  const layout = connect().single(true);
+  const dag = layout(cycle);
+  expect(dag.multidag()).toBe(true);
+  expect(dag.multidag()).toBe(true); // cache
+  expect(dag.size()).toBe(3);
 });
 
 test("connect() fails on empty", () => {
@@ -235,13 +287,4 @@ test("connect() fails on non-string target", () => {
   expect(() => connect()([new BadOne()])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
-});
-
-test("connect() fails on duplicate edges", () => {
-  expect(() =>
-    connect()([
-      ["a", "b"],
-      ["a", "b"]
-    ])
-  ).toThrow("contained duplicate children");
 });
