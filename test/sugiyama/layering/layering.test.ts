@@ -2,10 +2,10 @@ import { coffmanGraham } from "../../../src/sugiyama/layering/coffman-graham";
 import { longestPath } from "../../../src/sugiyama/layering/longest-path";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
 import { topological } from "../../../src/sugiyama/layering/topological";
-import { ccoz, doub, ex, square } from "../../examples";
+import { ccoz, doub, ex, multi, square } from "../../examples";
 import { getLayers } from "../utils";
 
-for (const dat of [doub, ex, square, ccoz]) {
+for (const dat of [doub, ex, square, ccoz, multi]) {
   for (const method of [
     simplex(),
     longestPath(),

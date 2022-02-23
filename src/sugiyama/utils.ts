@@ -66,13 +66,24 @@ function vlayer(node: DagNode): number {
  * independently.
  */
 export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
-  // NOTE we need to cache so that the returned 'SugiData' are the same
+  // NOTE we need to cache so that the returned 'SugiData' are the same object
   const cache = new Map(
-    map(
-      dag.idescendants(),
-      (node) => [node, { node, layer: vlayer(node) }] as const
-    )
+    map(dag, (node) => [node, { node, layer: vlayer(node) }] as const)
   );
+
+  // verify links
+  for (const { source, target } of dag.ilinks()) {
+    const multi = source.nchildLinksTo(target) > 1;
+    if (multi && source.value! + 1 >= target.value!) {
+      throw new Error(
+        js`layering left child data '${target.data}' (${target.value}) whose layer was not two more than its parent data '${source.data}' (${source.value})`
+      );
+    } else if (!multi && source.value! >= target.value!) {
+      throw new Error(
+        js`layering left child data '${target.data}' (${target.value}) whose layer was not greater than its parent data '${source.data}' (${source.value})`
+      );
+    }
+  }
 
   // children function
   function augment(data: SugiData<N, L>): SugiData<N, L>[] {
@@ -80,19 +91,14 @@ export function sugify<N, L>(dag: Dag<N, L>): SugiNode<N, L>[][] {
     const links = "node" in data ? data.node.childLinks() : [data.link];
     return links.map((link) => {
       const datum = cache.get(link.target)!;
-      if (datum.layer < layer) {
-        throw new Error(
-          js`layering left child data '${link.target.data}' (${link.target.value}) with greater or equal layer to parent data '${link.source.data}' (${link.source.value})`
-        );
-      }
       return datum.layer === layer ? datum : { link, layer };
     });
   }
 
   // create sugi dag
-  const sugi = hierarchy().children(augment)(
-    ...map(dag.iroots(), (node) => cache.get(node)!)
-  );
+  const create = hierarchy().children(augment);
+  const sugi = create(...map(dag.iroots(), (node) => cache.get(node)!));
+  assert(!sugi.multidag());
 
   // assign nodes to layer
   const layers: SugiNode<N, L>[][] = [];

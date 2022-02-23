@@ -346,12 +346,6 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     }
 ): SugiyamaOperator<Ops> {
   function sugiyama(dag: Dag<N, L>): SugiyamaInfo {
-    if (dag.multidag()) {
-      throw new Error(
-        "sugiyama layout isn't currently implemented for multidags"
-      );
-    }
-
     // compute layers
     options.layering(dag);
 

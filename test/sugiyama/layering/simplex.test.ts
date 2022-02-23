@@ -1,6 +1,6 @@
 import { DagNode } from "../../../src/dag";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
-import { doub, ex, SimpleDatum, square } from "../../examples";
+import { doub, ex, eye, multi, SimpleDatum, square } from "../../examples";
 import { getLayers } from "../utils";
 
 test("simplex() works for square", () => {
@@ -63,6 +63,22 @@ test("simplex() works for disconnected dag", () => {
   simplex()(dag);
   const layers = getLayers(dag);
   expect([[0, 1]]).toEqual(layers);
+});
+
+test("simplex() works for multi dag", () => {
+  const dag = multi();
+  const layer = simplex();
+  layer(dag);
+  const layers = getLayers(dag);
+  expect([[0], [], [1]]).toEqual(layers);
+});
+
+test("simplex() works for eye multi dag", () => {
+  const dag = eye();
+  const layer = simplex();
+  layer(dag);
+  const layers = getLayers(dag);
+  expect([[0], [1], [2]]).toEqual(layers);
 });
 
 test("simplex() fails passing an arg to constructor", () => {

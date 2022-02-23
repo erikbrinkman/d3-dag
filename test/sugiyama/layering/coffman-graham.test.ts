@@ -1,6 +1,6 @@
 import { connect } from "../../../src/dag/create";
 import { coffmanGraham } from "../../../src/sugiyama/layering/coffman-graham";
-import { ccoz, square } from "../../examples";
+import { ccoz, doub, eye, multi, square } from "../../examples";
 import { getLayers } from "../utils";
 
 test("coffmanGraham() works for square", () => {
@@ -26,6 +26,17 @@ test("coffmanGraham() handles width", () => {
   expect([
     [[0], [1], [2], [3]],
     [[0], [2], [1], [3]]
+  ]).toContainEqual(layers);
+});
+
+test("coffmanGraham() works for a disconnected graph with width constraint", () => {
+  const dag = doub();
+  const layering = coffmanGraham().width(1);
+  layering(dag);
+  const layers = getLayers(dag);
+  expect([
+    [[0], [1]],
+    [[1], [0]]
   ]).toContainEqual(layers);
 });
 
@@ -72,6 +83,22 @@ test("coffmanGraham() handles history reverse", () => {
   coffmanGraham().width(1)(dag);
   const layers = getLayers(dag);
   expect([[0], [1], [2], [3], [4]]).toEqual(layers);
+});
+
+test("coffmanGraham() works for a multi graph", () => {
+  const dag = multi();
+  const layering = coffmanGraham();
+  layering(dag);
+  const layers = getLayers(dag);
+  expect(layers).toEqual([[0], [], [1]]);
+});
+
+test("coffmanGraham() works for an eye multi graph", () => {
+  const dag = eye();
+  const layering = coffmanGraham();
+  layering(dag);
+  const layers = getLayers(dag);
+  expect(layers).toEqual([[0], [1], [2]]);
 });
 
 test("coffmanGraham() requires positive width", () => {

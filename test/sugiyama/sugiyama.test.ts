@@ -84,6 +84,25 @@ test("sugiyama() works with a dummy node", () => {
   expect(Math.abs(first.x! - second.x!)).toBeLessThan(0.5);
 });
 
+test("sugiyama() works with a multi dag", () => {
+  const dag = multi();
+  const [root, leaf] = dag;
+
+  const layout = sugiyama().nodeSize(() => [2, 2]);
+  const { width, height } = layout(dag);
+
+  expect(width).toBeCloseTo(4);
+  expect(height).toBeCloseTo(6);
+
+  expect(root.x).toBeCloseTo(2);
+  expect(root.y).toBeCloseTo(1);
+
+  // these gaps imply that the dummy nodes got positioned appropriately
+
+  expect(leaf.x).toBeCloseTo(2);
+  expect(leaf.y).toBeCloseTo(5);
+});
+
 test("sugiyama() allows changing nodeSize", () => {
   const dag = three();
 
@@ -217,7 +236,7 @@ test("sugiyama() throws with flat layering", () => {
     }
   });
   expect(() => layout(dag)).toThrow(
-    /layering left child data '{.*"id":"1".*}' \(0\) with greater or equal layer to parent data '{.*"id":"0".*}' \(0\)/
+    /layering left child data '{.*"id":"1".*}' \(0\) whose layer was not greater than its parent data '{.*"id":"0".*}' \(0\)/
   );
 });
 
@@ -293,12 +312,6 @@ test("sugiyama() throws with zero node height", () => {
   expect(() => layout(dag)).toThrow(
     "at least one node must have positive height, but total height was zero"
   );
-});
-
-test("grid() fails for multidag", () => {
-  const dag = multi();
-  const layout = sugiyama();
-  expect(() => layout(dag)).toThrow("multidag");
 });
 
 test("sugiyama() fails passing an arg to constructor", () => {

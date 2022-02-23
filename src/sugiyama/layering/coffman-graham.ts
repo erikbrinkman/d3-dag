@@ -7,6 +7,7 @@
 import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";
 import { Dag, DagNode } from "../../dag";
+import { getParentCounts } from "../../dag/utils";
 import { map } from "../../iters";
 
 /**
@@ -42,24 +43,11 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
   function coffmanGrahamCall(dag: Dag): void {
     const maxWidth = options.width || Math.floor(Math.sqrt(dag.size() + 0.5));
 
-    // initialize node data
-    const data = new Map(
-      map(
-        dag.idescendants(),
-        (node) =>
-          [node, { before: [] as number[], parents: [] as DagNode[] }] as const
-      )
-    );
-    for (const node of dag) {
-      for (const child of node.ichildren()) {
-        data.get(child)!.parents.push(node);
-      }
-    }
-
     // create queue
-    function comp(left: DagNode, right: DagNode): boolean {
-      const leftBefore = data.get(left)!.before;
-      const rightBefore = data.get(right)!.before;
+    function comp(
+      [leftBefore]: [number[], DagNode],
+      [rightBefore]: [number[], DagNode]
+    ): boolean {
       for (const [i, leftb] of leftBefore.entries()) {
         const rightb = rightBefore[i];
         if (rightb === undefined) {
@@ -72,34 +60,42 @@ function buildOperator(options: { width: number }): CoffmanGrahamOperator {
       }
       return true;
     }
-
     const queue = new FastPriorityQueue(comp);
+
+    // initialize node data
+    const beforeInds = new Map<DagNode, number[]>(
+      map(dag, (node) => [node, []])
+    );
+    const parents = getParentCounts(dag);
 
     // start with root nodes
     for (const root of dag.iroots()) {
-      queue.add(root);
+      queue.add([[], root]);
     }
     let i = 0; // node index
     let layer = 0; // layer assigning
     let width = 0; // current width
-    let node;
-    while ((node = queue.poll())) {
-      if (
-        width < maxWidth &&
-        data.get(node)!.parents.every((p) => p.value! < layer)
-      ) {
+    let next;
+    while ((next = queue.poll())) {
+      const [, node] = next;
+      // NOTE for clarity we compute this early, but we don't need to if width
+      // >= maxWidth which is a little inefficient
+      const limit = parents
+        .get(node)
+        ?.reduce((l, [p, c]) => Math.max(l, p.value! + +(c > 1)), 0);
+      if (width < maxWidth && (limit === undefined || limit < layer)) {
         node.value = layer;
         width++;
       } else {
-        node.value = ++layer;
+        console.log;
+        node.value = layer = Math.max(limit ?? 0, layer) + 1;
         width = 1;
       }
       for (const child of node.ichildren()) {
-        const { before, parents } = data.get(child)!;
+        const before = beforeInds.get(child)!;
         before.push(i);
-        if (before.length === parents.length) {
-          before.sort((a, b) => b - a);
-          queue.add(child);
+        if (before.length === parents.get(child)!.length) {
+          queue.add([before.reverse(), child]);
         }
       }
       i++;

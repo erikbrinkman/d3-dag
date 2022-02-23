@@ -30,7 +30,10 @@ export interface GroupAccessor<NodeDatum = never, LinkDatum = never> {
  * An operator for layering a dag.
  *
  * After calling a layering operator on a dag, every node's value should be set
- * to a non-negative integer layer, starting at 0.
+ * to a non-negative integer layer, starting at 0. Additionally children should
+ * have a strictly larger layer than their parents, and if a node has multiple
+ * links to the same child, it's layer should be at least two greater than its
+ * parent.
  *
  * There are several built in layering operators:
  * - {@link LongestPathOperator} - minimum height layout

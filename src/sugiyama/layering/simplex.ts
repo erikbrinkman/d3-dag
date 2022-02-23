@@ -83,10 +83,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     const constraints: Record<string, Constraint> = {};
 
     const ids = new Map(
-      map(
-        entries(dag.idescendants()),
-        ([i, node]) => [node, i.toString()] as const
-      )
+      map(entries(dag), ([i, node]) => [node, i.toString()] as const)
     );
 
     /** get node id */
@@ -108,13 +105,13 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       prefix: string,
       first: DagNode<N, L>,
       second: DagNode<N, L>,
-      strict: boolean = true
+      diff: number = 1
     ): void {
       const fvar = variable(first);
       const svar = variable(second);
       const cons = `${prefix}: ${n(first)} -> ${n(second)}`;
 
-      constraints[cons] = { min: +strict };
+      constraints[cons] = { min: diff };
       fvar[cons] = -1;
       svar[cons] = 1;
     }
@@ -125,8 +122,8 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       first: DagNode<N, L>,
       second: DagNode<N, L>
     ): void {
-      before(`${prefix} before`, first, second, false);
-      before(`${prefix} after`, second, first, false);
+      before(`${prefix} before`, first, second, 0);
+      before(`${prefix} after`, second, first, 0);
     }
 
     const ranks: [number, DagNode<N, L>][] = [];
@@ -137,7 +134,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       const nid = n(node);
       ints[nid] = 1;
       variables[nid] = {
-        opt: node.children.length
+        opt: node.nchildren()
       };
 
       const rank = options.rank(node);
@@ -156,10 +153,13 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     }
 
     // Add link constraints
-    for (const link of dag.ilinks()) {
-      before("link", link.source, link.target);
-      ++variable(link.source).opt;
-      --variable(link.target).opt;
+    for (const node of dag) {
+      for (const [child, count] of node.ichildrenCounts()) {
+        // make sure that multi nodes have at least one dummy row between them
+        before("link", node, child, count > 1 ? 2 : 1);
+        ++variable(node).opt;
+        --variable(child).opt;
+      }
     }
 
     // Add rank constraints
@@ -199,7 +199,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
 
     // lp solver doesn't assign some zeros
     for (const node of dag) {
-      node.value = assignment[n(node)] || 0;
+      node.value = assignment[n(node)] ?? 0;
     }
   }
 

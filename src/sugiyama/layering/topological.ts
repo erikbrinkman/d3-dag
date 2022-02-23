@@ -5,7 +5,6 @@
  */
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";
-import { entries } from "../../iters";
 
 /**
  * A layering that assigns every node a distinct layer, creating a topological
@@ -36,12 +35,15 @@ export function topological(...args: never[]): TopologicalOperator {
     );
   }
 
-  // TODO simplex optimizes number of dummy nodes, we could do simplex first,
-  // then grow each layer to minimize dummy nodes. Its unclear how hard that
-  // permutation is to optimize
   function topologicalCall(dag: Dag): void {
-    for (const [layer, node] of entries(dag.idescendants("before"))) {
-      node.value = layer;
+    let layer = 0;
+    let last;
+    for (const node of dag.idescendants("before")) {
+      if (last !== undefined && last.nchildLinksTo(node) > 1) {
+        ++layer;
+      }
+      node.value = layer++;
+      last = node;
     }
   }
 

@@ -36,11 +36,28 @@ test("sugify() throws for layering without 0", () => {
 });
 
 test("sugify() throws for flat layering", () => {
-  const dag = connect()([["a", "b"]]);
+  const create = connect();
+  const dag = create([["a", "b"]]);
   for (const node of dag) {
     node.value = 0;
   }
-  expect(() => sugify(dag)).toThrow("greater or equal layer to parent data");
+  expect(() => sugify(dag)).toThrow(
+    "whose layer was not greater than its parent data"
+  );
+});
+
+test("sugify() throws for invalid multi layering", () => {
+  const create = connect();
+  const dag = create([
+    ["0", "1"],
+    ["0", "1"]
+  ]);
+  for (const node of dag) {
+    node.value = parseInt(node.data.id);
+  }
+  expect(() => sugify(dag)).toThrow(
+    "whose layer was not two more than its parent data"
+  );
 });
 
 test("getLayers() throws when not all nodes have a layer", () => {
@@ -81,19 +98,6 @@ test("createLayers() throws on invalid last row", () => {
 
 test("createLayers() throws on out of range", () => {
   expect(() => createLayers([[[1]], [[]]])).toThrow();
-});
-
-test("getLayers() throws with empty layer", () => {
-  const dag = stratify()([
-    {
-      id: "a",
-      layer: 1
-    }
-  ]);
-  for (const node of dag) {
-    node.value = node.data.layer;
-  }
-  expect(() => getLayers(dag)).toThrow("layer 0 was empty");
 });
 
 test("crossings() returns correctly for simple case", () => {

@@ -5,6 +5,7 @@
  */
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";
+import { getParentCounts } from "../../dag/utils";
 import { map } from "../../iters";
 
 /**
@@ -34,10 +35,28 @@ export interface LongestPathOperator
 function buildOperator(options: { topDown: boolean }): LongestPathOperator {
   function longestPathCall(dag: Dag): void {
     if (options.topDown) {
-      dag.depth();
+      const parents = getParentCounts(dag);
+      for (const node of dag.idescendants("before")) {
+        node.value = Math.max(
+          0,
+          ...map(
+            parents.get(node) ?? [],
+            ([par, count]) => par.value! + (count > 1 ? 2 : 1)
+          )
+        );
+      }
     } else {
-      dag.height();
-      const maxHeight = Math.max(...map(dag.iroots(), (d) => d.value!));
+      let maxHeight = 0;
+      for (const node of dag.idescendants("after")) {
+        node.value = Math.max(
+          0,
+          ...map(
+            node.ichildrenCounts(),
+            ([child, count]) => child.value! + (count > 1 ? 2 : 1)
+          )
+        );
+        maxHeight = Math.max(maxHeight, node.value);
+      }
       for (const node of dag) {
         node.value = maxHeight - node.value!;
       }

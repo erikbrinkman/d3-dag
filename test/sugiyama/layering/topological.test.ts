@@ -1,5 +1,5 @@
 import { topological } from "../../../src/sugiyama/layering/topological";
-import { doub, square } from "../../examples";
+import { doub, eye, multi, square } from "../../examples";
 import { getLayers } from "../utils";
 
 test("topological() works for square", () => {
@@ -20,6 +20,22 @@ test("topological() works for disconnected graph", () => {
     [[0], [1]],
     [[1], [0]]
   ]).toContainEqual(layers);
+});
+
+test("topological() works for multi graph", () => {
+  const dag = multi();
+  const layer = topological();
+  layer(dag);
+  const layers = getLayers(dag);
+  expect([[0], [], [1]]).toEqual(layers);
+});
+
+test("topological() works for eye multi graph", () => {
+  const dag = eye();
+  const layer = topological();
+  layer(dag);
+  const layers = getLayers(dag);
+  expect([[0], [1], [2]]).toEqual(layers);
 });
 
 test("topological() fails passing an arg to constructor", () => {

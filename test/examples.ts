@@ -64,6 +64,28 @@ export function multi(): Dag<SimpleDatum, undefined> {
   ]);
 }
 
+// multidag where no skips should happen
+//   0
+//  /|\
+// | 1 |
+//  \|/
+//   2
+export function eye(): Dag<SimpleDatum, undefined> {
+  return stratify()([
+    {
+      id: "0"
+    },
+    {
+      id: "1",
+      parentIds: ["0"]
+    },
+    {
+      id: "2",
+      parentIds: ["0", "0", "1"]
+    }
+  ]);
+}
+
 // square, simple with a cycle
 //   0
 //  / \

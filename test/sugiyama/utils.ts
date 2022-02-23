@@ -12,8 +12,8 @@ export function getLayers(dag: Dag<{ id: string }>): number[][] {
     layer.push(parseInt(node.data.id));
   }
   for (const [i, layer] of layers.entries()) {
-    if (!layer || !layer.length) {
-      throw new Error(`layer ${i} was empty`);
+    if (layer === undefined) {
+      layers[i] = [];
     }
   }
   return layers.map((layer) => layer.sort((a, b) => a - b));
