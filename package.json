@@ -38,7 +38,7 @@
     "lint": "yarn prettier --check && eslint --cache {src,test,test-d,types}/**/*.ts *.mjs",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "bundle": "rm -rf bundle && node bundle.mjs",
-    "test": "tsc && yarn lint && jest /test --coverage && yarn build && tsd && yarn bundle && jest bundle.test.ts",
+    "test": "tsc && yarn lint && jest test/ --coverage && yarn build && tsd && yarn bundle && jest bundle.test.ts",
     "prepare": "jest --clear-cache && yarn test && yarn build && yarn bundle",
     "todo": "grep -rI --color TODO src test types",
     "doc": "typedoc"

@@ -4,6 +4,7 @@
  * @module
  */
 import { Dag } from "../dag";
+import { entries } from "../iters";
 import { greedy } from "./greedy";
 
 /**
@@ -79,66 +80,76 @@ function buildOperator(
   sizeVal: null | readonly [number, number]
 ): ZherebkoOperator {
   function zherebkoCall(dag: Dag): ZherebkoInfo {
-    if (dag.multidag()) {
-      throw new Error(
-        "zherebko layout isn't currently implemented for multidags"
-      );
+    // topological sort
+    const levels = [];
+    let numLevels = 0;
+    let last;
+    for (const node of dag.idescendants("before")) {
+      if (last !== undefined && last.nchildLinksTo(node) > 1) {
+        ++numLevels;
+      }
+      levels.push([node, numLevels++] as const);
+      last = node;
     }
 
-    // topological sort
-    const ordered = [...dag.idescendants("before")];
-
     // get link indices
-    const indices = greedy(ordered);
+    const indices = greedy(levels);
 
     // map to coordinates
     let minIndex = 0;
     let maxIndex = 0;
-    for (const { source, target } of dag.ilinks()) {
-      const index = indices.get(source)?.get(target);
-      if (index === undefined) continue; // assumed short link
-      minIndex = Math.min(minIndex, index);
-      maxIndex = Math.max(maxIndex, index);
+    for (const inds of indices.values()) {
+      for (const ind of inds) {
+        if (ind !== undefined) {
+          minIndex = Math.min(minIndex, ind);
+          maxIndex = Math.max(maxIndex, ind);
+        }
+      }
     }
 
     // assign node positions
     const nodex = -minIndex * edgeGap + nodeWidth / 2;
-    for (const [layer, node] of ordered.entries()) {
+    for (const [node, layer] of levels) {
       node.x = nodex;
       node.y = (layer + 0.5) * nodeHeight;
     }
 
     // assign link points
-    for (const { source, target, points } of dag.ilinks()) {
-      points.length = 0;
-      points.push({ x: source.x!, y: source.y! });
-      const index = indices.get(source)?.get(target);
+    for (const source of dag) {
+      const inds = indices.get(source) ?? [];
+      // we iterate like this instead of ilinks to get the indices among
+      // children as a way to dedup links
+      for (const [index, { target, points }] of entries(source.ichildLinks())) {
+        points.length = 0;
+        points.push({ x: source.x!, y: source.y! });
+        const ind = inds[index];
 
-      if (index !== undefined) {
-        // assumed long link
-        const x =
-          (index - minIndex + 0.5) * edgeGap +
-          (index > 0 ? nodeWidth - edgeGap : 0);
-        const y1 = source.y! + nodeHeight;
-        const y2 = target.y! - nodeHeight;
-        if (y2 - y1 > nodeHeight / 2) {
-          points.push({ x: x, y: y1 }, { x: x, y: y2 });
-        } else {
-          points.push({ x: x, y: y1 });
+        if (ind !== undefined) {
+          // assumed long link
+          const x =
+            (ind - minIndex + 0.5) * edgeGap +
+            (ind > 0 ? nodeWidth - edgeGap : 0);
+          const y1 = source.y! + nodeHeight;
+          const y2 = target.y! - nodeHeight;
+          if (y2 - y1 > nodeHeight / 2) {
+            points.push({ x: x, y: y1 }, { x: x, y: y2 });
+          } else {
+            points.push({ x: x, y: y1 });
+          }
         }
-      }
 
-      points.push({ x: target.x!, y: target.y! });
+        points.push({ x: target.x!, y: target.y! });
+      }
     }
 
     const width = (maxIndex - minIndex) * edgeGap + nodeWidth;
-    const height = ordered.length * nodeHeight;
+    const height = numLevels * nodeHeight;
     if (sizeVal === null) {
       return { width, height };
     } else {
       // rescale to new size
       const [newWidth, newHeight] = sizeVal;
-      for (const node of ordered) {
+      for (const [node] of levels) {
         node.x! *= newWidth / width;
         node.y! *= newHeight / height;
       }

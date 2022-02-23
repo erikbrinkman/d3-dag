@@ -161,6 +161,11 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
 
   /**
    * Return true if at least one node in this dag has multiple lints to the same child.
+   *
+   * All support for multidags is in beta as testing that multidags don't cause
+   * unexpected bugs is not easy to measure.
+   *
+   * @beta
    */
   multidag(): boolean;
 }

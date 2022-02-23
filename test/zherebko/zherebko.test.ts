@@ -1,7 +1,7 @@
 import { connect } from "../../src/dag/create";
 import { map } from "../../src/iters";
 import { zherebko } from "../../src/zherebko";
-import { doub, multi, single } from "../examples";
+import { doub, single } from "../examples";
 
 test("zherebko() works for a point", () => {
   const dag = single();
@@ -20,7 +20,8 @@ test("zherebko() works for a point", () => {
 });
 
 test("zherebko() works for a line", () => {
-  const dag = connect()([["0", "1"]]);
+  const create = connect();
+  const dag = create([["0", "1"]]);
   const layout = zherebko().size([2, 4]);
   expect(layout.size()).toEqual([2, 4]);
   layout(dag);
@@ -29,6 +30,29 @@ test("zherebko() works for a line", () => {
   expect(head.y).toBeCloseTo(1);
   expect(tail.x).toBeCloseTo(1);
   expect(tail.y).toBeCloseTo(3);
+});
+
+test("zherebko() works for a multidag line", () => {
+  const create = connect();
+  const dag = create([
+    ["0", "1"],
+    ["0", "1"]
+  ]);
+  const layout = zherebko().nodeSize([2, 2, 2]);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(4);
+  expect(height).toBeCloseTo(6);
+
+  const [head, tail] = dag;
+  expect(head.x).toBeCloseTo(1);
+  expect(head.y).toBeCloseTo(1);
+  expect(tail.x).toBeCloseTo(1);
+  expect(tail.y).toBeCloseTo(5);
+
+  const [shrt, lng] = head.ichildLinks();
+  expect(shrt.points).toHaveLength(2);
+  expect(lng.points).toHaveLength(3);
+  expect(Math.max(...lng.points.map(({ x }) => x))).toBeCloseTo(3);
 });
 
 test("zherebko() works specific case", () => {
@@ -92,6 +116,39 @@ test("zherebko() works specific case", () => {
   }
 });
 
+test("zherebko() works for a complex multidag", () => {
+  //   0
+  //  /|\
+  // | 1 |
+  //  \|/
+  //   2
+  const create = connect();
+  const dag = create([
+    ["0", "1"],
+    ["0", "2"],
+    ["0", "2"],
+    ["1", "2"]
+  ]);
+  const layout = zherebko().nodeSize([2, 2, 2]);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(6);
+  expect(height).toBeCloseTo(6);
+
+  const [head, middle, tail] = dag.idescendants("before");
+  expect(head.x).toBeCloseTo(3);
+  expect(head.y).toBeCloseTo(1);
+  expect(middle.x).toBeCloseTo(3);
+  expect(middle.y).toBeCloseTo(3);
+  expect(tail.x).toBeCloseTo(3);
+  expect(tail.y).toBeCloseTo(5);
+
+  for (const { target, points } of head.ichildLinks()) {
+    if (target === middle) continue;
+    const diff = Math.max(...points.map(({ x }) => Math.abs(x - 3)));
+    expect(diff).toBeCloseTo(2);
+  }
+});
+
 test("zherebko() works on disconnected dag", () => {
   const dag = doub();
   zherebko().nodeSize([2, 2, 2])(dag);
@@ -122,12 +179,6 @@ test("zherebko() works on sink", () => {
     const [x = 1] = exes;
     expect([1, 7]).toContainEqual(x);
   }
-});
-
-test("zherebko() fails on multidag", () => {
-  const dag = multi();
-  const layout = zherebko();
-  expect(() => layout(dag)).toThrow("multidag");
 });
 
 test("zherebko() fails with args", () => {
