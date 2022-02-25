@@ -11,7 +11,7 @@ const pkg = await new Promise((res, rej) =>
 );
 const today = new Date();
 const baseConfig = {
-  entryPoints: ["dist/index.js"],
+  entryPoints: ["src/index.ts"],
   bundle: true,
   minify: true,
   plugins: [
