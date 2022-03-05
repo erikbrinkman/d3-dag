@@ -6,7 +6,7 @@ export function solve(
   opType: "max" | "min",
   variables: Record<string, Variable>,
   constraints: Record<string, Constraint>,
-  ints: Record<string, 1>
+  ints: Record<string, 1> = {}
 ): Record<string, number> {
   // NOTE bundling sets `this` to undefined, and we need it to be settable
   const { feasible, ...assignment } = Solve.call(

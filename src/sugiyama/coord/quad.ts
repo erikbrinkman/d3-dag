@@ -6,72 +6,19 @@
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { DagLink, DagNode } from "../../dag";
-import { getParents } from "../../dag/utils";
-import { flatMap, map } from "../../iters";
-import { bigrams, dfs, setIntersect, Up } from "../../utils";
+import { map } from "../../iters";
+import { bigrams, Up } from "../../utils";
 import { SugiNode } from "../utils";
-import { indices, init, layout, minBend, minDist, solve } from "./utils";
-
-/**
- * Compute a map from node ids to a connected component index. This is useful
- * to quickly compare if two nodes are in the same connected component.
- *
- * @internal
- */
-function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
-  // create parent map to allow accessing parents
-  const parents = getParents(flatMap(layers, (lay) => lay));
-
-  // "children" function that returns children and parents
-  function* graph(node: SugiNode): Generator<SugiNode, void, undefined> {
-    yield* node.ichildren();
-    yield* parents.get(node) ?? [];
-  }
-
-  // depth first search over all nodes
-  let component = 0;
-  const compMap = new Map<SugiNode, number>();
-  for (const layer of layers) {
-    for (const node of layer) {
-      if (compMap.has(node)) continue;
-      for (const comp of dfs(graph, node)) {
-        compMap.set(comp, component);
-      }
-      component++;
-    }
-  }
-
-  return compMap;
-}
-
-/**
- * If disconnected components exist in the same layer, then we can minimize the
- * distance between them to make a reasonable objective. If, however, layers
- * share no common components then they are truly independent in assignment of
- * x coordinates and should be solved separately.
- *
- * @internal
- */
-function splitComponentLayers<N, L>(
-  layers: SugiNode<N, L>[][],
-  compMap: Map<SugiNode, number>
-): SugiNode<N, L>[][][] {
-  // Because of dummy nodes, there's no way for a component to skip a layer,
-  // thus for layers to share no common components, there must be a clear
-  // boundary between any two.
-  const split = [];
-  let newLayers = [];
-  let lastComponents = new Set<number>();
-  for (const layer of layers) {
-    const currentComponents = new Set(layer.map((n) => compMap.get(n)!));
-    if (!setIntersect(lastComponents, currentComponents)) {
-      split.push((newLayers = []));
-    }
-    newLayers.push(layer);
-    lastComponents = currentComponents;
-  }
-  return split;
-}
+import {
+  componentMap,
+  indices,
+  init,
+  layout,
+  minBend,
+  minDist,
+  solve,
+  splitComponentLayers
+} from "./utils";
 
 /**
  * an accessor to get the optimization of the weight for a node

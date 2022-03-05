@@ -74,6 +74,10 @@ export {
   type QuadOperator as QuadCoordOperator
 } from "./sugiyama/coord/quad";
 export {
+  simplex as coordSimplex,
+  type SimplexOperator as SimplexCoordOperator
+} from "./sugiyama/coord/simplex";
+export {
   topological as coordTopological,
   type TopologicalOperator as TopologicalCoordOperator
 } from "./sugiyama/coord/topological";
