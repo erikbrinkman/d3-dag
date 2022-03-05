@@ -1,4 +1,5 @@
 import { DagNode } from "../../../src/dag";
+import { connect } from "../../../src/dag/create";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
 import { doub, ex, eye, multi, SimpleDatum, square } from "../../examples";
 import { getLayers } from "../utils";
@@ -8,6 +9,26 @@ test("simplex() works for square", () => {
   simplex()(dag);
   const layers = getLayers(dag);
   expect([[0], [1, 2], [3]]).toEqual(layers);
+});
+
+test("simplex() works for known failure", () => {
+  const create = connect();
+  const dag = create([
+    ["0", "1"],
+    ["1", "2"],
+    ["2", "3"],
+    ["3", "4"],
+    ["5", "4"],
+    ["6", "4"]
+  ]);
+  const layout = simplex();
+  layout(dag);
+  const nodes = [...dag].sort(
+    (a, b) => parseInt(a.data.id) - parseInt(b.data.id)
+  );
+  for (const [i, node] of nodes.entries()) {
+    expect(node.value).toBeCloseTo(i < 5 ? i : 3);
+  }
 });
 
 test("simplex() respects ranks and gets them", () => {

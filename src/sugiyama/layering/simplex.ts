@@ -79,8 +79,8 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
 ): SimplexOperator<Ops> {
   function simplexCall(dag: Dag<N, L>): void {
     const variables: Record<string, Variable> = {};
-    const ints: Record<string, 1> = {};
     const constraints: Record<string, Constraint> = {};
+    const ints: Record<string, 1> = {};
 
     const ids = new Map(map(dag, (node, i) => [node, i.toString()] as const));
 
@@ -131,9 +131,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     for (const node of dag) {
       const nid = n(node);
       ints[nid] = 1;
-      variables[nid] = {
-        opt: node.nchildren()
-      };
+      variables[nid] = { opt: 0 };
 
       const rank = options.rank(node);
       if (rank !== undefined) {
@@ -155,8 +153,8 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       for (const [child, count] of node.ichildrenCounts()) {
         // make sure that multi nodes have at least one dummy row between them
         before("link", node, child, count > 1 ? 2 : 1);
-        ++variable(node).opt;
-        --variable(child).opt;
+        variable(node).opt += count;
+        variable(child).opt -= count;
       }
     }
 
