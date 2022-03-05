@@ -4,9 +4,9 @@
  *
  * @module
  */
-import { Model, Solve } from "javascript-lp-solver";
 import { TwolayerOperator } from ".";
 import { getParents } from "../../dag/utils";
+import { Constraint, solve, Variable } from "../../simplex";
 import { SugiNode } from "../utils";
 
 /**
@@ -80,13 +80,9 @@ function buildOperator(options: {
     }
 
     // initialize model
-    const model: Model = {
-      optimize: "opt",
-      opType: "min",
-      constraints: {},
-      variables: {},
-      ints: {}
-    };
+    const variables: Record<string, Variable> = {};
+    const constraints: Record<string, Constraint> = {};
+    const ints: Record<string, 1> = {};
 
     // initialize map to create ids for labeling constraints
     const inds = new Map(reordered.map((node, i) => [node, i] as const));
@@ -128,11 +124,11 @@ function buildOperator(options: {
     for (const [i, n1] of reordered.slice(0, reordered.length - 1).entries()) {
       for (const n2 of reordered.slice(i + 1)) {
         const pair = key(n1, n2);
-        model.ints[pair] = 1;
-        model.constraints[pair] = {
+        ints[pair] = 1;
+        constraints[pair] = {
           max: 1
         };
-        model.variables[pair] = {
+        variables[pair] = {
           opt: -preserveWeight,
           [pair]: 1
         };
@@ -150,20 +146,20 @@ function buildOperator(options: {
           const triangle = key(n1, n2, n3);
 
           const triangleUp = triangle + "+";
-          model.constraints[triangleUp] = {
+          constraints[triangleUp] = {
             max: 1
           };
-          model.variables[pair1][triangleUp] = 1;
-          model.variables[pair2][triangleUp] = -1;
-          model.variables[pair3][triangleUp] = 1;
+          variables[pair1][triangleUp] = 1;
+          variables[pair2][triangleUp] = -1;
+          variables[pair3][triangleUp] = 1;
 
           const triangleDown = triangle + "-";
-          model.constraints[triangleDown] = {
+          constraints[triangleDown] = {
             min: 0
           };
-          model.variables[pair1][triangleDown] = 1;
-          model.variables[pair2][triangleDown] = -1;
-          model.variables[pair3][triangleDown] = 1;
+          variables[pair1][triangleDown] = 1;
+          variables[pair2][triangleDown] = -1;
+          variables[pair3][triangleDown] = 1;
         }
       }
     }
@@ -177,9 +173,7 @@ function buildOperator(options: {
               continue;
             }
             const pair = topDown ? key(c1, c2) : key(p1, p2);
-            model.variables[pair].opt += Math.sign(
-              cinds.get(c1)! - cinds.get(c2)!
-            );
+            variables[pair].opt += Math.sign(cinds.get(c1)! - cinds.get(c2)!);
           }
         }
       }
@@ -207,7 +201,7 @@ function buildOperator(options: {
               const normal = `${slack} normal`;
               const reversed = `${slack} reversed`;
 
-              model.variables[slack] = {
+              variables[slack] = {
                 opt: distWeight,
                 [normal]: 1,
                 [reversed]: 1
@@ -222,14 +216,14 @@ function buildOperator(options: {
                 const pair = key(n1, n2);
                 const sign = Math.sign(inds.get(n1)! - inds.get(n2)!);
                 pos += +(sign > 0);
-                model.variables[pair][normal] = -sign;
-                model.variables[pair][reversed] = sign;
+                variables[pair][normal] = -sign;
+                variables[pair][reversed] = sign;
               }
 
-              model.constraints[normal] = {
+              constraints[normal] = {
                 min: 1 - pos
               };
-              model.constraints[reversed] = {
+              constraints[reversed] = {
                 min: pos - 2
               };
             }
@@ -240,7 +234,7 @@ function buildOperator(options: {
 
     // solve objective
     // NOTE bundling sets this to undefined, and we need it to be settable
-    const ordering = Solve.call({}, model);
+    const ordering = solve("opt", "min", variables, constraints, ints);
 
     // sort layers
     reordered.sort((n1, n2) => ordering[key(n1, n2)] || -1);

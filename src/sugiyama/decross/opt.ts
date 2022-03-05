@@ -3,9 +3,9 @@
  *
  * @module
  */
-import { Model, Solve } from "javascript-lp-solver";
 import { DecrossOperator } from ".";
 import { getParents } from "../../dag/utils";
+import { Constraint, solve, Variable } from "../../simplex";
 import { bigrams } from "../../utils";
 import { SugiNode } from "../utils";
 
@@ -119,13 +119,9 @@ function buildOperator(options: {
     const preserveWeight = distWeight / (numVars + 1);
 
     // initialize model
-    const model: Model = {
-      optimize: "opt",
-      opType: "min",
-      constraints: {},
-      variables: {},
-      ints: {}
-    };
+    const variables: Record<string, Variable> = {};
+    const constraints: Record<string, Constraint> = {};
+    const ints: Record<string, 1> = {};
 
     // map every node to an id for quick access, if one nodes id is less than
     // another it must come before it on the layer, or in a previous layer
@@ -153,11 +149,11 @@ function buildOperator(options: {
       for (const [i, n1] of layer.slice(0, layer.length - 1).entries()) {
         for (const n2 of layer.slice(i + 1)) {
           const pair = key(n1, n2);
-          model.ints[pair] = 1;
-          model.constraints[pair] = {
+          ints[pair] = 1;
+          constraints[pair] = {
             max: 1
           };
-          model.variables[pair] = {
+          variables[pair] = {
             // add small value to objective for preserving the original order of nodes
             opt: -preserveWeight,
             [pair]: 1
@@ -176,20 +172,20 @@ function buildOperator(options: {
             const triangle = key(n1, n2, n3);
 
             const triangleUp = triangle + "+";
-            model.constraints[triangleUp] = {
+            constraints[triangleUp] = {
               max: 1
             };
-            model.variables[pair1][triangleUp] = 1;
-            model.variables[pair2][triangleUp] = -1;
-            model.variables[pair3][triangleUp] = 1;
+            variables[pair1][triangleUp] = 1;
+            variables[pair2][triangleUp] = -1;
+            variables[pair3][triangleUp] = 1;
 
             const triangleDown = triangle + "-";
-            model.constraints[triangleDown] = {
+            constraints[triangleDown] = {
               min: 0
             };
-            model.variables[pair1][triangleDown] = 1;
-            model.variables[pair2][triangleDown] = -1;
-            model.variables[pair3][triangleDown] = 1;
+            variables[pair1][triangleDown] = 1;
+            variables[pair2][triangleDown] = -1;
+            variables[pair3][triangleDown] = 1;
           }
         }
       }
@@ -208,7 +204,7 @@ function buildOperator(options: {
               const slack = `slack (${pairp}) (${pairc})`;
               const slackUp = `${slack} +`;
               const slackDown = `${slack} -`;
-              model.variables[slack] = {
+              variables[slack] = {
                 opt: 1,
                 [slackUp]: 1,
                 [slackDown]: 1
@@ -217,17 +213,17 @@ function buildOperator(options: {
               const sign = Math.sign(inds.get(c1)! - inds.get(c2)!);
               const flip = Math.max(sign, 0);
 
-              model.constraints[slackUp] = {
+              constraints[slackUp] = {
                 min: flip
               };
-              model.variables[pairp][slackUp] = 1;
-              model.variables[pairc][slackUp] = sign;
+              variables[pairp][slackUp] = 1;
+              variables[pairc][slackUp] = sign;
 
-              model.constraints[slackDown] = {
+              constraints[slackDown] = {
                 min: -flip
               };
-              model.variables[pairp][slackDown] = -1;
-              model.variables[pairc][slackDown] = -sign;
+              variables[pairp][slackDown] = -1;
+              variables[pairc][slackDown] = -sign;
             }
           }
         }
@@ -248,7 +244,7 @@ function buildOperator(options: {
               const normal = `${slack} normal`;
               const reversed = `${slack} reversed`;
 
-              model.variables[slack] = {
+              variables[slack] = {
                 opt: distWeight,
                 [normal]: 1,
                 [reversed]: 1
@@ -263,14 +259,14 @@ function buildOperator(options: {
                 const pair = key(n1, n2);
                 const sign = Math.sign(inds.get(n1)! - inds.get(n2)!);
                 pos += +(sign > 0);
-                model.variables[pair][normal] = -sign;
-                model.variables[pair][reversed] = sign;
+                variables[pair][normal] = -sign;
+                variables[pair][reversed] = sign;
               }
 
-              model.constraints[normal] = {
+              constraints[normal] = {
                 min: 1 - pos
               };
-              model.constraints[reversed] = {
+              constraints[reversed] = {
                 min: pos - 2
               };
             }
@@ -298,7 +294,7 @@ function buildOperator(options: {
 
     // solve objective
     // NOTE bundling sets this to undefined, and we need it to be settable
-    const ordering = Solve.call({}, model);
+    const ordering = solve("opt", "min", variables, constraints, ints);
 
     // sort layers
     for (const layer of layers) {

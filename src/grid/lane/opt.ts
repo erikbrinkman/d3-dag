@@ -3,10 +3,10 @@
  *
  * @module
  */
-import { Model, Solve } from "javascript-lp-solver";
 import { LaneOperator } from ".";
 import { DagNode } from "../../dag";
 import { map } from "../../iters";
+import { Constraint, solve, Variable } from "../../simplex";
 
 /**
  * A lane operator that assigns lanes to minimize edge crossings.
@@ -69,13 +69,9 @@ function getCompressedWidth(ordered: readonly DagNode[]): number {
 function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
   function optCall(ordered: readonly DagNode[]): void {
     // initialize model
-    const model: Model = {
-      optimize: "opt",
-      opType: "min",
-      constraints: {},
-      variables: {},
-      ints: {}
-    };
+    const variables: Record<string, Variable> = {};
+    const constraints: Record<string, Constraint> = {};
+    const ints: Record<string, 1> = {};
 
     // map of node to its unique index / id
     const inds = new Map(map(ordered, (n, i) => [n, i] as const));
@@ -84,8 +80,8 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
       : ordered.length - 1;
 
     for (const ind of ordered.keys()) {
-      model.variables[ind] = { opt: 0, [ind]: 1 };
-      model.constraints[ind] = { max: width - 1 };
+      variables[ind] = { opt: 0, [ind]: 1 };
+      constraints[ind] = { max: width - 1 };
     }
 
     const parentIndex = new Map<DagNode, number>();
@@ -96,17 +92,17 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
         for (const [off, above] of ordered.slice(topIndex + 1, ind).entries()) {
           const aind = off + topIndex + 1;
           const pair = `${ind}-${aind}-above`;
-          model.variables[pair] = { opt: 0, [pair]: 1 };
-          model.constraints[pair] = { max: 1 };
-          model.ints[pair] = 1;
+          variables[pair] = { opt: 0, [pair]: 1 };
+          constraints[pair] = { max: 1 };
+          ints[pair] = 1;
 
           // constraints there to be room above node, and defines pair variable
           // which indicates if above node is left or right node
           const pairSpan = `${pair}-span`;
-          model.variables[ind][pairSpan] = 1;
-          model.variables[aind][pairSpan] = -1;
-          model.variables[pair][pairSpan] = -width;
-          model.constraints[pairSpan] = { min: 1 - width, max: -1 };
+          variables[ind][pairSpan] = 1;
+          variables[aind][pairSpan] = -1;
+          variables[pair][pairSpan] = -width;
+          constraints[pairSpan] = { min: 1 - width, max: -1 };
 
           for (const child of above.ichildren()) {
             if (child === node) continue; // can't cross self
@@ -114,23 +110,23 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
             // trip node to be one of there's a crossing
             const cind = inds.get(child)!;
             const trip = `${pair}-${cind}-cross`;
-            model.variables[trip] = { opt: 1, [trip]: 1 };
-            model.constraints[trip] = { max: 1 };
-            model.ints[trip] = 1;
+            variables[trip] = { opt: 1, [trip]: 1 };
+            constraints[trip] = { max: 1 };
+            ints[trip] = 1;
 
             const tripLeft = `${trip}-left`;
-            model.variables[ind][tripLeft] = -1;
-            model.variables[cind][tripLeft] = 1;
-            model.variables[pair][tripLeft] = width;
-            model.variables[trip][tripLeft] = -width;
-            model.constraints[tripLeft] = { max: width };
+            variables[ind][tripLeft] = -1;
+            variables[cind][tripLeft] = 1;
+            variables[pair][tripLeft] = width;
+            variables[trip][tripLeft] = -width;
+            constraints[tripLeft] = { max: width };
 
             const tripRight = `${trip}-right`;
-            model.variables[ind][tripRight] = -1;
-            model.variables[cind][tripRight] = 1;
-            model.variables[pair][tripRight] = width;
-            model.variables[trip][tripRight] = width;
-            model.constraints[tripRight] = { min: 0 };
+            variables[ind][tripRight] = -1;
+            variables[cind][tripRight] = 1;
+            variables[pair][tripRight] = width;
+            variables[trip][tripRight] = width;
+            constraints[tripRight] = { min: 0 };
           }
         }
       }
@@ -152,28 +148,24 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
         for (const child of node.ichildren()) {
           const cind = inds.get(child)!;
           const key = `${ind}-${cind}-dist`;
-          model.variables[key] = { opt: 1 / numEdges };
+          variables[key] = { opt: 1 / numEdges };
 
           const upper = `${key}-upper`;
-          model.variables[ind][upper] = 1;
-          model.variables[cind][upper] = -1;
-          model.variables[key][upper] = -width;
-          model.constraints[upper] = { max: 0 };
+          variables[ind][upper] = 1;
+          variables[cind][upper] = -1;
+          variables[key][upper] = -width;
+          constraints[upper] = { max: 0 };
 
           const lower = `${key}-lower`;
-          model.variables[ind][lower] = 1;
-          model.variables[cind][lower] = -1;
-          model.variables[key][lower] = width;
-          model.constraints[lower] = { min: 0 };
+          variables[ind][lower] = 1;
+          variables[cind][lower] = -1;
+          variables[key][lower] = width;
+          constraints[lower] = { min: 0 };
         }
       }
     }
 
-    const { feasible, ...lanes } = Solve.call({}, model);
-    /* istanbul ignore next */
-    if (!feasible) {
-      throw new Error("internal error: couldn't find a feasible solution");
-    }
+    const lanes = solve("opt", "min", variables, constraints, ints);
 
     if (distVal || compressedVal) {
       // if we minimize distance, we know this will be compact

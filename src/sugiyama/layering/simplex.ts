@@ -4,10 +4,10 @@
  *
  * @module
  */
-import { Constraint, Solve, Variable } from "javascript-lp-solver";
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { Dag, DagNode } from "../../dag";
-import { entries, map } from "../../iters";
+import { map } from "../../iters";
+import { Constraint, solve, Variable } from "../../simplex";
 import { assert, bigrams, Up } from "../../utils";
 
 interface Operators<N = never, L = never> {
@@ -82,9 +82,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     const ints: Record<string, 1> = {};
     const constraints: Record<string, Constraint> = {};
 
-    const ids = new Map(
-      map(entries(dag), ([i, node]) => [node, i.toString()] as const)
-    );
+    const ids = new Map(map(dag, (node, i) => [node, i.toString()] as const));
 
     /** get node id */
     function n(node: DagNode<N, L>): string {
@@ -180,26 +178,18 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     }
 
     // NOTE bundling sets `this` to undefined, and we need it to be settable
-    const { feasible, ...assignment } = Solve.call(
-      {},
-      {
-        optimize: "opt",
-        opType: "max",
-        constraints: constraints,
-        variables: variables,
-        ints: ints
+    try {
+      const assignment = solve("opt", "max", variables, constraints, ints);
+
+      // lp solver doesn't assign some zeros
+      for (const node of dag) {
+        node.value = assignment[n(node)] ?? 0;
       }
-    );
-    if (!feasible) {
+    } catch {
       assert(ranks.length || groups.size);
       throw new Error(
         "could not find a feasible simplex layout, check that rank or group accessors are not ill-defined"
       );
-    }
-
-    // lp solver doesn't assign some zeros
-    for (const node of dag) {
-      node.value = assignment[n(node)] ?? 0;
     }
   }
 
