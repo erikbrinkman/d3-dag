@@ -141,7 +141,7 @@ export function* dfs<T>(
 ): Generator<T> {
   const seen = new Set<T>();
   let node;
-  while ((node = queue.pop())) {
+  while ((node = queue.pop()) !== undefined) {
     if (seen.has(node)) continue;
     yield node;
     seen.add(node);

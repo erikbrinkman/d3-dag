@@ -65,6 +65,31 @@ test("quad() works with flat disconnected component", () => {
   expect(low.x).toBeCloseTo(1.0);
 });
 
+test("quad() works with constrained disconnected components", () => {
+  // NOTE before the top and bottom nodes would be pulled together by the
+  // connected component minimization, but since they're not constrained due to
+  // overlap, we can ignore it in this test case
+  const layers = createLayers([
+    [[0], [1, 3]],
+    [[0], [], [0], [1]],
+    [[], []]
+  ]);
+  const [[atop, btop], [aleft, bleft, aright, bright], [abottom, bbottom]] =
+    layers;
+  const layout = quad();
+  const width = layout(layers, nodeSize);
+
+  expect(width).toBeCloseTo(4);
+  expect(atop.x).toBeCloseTo(0.5);
+  expect(aleft.x).toBeCloseTo(0.5);
+  expect(aright.x).toBeCloseTo(2.5);
+  expect(abottom.x).toBeCloseTo(1.5);
+  expect(btop.x).toBeCloseTo(2.5);
+  expect(bleft.x).toBeCloseTo(1.5);
+  expect(bright.x).toBeCloseTo(3.5);
+  expect(bbottom.x).toBeCloseTo(3.5);
+});
+
 test("quad() fails with invalid weights", () => {
   const layout = quad();
   expect(() => layout.vertical([-1, 0])).toThrow(

@@ -6,8 +6,8 @@
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { DagLink, DagNode } from "../../dag";
-import { map } from "../../iters";
-import { bigrams, Up } from "../../utils";
+import { flatMap, map, some } from "../../iters";
+import { bigrams, dfs, Up } from "../../utils";
 import { SugiNode } from "../utils";
 import {
   componentMap,
@@ -285,16 +285,14 @@ function cacheVertWeak<N, L>(
   if (isConstAccessor(vertWeak)) {
     // verify that it's actually const since we'll never actually call it normally
     const val = vertWeak.value;
-    for (const layer of layers) {
-      for (const node of layer) {
-        if ("node" in node.data) {
-          const source = node.data.node;
-          for (const link of source.ichildLinks()) {
-            if (vertWeak(link) !== val) {
-              throw new Error(
-                "passed in a vertWeak accessor with a `value` property that wasn't a const accessor"
-              );
-            }
+    for (const node of flatMap(layers, (l) => l)) {
+      if ("node" in node.data) {
+        const source = node.data.node;
+        for (const link of source.ichildLinks()) {
+          if (vertWeak(link) !== val) {
+            throw new Error(
+              "passed in a vertWeak accessor with a `value` property that wasn't a const accessor"
+            );
           }
         }
       }
@@ -302,19 +300,17 @@ function cacheVertWeak<N, L>(
     return () => val;
   } else {
     const vertWeakMap = new Map<DagNode<N, L>, Map<DagNode<N, L>, number>>();
-    for (const layer of layers) {
-      for (const node of layer) {
-        if ("node" in node.data) {
-          // regular node
-          const source = node.data.node;
-          const targetLinks = new Map(
-            map(
-              source.ichildLinks(),
-              (link) => [link.target, vertWeak(link)] as const
-            )
-          );
-          vertWeakMap.set(source, targetLinks);
-        }
+    for (const node of flatMap(layers, (l) => l)) {
+      if ("node" in node.data) {
+        // regular node
+        const source = node.data.node;
+        const targetLinks = new Map(
+          map(
+            source.ichildLinks(),
+            (link) => [link.target, vertWeak(link)] as const
+          )
+        );
+        vertWeakMap.set(source, targetLinks);
       }
     }
     return (src: DagNode<N, L>, targ: DagNode<N, L>): number =>
@@ -405,46 +401,94 @@ function buildOperator<
     const cachedLinkCurve = cacheLinkWeightAccessor(opts.linkCurve);
     const cachedNodeCurve = cacheNodeWeightAccessor(opts.nodeCurve);
     // add loss for nearby nodes and for curve of nodes
-    for (const layer of layers) {
-      for (const par of layer) {
-        const pind = inds.get(par)!;
-        const pdata = par.data;
-        const source = "node" in pdata ? pdata.node : pdata.link.source;
-        for (const node of par.ichildren()) {
-          const nind = inds.get(node)!;
-          const ndata = node.data;
-          const target = "node" in ndata ? ndata.node : ndata.link.target;
+    for (const par of flatMap(layers, (l) => l)) {
+      const pind = inds.get(par)!;
+      const pdata = par.data;
+      const source = "node" in pdata ? pdata.node : pdata.link.source;
+      for (const node of par.ichildren()) {
+        const nind = inds.get(node)!;
+        const ndata = node.data;
+        const target = "node" in ndata ? ndata.node : ndata.link.target;
 
-          const wpdist =
-            "node" in pdata
-              ? cachedVertWeak(source, target)
-              : cachedVertStrong(pdata.link);
-          const wndist =
-            "node" in ndata
-              ? cachedVertWeak(source, target)
-              : cachedVertStrong(ndata.link);
-          const wcurve =
-            "node" in ndata
-              ? cachedNodeCurve(ndata.node)
-              : cachedLinkCurve(ndata.link);
-          minDist(Q, pind, nind, wpdist + wndist);
-          for (const child of node.ichildren()) {
-            const cind = inds.get(child)!;
-            minBend(Q, pind, nind, cind, wcurve);
-          }
+        const wpdist =
+          "node" in pdata
+            ? cachedVertWeak(source, target)
+            : cachedVertStrong(pdata.link);
+        const wndist =
+          "node" in ndata
+            ? cachedVertWeak(source, target)
+            : cachedVertStrong(ndata.link);
+        const wcurve =
+          "node" in ndata
+            ? cachedNodeCurve(ndata.node)
+            : cachedLinkCurve(ndata.link);
+        minDist(Q, pind, nind, wpdist + wndist);
+        for (const child of node.ichildren()) {
+          const cind = inds.get(child)!;
+          minBend(Q, pind, nind, cind, wcurve);
         }
       }
     }
 
     // for disconnected dags, add loss for being too far apart
+    // However, we only need to do this if a component is strictly to one side
+    // of the other component. We can compute this by first making a graph
+    // between components representing "to the left of" and then look for
+    // cycles, which don't need to be constrained
+
+    // create left map
+    const leftOf = new Map();
     for (const layer of layers) {
       for (const [first, second] of bigrams(layer)) {
-        if (compMap.get(first) !== compMap.get(second)) {
+        const firstComp = compMap.get(first)!;
+        const secondComp = compMap.get(second)!;
+        if (firstComp !== secondComp) {
+          const rights = leftOf.get(firstComp);
+          if (rights === undefined) {
+            leftOf.set(firstComp, new Set([secondComp]));
+          } else {
+            rights.add(secondComp);
+          }
+        }
+      }
+    }
+
+    // preserve links in left map if they're not part of a cycle
+    // Enumerating all cycles would be prohibitive, but there are a few ways we
+    // could speed up the current implementation
+    // 1. Check if left appears in any rights which we could do by making
+    //    another ancillary set. This doesn't improve worst case complexity,
+    //    but will probably speed up a lot of common slow paths.
+    // 2. Changing dfs to also return any cycles found along the way. This will
+    //    require more space and also won't change worst case time, but will
+    //    allow us to prune a lot of the available cycles and will at least
+    //    remove some redundant computation in terms of the length of a cycle.
+    // 3. Gate this behind a flag to prevent the long execution in large
+    //    disconnected dags.
+    const cons = new Map();
+    for (const [left, rights] of leftOf.entries()) {
+      const newRights = new Set();
+      for (const right of rights) {
+        const reachable = dfs((c) => leftOf.get(c) ?? [], right);
+        const inCycle = some(reachable, (c) => c === left);
+        if (!inCycle) {
+          newRights.add(right);
+        }
+      }
+      cons.set(left, newRights);
+    }
+    // add constraints if they're still there
+    for (const layer of layers) {
+      for (const [first, second] of bigrams(layer)) {
+        const firstComp = compMap.get(first)!;
+        const secondComp = compMap.get(second)!;
+        if (firstComp !== secondComp && cons.get(firstComp)?.has(secondComp)) {
           minDist(Q, inds.get(first)!, inds.get(second)!, comp);
         }
       }
     }
 
+    // get actual solution
     try {
       const solution = solve(Q, c, A, b);
       return layout(layers, nodeSize, inds, solution);
