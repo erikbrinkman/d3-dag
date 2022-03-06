@@ -331,7 +331,7 @@ export function cachedNodeSize<N, L>(
  * independently or controlled. In the future it may make sense to make
  * vertical coordinates part of the sugiyama operators.
  */
-export function verticalCoord<N, L>(
+export function coordVertical<N, L>(
   layers: readonly (readonly SugiNode<N, L>[])[],
   size: CoordNodeSizeAccessor<N, L>
 ): number {
@@ -364,7 +364,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     const [xSize, ySize] = cachedNodeSize(options.sugiNodeSize);
 
     // assign y
-    let height = verticalCoord(layers, ySize);
+    let height = coordVertical(layers, ySize);
     if (height <= 0) {
       throw new Error(
         "at least one node must have positive height, but total height was zero"

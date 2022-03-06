@@ -52,6 +52,7 @@ export {
   type OptOperator as OptLaneOperator
 } from "./grid/lane/opt";
 export {
+  coordVertical as sugiCoordVertical,
   sugiyama,
   type NodeSizeAccessor,
   type SugiNodeSizeAccessor,
@@ -122,4 +123,5 @@ export {
   opt as twolayerOpt,
   type OptOperator as OptTwolayerOperator
 } from "./sugiyama/twolayer/opt";
+export { sugify, unsugify } from "./sugiyama/utils";
 export { zherebko, type ZherebkoOperator } from "./zherebko";
