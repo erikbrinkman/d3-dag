@@ -24,7 +24,7 @@ If you use node, `npm i d3-dag` or `yarn add d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html
-<script src="https://unpkg.com/d3-dag@0.9.0"></script>
+<script src="https://unpkg.com/d3-dag@0.10.0"></script>
 <script>
 const dag = d3.dagStratify(...);
 const layout = d3.sugiyama();
