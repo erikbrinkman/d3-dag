@@ -1,27 +1,26 @@
 [
-    {
-      "id": "0",
-      "parentIds": []
-    },
-    {
-      "id": "1",
-      "parentIds": ["0"]
-    },
-    {
-      "id": "2",
-      "parentIds": ["0"]
-    },
-    {
-        "id": "3",
-        "parentIds": ["1", "2"]
-    },
-    {
-        "id": "4",
-        "parentIds": ["0"]
-    },
-    {
-        "id": "5",
-        "parentIds": ["4"]
-    }
-  ]
-  
+  {
+    "id": "0",
+    "parentIds": []
+  },
+  {
+    "id": "1",
+    "parentIds": ["0"]
+  },
+  {
+    "id": "2",
+    "parentIds": ["0"]
+  },
+  {
+    "id": "3",
+    "parentIds": ["1", "2"]
+  },
+  {
+    "id": "4",
+    "parentIds": ["0"]
+  },
+  {
+    "id": "5",
+    "parentIds": ["4"]
+  }
+]
