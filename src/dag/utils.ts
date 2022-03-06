@@ -1,5 +1,6 @@
-import { DagNode } from ".";
+import { DagNode, Dag } from ".";
 import { listMultimapPush } from "../utils";
+import { map } from "../iters";
 
 /**
  * get a mapping from a the children of a set of nodes to their unique parents
@@ -29,4 +30,18 @@ export function getParentCounts<N, L>(
     }
   }
   return parents;
+}
+
+/** convert a dag into a dot string */
+export function dot<N, L>(
+  dag: Dag<N, L>,
+  id: (node: DagNode<N, L>) => string
+): string {
+  const links = [
+    ...map(
+      dag.ilinks(),
+      ({ source, target }) => `    "${id(source)}" -> "${id(target)}"`
+    )
+  ];
+  return `digraph {\n${links.join("\n")}\n}`;
 }
