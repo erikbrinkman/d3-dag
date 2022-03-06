@@ -11,16 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - A way to specify node data for the `connect` operator.
-- Node and link level customizations to the `quad` operator allowing one to specify certain edges be more vertical.
-- All of the internals of `sugiyama` are exposed in the ES6 module api making it possible to selectively run or rerun different parts of the sugiyama layout. This may make incremental updates or interactivity easier.
+- Node and link level customizations to the `quad` operator allowing one to
+  specify certain edges be more vertical.
+- Updates to how the `quad` operator handles disconnected components that
+  should make layouts a little nicer.
 - Add two-layer greedy to help improve two-layer layouts.
-- `nchildren()` method to DagNodes which is more efficient than any of the current methods for getting the number of children.
-- Add the ability to remove cycles from DAGs by marking links as reversed.
+- Add a simplex coordinate assignment method that mimics how dot does
+  coordinate assignment
+- All of the internals of `sugiyama` are exposed in the ES6 module api making
+  it possible to selectively run or rerun different parts of the sugiyama
+  layout. This may make incremental updates or interactivity easier.
+- `nchildren()` method to DagNodes which is more efficient than any of the
+  current methods for getting the number of children.
+- Add the ability to remove cycles from DAGs by marking links as reversed. Note
+  this currently doesn't extend to self loops.
+- The ability to layout "multidags", dags where there can be multiple links
+  between the same nodes.
 
 ### Changed
 
-- The somewhat internal `SugiData` object has been changed to `{ link: DagLink<...> }` from `{ source: DagNode<...>, target: DagNode<...> }`. This simplifies the object and makes it easier to access link data for dummy nodes.
-- Various typings have been tweaked slightly to get better inference and clean up the messy types with more appropriate usage of `infer`.
+- The somewhat internal `SugiData` object has been changed to
+  `{ link: DagLink<...> }` from `{ source: DagNode<...>, target: DagNode<...> }`.
+  This simplifies the object and makes it easier to access link data for dummy
+  nodes.
+- Various typings have been tweaked slightly to get better inference and clean
+  up the messy types with more appropriate usage of `infer`.
+- The default sugiyama operators now default to two-layer greedy with agg base,
+  and simplex coordinate assignment.
 
 ### Removed
 

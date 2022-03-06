@@ -6,11 +6,17 @@
 import { Dag, DagNode } from "../dag";
 import { js, Up } from "../utils";
 import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
-import { DefaultQuadOperator, quad } from "./coord/quad";
+import {
+  DefaultSimplexOperator as DefaultCoord,
+  simplex as coordSimplex
+} from "./coord/simplex";
 import { DecrossOperator } from "./decross";
 import { twoLayer, TwoLayerOperator } from "./decross/two-layer";
 import { LayeringOperator } from "./layering";
-import { DefaultSimplexOperator, simplex } from "./layering/simplex";
+import {
+  DefaultSimplexOperator as DefaultLayering,
+  simplex as layerSimplex
+} from "./layering/simplex";
 import { agg, AggOperator } from "./twolayer/agg";
 import { greedy, GreedyOperator } from "./twolayer/greedy";
 import {
@@ -524,9 +530,9 @@ function defaultNodeSize(node?: DagNode): [number, number] {
 }
 
 export type DefaultSugiyamaOperator = SugiyamaOperator<{
-  layering: DefaultSimplexOperator;
+  layering: DefaultLayering;
   decross: TwoLayerOperator<GreedyOperator<AggOperator>>;
-  coord: DefaultQuadOperator;
+  coord: DefaultCoord;
   sugiNodeSize: WrappedNodeSizeAccessor<DefaultNodeSizeAccessor>;
   nodeSize: DefaultNodeSizeAccessor;
 }>;
@@ -551,9 +557,9 @@ export function sugiyama(...args: never[]): DefaultSugiyamaOperator {
     );
   } else {
     return buildOperator({
-      layering: simplex(),
+      layering: layerSimplex(),
       decross: twoLayer().order(greedy().base(agg())),
-      coord: quad(),
+      coord: coordSimplex(),
       size: null,
       nodeSize: defaultNodeSize,
       sugiNodeSize: wrapNodeSizeAccessor(defaultNodeSize)

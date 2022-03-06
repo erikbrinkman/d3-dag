@@ -70,18 +70,20 @@ test("sugiyama() works for triple node horizontally sized", () => {
 test("sugiyama() works with a dummy node", () => {
   const dag = dummy();
   const [first, second, third] = dag.idescendants("before");
-  sugiyama()(dag);
+  const layout = sugiyama();
+  const { width, height } = layout(dag);
+
+  expect(width).toBeCloseTo(1.5);
+  expect(height).toBeCloseTo(3);
+
   expect(first.y).toBeCloseTo(0.5);
   expect(second.y).toBeCloseTo(1.5);
   expect(third.y).toBeCloseTo(2.5);
 
-  expect(first.x).toBeGreaterThanOrEqual(0.5);
-  expect(first.x).toBeLessThan(1.0);
-  expect(third.x).toBeGreaterThanOrEqual(0.5);
-  expect(third.x).toBeLessThan(1.0);
-  expect(first.x).toBeCloseTo(third.x!);
-  expect(first.x).not.toBeCloseTo(second.x!);
-  expect(Math.abs(first.x! - second.x!)).toBeLessThan(0.5);
+  // NOTE these x's could flip, so this is brittle
+  expect(first.x).toBeCloseTo(0.5);
+  expect(second.x).toBeCloseTo(1.0);
+  expect(third.x).toBeCloseTo(0.5);
 });
 
 test("sugiyama() works with a multi dag", () => {
@@ -91,15 +93,16 @@ test("sugiyama() works with a multi dag", () => {
   const layout = sugiyama().nodeSize(() => [2, 2]);
   const { width, height } = layout(dag);
 
+  // the width and height imply that the dummy nodes got positioned appropriately
+
   expect(width).toBeCloseTo(4);
   expect(height).toBeCloseTo(6);
 
-  expect(root.x).toBeCloseTo(2);
+  // NOTE either could be one or three, so this is brittle
+  expect(root.x).toBeCloseTo(1);
   expect(root.y).toBeCloseTo(1);
 
-  // these gaps imply that the dummy nodes got positioned appropriately
-
-  expect(leaf.x).toBeCloseTo(2);
+  expect(leaf.x).toBeCloseTo(3);
   expect(leaf.y).toBeCloseTo(5);
 });
 
