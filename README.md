@@ -51,7 +51,7 @@ layout(dag);
 This library is built around the concept of operators.
 Operators are functions with a fluent interface to modify their behavior.
 Every function that modifies behavior returns a copy, and will not modify the original operator.
-For example, the `stratify` operator creates dags from id-based parent data, can ve used like so:
+For example, the `stratify` operator creates dags from id-based parent data, can be used like so:
 
 ```ts
 // note initial function call with no arguments to create default operator
