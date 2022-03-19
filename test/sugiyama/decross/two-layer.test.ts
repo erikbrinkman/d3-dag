@@ -43,7 +43,10 @@ test("twoLayer() can be set", () => {
     [[], []]
   ]);
   const twolayer = agg();
-  const decross = twoLayer().order(twolayer).passes(2);
+  const myInit = () => undefined;
+  const decross = twoLayer().order(twolayer).passes(2).inits([myInit]);
+  const [init] = decross.inits();
+  expect(init).toBe(myInit);
   expect(decross.order()).toBe(twolayer);
   expect(decross.passes()).toBe(2);
   decross(layers);
@@ -65,12 +68,19 @@ test("twoLayer() can be set with all built in methods", () => {
   expect(inds).toEqual([[0], [0]]);
 });
 
-test("twoLayer() fails passing an arg to constructor", () => {
-  expect(() => twoLayer(null as never)).toThrow("got arguments to twoLayer");
+test("twoLayer() fails passing empty inits", () => {
+  // NOTE typescript prevents this, but obviously it can still happen
+  expect(() => twoLayer().inits([] as never)).toThrow(
+    "inits must be a non-empty"
+  );
 });
 
 test("twoLayer() fails passing 0 to passes", () => {
   expect(() => twoLayer().passes(0)).toThrow(
     "number of passes must be positive"
   );
+});
+
+test("twoLayer() fails passing an arg to constructor", () => {
+  expect(() => twoLayer(null as never)).toThrow("got arguments to twoLayer");
 });

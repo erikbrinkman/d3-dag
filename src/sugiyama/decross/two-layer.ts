@@ -10,8 +10,14 @@ import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
 import { crossings, SugiNode } from "../utils";
 
+type Inits<N = never, L = never> = readonly [
+  DecrossOperator<N, L>,
+  ...DecrossOperator<N, L>[]
+];
+
 interface Operators<N = never, L = never> {
   order: OrderOperator<N, L>;
+  inits: Inits<N, L>;
 }
 
 type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
@@ -48,6 +54,23 @@ export interface TwoLayerOperator<Ops extends Operators = Operators>
   order(): Ops["order"];
 
   /**
+   * Sets the initialization passes to the specified {@link DecrossOperator}s and returns
+   * a new operator.
+   *
+   * For every initialization operator, this will run the two layer heuristic,
+   * ultimately choosing the ordering that minimized overall crossings. For
+   * this reason, only quick decrossing operators should be used, not expensive
+   * ones.  (default: [noop])
+   */
+  inits<NewInits extends Inits>(
+    val: NewInits
+  ): TwoLayerOperator<Up<Ops, { inits: NewInits }>>;
+  /**
+   * Get the current initialization passes
+   */
+  inits(): Ops["inits"];
+
+  /**
    * Sets the number of passes to make, more takes longer, but might result in
    * a better output. (default: 1)
    */
@@ -71,37 +94,41 @@ function buildOperator<N, L, O extends Operators<N, L>>(
     // save optimal ordering
     let opt = layers.map((l) => l.slice());
     let optCrossings = crossings(opt);
-    let changed = true;
 
-    for (let i = 0; i < options.passes && changed; ++i) {
-      changed = false;
+    for (const init of options.inits) {
+      init(layers);
 
-      // top down
-      for (const [upper, bottom] of bigrams(layers)) {
-        const init = bottom.slice();
-        options.order(upper, bottom, true);
-        if (bottom.some((node, i) => init[i] !== node)) {
-          changed = true;
+      let changed = true;
+      for (let i = 0; i < options.passes && changed; ++i) {
+        changed = false;
+
+        // top down
+        for (const [upper, bottom] of bigrams(layers)) {
+          const init = bottom.slice();
+          options.order(upper, bottom, true);
+          if (bottom.some((node, i) => init[i] !== node)) {
+            changed = true;
+          }
         }
-      }
-      const topDownCrossings = crossings(layers);
-      if (topDownCrossings < optCrossings) {
-        optCrossings = topDownCrossings;
-        opt = layers.map((l) => l.slice());
-      }
-
-      // bottom up
-      for (const [lower, topl] of bigrams(reversed)) {
-        const init = topl.slice();
-        options.order(topl, lower, false);
-        if (topl.some((node, i) => init[i] !== node)) {
-          changed = true;
+        const topDownCrossings = crossings(layers);
+        if (topDownCrossings < optCrossings) {
+          optCrossings = topDownCrossings;
+          opt = layers.map((l) => l.slice());
         }
-      }
-      const bottomUpCrossings = crossings(layers);
-      if (bottomUpCrossings < optCrossings) {
-        optCrossings = bottomUpCrossings;
-        opt = layers.map((l) => l.slice());
+
+        // bottom up
+        for (const [lower, topl] of bigrams(reversed)) {
+          const init = topl.slice();
+          options.order(topl, lower, false);
+          if (topl.some((node, i) => init[i] !== node)) {
+            changed = true;
+          }
+        }
+        const bottomUpCrossings = crossings(layers);
+        if (bottomUpCrossings < optCrossings) {
+          optCrossings = bottomUpCrossings;
+          opt = layers.map((l) => l.slice());
+        }
       }
     }
 
@@ -125,6 +152,27 @@ function buildOperator<N, L, O extends Operators<N, L>>(
   }
   twoLayerCall.order = order;
 
+  function inits<NewInits extends Inits>(
+    val: NewInits
+  ): TwoLayerOperator<Up<O, { inits: NewInits }>>;
+  function inits(): O["inits"];
+  function inits<NewInits extends Inits>(
+    val?: NewInits
+  ): O["inits"] | TwoLayerOperator<Up<O, { inits: NewInits }>> {
+    if (val === undefined) {
+      return [...options.inits];
+    } else if (val.length) {
+      const { inits: _, ...rest } = options;
+      // not sure why the cast here is necessary
+      return buildOperator({ ...rest, inits: [...val] as NewInits });
+    } else {
+      throw new Error(
+        "inits must be a non-empty array, maybe you intended the singleton noop: `[() => undefined]`"
+      );
+    }
+  }
+  twoLayerCall.inits = inits;
+
   function passes(val: number): TwoLayerOperator<O>;
   function passes(): number;
   function passes(val?: number): TwoLayerOperator<O> | number {
@@ -141,7 +189,10 @@ function buildOperator<N, L, O extends Operators<N, L>>(
   return twoLayerCall;
 }
 
-export type DefaultTwoLayerOperator = TwoLayerOperator<{ order: AggOperator }>;
+export type DefaultTwoLayerOperator = TwoLayerOperator<{
+  order: AggOperator;
+  inits: [DecrossOperator<unknown, unknown>];
+}>;
 
 /**
  * Create a default {@link TwoLayerOperator}, bundled as
@@ -153,5 +204,5 @@ export function twoLayer(...args: never[]): DefaultTwoLayerOperator {
       `got arguments to twoLayer(${args}), but constructor takes no arguments.`
     );
   }
-  return buildOperator({ order: agg(), passes: 1 });
+  return buildOperator({ order: agg(), inits: [() => undefined], passes: 1 });
 }

@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The weighted median twolayer heuristic from graphviz
+- The DFS decross operator
+- Optimal state caching for two-layer operator: this slightly breaking change
+  means the twolayer operator does a little more work and uses more memory, but
+  should return consistently better results. This should only change
+  performance of existing uses, not any apis.
+- Initialization routines for the twolayer operator consistent with graphviz to
+  improve heuristic layouts. This is a breaking type change for the twolayer
+  operator.
+
 ## [0.10.0] - 2022-03-06
 
 ### Added

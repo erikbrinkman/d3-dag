@@ -71,6 +71,7 @@
           "iife",
           "ilinks",
           "indeg",
+          "inits",
           "invariants",
           "iroots",
           "isplit",
