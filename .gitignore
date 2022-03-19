@@ -18,3 +18,7 @@
 ##############
 /src/**/*.js
 /tsconfig.tsbuildinfo
+
+# Local #
+#########
+/.flow_cache

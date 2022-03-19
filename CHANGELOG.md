@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initialization routines for the twolayer operator consistent with graphviz to
   improve heuristic layouts. This is a breaking type change for the twolayer
   operator.
+- Flow definitions to output
 
 ## [0.10.0] - 2022-03-06
 

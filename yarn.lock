@@ -2544,6 +2544,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^6.1.0":
+  version: 6.2.1
+  resolution: "commander@npm:6.2.1"
+  checksum: d7090410c0de6bc5c67d3ca41c41760d6d268f3c799e530aafb73b7437d1826bbf0d2a3edac33f8b57cc9887b4a986dce307fa5557e109be40eadb7c43b21742
+  languageName: node
+  linkType: hard
+
 "concat-map@npm:0.0.1":
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
@@ -2642,6 +2649,8 @@ __metadata:
     eslint-plugin-jest: ^25.7.0
     eslint-plugin-spellcheck: ^0.0.19
     fastpriorityqueue: 0.7.1
+    flowgen: ^1.17.0
+    glob: ^7.2.0
     javascript-lp-solver: 0.4.24
     jest: ^27.4.7
     prettier: ^2.5.1
@@ -3448,6 +3457,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"flowgen@npm:^1.17.0":
+  version: 1.17.0
+  resolution: "flowgen@npm:1.17.0"
+  dependencies:
+    "@babel/code-frame": ^7.16.7
+    "@babel/highlight": ^7.16.7
+    commander: ^6.1.0
+    lodash: ^4.17.20
+    prettier: ^2.5.1
+    shelljs: ^0.8.4
+    typescript: ~4.4.4
+    typescript-compiler: ^1.4.1-2
+  bin:
+    flowgen: lib/cli/index.js
+  checksum: 308e20743a1ae5f933566795785dcefe701aa0e81c738c10733a99a3ae7cced2ec90f7132d84ee62117770bae5bdbe0f2a9d5087ee3628c14ef172cac9fb9314
+  languageName: node
+  linkType: hard
+
 "form-data@npm:^3.0.0":
   version: 3.0.1
   resolution: "form-data@npm:3.0.1"
@@ -3582,7 +3609,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.1.1, glob@npm:^7.1.2, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.2.0":
+"glob@npm:^7.0.0, glob@npm:^7.1.1, glob@npm:^7.1.2, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.2.0":
   version: 7.2.0
   resolution: "glob@npm:7.2.0"
   dependencies:
@@ -3861,6 +3888,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"interpret@npm:^1.0.0":
+  version: 1.4.0
+  resolution: "interpret@npm:1.4.0"
+  checksum: 2e5f51268b5941e4a17e4ef0575bc91ed0ab5f8515e3cf77486f7c14d13f3010df9c0959f37063dcc96e78d12dc6b0bb1b9e111cdfe69771f4656d2993d36155
+  languageName: node
+  linkType: hard
+
 "ip@npm:^1.1.5":
   version: 1.1.5
   resolution: "ip@npm:1.1.5"
@@ -3882,7 +3916,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-core-module@npm:^2.5.0, is-core-module@npm:^2.8.0":
+"is-core-module@npm:^2.5.0, is-core-module@npm:^2.8.0, is-core-module@npm:^2.8.1":
   version: 2.8.1
   resolution: "is-core-module@npm:2.8.1"
   dependencies:
@@ -4722,7 +4756,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.15, lodash@npm:^4.7.0":
+"lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.7.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -5499,6 +5533,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rechoir@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "rechoir@npm:0.6.2"
+  dependencies:
+    resolve: ^1.1.6
+  checksum: fe76bf9c21875ac16e235defedd7cbd34f333c02a92546142b7911a0f7c7059d2e16f441fe6fb9ae203f459c05a31b2bcf26202896d89e390eda7514d5d2702b
+  languageName: node
+  linkType: hard
+
 "redent@npm:^3.0.0":
   version: 3.0.0
   resolution: "redent@npm:3.0.0"
@@ -5617,6 +5660,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resolve@npm:^1.1.6":
+  version: 1.22.0
+  resolution: "resolve@npm:1.22.0"
+  dependencies:
+    is-core-module: ^2.8.1
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: a2d14cc437b3a23996f8c7367eee5c7cf8149c586b07ca2ae00e96581ce59455555a1190be9aa92154785cf9f2042646c200d0e00e0bbd2b8a995a93a0ed3e4e
+  languageName: node
+  linkType: hard
+
 "resolve@npm:^1.10.0, resolve@npm:^1.14.2, resolve@npm:^1.20.0":
   version: 1.21.1
   resolution: "resolve@npm:1.21.1"
@@ -5627,6 +5683,19 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: 4703fbd6ddaebf7a7f7834ca29f5cfa2c64ef7988ac34bcd26148f0d017783d3a475936ffca02add1b9696e0d1db2a75210052c4b08e748e144e2886e575617c
+  languageName: node
+  linkType: hard
+
+"resolve@patch:resolve@^1.1.6#~builtin<compat/resolve>":
+  version: 1.22.0
+  resolution: "resolve@patch:resolve@npm%3A1.22.0#~builtin<compat/resolve>::version=1.22.0&hash=07638b"
+  dependencies:
+    is-core-module: ^2.8.1
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: c79ecaea36c872ee4a79e3db0d3d4160b593f2ca16e031d8283735acd01715a203607e9ded3f91f68899c2937fa0d49390cddbe0fb2852629212f3cda283f4a7
   languageName: node
   linkType: hard
 
@@ -5765,6 +5834,19 @@ __metadata:
   version: 3.0.0
   resolution: "shebang-regex@npm:3.0.0"
   checksum: 1a2bcae50de99034fcd92ad4212d8e01eedf52c7ec7830eedcf886622804fe36884278f2be8be0ea5fde3fd1c23911643a4e0f726c8685b61871c8908af01222
+  languageName: node
+  linkType: hard
+
+"shelljs@npm:^0.8.4":
+  version: 0.8.5
+  resolution: "shelljs@npm:0.8.5"
+  dependencies:
+    glob: ^7.0.0
+    interpret: ^1.0.0
+    rechoir: ^0.6.2
+  bin:
+    shjs: bin/shjs
+  checksum: 7babc46f732a98f4c054ec1f048b55b9149b98aa2da32f6cf9844c434b43c6251efebd6eec120937bd0999e13811ebd45efe17410edb3ca938f82f9381302748
   languageName: node
   linkType: hard
 
@@ -6273,6 +6355,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript-compiler@npm:^1.4.1-2":
+  version: 1.4.1
+  resolution: "typescript-compiler@npm:1.4.1"
+  checksum: 160c148d263f8feda3777c3043040a61d7f4eccf127c459012ef6a0ad2158dc9888e0dec40e0ea14194edb1a7a5113bc120eef6f71cf36c723319a8345d05238
+  languageName: node
+  linkType: hard
+
 "typescript@npm:^4.5.4":
   version: 4.5.5
   resolution: "typescript@npm:4.5.5"
@@ -6283,6 +6372,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:~4.4.4":
+  version: 4.4.4
+  resolution: "typescript@npm:4.4.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 89ecb8436bb48ef5594d49289f5f89103071716b6e4844278f4fb3362856e31203e187a9c76d205c3f0b674d221a058fd28310dbcbcf5d95e9a57229bb5203f1
+  languageName: node
+  linkType: hard
+
 "typescript@patch:typescript@^4.5.4#~builtin<compat/typescript>":
   version: 4.5.5
   resolution: "typescript@patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=493e53"
@@ -6290,6 +6389,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: c05c318d79c690f101d7ffb34cd6c7d6bbd884d3af9cefe7749ad0cd6be43c7082f098280982ca945dcba23fde34a08fed9602bb26540936baf8c0520727d3ba
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@~4.4.4#~builtin<compat/typescript>":
+  version: 4.4.4
+  resolution: "typescript@patch:typescript@npm%3A4.4.4#~builtin<compat/typescript>::version=4.4.4&hash=493e53"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: bd629ad0da4a15d79aaad56baf3ee7d96f6a181760d430ae77f8c5325df7bffd9edee57544a3970e3651e8b796fe03a5838a7eb39c6d46cc3866c0b23d36a0dd
   languageName: node
   linkType: hard
 

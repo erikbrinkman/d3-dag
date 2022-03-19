@@ -25,6 +25,7 @@
   "files": [
     "/bundle/*.js",
     "/dist/**/*.js",
+    "/dist/**/*.js.flow",
     "/dist/**/*.d.ts"
   ],
   "jest": {
@@ -33,20 +34,21 @@
     ]
   },
   "scripts": {
-    "prettier": "prettier '{src,test,test-d,types}/**/*.ts' '{,.}*.{json,mjs,ts}' 'examples/*.json'",
-    "fmt": "yarn prettier --write",
-    "lint:prettier": "yarn prettier --check",
+    "fmt:prettier": "prettier '{src,test,test-d,types}/**/*.ts' '*.{json,mjs,ts}' 'examples/*.json'",
+    "fmt": "yarn fmt:prettier --write",
+    "lint:prettier": "yarn fmt:prettier --check",
     "lint:eslint": "eslint --cache {src,test,test-d,types}/**/*.ts *.mjs",
     "lint": "yarn lint:prettier && yarn lint:eslint",
-    "build:ts": "rm -rf dist && tsc -p tsconfig.build.json",
+    "build:ts": "tsc -p tsconfig.build.json",
+    "build:flow": "node flow.mjs --cache",
     "build:bundle": "rm -rf bundle && node bundle.mjs",
-    "build": "yarn build:ts && yarn build:bundle",
+    "build": "yarn build:ts && yarn build:flow && yarn build:bundle",
     "test:jest": "jest test/",
     "test:coverage": "yarn test:jest --coverage",
     "test:tsd": "yarn build:ts && tsd",
     "test:bundle": "yarn build:bundle && jest bundle.test.ts",
     "test": "tsc && yarn lint && yarn test:coverage && yarn test:tsd && yarn test:bundle",
-    "prepare": "jest --clear-cache && yarn test && yarn build",
+    "prepare": "jest --clear-cache && rm -rf dist bundle && yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
     "doc": "typedoc"
   },
@@ -73,6 +75,8 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^25.7.0",
     "eslint-plugin-spellcheck": "^0.0.19",
+    "flowgen": "^1.17.0",
+    "glob": "^7.2.0",
     "jest": "^27.4.7",
     "prettier": "^2.5.1",
     "prettier-plugin-organize-imports": "^2.3.4",
