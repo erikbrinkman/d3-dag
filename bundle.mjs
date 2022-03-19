@@ -63,4 +63,4 @@ await Promise.all([
 ]);
 
 const end = performance.now();
-console.log(`Done in ${(end - start).toFixed(2)}ms`);
+console.log(`bundled in ${(end - start).toFixed(2)}ms`);
