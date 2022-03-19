@@ -1,6 +1,6 @@
-import { DagNode, Dag } from ".";
-import { listMultimapPush } from "../utils";
+import { Dag, DagNode } from ".";
 import { map } from "../iters";
+import { listMultimapPush } from "../utils";
 
 /**
  * get a mapping from a the children of a set of nodes to their unique parents
