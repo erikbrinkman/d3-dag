@@ -926,7 +926,7 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOperators<N, LinkDatum>>(
 
 /** default interface for tuples that start with a string */
 export interface ZeroString {
-  readonly [0]: string;
+  readonly 0: string;
 }
 
 function isZeroString(d: unknown): d is ZeroString {
@@ -949,7 +949,7 @@ function defaultSourceId(d: ZeroString): string {
 
 /** default interface for functions whose second element is a string */
 export interface OneString {
-  readonly [1]: string;
+  readonly 1: string;
 }
 
 function isOneString(d: unknown): d is OneString {
