@@ -61,6 +61,49 @@ class Median implements Aggregator {
  */
 export const medianFactory = (): Aggregator => new Median();
 
+class WeightedMedian implements Aggregator {
+  private vals: number[] = [];
+
+  add(val: number): void {
+    this.vals.push(val);
+  }
+
+  val(): number | undefined {
+    // NOTE this could be linear time, but we already do other sorts, so
+    // probably not terrible
+    this.vals.sort((a, b) => a - b);
+    if (this.vals.length === 0) {
+      return undefined;
+    } else if (this.vals.length === 2) {
+      return (this.vals[0] + this.vals[1]) / 2;
+    } else if (this.vals.length % 2 === 0) {
+      const ind = this.vals.length / 2;
+
+      const first = this.vals[0];
+      const left = this.vals[ind - 1];
+      const right = this.vals[ind];
+      const last = this.vals[this.vals.length - 1];
+
+      // all elements are guaranteed to be different, so we don't need to worry
+      // about leftDiff or rightDiff being 0
+      const leftDiff = left - first;
+      const rightDiff = last - right;
+      return (left * rightDiff + right * leftDiff) / (leftDiff + rightDiff);
+    } else {
+      return this.vals[(this.vals.length - 1) / 2];
+    }
+  }
+}
+
+/**
+ * A {@link AggFactory | factory} that creates weighted median {@link Aggregator}s,
+ * bundled as {@link aggWeightedMedianFactory}.
+ *
+ * @remarks
+ * This is slightly slower than the {@link medianFactory}.
+ */
+export const weightedMedianFactory = (): Aggregator => new WeightedMedian();
+
 /**
  * A {@link TwolayerOperator} that orders nodes based off the aggregation of their
  * parents' or children's indices.

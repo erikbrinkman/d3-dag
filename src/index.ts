@@ -113,6 +113,7 @@ export {
   agg as twolayerAgg,
   meanFactory as aggMeanFactory,
   medianFactory as aggMedianFactory,
+  weightedMedianFactory as aggWeightedMedianFactory,
   type AggOperator as AggTwolayerOperator
 } from "./sugiyama/twolayer/agg";
 export {

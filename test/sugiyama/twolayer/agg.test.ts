@@ -1,4 +1,8 @@
-import { agg, meanFactory } from "../../../src/sugiyama/twolayer/agg";
+import {
+  agg,
+  meanFactory,
+  weightedMedianFactory
+} from "../../../src/sugiyama/twolayer/agg";
 import { createLayers, crossings, getIndex } from "../utils";
 
 test("agg() works for very simple case", () => {
@@ -114,6 +118,30 @@ test("agg() mean preserves order of easy unconstrained nodes", () => {
   agg().aggregator(meanFactory)(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
   expect(inds).toEqual([0, 1, 2]);
+});
+
+test("agg() weighted median is different than median", () => {
+  // weighted median makes this deterministic
+  const [topLayer, bottomLayer] = createLayers([
+    [[0, 1], [0, 1], [0, 1], [0], [1]],
+    [[], []]
+  ]);
+  const order = agg().aggregator(weightedMedianFactory);
+  order(topLayer, bottomLayer, true);
+  const inds = bottomLayer.map(getIndex);
+  expect(inds).toEqual([1, 0]);
+});
+
+test("agg() weighted median works for all parent numbers", () => {
+  // weighted median makes this deterministic
+  const [topLayer, bottomLayer] = createLayers([
+    [[0, 1], [0, 1], [0]],
+    [[], [], []]
+  ]);
+  const order = agg().aggregator(weightedMedianFactory);
+  order(topLayer, bottomLayer, true);
+  const inds = bottomLayer.map(getIndex);
+  expect(inds).toEqual([1, 0, 2]);
 });
 
 test("agg() preserves order of easy unconstrained nodes bottom-up", () => {
