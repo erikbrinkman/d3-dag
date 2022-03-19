@@ -5,21 +5,19 @@
  * @module
  */
 import { DecrossOperator } from ".";
-import { bigrams } from "../../utils";
+import { bigrams, Up } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
 import { crossings, SugiNode } from "../utils";
 
-type OpNodeDatum<O extends OrderOperator> = O extends OrderOperator<
-  infer N,
-  never
->
+interface Operators<N = never, L = never> {
+  order: OrderOperator<N, L>;
+}
+
+type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
   ? N
   : never;
-type OpLinkDatum<O extends OrderOperator> = O extends OrderOperator<
-  never,
-  infer L
->
+type OpLinkDatum<O extends Operators> = O extends Operators<never, infer L>
   ? L
   : never;
 
@@ -35,25 +33,25 @@ type OpLinkDatum<O extends OrderOperator> = O extends OrderOperator<
  *
  * <img alt="two layer example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
-export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
-  extends DecrossOperator<OpNodeDatum<Order>, OpLinkDatum<Order>> {
+export interface TwoLayerOperator<Ops extends Operators = Operators>
+  extends DecrossOperator<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
   /**
    * Sets the order accessor to the specified {@link TwolayerOperator} and returns
    * a new operator. (default: {@link AggOperator}).
    */
   order<NewOrder extends OrderOperator>(
-    ord: NewOrder
-  ): TwoLayerOperator<NewOrder>;
+    val: NewOrder
+  ): TwoLayerOperator<Up<Ops, { order: NewOrder }>>;
   /**
    * Get the current {@link TwolayerOperator} for ordering.
    */
-  order(): Order;
+  order(): Ops["order"];
 
   /**
    * Sets the number of passes to make, more takes longer, but might result in
    * a better output. (default: 1)
    */
-  passes(val: number): TwoLayerOperator<Order>;
+  passes(val: number): TwoLayerOperator<Ops>;
   /**
    * Get the current number of passes
    */
@@ -61,10 +59,12 @@ export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
 }
 
 /** @internal */
-function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
-  order: O & OrderOperator<N, L>;
-  passes: number;
-}): TwoLayerOperator<O> {
+function buildOperator<N, L, O extends Operators<N, L>>(
+  options: O &
+    Operators<N, L> & {
+      passes: number;
+    }
+): TwoLayerOperator<O> {
   function twoLayerCall(layers: SugiNode<N, L>[][]): void {
     const reversed = layers.slice().reverse();
 
@@ -109,9 +109,13 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
     layers.splice(0, layers.length, ...opt);
   }
 
-  function order<NO extends OrderOperator>(ord: NO): TwoLayerOperator<NO>;
-  function order(): O;
-  function order<NO extends OrderOperator>(ord?: NO): O | TwoLayerOperator<NO> {
+  function order<NO extends OrderOperator>(
+    ord: NO
+  ): TwoLayerOperator<Up<O, { order: NO }>>;
+  function order(): O["order"];
+  function order<NO extends OrderOperator>(
+    ord?: NO
+  ): O["order"] | TwoLayerOperator<Up<O, { order: NO }>> {
     if (ord === undefined) {
       return options.order;
     } else {
@@ -137,7 +141,7 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
   return twoLayerCall;
 }
 
-export type DefaultTwoLayerOperator = TwoLayerOperator<AggOperator>;
+export type DefaultTwoLayerOperator = TwoLayerOperator<{ order: AggOperator }>;
 
 /**
  * Create a default {@link TwoLayerOperator}, bundled as

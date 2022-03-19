@@ -531,7 +531,7 @@ function defaultNodeSize(node?: DagNode): [number, number] {
 
 export type DefaultSugiyamaOperator = SugiyamaOperator<{
   layering: DefaultLayering;
-  decross: TwoLayerOperator<GreedyOperator<AggOperator>>;
+  decross: TwoLayerOperator<{ order: GreedyOperator<AggOperator> }>;
   coord: DefaultCoord;
   sugiNodeSize: WrappedNodeSizeAccessor<DefaultNodeSizeAccessor>;
   nodeSize: DefaultNodeSizeAccessor;
