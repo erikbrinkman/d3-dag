@@ -76,6 +76,7 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
       changed = false;
 
       // top down
+      // FIXME check crossings here, and cache init for whole graph
       for (const [upper, bottom] of bigrams(layers)) {
         const init = new Map(bottom.map((node, i) => [node, i] as const));
         options.order(upper, bottom, true);
@@ -83,6 +84,7 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
           changed = true;
         }
       }
+      // then reset if crossings is worse
 
       // bottom up
       for (const [lower, topl] of bigrams(reversed)) {

@@ -1,6 +1,7 @@
 import { agg } from "../../../src/sugiyama/twolayer/agg";
 import { greedy } from "../../../src/sugiyama/twolayer/greedy";
-import { createLayers, crossings, getIndex } from "../utils";
+import { crossings } from "../../../src/sugiyama/utils";
+import { createLayers, getIndex } from "../utils";
 
 test("greedy() works for very simple case", () => {
   // independent links that need to be swapped

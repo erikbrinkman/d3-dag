@@ -3,7 +3,8 @@ import {
   meanFactory,
   weightedMedianFactory
 } from "../../../src/sugiyama/twolayer/agg";
-import { createLayers, crossings, getIndex } from "../utils";
+import { crossings } from "../../../src/sugiyama/utils";
+import { createLayers, getIndex } from "../utils";
 
 test("agg() works for very simple case", () => {
   // independent links that need to be swapped

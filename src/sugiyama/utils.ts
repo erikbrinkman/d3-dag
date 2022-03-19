@@ -10,7 +10,7 @@
 import { Dag, DagLink, DagNode } from "../dag";
 import { hierarchy } from "../dag/create";
 import { map } from "../iters";
-import { assert, js } from "../utils";
+import { assert, bigrams, js } from "../utils";
 
 /**
  * The NodeDatum used for layered {@link SugiyamaOperator} layouts
@@ -200,4 +200,25 @@ export function scaleLayers(
       node.y! *= yscale;
     }
   }
+}
+
+/** compute the number of crossings in a layered sugi node */
+export function crossings(layers: readonly (readonly SugiNode[])[]): number {
+  let crossings = 0;
+  for (const [topLayer, bottomLayer] of bigrams(layers)) {
+    const inds = new Map(bottomLayer.map((node, j) => [node, j] as const));
+    for (const [j, p1] of topLayer.entries()) {
+      for (const p2 of topLayer.slice(j + 1)) {
+        // NOTE sugi nodes can't be multi-graphs, so ichildren is fine
+        for (const c1 of p1.ichildren()) {
+          for (const c2 of p2.ichildren()) {
+            if (c1 !== c2 && inds.get(c1)! > inds.get(c2)!) {
+              crossings++;
+            }
+          }
+        }
+      }
+    }
+  }
+  return crossings;
 }
