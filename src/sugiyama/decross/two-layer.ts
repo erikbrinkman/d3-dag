@@ -8,7 +8,9 @@ import { DecrossOperator } from ".";
 import { bigrams, Up } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
+import { greedy, GreedyOperator } from "../twolayer/greedy";
 import { crossings, SugiNode } from "../utils";
+import { dfs, DfsOperator } from "./dfs";
 
 type Inits<N = never, L = never> = readonly [
   DecrossOperator<N, L>,
@@ -72,7 +74,7 @@ export interface TwoLayerOperator<Ops extends Operators = Operators>
 
   /**
    * Sets the number of passes to make, more takes longer, but might result in
-   * a better output. (default: 1)
+   * a better output. (default: 24)
    */
   passes(val: number): TwoLayerOperator<Ops>;
   /**
@@ -190,8 +192,8 @@ function buildOperator<N, L, O extends Operators<N, L>>(
 }
 
 export type DefaultTwoLayerOperator = TwoLayerOperator<{
-  order: AggOperator;
-  inits: [DecrossOperator<unknown, unknown>];
+  order: GreedyOperator<AggOperator>;
+  inits: [DfsOperator, DfsOperator];
 }>;
 
 /**
@@ -204,5 +206,9 @@ export function twoLayer(...args: never[]): DefaultTwoLayerOperator {
       `got arguments to twoLayer(${args}), but constructor takes no arguments.`
     );
   }
-  return buildOperator({ order: agg(), inits: [() => undefined], passes: 1 });
+  return buildOperator({
+    order: greedy().base(agg()),
+    inits: [dfs(), dfs().topDown(false)],
+    passes: 24
+  });
 }

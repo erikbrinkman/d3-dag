@@ -293,5 +293,5 @@ export function agg(...args: never[]): AggOperator {
       `got arguments to agg(${args}), but constructor takes no arguments.`
     );
   }
-  return buildOperator({ factory: medianFactory });
+  return buildOperator({ factory: weightedMedianFactory });
 }

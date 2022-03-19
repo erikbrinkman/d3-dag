@@ -17,9 +17,9 @@ test("twoLayer() propagates to both layers", () => {
   twoLayer()(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
-    [0, 1],
     [1, 0],
-    [1, 0]
+    [0, 1],
+    [0, 1]
   ]);
 });
 
@@ -31,8 +31,8 @@ test("twoLayer() propagates down and up", () => {
   twoLayer()(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
-    [0, 1, 3, 2],
-    [1, 0]
+    [2, 3, 1, 0],
+    [0, 1]
   ]);
 });
 
