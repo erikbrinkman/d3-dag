@@ -1,3 +1,4 @@
+import { dfs } from "../../../src/sugiyama/decross/dfs";
 import { opt as decrossOpt } from "../../../src/sugiyama/decross/opt";
 import { twoLayer } from "../../../src/sugiyama/decross/two-layer";
 import { agg } from "../../../src/sugiyama/twolayer/agg";
@@ -17,7 +18,9 @@ for (const dat of [square, ccoz, dtopo, doub]) {
   for (const method of [
     twoLayer().order(agg()),
     twoLayer().order(twolayerOpt()),
-    decrossOpt()
+    decrossOpt(),
+    dfs(),
+    dfs().topDown(false)
   ]) {
     test(`invariants apply to ${dat.name} decrossed by ${method.name}`, () => {
       const layered = dat();

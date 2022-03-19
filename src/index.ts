@@ -84,6 +84,10 @@ export {
 } from "./sugiyama/coord/topological";
 export { type DecrossOperator } from "./sugiyama/decross";
 export {
+  dfs as decrossDfs,
+  type DfsOperator as DfsDecrossOperator
+} from "./sugiyama/decross/dfs";
+export {
   opt as decrossOpt,
   type OptOperator as OptDecrossOperator
 } from "./sugiyama/decross/opt";

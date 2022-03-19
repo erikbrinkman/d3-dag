@@ -1,4 +1,9 @@
-import { agg } from "../../../src/sugiyama/twolayer/agg";
+import {
+  agg,
+  meanFactory,
+  medianFactory,
+  weightedMedianFactory
+} from "../../../src/sugiyama/twolayer/agg";
 import { opt } from "../../../src/sugiyama/twolayer/opt";
 import { createLayers, getIndex } from "../utils";
 
@@ -15,7 +20,12 @@ const doub = () =>
   ]);
 
 for (const dat of [square, ccoz, doub]) {
-  for (const method of [agg(), opt()]) {
+  for (const method of [
+    agg().aggregator(meanFactory),
+    agg().aggregator(medianFactory),
+    agg().aggregator(weightedMedianFactory),
+    opt()
+  ]) {
     test(`invariants apply to ${dat.name} decrossed by ${method.name}`, () => {
       const [topLayer, bottomLayer] = dat();
 
