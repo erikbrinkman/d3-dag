@@ -8,7 +8,7 @@ import { DecrossOperator } from ".";
 import { bigrams } from "../../utils";
 import { TwolayerOperator as OrderOperator } from "../twolayer";
 import { agg, AggOperator } from "../twolayer/agg";
-import { SugiNode } from "../utils";
+import { crossings, SugiNode } from "../utils";
 
 type OpNodeDatum<O extends OrderOperator> = O extends OrderOperator<
   infer N,
@@ -60,9 +60,6 @@ export interface TwoLayerOperator<Order extends OrderOperator = OrderOperator>
   passes(): number;
 }
 
-// TODO Add optional greedy swapping of nodes after assignment
-// TODO Add two layer noop. This only makes sense if there's a greedy swapping ability
-
 /** @internal */
 function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
   order: O & OrderOperator<N, L>;
@@ -71,30 +68,45 @@ function buildOperator<N, L, O extends OrderOperator<N, L>>(options: {
   function twoLayerCall(layers: SugiNode<N, L>[][]): void {
     const reversed = layers.slice().reverse();
 
+    // save optimal ordering
+    let opt = layers.map((l) => l.slice());
+    let optCrossings = crossings(opt);
     let changed = true;
+
     for (let i = 0; i < options.passes && changed; ++i) {
       changed = false;
 
       // top down
-      // FIXME check crossings here, and cache init for whole graph
       for (const [upper, bottom] of bigrams(layers)) {
-        const init = new Map(bottom.map((node, i) => [node, i] as const));
+        const init = bottom.slice();
         options.order(upper, bottom, true);
-        if (bottom.some((node, i) => init.get(node) !== i)) {
+        if (bottom.some((node, i) => init[i] !== node)) {
           changed = true;
         }
       }
-      // then reset if crossings is worse
+      const topDownCrossings = crossings(layers);
+      if (topDownCrossings < optCrossings) {
+        optCrossings = topDownCrossings;
+        opt = layers.map((l) => l.slice());
+      }
 
       // bottom up
       for (const [lower, topl] of bigrams(reversed)) {
-        const init = new Map(topl.map((node, i) => [node, i] as const));
+        const init = topl.slice();
         options.order(topl, lower, false);
-        if (topl.some((node, i) => init.get(node) !== i)) {
+        if (topl.some((node, i) => init[i] !== node)) {
           changed = true;
         }
       }
+      const bottomUpCrossings = crossings(layers);
+      if (bottomUpCrossings < optCrossings) {
+        optCrossings = bottomUpCrossings;
+        opt = layers.map((l) => l.slice());
+      }
     }
+
+    // replace optimal ordering
+    layers.splice(0, layers.length, ...opt);
   }
 
   function order<NO extends OrderOperator>(ord: NO): TwoLayerOperator<NO>;
