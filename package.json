@@ -48,7 +48,7 @@
     "test:tsd": "yarn build:ts && tsd",
     "test:bundle": "yarn build:bundle && jest bundle.test.ts",
     "test": "tsc && yarn lint && yarn test:coverage && yarn test:tsd && yarn test:bundle",
-    "prepare": "jest --clear-cache && rm -rf dist bundle && yarn test && yarn build",
+    "prepack": "jest --clear-cache && rm -rf dist bundle && yarn test && yarn build",
     "todo": "grep -rI --color TODO src test types",
     "doc": "typedoc"
   },
