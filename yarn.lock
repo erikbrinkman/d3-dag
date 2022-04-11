@@ -2649,7 +2649,7 @@ __metadata:
     eslint-plugin-jest: ^25.7.0
     eslint-plugin-spellcheck: ^0.0.19
     fastpriorityqueue: 0.7.1
-    flowgen: ^1.17.0
+    flowgen: ^1.18.0
     glob: ^7.2.0
     javascript-lp-solver: 0.4.24
     jest: ^27.4.7
@@ -3457,9 +3457,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flowgen@npm:^1.17.0":
-  version: 1.17.0
-  resolution: "flowgen@npm:1.17.0"
+"flowgen@npm:^1.18.0":
+  version: 1.18.0
+  resolution: "flowgen@npm:1.18.0"
   dependencies:
     "@babel/code-frame": ^7.16.7
     "@babel/highlight": ^7.16.7
@@ -3471,7 +3471,7 @@ __metadata:
     typescript-compiler: ^1.4.1-2
   bin:
     flowgen: lib/cli/index.js
-  checksum: 308e20743a1ae5f933566795785dcefe701aa0e81c738c10733a99a3ae7cced2ec90f7132d84ee62117770bae5bdbe0f2a9d5087ee3628c14ef172cac9fb9314
+  checksum: 5acb198f9f2705689896790043930aba42d61ac7a6f5c347ff3e60e1486b8d8c797b53ca6df15e19952d26a93bcf20d30145eedaa967a7b10bcf0a03585506d2
   languageName: node
   linkType: hard
 
