@@ -3,42 +3,42 @@ import { SimpleDatum } from "../examples";
 
 const single = [
   {
-    id: "0"
-  }
+    id: "0",
+  },
 ] as const;
 const doub = [
   {
-    id: "0"
-  },
-  {
-    id: "1"
-  }
-] as const;
-const square = [
-  {
-    id: "0"
+    id: "0",
   },
   {
     id: "1",
-    parentIds: ["0"]
+  },
+] as const;
+const square = [
+  {
+    id: "0",
+  },
+  {
+    id: "1",
+    parentIds: ["0"],
   },
   {
     id: "2",
-    parentIds: ["0"]
+    parentIds: ["0"],
   },
   {
     id: "3",
-    parentIds: ["1", "2"]
-  }
+    parentIds: ["1", "2"],
+  },
 ] as const;
 const spaces = [
   {
-    id: "0 0"
+    id: "0 0",
   },
   {
     id: "1 1",
-    parentIds: ["0 0"]
-  }
+    parentIds: ["0 0"],
+  },
 ] as const;
 
 function alter(id: string): string {
@@ -104,14 +104,14 @@ test("stratify() works with data accessor", () => {
       i: "d",
       pd: [
         ["b", "b -> d"],
-        ["c", "c -> d"]
-      ]
-    }
+        ["c", "c -> d"],
+      ],
+    },
   ] as const;
 
   const newId = ({ i }: { i: string }) => i;
   const newParentData = ({
-    pd
+    pd,
   }: {
     pd: readonly (readonly [string, string])[] | undefined;
   }) => pd;
@@ -141,16 +141,16 @@ test("stratify() decycle works with cycle", () => {
   const data = [
     {
       id: "1",
-      parentIds: ["3"]
+      parentIds: ["3"],
     },
     {
       id: "2",
-      parentIds: ["1"]
+      parentIds: ["1"],
     },
     {
       id: "3",
-      parentIds: ["2"]
-    }
+      parentIds: ["2"],
+    },
   ];
   const layout = stratify().decycle(true);
   expect(layout.decycle()).toBe(true);
@@ -162,12 +162,12 @@ test("stratify() works for multidag", () => {
   const data = [
     {
       id: "1",
-      parentIds: []
+      parentIds: [],
     },
     {
       id: "2",
-      parentIds: ["1", "1"]
-    }
+      parentIds: ["1", "1"],
+    },
   ];
   const layout = stratify();
   const dag = layout(data);
@@ -205,7 +205,7 @@ test("stratify() fails at undefined id", () => {
 test("stratify() fails without unique ids", () => {
   const data = [
     { id: "1", parentIds: [] },
-    { id: "1", parentIds: [] }
+    { id: "1", parentIds: [] },
   ];
   expect(() => stratify()(data)).toThrow("duplicate id");
 });
@@ -219,12 +219,12 @@ test("stratify() fails without root", () => {
   const data = [
     {
       id: "1",
-      parentIds: ["2"]
+      parentIds: ["2"],
     },
     {
       id: "2",
-      parentIds: ["1"]
-    }
+      parentIds: ["1"],
+    },
   ];
   expect(() => stratify()(data)).toThrow("no roots");
 });
@@ -232,12 +232,12 @@ test("stratify() fails without root", () => {
 test("stratify() fails with self loop", () => {
   const data = [
     {
-      id: "1"
+      id: "1",
     },
     {
       id: "2",
-      parentIds: ["1", "2"]
-    }
+      parentIds: ["1", "2"],
+    },
   ];
   expect(() => stratify()(data)).toThrow(
     /node '{"id":"2",.*}' contained a self loop/
@@ -247,16 +247,16 @@ test("stratify() fails with self loop", () => {
 test("stratify() fails with cycle", () => {
   const data = [
     {
-      id: "1"
+      id: "1",
     },
     {
       id: "2",
-      parentIds: ["1", "3"]
+      parentIds: ["1", "3"],
     },
     {
       id: "3",
-      parentIds: ["2"]
-    }
+      parentIds: ["2"],
+    },
   ];
   expect(() => stratify()(data)).toThrow(
     /cycle: '{"id":"2",.*}' -> '{"id":"3",.*}' -> '{"id":"2",.*}'/
@@ -266,19 +266,19 @@ test("stratify() fails with cycle", () => {
 test("stratify() fails with hard cycle", () => {
   const data = [
     {
-      id: "1"
+      id: "1",
     },
     {
-      id: "2"
+      id: "2",
     },
     {
       id: "3",
-      parentIds: ["4", "2"]
+      parentIds: ["4", "2"],
     },
     {
       id: "4",
-      parentIds: ["1", "3"]
-    }
+      parentIds: ["1", "3"],
+    },
   ];
   expect(() => stratify()(data)).toThrow(
     /cycle: '{"id":"4",.*}' -> '{"id":"3",.*}' -> '{"id":"4".*}'/
@@ -303,8 +303,8 @@ test("stratify() fails with incorrect parentIds", () => {
   const data = [
     {
       id: "1",
-      parentIds: null as unknown as undefined
-    }
+      parentIds: null as unknown as undefined,
+    },
   ];
   expect(() => stratify()(data)).toThrow(
     "default parentIds function expected datum to have a parentIds field but got: "

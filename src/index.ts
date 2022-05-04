@@ -30,7 +30,7 @@
  * }
  * ```
  *
- * @module
+ * @packageDocumentation
  */
 export { type Dag, type DagLink, type DagNode } from "./dag";
 export {
@@ -39,78 +39,78 @@ export {
   stratify as dagStratify,
   type ConnectOperator,
   type HierarchyOperator,
-  type StratifyOperator
+  type StratifyOperator,
 } from "./dag/create";
 export { grid, type GridOperator } from "./grid";
 export { type LaneOperator } from "./grid/lane";
 export {
   greedy as laneGreedy,
-  type GreedyOperator as GreedyLaneOperator
+  type GreedyOperator as GreedyLaneOperator,
 } from "./grid/lane/greedy";
 export {
   opt as laneOpt,
-  type OptOperator as OptLaneOperator
+  type OptOperator as OptLaneOperator,
 } from "./grid/lane/opt";
 export {
   coordVertical as sugiCoordVertical,
   sugiyama,
   type NodeSizeAccessor,
   type SugiNodeSizeAccessor,
-  type SugiyamaOperator
+  type SugiyamaOperator,
 } from "./sugiyama";
 export {
   type CoordNodeSizeAccessor,
-  type CoordOperator
+  type CoordOperator,
 } from "./sugiyama/coord";
 export {
   center as coordCenter,
-  type CenterOperator as CenterCoordOperator
+  type CenterOperator as CenterCoordOperator,
 } from "./sugiyama/coord/center";
 export {
   greedy as coordGreedy,
-  type GreedyOperator as GreedyCoordOperator
+  type GreedyOperator as GreedyCoordOperator,
 } from "./sugiyama/coord/greedy";
 export {
   quad as coordQuad,
-  type QuadOperator as QuadCoordOperator
+  type QuadOperator as QuadCoordOperator,
 } from "./sugiyama/coord/quad";
 export {
   simplex as coordSimplex,
-  type SimplexOperator as SimplexCoordOperator
+  type SimplexOperator as SimplexCoordOperator,
 } from "./sugiyama/coord/simplex";
 export {
   topological as coordTopological,
-  type TopologicalOperator as TopologicalCoordOperator
+  type TopologicalOperator as TopologicalCoordOperator,
 } from "./sugiyama/coord/topological";
 export { type DecrossOperator } from "./sugiyama/decross";
 export {
   dfs as decrossDfs,
-  type DfsOperator as DfsDecrossOperator
+  type DfsOperator as DfsDecrossOperator,
 } from "./sugiyama/decross/dfs";
 export {
   opt as decrossOpt,
-  type OptOperator as OptDecrossOperator
+  type OptOperator as OptDecrossOperator,
 } from "./sugiyama/decross/opt";
 export {
   twoLayer as decrossTwoLayer,
-  type TwoLayerOperator as TwoLayerDecrossOperator
+  type TwoLayerOperator as TwoLayerDecrossOperator,
 } from "./sugiyama/decross/two-layer";
 export { type LayeringOperator } from "./sugiyama/layering";
 export {
   coffmanGraham as layeringCoffmanGraham,
-  type CoffmanGrahamOperator as CoffmanGrahamLayeringOperator
+  type CoffmanGrahamOperator as CoffmanGrahamLayeringOperator,
 } from "./sugiyama/layering/coffman-graham";
 export {
   longestPath as layeringLongestPath,
-  type LongestPathOperator as LongestPathLayeringOperator
+  type LongestPathOperator as LongestPathLayeringOperator,
 } from "./sugiyama/layering/longest-path";
 export {
   simplex as layeringSimplex,
-  type SimplexOperator as SimplexLayeringOperator
+  type SimplexOperator as SimplexLayeringOperator,
 } from "./sugiyama/layering/simplex";
 export {
   topological as layeringTopological,
-  type TopologicalOperator as TopologicalLayeringOperator
+  type TopologicalOperator as TopologicalLayeringOperator,
 } from "./sugiyama/layering/topological";
 export { type TwolayerOperator } from "./sugiyama/twolayer";
 export {
@@ -118,15 +118,15 @@ export {
   meanFactory as aggMeanFactory,
   medianFactory as aggMedianFactory,
   weightedMedianFactory as aggWeightedMedianFactory,
-  type AggOperator as AggTwolayerOperator
+  type AggOperator as AggTwolayerOperator,
 } from "./sugiyama/twolayer/agg";
 export {
   greedy as twolayerGreedy,
-  type GreedyOperator as GreedyTwolayerOperator
+  type GreedyOperator as GreedyTwolayerOperator,
 } from "./sugiyama/twolayer/greedy";
 export {
   opt as twolayerOpt,
-  type OptOperator as OptTwolayerOperator
+  type OptOperator as OptTwolayerOperator,
 } from "./sugiyama/twolayer/opt";
 export { sugify, unsugify, type SugiNode } from "./sugiyama/utils";
 export { zherebko, type ZherebkoOperator } from "./zherebko";

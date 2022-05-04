@@ -1,7 +1,7 @@
 /**
  * A topological layout using {@link GridOperator}.
  *
- * @module
+ * @packageDocumentation
  */
 import { Dag, DagNode } from "../dag";
 import { map } from "../iters";
@@ -9,7 +9,8 @@ import { js, setEqual } from "../utils";
 import { LaneOperator } from "./lane";
 import { greedy, GreedyOperator } from "./lane/greedy";
 
-type OpDag<Lop extends LaneOperator> = Lop extends LaneOperator<
+/** the typed dag specified by a set of operators */
+export type OpDag<Lop extends LaneOperator> = Lop extends LaneOperator<
   infer N,
   infer L
 >
@@ -22,7 +23,9 @@ type OpDag<Lop extends LaneOperator> = Lop extends LaneOperator<
  * This is the final width and height of the laid out dag.
  */
 export interface GridInfo {
+  /** the total weight after layout */
   width: number;
+  /** the total height after layout */
   height: number;
 }
 
@@ -245,6 +248,7 @@ function buildOperator<N, L, Lane extends LaneOperator<N, L>>(options: {
   return gridCall;
 }
 
+/** the default grid operator */
 export type DefaultGridOperator = GridOperator<GreedyOperator>;
 
 /**
@@ -260,6 +264,6 @@ export function grid(...args: never[]): DefaultGridOperator {
     lane: greedy(),
     nodeWidth: 1,
     nodeHeight: 1,
-    size: null
+    size: null,
   });
 }

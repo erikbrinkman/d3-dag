@@ -12,27 +12,27 @@ test("twoLayer() propagates to both layers", () => {
   const layers = createLayers([
     [[1], [0]],
     [[0], [1]],
-    [[], []]
+    [[], []],
   ]);
   twoLayer()(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
     [1, 0],
     [0, 1],
-    [0, 1]
+    [0, 1],
   ]);
 });
 
 test("twoLayer() propagates down and up", () => {
   const layers = createLayers([
     [[1], [1], [0], [1]],
-    [[], []]
+    [[], []],
   ]);
   twoLayer()(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
     [2, 3, 1, 0],
-    [0, 1]
+    [0, 1],
   ]);
 });
 
@@ -40,7 +40,7 @@ test("twoLayer() can be set", () => {
   const layers = createLayers([
     [[1], [0]],
     [[0], [1]],
-    [[], []]
+    [[], []],
   ]);
   const twolayer = agg();
   const myInit = () => undefined;
@@ -54,7 +54,7 @@ test("twoLayer() can be set", () => {
   expect(inds).toEqual([
     [0, 1],
     [1, 0],
-    [1, 0]
+    [1, 0],
   ]);
 });
 

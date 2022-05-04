@@ -6,13 +6,13 @@ const square = {
   children: [
     {
       id: "b",
-      children: [tail]
+      children: [tail],
     },
     {
       id: "c",
-      children: [tail]
-    }
-  ]
+      children: [tail],
+    },
+  ],
 } as const;
 
 interface SimpleDatum {
@@ -68,21 +68,21 @@ test("hierarchy() works with custom operators", () => {
     c: [
       [
         {
-          c: [[t, "b -> d"]]
+          c: [[t, "b -> d"]],
         },
-        "a -> b"
+        "a -> b",
       ],
       [
         {
-          c: [[t, "c -> d"]]
+          c: [[t, "c -> d"]],
         },
-        "a -> c"
-      ]
-    ]
+        "a -> c",
+      ],
+    ],
   };
 
   function newChildData({
-    c
+    c,
   }: ComplexDatum): readonly (readonly [ComplexDatum, string])[] | undefined {
     return c;
   }
@@ -104,7 +104,7 @@ test("hierarchy() fails with empty data", () => {
 test("hierarchy() fails with invalid root", () => {
   const input = {
     id: "1",
-    children: [{ id: "2", children: undefined }]
+    children: [{ id: "2", children: undefined }],
   } as const;
   expect(() => hierarchy()(input, ...input.children)).toThrow(
     /node '{"id":"1",.*}' pointed to a root/
@@ -114,7 +114,7 @@ test("hierarchy() fails with invalid root", () => {
 test("hierarchy() passes with invalid root and roots", () => {
   const input = {
     id: "1",
-    children: [{ id: "2", children: undefined }]
+    children: [{ id: "2", children: undefined }],
   } as const;
   const layout = hierarchy().roots(false);
   expect(layout.roots()).toBeFalsy();
@@ -127,7 +127,7 @@ test("hierarchy() decycle handles a cycle with a root", () => {
   const two: Loop = { id: "2", children: [three] };
   const one = {
     id: "1",
-    children: [two]
+    children: [two],
   };
   three.children.push(one);
   const layout = hierarchy().decycle(true).roots(false);
@@ -167,7 +167,7 @@ test("hierarchy() fails with self loop", () => {
   selfLoop.children.push(selfLoop);
   const line = {
     id: "1",
-    children: [selfLoop]
+    children: [selfLoop],
   };
   expect(() => hierarchy()(line)).toThrow(
     /node '{.*"id":"2".*}' contained a self loop/
@@ -180,7 +180,7 @@ test("hierarchy() fails with cycle", () => {
   three.children.push(two);
   const one = {
     id: "1",
-    children: [two]
+    children: [two],
   };
   const layout = hierarchy();
   expect(() => layout(one)).toThrow(
@@ -194,17 +194,17 @@ test("hierarchy() fails with hard cycle", () => {
       children: [
         {
           id: "4",
-          children: []
-        }
-      ]
+          children: [],
+        },
+      ],
     },
     roota = {
       id: "1",
-      children: loop.children.slice()
+      children: loop.children.slice(),
     },
     rootb = {
       id: "2",
-      children: [loop]
+      children: [loop],
     };
   loop.children[0].children.push(loop);
   expect(() => hierarchy()(roota, rootb)).toThrow(

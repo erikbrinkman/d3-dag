@@ -2,7 +2,7 @@
  * The {@link SimplexOperator} positions nodes to maximize line straightness.
  * This is adapted from methods used for dot layout.
  *
- * @module
+ * @packageDocumentation
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { DagLink } from "../../dag";
@@ -37,8 +37,9 @@ export interface ConstAccessor<
     number
   ]
 > extends WeightAccessor<unknown, unknown> {
-  value: Readonly<T>;
   (): T;
+  /** the constant value */
+  value: Readonly<T>;
 }
 
 /**
@@ -70,13 +71,17 @@ function isConstAccessor(
   );
 }
 
-interface Operators<N = never, L = never> {
+/** the operators of the simplex operator */
+export interface Operators<N = never, L = never> {
+  /** the weights for each edge */
   weight: WeightAccessor<N, L>;
 }
 
+/** node datum for operators */
 type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
   ? N
   : never;
+/** link datum for operators */
 type OpLinkDatum<O extends Operators> = O extends Operators<never, infer L>
   ? L
   : never;
@@ -101,11 +106,12 @@ export interface SimplexOperator<Ops extends Operators>
    * are triplets of numbers describing the weight for different parts of edge.
    * The first is between true nodes, the second is for near true nodes, and
    * the last is for the extents of long edges. Generally the number should be
-   * increasing, and all must be positive. (default: () => [1, 2, 8])
+   * increasing, and all must be positive. (default: () =\> [1, 2, 8])
    */
   weight<NewWeight extends WeightAccessor>(
     val: NewWeight
   ): SimplexOperator<{
+    /** new weight */
     weight: NewWeight;
   }>;
   /** Gets the current weight accessor */
@@ -322,7 +328,7 @@ function buildOperator<
       const { weight: _, ...rest } = opts;
       return buildOperator({
         ...rest,
-        weight: val
+        weight: val,
       });
     }
   }
@@ -331,7 +337,9 @@ function buildOperator<
   return simplexCall;
 }
 
+/** default simplex operator */
 export type DefaultSimplexOperator = SimplexOperator<{
+  /** default weights taken from graphvis */
   weight: ConstAccessor<readonly [1, 2, 8]>;
 }>;
 
@@ -346,6 +354,6 @@ export function simplex(...args: never[]): DefaultSimplexOperator {
   }
 
   return buildOperator({
-    weight: createConstAccessor([1, 2, 8] as const)
+    weight: createConstAccessor([1, 2, 8] as const),
   });
 }

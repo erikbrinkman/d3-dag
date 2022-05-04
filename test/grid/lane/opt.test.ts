@@ -37,7 +37,7 @@ test("opt() works for compressed", () => {
     ["1", "5"],
     ["1", "6"],
     ["2", "3"],
-    ["2", "4"]
+    ["2", "4"],
   ]);
   const nodes = prepare(dag);
 
@@ -60,7 +60,7 @@ test("opt() works for compressed edge case", () => {
   const create = connect();
   const dag = create([
     ["0", "1"],
-    ["2", "3"]
+    ["2", "3"],
   ]);
   const nodes = prepare(dag);
 
@@ -81,7 +81,7 @@ test("opt() dist compacts slightly", () => {
     ["0", "6"],
     ["1", "6"],
     ["2", "3"],
-    ["2", "4"]
+    ["2", "4"],
   ]);
   const nodes = prepare(dag);
 

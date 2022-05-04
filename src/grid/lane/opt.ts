@@ -1,7 +1,7 @@
 /**
  * A {@link LaneOperator} that assigns lanes to minimize edge crossings.
  *
- * @module
+ * @packageDocumentation
  */
 import { LaneOperator } from ".";
 import { DagNode } from "../../dag";

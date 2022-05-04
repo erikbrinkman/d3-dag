@@ -10,7 +10,7 @@ for (const dat of [doub, ex, square, ccoz, multi]) {
     simplex(),
     longestPath(),
     coffmanGraham(),
-    topological()
+    topological(),
   ]) {
     test(`invariants apply to ${dat.name} layered by ${method.name}`, () => {
       const dag = dat();

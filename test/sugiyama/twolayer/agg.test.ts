@@ -1,7 +1,7 @@
 import {
   agg,
   meanFactory,
-  weightedMedianFactory
+  weightedMedianFactory,
 } from "../../../src/sugiyama/twolayer/agg";
 import { crossings } from "../../../src/sugiyama/utils";
 import { createLayers, getIndex } from "../utils";
@@ -10,7 +10,7 @@ test("agg() works for very simple case", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([
     [[1], [0]],
-    [[], []]
+    [[], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
@@ -21,7 +21,7 @@ test("agg() works for very simple case bottom-up", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([
     [[1], [0]],
-    [[], []]
+    [[], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -34,7 +34,7 @@ test("agg() median is different than mean", () => {
   // order will be different for median and mean
   const [topLayer, bottomLayer] = createLayers([
     [[1], [0, 1], [0], [2], [1]],
-    [[], [], []]
+    [[], [], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
@@ -47,7 +47,7 @@ test("agg() mean is different than median", () => {
   // order will be different for median and mean
   const [topLayer, bottomLayer] = createLayers([
     [[0], [0, 1], [1], [2], [0]],
-    [[], [], []]
+    [[], [], []],
   ]);
   const op = agg().aggregator(meanFactory);
   expect(op.aggregator()).toBe(meanFactory);
@@ -60,7 +60,7 @@ test("agg() mean is different than median", () => {
 test("agg() median is suboptimal", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3], [2], [2], [0], [1], [3], [2]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(8);
@@ -71,7 +71,7 @@ test("agg() median is suboptimal", () => {
 test("agg() median is suboptimal bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3], [4], [1, 2, 6], [0, 5]],
-    [[], [], [], [], [], [], []]
+    [[], [], [], [], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(8);
@@ -82,7 +82,7 @@ test("agg() median is suboptimal bottom-up", () => {
 test("agg() mean doesn't optimize crossings", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[4], [4], [0], [1], [2], [3], [4]],
-    [[], [], [], [], []]
+    [[], [], [], [], []],
   ]);
   agg().aggregator(meanFactory)(topLayer, bottomLayer, true);
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(5);
@@ -93,7 +93,7 @@ test("agg() mean doesn't optimize crossings", () => {
 test("agg() mean doesn't optimize crossings bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[2], [3], [4], [5], [0, 1, 6]],
-    [[], [], [], [], [], [], []]
+    [[], [], [], [], [], [], []],
   ]);
   agg().aggregator(meanFactory)(topLayer, bottomLayer, false);
   expect(crossings([topLayer, bottomLayer])).toBeCloseTo(5);
@@ -104,7 +104,7 @@ test("agg() mean doesn't optimize crossings bottom-up", () => {
 test("agg() preserves order of easy unconstrained nodes", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [2]],
-    [[], [], []]
+    [[], [], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
@@ -114,7 +114,7 @@ test("agg() preserves order of easy unconstrained nodes", () => {
 test("agg() mean preserves order of easy unconstrained nodes", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [2]],
-    [[], [], []]
+    [[], [], []],
   ]);
   agg().aggregator(meanFactory)(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
@@ -125,7 +125,7 @@ test("agg() weighted median is different than median", () => {
   // weighted median makes this deterministic
   const [topLayer, bottomLayer] = createLayers([
     [[0, 1], [0, 1], [0, 1], [0], [1]],
-    [[], []]
+    [[], []],
   ]);
   const order = agg().aggregator(weightedMedianFactory);
   order(topLayer, bottomLayer, true);
@@ -137,7 +137,7 @@ test("agg() weighted median works for all parent numbers", () => {
   // weighted median makes this deterministic
   const [topLayer, bottomLayer] = createLayers([
     [[0, 1], [0, 1], [0]],
-    [[], [], []]
+    [[], [], []],
   ]);
   const order = agg().aggregator(weightedMedianFactory);
   order(topLayer, bottomLayer, true);
@@ -148,7 +148,7 @@ test("agg() weighted median works for all parent numbers", () => {
 test("agg() preserves order of easy unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [], [1]],
-    [[], []]
+    [[], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -158,7 +158,7 @@ test("agg() preserves order of easy unconstrained nodes bottom-up", () => {
 test("agg() preserves order of multiple easy unconstrained nodes", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [3]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
@@ -168,7 +168,7 @@ test("agg() preserves order of multiple easy unconstrained nodes", () => {
 test("agg() preserves order of multiple middle unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [], [], [], [1]],
-    [[], []]
+    [[], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -178,7 +178,7 @@ test("agg() preserves order of multiple middle unconstrained nodes bottom-up", (
 test("agg() preserves order of multiple edge unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[], [0], [], [1], []],
-    [[], []]
+    [[], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -188,7 +188,7 @@ test("agg() preserves order of multiple edge unconstrained nodes bottom-up", () 
 test("agg() preserves order of multiple middle-middle unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [], [1], [], [2], [], [3], []],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -198,7 +198,7 @@ test("agg() preserves order of multiple middle-middle unconstrained nodes bottom
 test("agg() preserves order of multiple middle-front unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [], [], [1], [2], [], [3], []],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -208,7 +208,7 @@ test("agg() preserves order of multiple middle-front unconstrained nodes bottom-
 test("agg() preserves order of multiple middle-back unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [], [1], [2], [], [], [3], []],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, false);
   const inds = topLayer.map(getIndex);
@@ -218,7 +218,7 @@ test("agg() preserves order of multiple middle-back unconstrained nodes bottom-u
 test("agg() preserves order of unconstrained nodes to front", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3], [2], [0]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);
@@ -228,7 +228,7 @@ test("agg() preserves order of unconstrained nodes to front", () => {
 test("agg() preserves order of unconstrained nodes to back", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3], [1], [0]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   agg()(topLayer, bottomLayer, true);
   const inds = bottomLayer.map(getIndex);

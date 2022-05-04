@@ -2,7 +2,7 @@
  * {@link CoordOperator}s assign `x` coordinates to every node, while
  * respecting the {@link CoordNodeSizeAccessor}.
  *
- * @module
+ * @packageDocumentation
  */
 import { SugiNode } from "../utils";
 

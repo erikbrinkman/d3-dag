@@ -2,7 +2,7 @@
  * A {@link TopologicalOperator} for assigning coordinates to a topological
  * layering.
  *
- * @module
+ * @packageDocumentation
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { SugiNode } from "../utils";

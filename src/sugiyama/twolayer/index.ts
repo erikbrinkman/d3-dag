@@ -2,7 +2,7 @@
  * The definition of the {@link TwolayerOperator} interface, which is used to
  * customize {@link TwoLayerOperator}.
  *
- * @module
+ * @packageDocumentation
  */
 import { SugiNode } from "../utils";
 
@@ -10,9 +10,8 @@ import { SugiNode } from "../utils";
  * An operator for optimizing decrossings one layer at a time.
  *
  * When called with `topDown = true` `topLayer` should be untouched, and
- * `bottomLayer` should be rearranged to minimize crossings. When `topDown =
- * false` then `topLayer` should be rearranged, and `bottomLayer` should remain
- * fixed.
+ * `bottomLayer` should be rearranged to minimize crossings. When `topDown = false`
+ * then `topLayer` should be rearranged, and `bottomLayer` should remain fixed.
  *
  * There are two built in two-layer operators:
  * - {@link OptOperator} - optimal crossing minimization for the layer in question

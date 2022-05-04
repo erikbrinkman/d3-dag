@@ -5,7 +5,7 @@
  * {@link CoordOperator}s, {@link DecrossOperator}s, or in the rare case
  * advanced {@link SugiNodeSizeAccessor}s.
  *
- * @module
+ * @packageDocumentation
  */
 import { Dag, DagLink, DagNode } from "../dag";
 import { hierarchy } from "../dag/create";
@@ -21,8 +21,19 @@ import { assert, bigrams, js } from "../utils";
  * edges aren't allowed, this uniquely defines each dummy node.
  */
 export type SugiData<NodeDatum = unknown, LinkDatum = unknown> =
-  | { layer: number; node: DagNode<NodeDatum, LinkDatum> }
-  | { layer: number; link: DagLink<NodeDatum, LinkDatum> };
+  | {
+      /** layer of the sugi node */
+      layer: number;
+      /** original node this sugi node wraps */
+      node: DagNode<NodeDatum, LinkDatum>;
+    }
+  | {
+      /** layer of the sugi node */
+      layer: number;
+      /** original link this sugi node is on */
+      link: DagLink<NodeDatum, LinkDatum>;
+    };
+
 /**
  * A {@link DagNode} with {@link SugiData}
  *

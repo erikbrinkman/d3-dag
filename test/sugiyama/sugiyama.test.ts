@@ -22,7 +22,7 @@ import {
   SimpleDatum,
   single,
   three,
-  trip
+  trip,
 } from "../examples";
 
 test("sugiyama() works for single node", () => {

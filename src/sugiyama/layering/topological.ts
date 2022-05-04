@@ -1,7 +1,7 @@
 /**
  * A {@link TopologicalOperator} that assigns each node a unique layer.
  *
- * @module
+ * @packageDocumentation
  */
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";

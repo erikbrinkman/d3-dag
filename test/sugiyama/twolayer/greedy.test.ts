@@ -7,7 +7,7 @@ test("greedy() works for very simple case", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([
     [[1], [0]],
-    [[], []]
+    [[], []],
   ]);
   const layout = greedy();
   expect(layout.scan()).toBe(false);
@@ -20,7 +20,7 @@ test("greedy() works for very simple case bottom-up", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([
     [[1], [0]],
-    [[], []]
+    [[], []],
   ]);
   const layout = greedy();
   layout(topLayer, bottomLayer, false);
@@ -31,7 +31,7 @@ test("greedy() works for very simple case bottom-up", () => {
 test("greedy() improves suboptimal median", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3], [2], [2], [0], [1], [3], [2]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   const base = agg();
   const layout = greedy().base(base);
@@ -46,7 +46,7 @@ test("greedy() improves suboptimal median", () => {
 test("greedy() scan fails where opt succeeds", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0, 3, 4], [1, 4], [2]],
-    [[], [], [], [], []]
+    [[], [], [], [], []],
   ]);
   const layout = greedy().scan(true);
   layout(topLayer, bottomLayer, false);
@@ -59,7 +59,7 @@ test("greedy() scan fails where opt succeeds", () => {
 test("greedy() preserves order of easy unconstrained nodes", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [2]],
-    [[], [], []]
+    [[], [], []],
   ]);
   const layout = greedy();
   layout(topLayer, bottomLayer, true);
@@ -70,7 +70,7 @@ test("greedy() preserves order of easy unconstrained nodes", () => {
 test("greedy() preserves order of easy unconstrained nodes bottom-up", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0], [], [1]],
-    [[], []]
+    [[], []],
   ]);
   const layout = greedy();
   layout(topLayer, bottomLayer, false);
@@ -81,7 +81,7 @@ test("greedy() preserves order of easy unconstrained nodes bottom-up", () => {
 test("greedy() fails with neutral adjacent", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[1], [], [0]],
-    [[], []]
+    [[], []],
   ]);
   const layout = greedy();
   layout(topLayer, bottomLayer, false);
@@ -93,7 +93,7 @@ test("greedy() fails with neutral adjacent", () => {
 test("greedy() scan works with neutral adjacent", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[1], [], [0]],
-    [[], []]
+    [[], []],
   ]);
   const layout = greedy().scan(true);
   expect(layout.scan()).toBe(true);
@@ -106,7 +106,7 @@ test("greedy() scan works with neutral adjacent", () => {
 test("greedy() scan can swap a node twice", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[1], [2, 3], [0]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   const layout = greedy().scan(true);
   layout(topLayer, bottomLayer, false);
@@ -117,7 +117,7 @@ test("greedy() scan can swap a node twice", () => {
 test("greedy() scan will interleave intervals", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3, 4], [5], [0, 1], [2]],
-    [[], [], [], [], [], []]
+    [[], [], [], [], [], []],
   ]);
   const layout = greedy().scan(true);
   layout(topLayer, bottomLayer, false);
@@ -128,7 +128,7 @@ test("greedy() scan will interleave intervals", () => {
 test("greedy() scan improves suboptimal median", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[3], [2], [2], [0], [1], [3], [2]],
-    [[], [], [], []]
+    [[], [], [], []],
   ]);
   const base = agg();
   const layout = greedy().base(base).scan(true);

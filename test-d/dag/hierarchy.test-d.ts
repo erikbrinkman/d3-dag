@@ -3,7 +3,7 @@ import { Dag } from "../../src/dag";
 import {
   ChildrenDataOperator,
   ChildrenOperator,
-  hierarchy
+  hierarchy,
 } from "../../src/dag/create";
 
 // initial types

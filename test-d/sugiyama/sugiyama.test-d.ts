@@ -4,7 +4,7 @@ import {
   NodeSizeAccessor,
   SugiNodeSizeAccessor,
   sugiyama,
-  SugiyamaInfo
+  SugiyamaInfo,
 } from "../../src/sugiyama";
 import { CoordOperator } from "../../src/sugiyama/coord";
 import { DecrossOperator } from "../../src/sugiyama/decross";

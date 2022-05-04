@@ -2,7 +2,7 @@
  * Until this is customizable, this is an internal module
  *
  * @internal
- * @module
+ * @packageDocumentation
  */
 // TODO turn this into an operator for zherebko
 import { DagNode } from "../dag";
@@ -18,7 +18,7 @@ function firstAvailable(inds: number[], target: number) {
 }
 
 /**
- * @return link map which takes source, target, and ind to get lane
+ * @returns link map which takes source, target, and ind to get lane
  */
 export function greedy(
   nodes: readonly (readonly [DagNode, number])[]

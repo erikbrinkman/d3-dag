@@ -2,7 +2,7 @@
  * A {@link OptOperator} that is optimal for only the current layer being
  * rearranged.
  *
- * @module
+ * @packageDocumentation
  */
 import { TwolayerOperator } from ".";
 import { getParents } from "../../dag/utils";
@@ -126,11 +126,11 @@ function buildOperator(options: {
         const pair = key(n1, n2);
         ints[pair] = 1;
         constraints[pair] = {
-          max: 1
+          max: 1,
         };
         variables[pair] = {
           opt: -preserveWeight,
-          [pair]: 1
+          [pair]: 1,
         };
       }
     }
@@ -147,7 +147,7 @@ function buildOperator(options: {
 
           const triangleUp = triangle + "+";
           constraints[triangleUp] = {
-            max: 1
+            max: 1,
           };
           variables[pair1][triangleUp] = 1;
           variables[pair2][triangleUp] = -1;
@@ -155,7 +155,7 @@ function buildOperator(options: {
 
           const triangleDown = triangle + "-";
           constraints[triangleDown] = {
-            min: 0
+            min: 0,
           };
           variables[pair1][triangleDown] = 1;
           variables[pair2][triangleDown] = -1;
@@ -204,14 +204,14 @@ function buildOperator(options: {
               variables[slack] = {
                 opt: distWeight,
                 [normal]: 1,
-                [reversed]: 1
+                [reversed]: 1,
               };
 
               let pos = 0;
               for (const [n1, n2] of [
                 [start, node],
                 [start, end],
-                [node, end]
+                [node, end],
               ]) {
                 const pair = key(n1, n2);
                 const sign = Math.sign(inds.get(n1)! - inds.get(n2)!);
@@ -221,10 +221,10 @@ function buildOperator(options: {
               }
 
               constraints[normal] = {
-                min: 1 - pos
+                min: 1 - pos,
               };
               constraints[reversed] = {
-                min: pos - 2
+                min: pos - 2,
               };
             }
           }

@@ -3,7 +3,7 @@
  * layer. {@link RankAccessor} and {@link GroupAccessor} allow specifying extra
  * constraints on the layout.
  *
- * @module
+ * @packageDocumentation
  */
 import { Dag, DagNode } from "../../dag";
 

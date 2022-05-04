@@ -1,8 +1,7 @@
 /**
  * General utilities for use throughout the package
  *
- * @internal
- * @module
+ * @packageDocumentation
  */
 
 /** utility type for replacing keys with new value */
@@ -91,6 +90,7 @@ export function setMultimapAdd<K, V>(
   }
 }
 
+/** a generic json replacer */
 export interface Replacer {
   (key: string, value: unknown): unknown;
 }
@@ -119,7 +119,7 @@ export function js(
     .concat(
       ...rest.map((str, i) => [
         JSON.stringify(values[i], getCircularReplacer()),
-        str
+        str,
       ])
     )
     .join("");
@@ -134,9 +134,14 @@ export function* bigrams<T>(array: readonly T[]): IterableIterator<[T, T]> {
   }
 }
 
+/** a callback for things with children */
+export interface ChildrenCallback<T> {
+  (node: T): Iterable<T>;
+}
+
 /** depth first search for arbitrary types */
 export function* dfs<T>(
-  children: (node: T) => Iterable<T>,
+  children: ChildrenCallback<T>,
   ...queue: T[]
 ): Generator<T> {
   const seen = new Set<T>();

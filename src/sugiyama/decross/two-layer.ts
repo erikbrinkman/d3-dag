@@ -2,7 +2,7 @@
  * A {@link TwoLayerOperator} heuristic for reducing the number of crossings in
  * large dags efficiently.
  *
- * @module
+ * @packageDocumentation
  */
 import { DecrossOperator } from ".";
 import { bigrams, Up } from "../../utils";
@@ -12,20 +12,32 @@ import { greedy, GreedyOperator } from "../twolayer/greedy";
 import { crossings, SugiNode } from "../utils";
 import { dfs, DfsOperator } from "./dfs";
 
-type Inits<N = never, L = never> = readonly [
+/** initializers */
+export type Inits<N = never, L = never> = readonly [
   DecrossOperator<N, L>,
   ...DecrossOperator<N, L>[]
 ];
 
-interface Operators<N = never, L = never> {
+/** two layer operators */
+export interface Operators<N = never, L = never> {
+  /** the order operator */
   order: OrderOperator<N, L>;
+  /** the initializers */
   inits: Inits<N, L>;
 }
 
-type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
+/** the node datum of a set of operators */
+export type OpNodeDatum<O extends Operators> = O extends Operators<
+  infer N,
+  never
+>
   ? N
   : never;
-type OpLinkDatum<O extends Operators> = O extends Operators<never, infer L>
+/** the link datum of a set of operators */
+export type OpLinkDatum<O extends Operators> = O extends Operators<
+  never,
+  infer L
+>
   ? L
   : never;
 
@@ -49,7 +61,15 @@ export interface TwoLayerOperator<Ops extends Operators = Operators>
    */
   order<NewOrder extends OrderOperator>(
     val: NewOrder
-  ): TwoLayerOperator<Up<Ops, { order: NewOrder }>>;
+  ): TwoLayerOperator<
+    Up<
+      Ops,
+      {
+        /** new order */
+        order: NewOrder;
+      }
+    >
+  >;
   /**
    * Get the current {@link TwolayerOperator} for ordering.
    */
@@ -66,7 +86,15 @@ export interface TwoLayerOperator<Ops extends Operators = Operators>
    */
   inits<NewInits extends Inits>(
     val: NewInits
-  ): TwoLayerOperator<Up<Ops, { inits: NewInits }>>;
+  ): TwoLayerOperator<
+    Up<
+      Ops,
+      {
+        /** new inits */
+        inits: NewInits;
+      }
+    >
+  >;
   /**
    * Get the current initialization passes
    */
@@ -191,8 +219,11 @@ function buildOperator<N, L, O extends Operators<N, L>>(
   return twoLayerCall;
 }
 
+/** default two layer operator */
 export type DefaultTwoLayerOperator = TwoLayerOperator<{
+  /** default order */
   order: GreedyOperator<AggOperator>;
+  /** default inits, both dfs based */
   inits: [DfsOperator, DfsOperator];
 }>;
 
@@ -209,6 +240,6 @@ export function twoLayer(...args: never[]): DefaultTwoLayerOperator {
   return buildOperator({
     order: greedy().base(agg()),
     inits: [dfs(), dfs().topDown(false)],
-    passes: 24
+    passes: 24,
   });
 }

@@ -1,7 +1,7 @@
 /**
  * A {@link LaneOperator} that assigns lanes greedily, but quickly.
  *
- * @module
+ * @packageDocumentation
  */
 import { least, median } from "d3-array";
 import { LaneOperator } from ".";
@@ -243,7 +243,7 @@ function bottomUpOp(nodes: readonly DagNode[], inds: Indexer): void {
   for (const node of reverse(nodes)) {
     // if node wasn't a highest parent, find it a lane
     if (node.x === undefined) {
-      const target = median(map(node.ichildren(), (c) => c.x));
+      const target = median(map(node.ichildren(), (c) => c.x!));
       // note we invert y because we're going bottom up
       node.x = inds.getIndex(nodes.length - node.y!, target);
     }

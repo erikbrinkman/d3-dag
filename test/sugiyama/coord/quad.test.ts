@@ -72,7 +72,7 @@ test("quad() works with constrained disconnected components", () => {
   const layers = createLayers([
     [[0], [1, 3]],
     [[0], [], [0], [1]],
-    [[], []]
+    [[], []],
   ]);
   const [[atop, btop], [aleft, bleft, aright, bright], [abottom, bbottom]] =
     layers;

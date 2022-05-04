@@ -2,7 +2,7 @@ import { expectAssignable, expectNotAssignable, expectType } from "tsd";
 import {
   GroupAccessor,
   LayeringOperator,
-  RankAccessor
+  RankAccessor,
 } from "../../../src/sugiyama/layering";
 import { simplex } from "../../../src/sugiyama/layering/simplex";
 

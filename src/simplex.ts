@@ -1,6 +1,7 @@
 import { Constraint, Solve, Variable } from "javascript-lp-solver";
 export type { Constraint, Variable };
 
+/** solve an lp with a better interface */
 export function solve(
   optimize: string,
   opType: "max" | "min",
@@ -16,7 +17,7 @@ export function solve(
       opType,
       constraints,
       variables,
-      ints
+      ints,
     }
   );
   if (!feasible) {

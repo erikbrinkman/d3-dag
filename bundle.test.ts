@@ -5,7 +5,7 @@ import {
   createLayers,
   getIndex,
   getLayers,
-  nodeSize
+  nodeSize,
 } from "./test/sugiyama/utils";
 
 // so that the runtime types align with the test utilties types
@@ -22,14 +22,14 @@ describe("tests that require a built bundle", () => {
     const layers = createLayers([
       [[1], [0]],
       [[0], [1]],
-      [[], []]
+      [[], []],
     ]);
     d3dag.decrossOpt()(layers);
     const inds = layers.map((layer) => layer.map(getIndex));
     expect(inds).toEqual([
       [1, 0],
       [0, 1],
-      [0, 1]
+      [0, 1],
     ]);
   });
 
@@ -38,7 +38,7 @@ describe("tests that require a built bundle", () => {
     // independent links that need to be swapped
     const [topLayer, bottomLayer] = createLayers([
       [[1], [0]],
-      [[], []]
+      [[], []],
     ]);
     d3dag.twolayerOpt()(topLayer, bottomLayer, true);
     const inds = bottomLayer.map(getIndex);

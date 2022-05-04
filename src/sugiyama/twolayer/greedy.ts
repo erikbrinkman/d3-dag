@@ -2,24 +2,18 @@
  * An {@link GreedyOperator} that calls another {@link TwolayerOperator} before
  * greedily swapping nodes to minimize crossings.
  *
- * @module
+ * @packageDocumentation
  */
 import { TwolayerOperator } from ".";
 import { getParents } from "../../dag/utils";
 import { SugiNode } from "../utils";
 
-type OpNodeDatum<Op extends TwolayerOperator> = Op extends TwolayerOperator<
-  infer D,
-  never
->
-  ? D
-  : never;
-type OpLinkDatum<Op extends TwolayerOperator> = Op extends TwolayerOperator<
-  never,
-  infer L
->
-  ? L
-  : never;
+/** the node datum of a set of operators */
+export type OpNodeDatum<Op extends TwolayerOperator> =
+  Op extends TwolayerOperator<infer D, never> ? D : never;
+/** the link datum of a set of operators */
+export type OpLinkDatum<Op extends TwolayerOperator> =
+  Op extends TwolayerOperator<never, infer L> ? L : never;
 
 /**
  * A {@link TwolayerOperator} that first calls a base twolayer operator, then
@@ -171,7 +165,7 @@ function scanSwap<N, L>(
 
 function buildOperator<N, L, Op extends TwolayerOperator<N, L>>({
   baseOp,
-  doScan
+  doScan,
 }: {
   baseOp: Op & TwolayerOperator<N, L>;
   doScan: boolean;
@@ -234,6 +228,7 @@ function buildOperator<N, L, Op extends TwolayerOperator<N, L>>({
   return greedyCall;
 }
 
+/** default greedy operator */
 export type DefaultGreedyOperator = GreedyOperator<
   TwolayerOperator<unknown, unknown>
 >;

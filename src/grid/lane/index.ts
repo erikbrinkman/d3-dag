@@ -2,7 +2,7 @@
  * A {@link LaneOperator} for assigning nodes in a dag a non-negative
  * lane.
  *
- * @module
+ * @packageDocumentation
  */
 import { DagNode } from "../../dag";
 

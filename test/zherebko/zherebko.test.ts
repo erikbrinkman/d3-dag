@@ -36,7 +36,7 @@ test("zherebko() works for a multidag line", () => {
   const create = connect();
   const dag = create([
     ["0", "1"],
-    ["0", "1"]
+    ["0", "1"],
   ]);
   const layout = zherebko().nodeSize([2, 2, 2]);
   const { width, height } = layout(dag);
@@ -63,7 +63,7 @@ test("zherebko() works specific case", () => {
     ["1", "2"],
     ["2", "3"],
     ["2", "4"],
-    ["3", "4"]
+    ["3", "4"],
   ]);
   const layout = zherebko().nodeSize([2, 2, 2]);
   const { width, height } = layout(dag);
@@ -127,7 +127,7 @@ test("zherebko() works for a complex multidag", () => {
     ["0", "1"],
     ["0", "2"],
     ["0", "2"],
-    ["1", "2"]
+    ["1", "2"],
   ]);
   const layout = zherebko().nodeSize([2, 2, 2]);
   const { width, height } = layout(dag);
@@ -164,7 +164,7 @@ test("zherebko() works on sink", () => {
   const dag = connect()([
     ["0", "3"],
     ["1", "3"],
-    ["2", "3"]
+    ["2", "3"],
   ]);
   const layout = zherebko().nodeSize([2, 1, 1]).size([8, 8]);
   layout(dag);

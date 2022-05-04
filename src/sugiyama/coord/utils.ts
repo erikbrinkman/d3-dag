@@ -2,7 +2,7 @@
  * Utilities for quadratic optimization
  *
  * @internal
- * @module
+ * @packageDocumentation
  */
 import { solveQP } from "quadprog";
 import { CoordNodeSizeAccessor } from ".";

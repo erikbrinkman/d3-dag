@@ -10,7 +10,7 @@ export function hard(): Dag<ConnectDatum, SimpleLinkDatum> {
     ["0", "2"],
     ["0", "3"],
     ["0", "4"],
-    ["1", "4"]
+    ["1", "4"],
   ]);
 }
 

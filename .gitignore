@@ -1,11 +1,5 @@
-# Node #
+# Yarn #
 ########
-/dist
-/bundle
-/node_modules
-/coverage
-/yarn-error.log
-/.eslintcache
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -14,11 +8,14 @@
 !.yarn/sdks
 !.yarn/versions
 
-# Typescript #
-##############
-/src/**/*.js
-/tsconfig.tsbuildinfo
-
-# Local #
+# Cache #
 #########
-/.flow_cache
+coverage
+.eslintcache
+tsconfig.tsbuildinfo
+.flow_cache
+
+# Artifacts #
+#############
+dist
+bundle

@@ -2,7 +2,7 @@
  * A {@link DecrossOperator} rearranges nodes within a layer to minimize
  * decrossings.
  *
- * @module
+ * @packageDocumentation
  */
 import { SugiNode } from "../utils";
 

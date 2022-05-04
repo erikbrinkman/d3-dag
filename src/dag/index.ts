@@ -9,7 +9,7 @@
  * {@link HierarchyOperator}, {@link StratifyOperator}, and
  * {@link ConnectOperator}.
  *
- * @module
+ * @packageDocumentation
  */
 
 /**
@@ -17,6 +17,13 @@
  */
 export type IterStyle = "depth" | "breadth" | "before" | "after";
 
+/** a control point for a link */
+export interface Point {
+  /** the x coordinate of the point */
+  readonly x: number;
+  /** the y coordinate of the point */
+  readonly y: number;
+}
 /**
  * A link between nodes, with attached information
  */
@@ -33,9 +40,14 @@ export interface DagLink<NodeDatum = unknown, LinkDatum = unknown> {
    * The property itself is read only, but the list is mutable to update or
    * changes points as necessary.
    */
-  readonly points: { readonly x: number; readonly y: number }[];
+  readonly points: Point[];
   /** If the link had to be reversed to handle cycles, this will be true */
   readonly reversed: boolean;
+}
+
+/** the callback for sum */
+export interface SumCallback<NodeDatum, LinkDatum> {
+  (node: DagNode<NodeDatum, LinkDatum>, index: number): number;
 }
 
 /**
@@ -120,9 +132,7 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
    * descendants. Note, if another node is a child via two separate paths, that
    * child's value will only factor into this node's value once.
    */
-  sum(
-    callback: (node: DagNode<NodeDatum, LinkDatum>, index: number) => number
-  ): this;
+  sum(callback: SumCallback<NodeDatum, LinkDatum>): this;
 
   /**
    * Set the value of each node to be the number of leaves beneath the node.
@@ -179,9 +189,13 @@ export interface Dag<NodeDatum = unknown, LinkDatum = unknown>
  */
 export interface DagNode<NodeDatum = unknown, LinkDatum = unknown>
   extends Dag<NodeDatum, LinkDatum> {
+  /** the data backing this node */
   readonly data: NodeDatum;
+  /** a generic value written to by some functions */
   value?: number;
+  /** if the dag is laidout, this is the x position of the node */
   x?: number;
+  /** if the dag is laidout, this is the y position of the node */
   y?: number;
 
   /** Return the number of unique child nodes */

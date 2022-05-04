@@ -1,7 +1,7 @@
 import { flatMap } from "../../../src/iters";
 import {
   createConstAccessor,
-  simplex
+  simplex,
 } from "../../../src/sugiyama/coord/simplex";
 import { SugiNode } from "../../../src/sugiyama/utils";
 import { createLayers, nodeSize } from "../utils";

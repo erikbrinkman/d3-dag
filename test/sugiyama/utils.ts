@@ -126,7 +126,7 @@ export function createLayers(
           source.data.layer,
           source.data.index,
           target.data.layer,
-          target.data.index
+          target.data.index,
         ].join(",");
         return dinds.get(key)!;
       }

@@ -3,7 +3,7 @@ import { CoordOperator } from "../../../src/sugiyama/coord";
 import {
   LinkWeightAccessor,
   NodeWeightAccessor,
-  quad
+  quad,
 } from "../../../src/sugiyama/coord/quad";
 
 const init = quad();

@@ -5,17 +5,17 @@ const simpleSquare = [
   ["a", "b"],
   ["a", "c"],
   ["b", "d"],
-  ["c", "d"]
+  ["c", "d"],
 ] as const;
 const simpleVee = [
   ["a", "c"],
-  ["b", "c"]
+  ["b", "c"],
 ] as const;
 const complexSquare = [
   { source: "a", target: "b" },
   { source: "a", target: "c" },
   { source: "b", target: "d" },
-  { source: "c", target: "d" }
+  { source: "c", target: "d" },
 ] as const;
 
 const zherebko = [
@@ -36,7 +36,7 @@ const zherebko = [
   ["6", "8"],
   ["7", "8"],
   ["9", "10"],
-  ["9", "11"]
+  ["9", "11"],
 ] as const;
 
 test("connect() parses a simple square", () => {
@@ -51,7 +51,7 @@ test("connect() parses a simple square", () => {
   expect(leftc).toBe(rightc);
   expect([
     ["a", "b", "c", "d"],
-    ["a", "c", "b", "d"]
+    ["a", "c", "b", "d"],
   ]).toContainEqual([...map(dag.idescendants("before"), (n) => n.data.id)]);
 });
 
@@ -59,7 +59,7 @@ test("connect() handles single nodes", () => {
   expect(() =>
     connect()([
       ["b", "a"],
-      ["a", "a"]
+      ["a", "a"],
     ])
   ).toThrow("self loop");
 
@@ -118,7 +118,7 @@ test("connect() decycle works with simple cycle", () => {
     ["b", "c"],
     ["c", "a"],
     ["a", "d"],
-    ["d", "c"]
+    ["d", "c"],
   ] as const;
   const layout = connect().decycle(true);
   expect(layout.decycle()).toBe(true);
@@ -140,7 +140,7 @@ test("connect() decycle works with simple multidag", () => {
     ["a", "b"],
     ["a", "b"],
     ["b", "c"],
-    ["c", "a"]
+    ["c", "a"],
   ] as const;
   const layout = connect().decycle(true);
   expect(layout.decycle()).toBe(true);
@@ -192,7 +192,7 @@ test("connect() decycle works with complex cycle", () => {
     ["g", "d"],
     ["b", "i"],
     ["i", "e"],
-    ["g", "h"]
+    ["g", "h"],
   ] as const;
   const layout = connect().decycle(true);
   const dag = layout(cycle);
@@ -205,7 +205,7 @@ test("connect() decycle works with complex cycle", () => {
 test("connect() works for multidag", () => {
   const cycle = [
     ["a", "b"],
-    ["a", "b"]
+    ["a", "b"],
   ] as const;
   const layout = connect();
   const dag = layout(cycle);
@@ -221,7 +221,7 @@ test("connect() works for multidag dag", () => {
   const cycle = [
     ["a", "b"],
     ["a", "b"],
-    ["c", "c"]
+    ["c", "c"],
   ] as const;
   const layout = connect().single(true);
   const dag = layout(cycle);
@@ -241,7 +241,7 @@ test("connect() fails passing an arg to connect", () => {
 test("connect() fails with no roots", () => {
   const cycle = [
     ["a", "b"],
-    ["b", "a"]
+    ["b", "a"],
   ] as const;
   expect(() => connect()(cycle)).toThrow("dag contained no roots");
 });
@@ -250,7 +250,7 @@ test("connect() fails with cycle", () => {
   const cycle = [
     ["c", "a"],
     ["a", "b"],
-    ["b", "a"]
+    ["b", "a"],
   ] as const;
   expect(() => connect()(cycle)).toThrow(
     `cycle: '{"id":"a"}' -> '{"id":"b"}' -> '{"id":"a"}'`

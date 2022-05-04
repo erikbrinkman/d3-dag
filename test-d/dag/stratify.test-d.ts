@@ -4,7 +4,7 @@ import {
   IdOperator,
   ParentDataOperator,
   ParentIdsOperator,
-  stratify
+  stratify,
 } from "../../src/dag/create";
 
 // initial types

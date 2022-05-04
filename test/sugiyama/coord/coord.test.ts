@@ -12,7 +12,7 @@ const vee = () => createLayers([[[0], [0]], [[]]]);
 const ex = () =>
   createLayers([
     [[1], [0]],
-    [[], []]
+    [[], []],
   ]);
 
 function idLayerSize(node: SugiNode<{ index: number }>): number {

@@ -19,7 +19,7 @@ test("simplex() works for known failure", () => {
     ["2", "3"],
     ["3", "4"],
     ["5", "4"],
-    ["6", "4"]
+    ["6", "4"],
   ]);
   const layout = simplex();
   layout(dag);

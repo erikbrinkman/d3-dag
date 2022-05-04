@@ -32,16 +32,18 @@ export function getParentCounts<N, L>(
   return parents;
 }
 
+/** get the id from a dag node */
+export interface IdAccessor<N, L> {
+  (node: DagNode<N, L>): string;
+}
+
 /** convert a dag into a dot string */
-export function dot<N, L>(
-  dag: Dag<N, L>,
-  id: (node: DagNode<N, L>) => string
-): string {
+export function dot<N, L>(dag: Dag<N, L>, id: IdAccessor<N, L>): string {
   const links = [
     ...map(
       dag.ilinks(),
       ({ source, target }) => `    "${id(source)}" -> "${id(target)}"`
-    )
+    ),
   ];
   return `digraph {\n${links.join("\n")}\n}`;
 }

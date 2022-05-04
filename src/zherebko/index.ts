@@ -1,7 +1,7 @@
 /**
  * A topological layout using {@link ZherebkoOperator}.
  *
- * @module
+ * @packageDocumentation
  */
 import { Dag } from "../dag";
 import { entries } from "../iters";
@@ -13,7 +13,9 @@ import { greedy } from "./greedy";
  * This is the final width and height of the laid out dag.
  */
 export interface ZherebkoInfo {
+  /** total width after layout */
   width: number;
+  /** total height after layout */
   height: number;
 }
 
@@ -156,7 +158,7 @@ function buildOperator(
       for (const { points } of dag.ilinks()) {
         const newPoints = points.map(({ x, y }) => ({
           x: (x! * newWidth) / width,
-          y: (y! * newHeight) / height
+          y: (y! * newHeight) / height,
         }));
         points.splice(0, points.length, ...newPoints);
       }

@@ -2,7 +2,7 @@
  * A {@link DfsOperator} heuristic for quickly producing reasonable crossings.
  * This is intended for use as an initialization step.
  *
- * @module
+ * @packageDocumentation
  */
 import { DecrossOperator } from ".";
 import { getParents } from "../../dag/utils";
@@ -10,6 +10,12 @@ import { flatMap, reverse } from "../../iters";
 import { dfs as depthFirstSearch } from "../../utils";
 import { SugiNode } from "../utils";
 
+/**
+ * Depth first search operator
+ *
+ * This is a fast heuristic that runs a depth first search, incrementally
+ * adding nodes to their appropriate layer.
+ */
 export interface DfsOperator extends DecrossOperator<unknown, unknown> {
   /**
    * Sets whether the dfs should be top down or bottom up. (default: true)

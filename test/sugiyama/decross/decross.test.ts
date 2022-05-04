@@ -11,7 +11,7 @@ const dtopo = () => createLayers([[[0, 1]], [[], 0], [[]], [[0]], [[]]]);
 const doub = () =>
   createLayers([
     [[1], [0]],
-    [[], []]
+    [[], []],
   ]);
 
 for (const dat of [square, ccoz, dtopo, doub]) {
@@ -20,7 +20,7 @@ for (const dat of [square, ccoz, dtopo, doub]) {
     twoLayer().order(twolayerOpt()),
     decrossOpt(),
     dfs(),
-    dfs().topDown(false)
+    dfs().topDown(false),
   ]) {
     test(`invariants apply to ${dat.name} decrossed by ${method.name}`, () => {
       const layered = dat();

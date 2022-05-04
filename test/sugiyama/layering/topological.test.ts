@@ -8,7 +8,7 @@ test("topological() works for square", () => {
   const layers = getLayers(dag);
   expect([
     [[0], [1], [2], [3]],
-    [[0], [2], [1], [3]]
+    [[0], [2], [1], [3]],
   ]).toContainEqual(layers);
 });
 
@@ -18,7 +18,7 @@ test("topological() works for disconnected graph", () => {
   const layers = getLayers(dag);
   expect([
     [[0], [1]],
-    [[1], [0]]
+    [[1], [0]],
   ]).toContainEqual(layers);
 });
 

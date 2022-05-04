@@ -17,7 +17,7 @@ import {
   sugiyama,
   twolayerAgg,
   twolayerOpt,
-  zherebko
+  zherebko,
 } from "../src";
 
 test("can loosely call the api", () => {

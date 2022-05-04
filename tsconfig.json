@@ -9,8 +9,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "strict": true,
-    "incremental": true,
-    "typeRoots": ["./types", "./node_modules/@types"]
+    "incremental": true
   },
   "include": ["src", "test"]
 }

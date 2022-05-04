@@ -2,7 +2,7 @@
  * The {@link GreedyOperator} assigns nodes close to the mean of their parents,
  * then spreads them out.
  *
- * @module
+ * @packageDocumentation
  */
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior

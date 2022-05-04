@@ -5,7 +5,7 @@ test("greedy() works for N", () => {
   // degree matters
   const layers = createLayers([
     [[0, 1], [1]],
-    [[], []]
+    [[], []],
   ]);
   const [[topLeft, topRight], [bottomLeft, bottomRight]] = layers;
   greedy()(layers, nodeSize);

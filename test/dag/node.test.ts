@@ -8,7 +8,7 @@ import {
   multi,
   single,
   square,
-  vee
+  vee,
 } from "../examples";
 
 test("roots() works for square", () => {
@@ -87,7 +87,7 @@ test("links() is correct for square", () => {
     ["0", new Set(["1", "2"])],
     ["1", new Set(["3"])],
     ["2", new Set(["3"])],
-    ["3", new Set()]
+    ["3", new Set()],
   ]);
   for (const link of dag.links()) {
     expect(
@@ -102,7 +102,7 @@ test("links() is correct for N", () => {
     ["0", new Set(["2", "3"])],
     ["1", new Set(["3"])],
     ["2", new Set()],
-    ["3", new Set()]
+    ["3", new Set()],
   ]);
   for (const link of dag.links()) {
     expect(
@@ -116,7 +116,7 @@ test("idescendants('breadth') is correct for square", () => {
   const breadthIds = [...map(dag.idescendants("breadth"), (n) => n.data.id)];
   expect([
     ["0", "1", "2", "3"],
-    ["0", "2", "1", "3"]
+    ["0", "2", "1", "3"],
   ]).toContainEqual(breadthIds);
 });
 
@@ -139,7 +139,7 @@ test("sum() is correct for square", () => {
     ["0", 6],
     ["1", 4],
     ["2", 5],
-    ["3", 3]
+    ["3", 3],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -156,7 +156,7 @@ test("sum() is correct for N", () => {
     ["0", 5],
     ["1", 4],
     ["2", 2],
-    ["3", 3]
+    ["3", 3],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -176,7 +176,7 @@ test("sum() is correct for X", () => {
     ["3", 18],
     ["4", 4],
     ["5", 11],
-    ["6", 6]
+    ["6", 6],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -193,7 +193,7 @@ test("count() is correct for square", () => {
     ["0", 1],
     ["1", 1],
     ["2", 1],
-    ["3", 1]
+    ["3", 1],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -210,7 +210,7 @@ test("count() is correct for N", () => {
     ["0", 2],
     ["1", 1],
     ["2", 1],
-    ["3", 1]
+    ["3", 1],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -230,7 +230,7 @@ test("count() is correct for X", () => {
     ["3", 2],
     ["4", 1],
     ["5", 1],
-    ["6", 1]
+    ["6", 1],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -247,7 +247,7 @@ test("height() is correct for square", () => {
     ["0", 2],
     ["1", 1],
     ["2", 1],
-    ["3", 0]
+    ["3", 0],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -264,7 +264,7 @@ test("height() is correct for N", () => {
     ["0", 1],
     ["1", 1],
     ["2", 0],
-    ["3", 0]
+    ["3", 0],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -284,7 +284,7 @@ test("height() is correct for X", () => {
     ["3", 2],
     ["4", 0],
     ["5", 1],
-    ["6", 0]
+    ["6", 0],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -301,7 +301,7 @@ test("depth() is correct for square", () => {
     ["0", 0],
     ["1", 1],
     ["2", 1],
-    ["3", 2]
+    ["3", 2],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -318,7 +318,7 @@ test("depth() is correct for N", () => {
     ["0", 0],
     ["1", 0],
     ["2", 1],
-    ["3", 1]
+    ["3", 1],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);
@@ -338,7 +338,7 @@ test("depth() is correct for X", () => {
     ["3", 2],
     ["4", 3],
     ["5", 3],
-    ["6", 4]
+    ["6", 4],
   ]);
   for (const node of dag) {
     const exp = expected.get(node.data.id);

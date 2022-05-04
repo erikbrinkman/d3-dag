@@ -2,7 +2,7 @@
  * A {@link SimplexOperator} that assigns layers to minimize the number of
  * dummy nodes.
  *
- * @module
+ * @packageDocumentation
  */
 import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
 import { Dag, DagNode } from "../../dag";
@@ -10,15 +10,26 @@ import { map } from "../../iters";
 import { Constraint, solve, Variable } from "../../simplex";
 import { assert, bigrams, Up } from "../../utils";
 
-interface Operators<N = never, L = never> {
+/** simplex operator operators */
+export interface Operators<N = never, L = never> {
+  /** rank operator */
   rank: RankAccessor<N, L>;
+  /** group operator */
   group: GroupAccessor<N, L>;
 }
 
-type OpsNodeDatum<Ops extends Operators> = Ops extends Operators<infer N, never>
+/** the node datum of a set of operators */
+export type OpsNodeDatum<Ops extends Operators> = Ops extends Operators<
+  infer N,
+  never
+>
   ? N
   : never;
-type OpsLinkDatum<Ops extends Operators> = Ops extends Operators<never, infer L>
+/** the link datum of a set of operators */
+export type OpsLinkDatum<Ops extends Operators> = Ops extends Operators<
+  never,
+  infer L
+>
   ? L
   : never;
 
@@ -52,7 +63,15 @@ export interface SimplexOperator<Ops extends Operators = Operators>
    */
   rank<NewRank extends RankAccessor>(
     newRank: NewRank
-  ): SimplexOperator<Up<Ops, { rank: NewRank }>>;
+  ): SimplexOperator<
+    Up<
+      Ops,
+      {
+        /** new rank */
+        rank: NewRank;
+      }
+    >
+  >;
   /**
    * Get the current {@link RankAccessor}.
    */
@@ -66,7 +85,15 @@ export interface SimplexOperator<Ops extends Operators = Operators>
    */
   group<NewGroup extends GroupAccessor>(
     newGroup: NewGroup
-  ): SimplexOperator<Up<Ops, { group: NewGroup }>>;
+  ): SimplexOperator<
+    Up<
+      Ops,
+      {
+        /** new group */
+        group: NewGroup;
+      }
+    >
+  >;
   /**
    * Get the current {@link GroupAccessor}.
    */
@@ -96,8 +123,8 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
 
     /** enforce that first occurs before second
      *
-     * @param prefix determines a unique prefix to describe constraint
-     * @param strict strictly before or possibly equal
+     * @param prefix - determines a unique prefix to describe constraint
+     * @param strict - strictly before or possibly equal
      */
     function before(
       prefix: string,
@@ -231,8 +258,11 @@ function defaultAccessor(): undefined {
   return undefined;
 }
 
+/** default simplex operator */
 export type DefaultSimplexOperator = SimplexOperator<{
+  /** unconstrained rank */
   rank: RankAccessor<unknown, unknown>;
+  /** unconstrained group */
   group: GroupAccessor<unknown, unknown>;
 }>;
 

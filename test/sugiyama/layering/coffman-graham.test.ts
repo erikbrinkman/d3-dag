@@ -25,7 +25,7 @@ test("coffmanGraham() handles width", () => {
   const layers = getLayers(dag);
   expect([
     [[0], [1], [2], [3]],
-    [[0], [2], [1], [3]]
+    [[0], [2], [1], [3]],
   ]).toContainEqual(layers);
 });
 
@@ -36,7 +36,7 @@ test("coffmanGraham() works for a disconnected graph with width constraint", () 
   const layers = getLayers(dag);
   expect([
     [[0], [1]],
-    [[1], [0]]
+    [[1], [0]],
   ]).toContainEqual(layers);
 });
 
@@ -47,7 +47,7 @@ test("coffmanGraham() handles earlier nodes", () => {
     ["0", "3"],
     ["2", "3"],
     ["1", "4"],
-    ["2", "4"]
+    ["2", "4"],
   ]);
   coffmanGraham().width(1)(dag);
   const layers = getLayers(dag);
@@ -62,7 +62,7 @@ test("coffmanGraham() handles shorter edges", () => {
     ["1", "3"],
     ["0", "4"],
     ["1", "4"],
-    ["2", "4"]
+    ["2", "4"],
   ]);
   coffmanGraham().width(1)(dag);
   const layers = getLayers(dag);
@@ -78,7 +78,7 @@ test("coffmanGraham() handles history reverse", () => {
     ["1", "4"],
     ["2", "4"],
     ["0", "3"],
-    ["2", "3"]
+    ["2", "3"],
   ]);
   coffmanGraham().width(1)(dag);
   const layers = getLayers(dag);

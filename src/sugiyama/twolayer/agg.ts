@@ -2,7 +2,7 @@
  * An {@link AggOperator} that orders nodes based on the aggregation of their
  * parents' or children's indices.
  *
- * @module
+ * @packageDocumentation
  */
 import { median } from "d3-array";
 import { TwolayerOperator } from ".";
@@ -14,8 +14,10 @@ import { SugiNode } from "../utils";
  * An interface for aggregating numbers
  */
 export interface Aggregator {
+  /** add another value to the aggregator */
   add(inp: number): void;
 
+  /** return the aggregate of all added values */
   val(): number | undefined;
 }
 
@@ -229,7 +231,7 @@ function order(
 }
 
 function buildOperator<Factory extends AggFactory>({
-  factory
+  factory,
 }: {
   factory: Factory;
 }): AggOperator<Factory> {

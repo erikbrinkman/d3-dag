@@ -2,7 +2,7 @@
  * A {@link CoffmanGrahamOperator} that prevents the width of the dag from
  * being too large.
  *
- * @module
+ * @packageDocumentation
  */
 import FastPriorityQueue from "fastpriorityqueue";
 import { LayeringOperator } from ".";

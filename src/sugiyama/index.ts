@@ -1,31 +1,31 @@
 /**
  * A {@link SugiyamaOperator} for computing a layered layout of a dag
  *
- * @module
+ * @packageDocumentation
  */
 import { Dag, DagNode } from "../dag";
 import { js, Up } from "../utils";
 import { CoordNodeSizeAccessor, CoordOperator } from "./coord";
 import {
   DefaultSimplexOperator as DefaultCoord,
-  simplex as coordSimplex
+  simplex as coordSimplex,
 } from "./coord/simplex";
 import { DecrossOperator } from "./decross";
 import {
   DefaultTwoLayerOperator as DefaultTwoLayer,
-  twoLayer
+  twoLayer,
 } from "./decross/two-layer";
 import { LayeringOperator } from "./layering";
 import {
   DefaultSimplexOperator as DefaultLayering,
-  simplex as layerSimplex
+  simplex as layerSimplex,
 } from "./layering/simplex";
 import {
   scaleLayers,
   sugify,
   SugiNode,
   unsugify,
-  verifyCoordAssignment
+  verifyCoordAssignment,
 } from "./utils";
 
 /**
@@ -34,7 +34,9 @@ import {
  * This is the final width and height of the laid out dag.
  */
 export interface SugiyamaInfo {
+  /** total width after layout */
   width: number;
+  /** total height after layout */
   height: number;
 }
 
@@ -69,18 +71,12 @@ export interface SugiNodeSizeAccessor<NodeDatum = never, LinkDatum = never> {
   (node: SugiNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
-type NsNodeDatum<NS extends NodeSizeAccessor> = NS extends NodeSizeAccessor<
-  infer N,
-  never
->
-  ? N
-  : never;
-type NsLinkDatum<NS extends NodeSizeAccessor> = NS extends NodeSizeAccessor<
-  never,
-  infer L
->
-  ? L
-  : never;
+/** the node datum of a node size accessor */
+export type NsNodeDatum<NS extends NodeSizeAccessor> =
+  NS extends NodeSizeAccessor<infer N, never> ? N : never;
+/** the link datum of a node size accessor */
+export type NsLinkDatum<NS extends NodeSizeAccessor> =
+  NS extends NodeSizeAccessor<never, infer L> ? L : never;
 
 /**
  * The effective {@link SugiNodeSizeAccessor} when a normal
@@ -88,6 +84,7 @@ type NsLinkDatum<NS extends NodeSizeAccessor> = NS extends NodeSizeAccessor<
  */
 export interface WrappedNodeSizeAccessor<NodeSize extends NodeSizeAccessor>
   extends SugiNodeSizeAccessor<NsNodeDatum<NodeSize>, NsLinkDatum<NodeSize>> {
+  /** the underling node size */
   wrapped: NodeSize;
 }
 
@@ -109,15 +106,25 @@ export function wrapNodeSizeAccessor<N, L, NS extends NodeSizeAccessor<N, L>>(
   return sugiNodeSizeAccessor;
 }
 
-interface Operators<N = never, L = never> {
+/** sugiyama operators */
+export interface Operators<N = never, L = never> {
+  /** layering operator */
   layering: LayeringOperator<N, L>;
+  /** decross operator */
   decross: DecrossOperator<N, L>;
+  /** coord operator */
   coord: CoordOperator<N, L>;
+  /** sugi node size operator */
   sugiNodeSize: SugiNodeSizeAccessor<N, L>;
+  /** node size operator */
   nodeSize: NodeSizeAccessor<N, L> | null;
 }
 
-type OpsDag<Ops extends Operators> = Ops extends Operators<infer N, infer L>
+/** the typed dag of a set of operators */
+export type OpsDag<Ops extends Operators> = Ops extends Operators<
+  infer N,
+  infer L
+>
   ? Dag<N, L>
   : Dag<never, never>;
 
@@ -199,7 +206,15 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
    */
   layering<NewLayering extends LayeringOperator>(
     layer: NewLayering
-  ): SugiyamaOperator<Up<Ops, { layering: NewLayering }>>;
+  ): SugiyamaOperator<
+    Up<
+      Ops,
+      {
+        /** new layering */
+        layering: NewLayering;
+      }
+    >
+  >;
   /**
    * Get the current {@link LayeringOperator}.
    */
@@ -210,7 +225,15 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
    */
   decross<NewDecross extends DecrossOperator>(
     dec: NewDecross
-  ): SugiyamaOperator<Up<Ops, { decross: NewDecross }>>;
+  ): SugiyamaOperator<
+    Up<
+      Ops,
+      {
+        /** new decross */
+        decross: NewDecross;
+      }
+    >
+  >;
   /**
    * Get the current {@link DecrossOperator}.
    */
@@ -221,7 +244,15 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
    */
   coord<NewCoord extends CoordOperator>(
     crd: NewCoord
-  ): SugiyamaOperator<Up<Ops, { coord: NewCoord }>>;
+  ): SugiyamaOperator<
+    Up<
+      Ops,
+      {
+        /** new coord */
+        coord: NewCoord;
+      }
+    >
+  >;
   /**
    * Get the current {@link CoordOperator}.
    */
@@ -256,7 +287,9 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
     Up<
       Ops,
       {
+        /** new node size */
         nodeSize: NewNodeSize;
+        /** new wrapped sugi node size */
         sugiNodeSize: WrappedNodeSizeAccessor<NewNodeSize>;
       }
     >
@@ -278,7 +311,15 @@ export interface SugiyamaOperator<Ops extends Operators = Operators> {
   sugiNodeSize<NewSugiNodeSize extends SugiNodeSizeAccessor>(
     sz: NewSugiNodeSize
   ): SugiyamaOperator<
-    Up<Ops, { sugiNodeSize: NewSugiNodeSize; nodeSize: null }>
+    Up<
+      Ops,
+      {
+        /** new sugi node size */
+        sugiNodeSize: NewSugiNodeSize;
+        /** no node size */
+        nodeSize: null;
+      }
+    >
   >;
   /**
    * Get the current sugi node size, or a {@link WrappedNodeSizeAccessor |
@@ -409,7 +450,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       const { layering: _, ...rest } = options;
       return buildOperator({
         ...rest,
-        layering: layer
+        layering: layer,
       });
     }
   }
@@ -428,7 +469,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       const { decross: _, ...rest } = options;
       return buildOperator({
         ...rest,
-        decross: dec
+        decross: dec,
       });
     }
   }
@@ -447,7 +488,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       const { coord: _, ...rest } = options;
       return buildOperator({
         ...rest,
-        coord: crd
+        coord: crd,
       });
     }
   }
@@ -490,7 +531,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       return buildOperator({
         ...rest,
         nodeSize: sz,
-        sugiNodeSize: wrapNodeSizeAccessor(sz)
+        sugiNodeSize: wrapNodeSizeAccessor(sz),
       });
     } else {
       return options.nodeSize;
@@ -512,7 +553,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       return buildOperator({
         ...rest,
         sugiNodeSize: sz,
-        nodeSize: null
+        nodeSize: null,
       });
     } else {
       return options.sugiNodeSize;
@@ -523,6 +564,7 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
   return sugiyama;
 }
 
+/** default node size */
 export type DefaultNodeSizeAccessor = NodeSizeAccessor<unknown, unknown>;
 
 /** @internal */
@@ -530,11 +572,17 @@ function defaultNodeSize(node?: DagNode): [number, number] {
   return [+(node !== undefined), 1];
 }
 
+/** default sugiyama operator */
 export type DefaultSugiyamaOperator = SugiyamaOperator<{
+  /** default layering */
   layering: DefaultLayering;
+  /** default decross */
   decross: DefaultTwoLayer;
+  /** default coord */
   coord: DefaultCoord;
+  /** wrapped default node size */
   sugiNodeSize: WrappedNodeSizeAccessor<DefaultNodeSizeAccessor>;
+  /** default node size */
   nodeSize: DefaultNodeSizeAccessor;
 }>;
 
@@ -563,7 +611,7 @@ export function sugiyama(...args: never[]): DefaultSugiyamaOperator {
       coord: coordSimplex(),
       size: null,
       nodeSize: defaultNodeSize,
-      sugiNodeSize: wrapNodeSizeAccessor(defaultNodeSize)
+      sugiNodeSize: wrapNodeSizeAccessor(defaultNodeSize),
     });
   }
 }

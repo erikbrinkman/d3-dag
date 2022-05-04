@@ -13,8 +13,8 @@ export type SimpleLinkDatum = [string, string];
 export function single(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
-    }
+      id: "0",
+    },
   ]);
 }
 
@@ -23,11 +23,11 @@ export function single(): Dag<SimpleDatum, undefined> {
 export function doub(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
-      id: "1"
-    }
+      id: "1",
+    },
   ]);
 }
 
@@ -36,14 +36,14 @@ export function doub(): Dag<SimpleDatum, undefined> {
 export function trip(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
-      id: "1"
+      id: "1",
     },
     {
-      id: "2"
-    }
+      id: "2",
+    },
   ]);
 }
 
@@ -55,12 +55,12 @@ export function trip(): Dag<SimpleDatum, undefined> {
 export function multi(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
       id: "1",
-      parentIds: ["0", "0"]
-    }
+      parentIds: ["0", "0"],
+    },
   ]);
 }
 
@@ -73,16 +73,16 @@ export function multi(): Dag<SimpleDatum, undefined> {
 export function eye(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
       id: "1",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "2",
-      parentIds: ["0", "0", "1"]
-    }
+      parentIds: ["0", "0", "1"],
+    },
   ]);
 }
 
@@ -95,20 +95,20 @@ export function eye(): Dag<SimpleDatum, undefined> {
 export function square(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
       id: "1",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "2",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "3",
-      parentIds: ["1", "2"]
-    }
+      parentIds: ["1", "2"],
+    },
   ]);
 }
 
@@ -121,16 +121,16 @@ export function square(): Dag<SimpleDatum, undefined> {
 export function dummy(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
       id: "1",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "2",
-      parentIds: ["0", "1"]
-    }
+      parentIds: ["0", "1"],
+    },
   ]);
 }
 
@@ -143,24 +143,24 @@ export function dummy(): Dag<SimpleDatum, undefined> {
 export function three(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
       id: "1",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "2",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "3",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "4",
-      parentIds: ["1", "2", "3"]
-    }
+      parentIds: ["1", "2", "3"],
+    },
   ]);
 }
 
@@ -171,19 +171,19 @@ export function three(): Dag<SimpleDatum, undefined> {
 export function en(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
-      id: "1"
+      id: "1",
     },
     {
       id: "2",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
       id: "3",
-      parentIds: ["0", "1"]
-    }
+      parentIds: ["0", "1"],
+    },
   ]);
 }
 
@@ -194,15 +194,15 @@ export function en(): Dag<SimpleDatum, undefined> {
 export function vee(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
-      id: "1"
+      id: "1",
     },
     {
       id: "2",
-      parentIds: ["0", "1"]
-    }
+      parentIds: ["0", "1"],
+    },
   ]);
 }
 
@@ -213,22 +213,22 @@ export function vee(): Dag<SimpleDatum, undefined> {
 export function doubleYou(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
-      id: "1"
+      id: "1",
     },
     {
-      id: "2"
+      id: "2",
     },
     {
       id: "3",
-      parentIds: ["0", "1"]
+      parentIds: ["0", "1"],
     },
     {
       id: "4",
-      parentIds: ["1", "2"]
-    }
+      parentIds: ["1", "2"],
+    },
   ]);
 }
 
@@ -239,25 +239,25 @@ export function doubleYou(): Dag<SimpleDatum, undefined> {
 export function doubleVee(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
-      id: "1"
+      id: "1",
     },
     {
-      id: "2"
+      id: "2",
     },
     {
-      id: "3"
+      id: "3",
     },
     {
       id: "4",
-      parentIds: ["0", "1"]
+      parentIds: ["0", "1"],
     },
     {
       id: "5",
-      parentIds: ["2", "3"]
-    }
+      parentIds: ["2", "3"],
+    },
   ]);
 }
 
@@ -274,31 +274,31 @@ export function doubleVee(): Dag<SimpleDatum, undefined> {
 export function ex(): Dag<SimpleDatum, undefined> {
   return stratify()([
     {
-      id: "0"
+      id: "0",
     },
     {
       id: "1",
-      parentIds: ["0"]
+      parentIds: ["0"],
     },
     {
-      id: "2"
+      id: "2",
     },
     {
       id: "3",
-      parentIds: ["1", "2"]
+      parentIds: ["1", "2"],
     },
     {
       id: "4",
-      parentIds: ["3"]
+      parentIds: ["3"],
     },
     {
       id: "5",
-      parentIds: ["3"]
+      parentIds: ["3"],
     },
     {
       id: "6",
-      parentIds: ["5"]
-    }
+      parentIds: ["5"],
+    },
   ]);
 }
 
@@ -317,7 +317,7 @@ export function ccoz(): Dag<ConnectDatum, SimpleLinkDatum> {
     ["1", "2"],
     ["3", "7"],
     ["5", "6"],
-    ["4", "7"]
+    ["4", "7"],
   ]);
 }
 
@@ -341,6 +341,6 @@ export function zhere(): Dag<ConnectDatum, SimpleLinkDatum> {
     ["6", "8"],
     ["7", "8"],
     ["9", "10"],
-    ["9", "11"]
+    ["9", "11"],
   ]);
 }

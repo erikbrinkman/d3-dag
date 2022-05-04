@@ -1,7 +1,7 @@
 /**
  * A {@link LongestPathOperator} that minimizes the height of the final layout
  *
- * @module
+ * @packageDocumentation
  */
 import { LayeringOperator } from ".";
 import { Dag } from "../../dag";

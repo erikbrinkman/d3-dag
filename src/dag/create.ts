@@ -4,7 +4,7 @@
  * 2. {@link StratifyOperator} - when the dag has a tabular structure, referencing parents by id.
  * 3. {@link ConnectOperator} - when the dag has a link structure and is specified as pairs of nodes.
  *
- * @module
+ * @packageDocumentation
  */
 import { Dag, DagLink, DagNode, IterStyle } from ".";
 import { entries, every, filter, flatMap, map, reduce, some } from "../iters";
@@ -14,7 +14,7 @@ import {
   listMultimapPush,
   setMultimapAdd,
   setPop,
-  Up
+  Up,
 } from "../utils";
 import { getParents } from "./utils";
 
@@ -391,7 +391,7 @@ function verifyId(id: string): string {
 /**
  * Verify a DAG is valid.
  *
- * @param checkForCycles if true will check for all cycles, if false, will only
+ * @param checkForCycles - if true will check for all cycles, if false, will only
  * check for trivial self-loops
  */
 function verifyDag(roots: DagNode[], checkForCycles: boolean): void {
@@ -486,8 +486,8 @@ function removeCycles<N, L>(nodes: LayoutDagNode<N, L>[]): DagNode<N, L>[] {
       {
         indeg: parents.get(node)?.length ?? 0,
         outdeg: node.nchildLinks(),
-        node
-      }
+        node,
+      },
     ])
   );
   const maxDelta = Math.max(
@@ -666,15 +666,19 @@ export interface IdNodeDatumOperator<D = unknown> {
  * The default node data on dags built using {@link ConnectOperator}
  */
 export interface ConnectDatum {
+  /** the id */
   id: string;
 }
 
 /**
  * The operators that parametrize {@link ConnectOperator}
  */
-interface ConnectOperators<N = unknown, L = never> {
+export interface ConnectOperators<N = unknown, L = never> {
+  /** the source id operator */
   sourceId: IdOperator<L>;
+  /** the target id operator */
   targetId: IdOperator<L>;
+  /** the node datum operator */
   nodeDatum: IdNodeDatumOperator<N>;
 }
 
@@ -733,7 +737,16 @@ export interface ConnectOperator<
    */
   sourceId<NewId extends IdOperator>(
     id: NewId
-  ): ConnectOperator<NodeDatum, Up<Ops, { sourceId: NewId }>>;
+  ): ConnectOperator<
+    NodeDatum,
+    Up<
+      Ops,
+      {
+        /** the new source id */
+        sourceId: NewId;
+      }
+    >
+  >;
   /** Gets the current sourceId accessor. */
   sourceId(): Ops["sourceId"];
 
@@ -750,7 +763,16 @@ export interface ConnectOperator<
    */
   targetId<NewId extends IdOperator>(
     id: NewId
-  ): ConnectOperator<NodeDatum, Up<Ops, { targetId: NewId }>>;
+  ): ConnectOperator<
+    NodeDatum,
+    Up<
+      Ops,
+      {
+        /** the new target id */
+        targetId: NewId;
+      }
+    >
+  >;
   /** Gets the current targetId accessor. */
   targetId(): Ops["targetId"];
 
@@ -770,7 +792,16 @@ export interface ConnectOperator<
     NewNodeDatumOp extends IdNodeDatumOperator<NewNodeDatum>
   >(
     data: NewNodeDatumOp & IdNodeDatumOperator<NewNodeDatum>
-  ): ConnectOperator<NewNodeDatum, Up<Ops, { nodeDatum: NewNodeDatumOp }>>;
+  ): ConnectOperator<
+    NewNodeDatum,
+    Up<
+      Ops,
+      {
+        /** the new node datum */
+        nodeDatum: NewNodeDatumOp;
+      }
+    >
+  >;
   /** Get the current id node datum operator */
   nodeDatum(): Ops["nodeDatum"];
 
@@ -926,6 +957,7 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOperators<N, LinkDatum>>(
 
 /** default interface for tuples that start with a string */
 export interface ZeroString {
+  /** the zero property */
   readonly 0: string;
 }
 
@@ -949,6 +981,7 @@ function defaultSourceId(d: ZeroString): string {
 
 /** default interface for functions whose second element is a string */
 export interface OneString {
+  /** the one property */
   readonly 1: string;
 }
 
@@ -974,11 +1007,15 @@ function defaultNodeDatum(id: string): ConnectDatum {
   return { id };
 }
 
+/** the default connect operator */
 export type DefaultConnectOperator = ConnectOperator<
   ConnectDatum,
   {
+    /** the default source id operator */
     sourceId: IdOperator<ZeroString>;
+    /** the default target id operator */
     targetId: IdOperator<OneString>;
+    /** the default node datum operator */
     nodeDatum: IdNodeDatumOperator<ConnectDatum>;
   }
 >;
@@ -1009,7 +1046,7 @@ export function connect(...args: never[]): DefaultConnectOperator {
       targetId: defaultTargetId,
       nodeDatum: defaultNodeDatum,
       single: false,
-      decycle: false
+      decycle: false,
     });
   }
 }
@@ -1054,6 +1091,7 @@ export interface WrappedChildrenOperator<
   NodeDatum,
   Children extends ChildrenOperator<NodeDatum>
 > extends ChildrenDataOperator<NodeDatum, undefined> {
+  /** the wrapped children operator */
   wrapped: Children;
 }
 
@@ -1064,27 +1102,35 @@ export interface WrappedChildrenDataOperator<
   NodeDatum,
   ChildrenData extends ChildrenDataOperator<NodeDatum>
 > extends ChildrenOperator<NodeDatum> {
+  /** the wrapped children data operator */
   wrapped: ChildrenData;
 }
 
-interface HierarchyOperators<NodeDatum, LinkDatum = unknown> {
+/** the hierarchy operator operators */
+export interface HierarchyOperators<NodeDatum, LinkDatum = unknown> {
+  /** the children operator */
   children: ChildrenOperator<NodeDatum>;
+  /** the children data operator */
   childrenData: ChildrenDataOperator<NodeDatum, LinkDatum>;
 }
 
-type ChildrenHierarchyOperator<
+/** a hierarchy operator with children */
+export type ChildrenHierarchyOperator<
   NodeDatum,
   Children extends ChildrenOperator<NodeDatum>
 > = HierarchyOperator<
   NodeDatum,
   undefined,
   {
+    /** new children */
     children: Children;
+    /** new children data */
     childrenData: WrappedChildrenOperator<NodeDatum, Children>;
   }
 >;
 
-type ChildrenDataHierarchyOperator<
+/** a hierarchy operator with children data specified */
+export type ChildrenDataHierarchyOperator<
   NodeDatum,
   LinkDatum,
   ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
@@ -1092,7 +1138,9 @@ type ChildrenDataHierarchyOperator<
   NodeDatum,
   LinkDatum,
   {
+    /** new children */
     children: WrappedChildrenDataOperator<NodeDatum, ChildrenData>;
+    /** new children data */
     childrenData: ChildrenData;
   }
 >;
@@ -1301,7 +1349,7 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
       return buildHierarchy({
         ...rest,
         children: childs,
-        childrenData: wrapChildren(childs)
+        childrenData: wrapChildren(childs),
       });
     }
   }
@@ -1321,7 +1369,7 @@ function buildHierarchy<N, L, Ops extends HierarchyOperators<N, L>>(
       return buildHierarchy({
         ...rest,
         children: wrapChildrenData(data),
-        childrenData: data
+        childrenData: data,
       });
     }
   }
@@ -1372,7 +1420,9 @@ function wrapChildrenData<N, C extends ChildrenDataOperator<N>>(
   return wrapped;
 }
 
-interface HasChildren {
+/** an object with children */
+export interface HasChildren {
+  /** the children */
   readonly children?: readonly HasChildren[] | undefined;
 }
 
@@ -1395,6 +1445,7 @@ function defaultChildren(d: unknown): readonly HasChildren[] | undefined {
   }
 }
 
+/** the default hierarchy operator */
 export type DefaultHierarchyOperator = ChildrenHierarchyOperator<
   HasChildren,
   ChildrenOperator<HasChildren>
@@ -1415,7 +1466,7 @@ export function hierarchy(...args: never[]): DefaultHierarchyOperator {
       children: defaultChildren,
       childrenData: wrapChildren(defaultChildren),
       roots: true,
-      decycle: false
+      decycle: false,
     });
   }
 }
@@ -1435,11 +1486,9 @@ export interface ParentIdsOperator<NodeDatum = never> {
   (d: NodeDatum, i: number): readonly string[] | undefined;
 }
 
-type ParIdsNodeDatum<P extends ParentIdsOperator> = P extends ParentIdsOperator<
-  infer N
->
-  ? N
-  : never;
+/** the node datum of a parent ids operator */
+export type ParIdsNodeDatum<P extends ParentIdsOperator> =
+  P extends ParentIdsOperator<infer N> ? N : never;
 
 /**
  * The interface for getting the parent ids and link data from the current node
@@ -1455,7 +1504,8 @@ export interface ParentDataOperator<NodeDatum = never, LinkDatum = unknown> {
     | undefined;
 }
 
-type ParDataNodeDatum<P extends ParentDataOperator> =
+/** the node datum of a parent data operator */
+export type ParDataNodeDatum<P extends ParentDataOperator> =
   P extends ParentDataOperator<infer N> ? N : never;
 
 type StratifyNodeDatum<Ops extends StratifyOperators> =
@@ -1466,6 +1516,7 @@ type StratifyNodeDatum<Ops extends StratifyOperators> =
  */
 export interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
   extends ParentDataOperator<ParIdsNodeDatum<ParentIds>, undefined> {
+  /** the wrapped parent ids operator */
   wrapped: ParentIds;
 }
 
@@ -1475,16 +1526,22 @@ export interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
 export interface WrappedParentDataOperator<
   ParentData extends ParentDataOperator
 > extends ParentIdsOperator<ParDataNodeDatum<ParentData>> {
+  /** the wrapped parent data operator */
   wrapped: ParentData;
 }
 
-interface StratifyOperators<NodeDatum = never, LinkDatum = unknown> {
+/** the operators for the stratify operator */
+export interface StratifyOperators<NodeDatum = never, LinkDatum = unknown> {
+  /** the id operator */
   id: IdOperator<NodeDatum>;
+  /** the parent ids operator */
   parentIds: ParentIdsOperator<NodeDatum>;
+  /** the parent data operator */
   parentData: ParentDataOperator<NodeDatum, LinkDatum>;
 }
 
-type IdsStratifyOperator<
+/** the id stratify operator */
+export type IdsStratifyOperator<
   Ops extends StratifyOperators,
   ParentIds extends ParentIdsOperator
 > = StratifyOperator<
@@ -1492,13 +1549,16 @@ type IdsStratifyOperator<
   Up<
     Ops,
     {
+      /** new parent ids */
       parentIds: ParentIds;
+      /** new parent data */
       parentData: WrappedParentIdsOperator<ParentIds>;
     }
   >
 >;
 
-type DataStratifyOperator<
+/** a stratify operator with parent data specified */
+export type DataStratifyOperator<
   LinkDatum,
   Ops extends StratifyOperators,
   ParentData extends ParentDataOperator<never, LinkDatum>
@@ -1507,7 +1567,9 @@ type DataStratifyOperator<
   Up<
     Ops,
     {
+      /** new parent data */
       parentData: ParentData;
+      /** new parent ids */
       parentIds: WrappedParentDataOperator<ParentData>;
     }
   >
@@ -1588,7 +1650,16 @@ export interface StratifyOperator<
    */
   id<NewId extends IdOperator>(
     id: NewId
-  ): StratifyOperator<LinkDatum, Up<Ops, { id: NewId }>>;
+  ): StratifyOperator<
+    LinkDatum,
+    Up<
+      Ops,
+      {
+        /** the new id */
+        id: NewId;
+      }
+    >
+  >;
   /**
    * Gets the current id accessor.
    */
@@ -1723,7 +1794,7 @@ function buildStratify<
       return buildStratify({
         ...rest,
         parentIds: wrapParentData(data),
-        parentData: data
+        parentData: data,
       });
     }
   }
@@ -1743,7 +1814,7 @@ function buildStratify<
       return buildStratify({
         ...rest,
         parentIds: ids,
-        parentData: wrapParentIds(ids)
+        parentData: wrapParentIds(ids),
       });
     }
   }
@@ -1785,6 +1856,7 @@ function wrapParentData<N, D extends ParentDataOperator<N>>(
 
 /** default interface for types with an id */
 export interface HasId {
+  /** the id */
   readonly id: string;
 }
 
@@ -1808,6 +1880,7 @@ function defaultId(data: unknown): string {
 
 /** default interface for data types with parent ids */
 export interface HasParentIds {
+  /** the parent ids */
   readonly parentIds?: readonly string[] | undefined;
 }
 
@@ -1834,11 +1907,14 @@ function defaultParentIds(d: unknown): readonly string[] | undefined {
   }
 }
 
+/** the default stratify operator */
 export type DefaultStratifyOperator = IdsStratifyOperator<
   {
+    /** the id operator */
     id: IdOperator<HasId>;
-    // NOTE these are immediately overridden
+    /** the parent id operator */
     parentIds: ParentIdsOperator;
+    /** the parent data operator */
     parentData: ParentDataOperator;
   },
   ParentIdsOperator<HasParentIds>
@@ -1859,7 +1935,7 @@ export function stratify(...args: never[]): DefaultStratifyOperator {
       id: defaultId,
       parentIds: defaultParentIds,
       parentData: wrapParentIds(defaultParentIds),
-      decycle: false
+      decycle: false,
     });
   }
 }

@@ -2,7 +2,7 @@
  * The {@link CenterOperator} centers all of the nodes as compactly as
  * possible. It produces generally poor layouts, but is very fast.
  *
- * @module
+ * @packageDocumentation
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { SugiNode } from "../utils";

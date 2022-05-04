@@ -1,66 +1,79 @@
+import { pnpPlugin } from "@yarnpkg/esbuild-plugin-pnp";
+import chalk from "chalk";
 import { build } from "esbuild";
 import ignorePlugin from "esbuild-plugin-ignore";
+import { stat } from "node:fs/promises";
+import { parse } from "node:path";
 import { performance } from "perf_hooks";
 import readPackageJson from "read-package-json";
 
+const name = "d3-dag";
 const start = performance.now();
+const today = new Date();
+
+async function wrapper(options) {
+  const res = await build(options);
+  const { outfile } = options;
+  const { size } = await stat(outfile);
+  const { dir, base } = parse(outfile);
+  console.log(
+    chalk.white(`\n  ${dir}/`) + chalk.bold(`${base}`),
+    chalk.cyan(` ${(size / 1024).toFixed(1)}kb`)
+  );
+  return res;
+}
 
 // read package.json and dat to get info for preamble
 const pkg = await new Promise((res, rej) =>
   readPackageJson("./package.json", (err, dat) => (err ? rej(err) : res(dat)))
 );
-const today = new Date();
-const baseConfig = {
+const config = {
   entryPoints: ["src/index.ts"],
   bundle: true,
   minify: true,
   plugins: [
     ignorePlugin([
       { resourceRegExp: /^fs$/ },
-      { resourceRegExp: /^child_process$/ }
-    ])
+      { resourceRegExp: /^child_process$/ },
+    ]),
+    pnpPlugin(),
   ],
   banner: {
     js: `// ${pkg.name} Version ${
       pkg.version
-    }. Copyright ${today.getFullYear()} ${pkg.author.name}.`
-  }
+    }. Copyright ${today.getFullYear()} ${pkg.author.name}.`,
+  },
 };
 
 await Promise.all([
   // build iife
-  build({
-    ...baseConfig,
+  wrapper({
+    ...config,
     platform: "browser",
-    format: "iife",
-    outfile: "bundle/d3-dag.iife.min.js",
-    define: { this: "window" },
+    outfile: `bundle/${name}.iife.min.js`,
+    // NOTE special commands to update d3
     globalName: "d3",
     banner: {
-      js: `${baseConfig.banner.js}\nvar d3 = Object.assign(d3 || {}, (() => {`
+      js: `${config.banner.js}\nvar d3 = Object.assign(d3 || {}, (() => {`,
     },
     footer: {
-      js: "return d3; })())"
-    }
+      js: "return d3; })())",
+    },
   }),
   // build cjs
-  build({
-    ...baseConfig,
+  wrapper({
+    ...config,
     platform: "node",
-    format: "cjs",
-    outfile: "bundle/d3-dag.cjs.min.js",
-    define: { this: "global" }
+    outfile: `bundle/${name}.cjs.min.js`,
   }),
   // build esm
-  build({
-    ...baseConfig,
+  wrapper({
+    ...config,
     platform: "neutral",
-    format: "esm",
-    outfile: "bundle/d3-dag.esm.min.js",
+    outfile: `bundle/${name}.esm.min.js`,
     mainFields: ["module", "main"],
-    define: { this: "undefined" }
-  })
+  }),
 ]);
 
-const end = performance.now();
-console.log(`bundled in ${(end - start).toFixed(2)}ms`);
+const elapsed = Math.round(performance.now() - start);
+console.log("\n⚡", chalk.green(`Done in ${elapsed}ms`));

@@ -17,14 +17,14 @@ test("opt() propagates to both layers", () => {
   const layers = createLayers([
     [[1], [0]],
     [[0], [1]],
-    [[], []]
+    [[], []],
   ]);
   opt()(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
   expect(inds).toEqual([
     [1, 0],
     [0, 1],
-    [0, 1]
+    [0, 1],
   ]);
 });
 
@@ -40,7 +40,7 @@ test("opt() is optimal", () => {
   const layers = createLayers([
     [[0], [0, 1, 2], [2]],
     [[1], [0, 2], [1]],
-    [[], [], []]
+    [[], [], []],
   ]).map((layer) => layer.reverse());
   expect(crossings(layers)).toBeCloseTo(2);
   const decross = opt().large("large");
@@ -73,7 +73,7 @@ test("opt() can optimize complex distance", () => {
   const layers = createLayers([
     [[0, 3, 4]],
     [[], [0], [0, 1], [], [1]],
-    [[], []]
+    [[], []],
   ]);
   opt().dist(true)(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
@@ -85,7 +85,7 @@ test("opt() fails for large inputs", () => {
     [...Array(30)].map((_, k) => [k]),
     [...Array(30)].map((_, k) => [k]),
     [...Array(30)].map((_, k) => [k]),
-    [...Array(30)].fill([])
+    [...Array(30)].fill([]),
   ]);
   expect(() => opt()(layers)).toThrow(`"large"`);
 });
@@ -95,7 +95,7 @@ test("opt() fails for medium inputs", () => {
     [...Array(20)].map((_, k) => [k]),
     [...Array(20)].map((_, k) => [k]),
     [...Array(20)].map((_, k) => [k]),
-    [...Array(20)].fill([])
+    [...Array(20)].fill([]),
   ]);
   expect(() => opt()(layers)).toThrow(`"medium"`);
 });

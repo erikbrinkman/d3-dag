@@ -2,7 +2,7 @@
  * The {@link QuadOperator} positions nodes to minimize a quadratic
  * optimization.
  *
- * @module
+ * @packageDocumentation
  */
 import { CoordNodeSizeAccessor, CoordOperator } from ".";
 import { DagLink, DagNode } from "../../dag";
@@ -17,7 +17,7 @@ import {
   minBend,
   minDist,
   solve,
-  splitComponentLayers
+  splitComponentLayers,
 } from "./utils";
 
 /**
@@ -49,8 +49,9 @@ export interface LinkWeightAccessor<NodeDatum = never, LinkDatum = never> {
 export interface ConstAccessor<T extends number = number>
   extends NodeWeightAccessor<unknown, unknown>,
     LinkWeightAccessor<unknown, unknown> {
-  value: T;
   (): T;
+  /** the constant value */
+  value: T;
 }
 
 /**
@@ -76,16 +77,23 @@ function isConstAccessor(
   return "value" in acc && typeof acc.value === "number";
 }
 
-interface Operators<N = never, L = never> {
+/** the operators for the quad operator */
+export interface Operators<N = never, L = never> {
+  /** the vert weak accessor */
   vertWeak: LinkWeightAccessor<N, L>;
+  /** the vert strong accessor */
   vertStrong: LinkWeightAccessor<N, L>;
+  /** the link weight accessor */
   linkCurve: LinkWeightAccessor<N, L>;
+  /** the node weight accessor */
   nodeCurve: NodeWeightAccessor<N, L>;
 }
 
+/** node datum for operators */
 type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
   ? N
   : never;
+/** link datum for operators */
 type OpLinkDatum<O extends Operators> = O extends Operators<never, infer L>
   ? L
   : never;
@@ -123,7 +131,9 @@ export interface QuadOperator<Ops extends Operators>
     Up<
       Ops,
       {
+        /** new vert weak */
         vertWeak: ConstAccessor;
+        /** new vert strong */
         vertStrong: ConstAccessor;
       }
     >
@@ -134,7 +144,12 @@ export interface QuadOperator<Ops extends Operators>
    * then null is returned. By setting the weight of dummy nodes to zero,
    * longer edges aren't penalized to be straighter than short edges.
    */
-  vertical(): Ops extends { vertWeak: ConstAccessor; vertStrong: ConstAccessor }
+  vertical(): Ops extends {
+    /** const vert weak */
+    vertWeak: ConstAccessor;
+    /** const vert strong */
+    vertStrong: ConstAccessor;
+  }
     ? [number, number]
     : null;
 
@@ -144,7 +159,7 @@ export interface QuadOperator<Ops extends Operators>
    * The weak vertical accessor adds a penalty to make edges vertical. It's
    * weak in that it applies to all edges equally regardless of length, and
    * while it penalized non vertical edges, it allows curving in the middle of
-   * long edges. (default: () => 1)
+   * long edges. (default: () =\> 1)
    */
   vertWeak<NewVertWeak extends LinkWeightAccessor>(
     val: NewVertWeak
@@ -152,6 +167,7 @@ export interface QuadOperator<Ops extends Operators>
     Up<
       Ops,
       {
+        /** new vert weak */
         vertWeak: NewVertWeak;
       }
     >
@@ -166,7 +182,7 @@ export interface QuadOperator<Ops extends Operators>
    *
    * The strong vertical accessor adds a penalty to make edges vertical. It
    * penealizes any section of an edge that isn't vertical, making longer edges
-   * contribute more to the overall impact on the objective. (default: () => 0)
+   * contribute more to the overall impact on the objective. (default: () =\> 0)
    */
   vertStrong<NewVertStrong extends LinkWeightAccessor>(
     val: NewVertStrong
@@ -174,6 +190,7 @@ export interface QuadOperator<Ops extends Operators>
     Up<
       Ops,
       {
+        /** new vert strong */
         vertStrong: NewVertStrong;
       }
     >
@@ -192,13 +209,15 @@ export interface QuadOperator<Ops extends Operators>
    * longer edges should try to be straight. (default: [0, 1])
    *
    * @remarks
-   * `.curve([a, b])` is the same as `.nodeCurve(() => a).linkCurve(() => b)`
+   * `.curve([a, b])` is the same as `.nodeCurve(() =\> a).linkCurve(() =\> b)`
    */
   curve(val: readonly [number, number]): QuadOperator<
     Up<
       Ops,
       {
+        /** new link curve */
         linkCurve: ConstAccessor;
+        /** new node curve */
         nodeCurve: ConstAccessor;
       }
     >
@@ -208,7 +227,12 @@ export interface QuadOperator<Ops extends Operators>
    * By setting the weight of non-dummy nodes to zero, we only care about the
    * curvature of edges, not lines that pass through nodes.
    */
-  curve(): Ops extends { linkCurve: ConstAccessor; nodeCurve: ConstAccessor }
+  curve(): Ops extends {
+    /** constant link curve */
+    linkCurve: ConstAccessor;
+    /** constant node curve */
+    nodeCurve: ConstAccessor;
+  }
     ? [number, number]
     : null;
 
@@ -217,7 +241,7 @@ export interface QuadOperator<Ops extends Operators>
    *
    * The link curve weight penalizes links to reduce their curving, in
    * dependent of their verticality. If using strongVert for an edge, it
-   * probably won't need a strong link curve weight. (default: () => 1)
+   * probably won't need a strong link curve weight. (default: () =\> 1)
    */
   linkCurve<NewLinkCurve extends LinkWeightAccessor>(
     val: NewLinkCurve
@@ -225,6 +249,7 @@ export interface QuadOperator<Ops extends Operators>
     Up<
       Ops,
       {
+        /** new link curve */
         linkCurve: NewLinkCurve;
       }
     >
@@ -242,7 +267,7 @@ export interface QuadOperator<Ops extends Operators>
    * angle. Note that it does it for all possible "through edges" so multiple
    * incoming and multiple outgoing will get counted several times. It's not
    * clear why this would ever be desirable, but it's possible to specify.
-   * (default: () => 0)
+   * (default: () =\> 0)
    */
   nodeCurve<NewNodeCurve extends NodeWeightAccessor>(
     val: NewNodeCurve
@@ -250,6 +275,7 @@ export interface QuadOperator<Ops extends Operators>
     Up<
       Ops,
       {
+        /** new node curve */
         nodeCurve: NewNodeCurve;
       }
     >
@@ -583,7 +609,7 @@ function buildOperator<
         return buildOperator({
           ...rest,
           vertWeak: createConstAccessor(vertNode),
-          vertStrong: createConstAccessor(vertDummy)
+          vertStrong: createConstAccessor(vertDummy),
         });
       }
     }
@@ -619,7 +645,7 @@ function buildOperator<
       const { vertWeak: _, ...rest } = opts;
       return buildOperator({
         ...rest,
-        vertWeak: val
+        vertWeak: val,
       });
     }
   }
@@ -654,7 +680,7 @@ function buildOperator<
       const { vertStrong: _, ...rest } = opts;
       return buildOperator({
         ...rest,
-        vertStrong: val
+        vertStrong: val,
       });
     }
   }
@@ -705,7 +731,7 @@ function buildOperator<
         return buildOperator({
           ...rest,
           linkCurve: createConstAccessor(curveDummy),
-          nodeCurve: createConstAccessor(curveNode)
+          nodeCurve: createConstAccessor(curveNode),
         });
       }
     }
@@ -741,7 +767,7 @@ function buildOperator<
       const { linkCurve: _, ...rest } = opts;
       return buildOperator({
         ...rest,
-        linkCurve: val
+        linkCurve: val,
       });
     }
   }
@@ -776,7 +802,7 @@ function buildOperator<
       const { nodeCurve: _, ...rest } = opts;
       return buildOperator({
         ...rest,
-        nodeCurve: val
+        nodeCurve: val,
       });
     }
   }
@@ -798,10 +824,15 @@ function buildOperator<
   return quadCall;
 }
 
+/** default quad operator */
 export type DefaultQuadOperator = QuadOperator<{
+  /** default vert weak */
   vertWeak: ConstAccessor<1>;
+  /** default vert strong */
   vertStrong: ConstAccessor<0>;
+  /** default link curve */
   linkCurve: ConstAccessor<1>;
+  /** default node curve */
   nodeCurve: ConstAccessor<0>;
 }>;
 
@@ -820,6 +851,6 @@ export function quad(...args: never[]): DefaultQuadOperator {
     vertStrong: createConstAccessor(0),
     linkCurve: createConstAccessor(1),
     nodeCurve: createConstAccessor(0),
-    comp: 1
+    comp: 1,
   });
 }
