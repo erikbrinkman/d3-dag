@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Upgrading
+
+This change is a major rewrite of a lot of the library, so expect some effort to migrate.
+
+The notable change was switching the backing data structure from a static DAG
+to a mutable Graph. This change will enable building dynamic layouts much more
+easily. Graphs have a `topological()` method to get nodes in DAG order,
+minimizing edge inversions where possible (although not optimally)
+
+### Added
+
+- Mutable directed graphs, and similar creation methods to warm start them from
+  data.
+
+### Removed
+
+- dag
+- Automatic flow typings. The current version uses the new in/out type
+  designations, and there's an
+  [issue](https://github.com/joarwilk/flowgen/pull/192) with upgrading
+  flowgen's support
+- The Coffman-Graham layering method was removed. This method was rarely used,
+  and is relatively expensive and hard to maintain.
+- Link points are now `[x, y]` tuples so they work more conveniently with
+  `d3.curve`s default typing.
+
+### Changed
+
+- Layering operators now take a separation function instead of always keeping
+  separation at one. This can now be thought of more generally as a height
+  assignment which will be grouped into layers. This is to support more compact
+  sugiyama layouts with minimal effort.
+- Coordinate assignment operators were tweaked to take separation as a
+  parameter instead of node size.
+- Type names have been simplified and rearranged.
+- All layouts have four consistent attributes, the layout function, `nodeSize`,
+  `gap`, and `tweaks`.
+
 ## [0.11.0] - 2022-03-23
 
 ### Added

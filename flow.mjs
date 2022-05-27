@@ -72,7 +72,7 @@ const totalStart = performance.now();
 const useCache = process.argv[2] === "--cache";
 const [rootCache, files] = await Promise.all([
   useCache ? getCache() : {},
-  getFiles()
+  getFiles(),
 ]);
 await Promise.all(files.map((file) => transpile(rootCache, file)));
 await saveCache(rootCache);

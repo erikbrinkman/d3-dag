@@ -1,212 +1,265 @@
 /**
- * A topological layout using {@link ZherebkoOperator}.
+ * A topological layout using {@link Zherebko}.
  *
  * @packageDocumentation
  */
-import { Dag } from "../dag";
-import { entries } from "../iters";
+import { Graph, Rank } from "../graph";
+import { bigrams, map } from "../iters";
+import { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
+import { err, U } from "../utils";
 import { greedy } from "./greedy";
 
-/**
- * The return from calling {@link ZherebkoOperator}
- *
- * This is the final width and height of the laid out dag.
- */
-export interface ZherebkoInfo {
-  /** total width after layout */
-  width: number;
-  /** total height after layout */
-  height: number;
+// TODO Add node size
+
+/** all operators for the zherebko layout */
+export interface Operators<in N = never, in L = never> {
+  /** the operator for assigning nodes a rank */
+  rank: Rank<N, L>;
+  /** node size operator */
+  nodeSize: NodeSize<N, L>;
 }
+
+/** the typed graph input of a set of operators */
+export type OpGraph<Ops extends Operators> = Ops extends Operators<
+  infer N,
+  infer L
+>
+  ? Graph<N, L>
+  : never;
 
 /**
  * A simple topological layout operator.
  *
- * This layout algorithm constructs a topological representation of the dag
+ * This layout algorithm constructs a topological representation of the graph
  * meant for visualization. The algorithm is based off a PR by D. Zherebko. The
  * nodes are topologically ordered, and edges are then positioned into "lanes"
  * to the left and right of the nodes.
  *
  * Create with {@link zherebko}.
  *
- * @example
  * <img alt="zherebko example" src="media://zherebko.png" width="1000">
  *
  * @example
  * ```typescript
  * const data = [["parent", "child"], ...];
  * const create = connect();
- * const dag = create(data);
+ * const graph = create(data);
  * const layout = zherebko();
- * const { width, height } = layout(dag);
- * for (const node of dag) {
+ * const { width, height } = layout(graph);
+ * for (const node of graph) {
  *   console.log(node.x, node.y);
  * }
  * ```
  */
-export interface ZherebkoOperator {
-  /** Layout the input dag */
-  (dag: Dag): ZherebkoInfo;
+export interface Zherebko<Ops extends Operators = Operators> {
+  (graph: OpGraph<Ops>): LayoutResult;
 
   /**
-   * Set the zherebko layout's node size
-   *
-   * Set the size to the specified three-element array of numbers [
-   * *nodeWidth*, *nodeHeight*, *edgeGap* ] and returns a new operator. Nodes
-   * are spaced apart vertically by nodeHeight, and each node is given space of
-   * nodeWidth. Edges that wrap around the nodes are given space edgeGap.
-   *
-   * (default: [1, 1, 1])
+   * Set the rank operator to the given {@link graph.Rank} and returns a new
+   * version of this operator. (default: () =\> undefined)
    */
-  nodeSize(val: readonly [number, number, number]): ZherebkoOperator;
-  /** Get the current node size. */
-  nodeSize(): [number, number, number];
+  rank<NewRank extends Rank>(val: NewRank): Zherebko<U<Ops, "rank", NewRank>>;
+  /** Get the current lane operator */
+  rank(): Ops["rank"];
 
   /**
-   * Set the zherebko layouts full size
+   * Sets the {@link layout!NodeSize}, which assigns how much space is
+   * necessary between nodes.
    *
-   * Set the size to the specified two-element array of numbers [ *width*,
-   * *height* ] and returns a new operator. The dag is resized to fit within
-   * width and height if they are specified. (default: null)
+   * (default: [1, 1])
    */
-  size(val: null | readonly [number, number]): ZherebkoOperator;
-  /** Get the current size */
-  size(): null | [number, number];
+  nodeSize<NewNodeSize extends NodeSize>(
+    val: NewNodeSize
+  ): Zherebko<U<Ops, "nodeSize", NewNodeSize>>;
+  /** Get the current node size */
+  nodeSize(): Ops["nodeSize"];
+
+  /**
+   * Set the gap size between nodes
+   *
+   * (default: [0, 0])
+   */
+  gap(val: readonly [number, number]): Zherebko<Ops>;
+  /** Get the current gap size */
+  gap(): readonly [number, number];
+}
+
+function normalize<N, L>(inp: NodeSize<N, L>): CallableNodeSize<N, L> {
+  if (typeof inp === "function") {
+    return inp;
+  } else {
+    return () => inp;
+  }
 }
 
 /** @internal */
-function buildOperator(
-  nodeWidth: number,
-  nodeHeight: number,
-  edgeGap: number,
-  sizeVal: null | readonly [number, number]
-): ZherebkoOperator {
-  function zherebkoCall(dag: Dag): ZherebkoInfo {
-    // topological sort
-    const levels = [];
-    let numLevels = 0;
-    let last;
-    for (const node of dag.idescendants("before")) {
-      if (last !== undefined && last.nchildLinksTo(node) > 1) {
-        ++numLevels;
+function buildOperator<ND, LD, O extends Operators<ND, LD>>(
+  ops: O & Operators<ND, LD>,
+  sizes: {
+    xgap: number;
+    ygap: number;
+  }
+): Zherebko<O> {
+  function zherebko<N extends ND, L extends LD>(
+    inp: Graph<N, L>
+  ): LayoutResult {
+    const { xgap, ygap } = sizes;
+    const nodeSize = normalize(ops.nodeSize);
+
+    // topological-ish sort
+    const ordered = [...inp.topological(ops.rank)];
+    let y = -ygap;
+    let maxWidth = 0;
+    for (const node of ordered) {
+      const [width, height] = nodeSize(node);
+      if (width <= 0 || height <= 0) {
+        throw err`constant nodeSize must be positive, but got: [${width}, ${height}]`;
       }
-      levels.push([node, numLevels++] as const);
-      last = node;
+      maxWidth = Math.max(maxWidth, width);
+      y += ygap;
+      node.y = y + height / 2;
+      y += height;
     }
+    const height = y;
+
+    // determine edge curve
+    const gap = Math.min(
+      // space between adjacent nodes or half for multi links
+      ...map(
+        bigrams(ordered),
+        ([f, s]) =>
+          (s.y - f.y) / (f.nchildLinksTo(s) + f.nparentLinksTo(s) > 1 ? 2 : 1)
+      )
+    );
 
     // get link indices
-    const indices = greedy(levels);
+    const indices = greedy(ordered, gap * 1.5);
 
     // map to coordinates
     let minIndex = 0;
     let maxIndex = 0;
-    for (const inds of indices.values()) {
-      for (const ind of inds) {
-        if (ind !== undefined) {
-          minIndex = Math.min(minIndex, ind);
-          maxIndex = Math.max(maxIndex, ind);
-        }
-      }
+    for (const index of indices.values()) {
+      minIndex = Math.min(minIndex, index);
+      maxIndex = Math.max(maxIndex, index);
     }
 
     // assign node positions
-    const nodex = -minIndex * edgeGap + nodeWidth / 2;
-    for (const [node, layer] of levels) {
+    const nodex = -minIndex * xgap + maxWidth / 2;
+    for (const node of ordered) {
       node.x = nodex;
-      node.y = (layer + 0.5) * nodeHeight;
     }
 
     // assign link points
-    for (const source of dag) {
-      const inds = indices.get(source) ?? [];
-      // we iterate like this instead of ilinks to get the indices among
-      // children as a way to dedup links
-      for (const [index, { target, points }] of entries(source.ichildLinks())) {
-        points.length = 0;
-        points.push({ x: source.x!, y: source.y! });
-        const ind = inds[index];
+    for (const link of inp.links()) {
+      const index = indices.get(link) ?? 0;
+      const { source, target, points } = link;
+      points.splice(0);
 
-        if (ind !== undefined) {
-          // assumed long link
-          const x =
-            (ind - minIndex + 0.5) * edgeGap +
-            (ind > 0 ? nodeWidth - edgeGap : 0);
-          const y1 = source.y! + nodeHeight;
-          const y2 = target.y! - nodeHeight;
-          if (y2 - y1 > nodeHeight / 2) {
-            points.push({ x: x, y: y1 }, { x: x, y: y2 });
-          } else {
-            points.push({ x: x, y: y1 });
-          }
+      points.push([source.x, source.y]);
+      if (index !== 0) {
+        // assumed long link
+        const x = (index - minIndex) * xgap + (index > 0 ? maxWidth : 0);
+        const y1 = source.y + gap;
+        const y2 = target.y - gap;
+        if (y2 - y1 > 1e-3 * gap) {
+          points.push([x, y1], [x, y2]);
+        } else {
+          points.push([x, y1]);
         }
-
-        points.push({ x: target.x!, y: target.y! });
       }
+      points.push([target.x, target.y]);
     }
 
-    const width = (maxIndex - minIndex) * edgeGap + nodeWidth;
-    const height = numLevels * nodeHeight;
-    if (sizeVal === null) {
-      return { width, height };
-    } else {
-      // rescale to new size
-      const [newWidth, newHeight] = sizeVal;
-      for (const [node] of levels) {
-        node.x! *= newWidth / width;
-        node.y! *= newHeight / height;
-      }
-      for (const { points } of dag.ilinks()) {
-        const newPoints = points.map(({ x, y }) => ({
-          x: (x! * newWidth) / width,
-          y: (y! * newHeight) / height,
-        }));
-        points.splice(0, points.length, ...newPoints);
-      }
-      return { width: newWidth, height: newHeight };
-    }
+    return {
+      width: (maxIndex - minIndex) * xgap + maxWidth,
+      height,
+    };
   }
 
-  function nodeSize(): [number, number, number];
-  function nodeSize(val: readonly [number, number, number]): ZherebkoOperator;
-  function nodeSize(
-    val?: readonly [number, number, number]
-  ): [number, number, number] | ZherebkoOperator {
+  function rank(): O["rank"];
+  function rank<NR extends Rank>(val: NR): Zherebko<U<O, "rank", NR>>;
+  function rank<NR extends Rank>(
+    val?: NR
+  ): Zherebko<U<O, "rank", NR>> | O["rank"] {
     if (val === undefined) {
-      return [nodeWidth, nodeHeight, edgeGap];
+      return ops.rank;
     } else {
-      const [newWidth, newHeight, newGap] = val;
-      return buildOperator(newWidth, newHeight, newGap, sizeVal);
+      const { rank: _, ...rest } = ops;
+      return buildOperator({ ...rest, rank: val }, sizes);
     }
   }
-  zherebkoCall.nodeSize = nodeSize;
+  zherebko.rank = rank;
 
-  function size(): [number, number];
-  function size(val: null | readonly [number, number]): ZherebkoOperator;
-  function size(
-    val?: null | readonly [number, number]
-  ): null | [number, number] | ZherebkoOperator {
+  function nodeSize(): O["nodeSize"];
+  function nodeSize<NNS extends NodeSize>(
+    val: NNS
+  ): Zherebko<U<O, "nodeSize", NNS>>;
+  function nodeSize<NNS extends NodeSize>(
+    val?: NNS
+  ): Zherebko<U<O, "nodeSize", NNS>> | O["nodeSize"] {
+    if (val === undefined) {
+      return ops.nodeSize;
+    } else if (typeof val !== "function" && (val[0] <= 0 || val[1] <= 0)) {
+      const [x, y] = val;
+      throw err`constant nodeSize must be positive, but got: [${x}, ${y}]`;
+    } else {
+      const { nodeSize: _, ...rest } = ops;
+      return buildOperator(
+        {
+          ...rest,
+          nodeSize: val,
+        },
+        sizes
+      );
+    }
+  }
+  zherebko.nodeSize = nodeSize;
+
+  function gap(): readonly [number, number];
+  function gap(val: readonly [number, number]): Zherebko<O>;
+  function gap(
+    val?: readonly [number, number]
+  ): Zherebko<O> | readonly [number, number] {
     if (val !== undefined) {
-      return buildOperator(nodeWidth, nodeHeight, edgeGap, val);
-    } else if (sizeVal === null) {
-      return sizeVal;
+      const [xgap, ygap] = val;
+      if (xgap < 0 || ygap < 0) {
+        throw err`gap width (${xgap}) and height (${ygap}) must be non-negative`;
+      }
+      return buildOperator(ops, { ...sizes, xgap, ygap });
     } else {
-      const [width, height] = sizeVal;
-      return [width, height];
+      const { xgap, ygap } = sizes;
+      return [xgap, ygap];
     }
   }
-  zherebkoCall.size = size;
+  zherebko.gap = gap;
 
-  return zherebkoCall;
+  return zherebko;
 }
 
+/** the default zherebko operator */
+export type DefaultZherebko = Zherebko<{
+  /** no specified ranks */
+  rank: Rank<unknown, unknown>;
+  /** default node size */
+  nodeSize: readonly [1, 1];
+}>;
+
 /**
- * Create a new {@link ZherebkoOperator} with default settings.
+ * Create a new {@link Zherebko} with default settings.
+ *
+ * - rank: none
+ * - nodeSize: [1, 1]
+ * - gap: 1
  */
-export function zherebko(...args: never[]): ZherebkoOperator {
+export function zherebko(...args: never[]): DefaultZherebko {
   if (args.length) {
-    throw new Error(
-      `got arguments to zherebko(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to zherebko(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`zherebko()(...)\``;
   }
-  return buildOperator(1, 1, 1, null);
+  return buildOperator(
+    { rank: () => undefined, nodeSize: [1, 1] as const },
+    {
+      xgap: 1,
+      ygap: 1,
+    }
+  );
 }

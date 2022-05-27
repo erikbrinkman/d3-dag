@@ -10,6 +10,7 @@
 
 # Cache #
 #########
+.cache
 coverage
 .eslintcache
 tsconfig.tsbuildinfo

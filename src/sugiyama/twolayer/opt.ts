@@ -1,43 +1,36 @@
 /**
- * A {@link OptOperator} that is optimal for only the current layer being
+ * A {@link TwolayerOpt} that is optimal for only the current layer being
  * rearranged.
  *
  * @packageDocumentation
  */
-import { TwolayerOperator } from ".";
-import { getParents } from "../../dag/utils";
+import { Twolayer } from ".";
+import { OptChecking } from "../../layout";
 import { Constraint, solve, Variable } from "../../simplex";
-import { SugiNode } from "../utils";
+import { err } from "../../utils";
+import { SugiNode } from "../sugify";
 
 /**
- * How to handle large dags
- *
- * Setting this higher than `"small"` may result in very long run times or
- * crashes.
- */
-export type LargeHandling = "small" | "medium" | "large";
-
-/**
- * A {@link TwolayerOperator} for optimal decrossing of a single target layer
+ * A {@link sugiyama/twolayer!Twolayer} for optimal decrossing of a single target layer
  *
  * The opt order operator orders the relevant layer to minimize the number of
  * crossings. This is expensive, but not nearly as expensive as optimizing all
  * crossings initially.
  *
- * Create with {@link opt}.
+ * Create with {@link twolayerOpt}.
  *
  * <img alt="two layer opt example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
-export interface OptOperator extends TwolayerOperator<unknown, unknown> {
+export interface TwolayerOpt extends Twolayer<unknown, unknown> {
   /**
    * Set the large dag handling
    *
-   * Setting to anything but `"small"` will allow running on larger dags, but
-   * the layout may run forever, or crash the vm. (default: `"small"`)
+   * Setting to anything but `"fast"` will allow running on larger dags, but
+   * the layout may run forever, or crash the vm. (default: `"fast"`)
    */
-  large(val: LargeHandling): OptOperator;
+  check(val: OptChecking): TwolayerOpt;
   /** Return the handling of large graphs. */
-  large(): LargeHandling;
+  check(): OptChecking;
 
   /**
    * Set whether to also minimize distance between nodes that share a parent or
@@ -46,38 +39,27 @@ export interface OptOperator extends TwolayerOperator<unknown, unknown> {
    * This adds more variables and constraints so will take longer, but will
    * likely produce a better layout. (default: false)
    */
-  dist(val: boolean): OptOperator;
+  dist(val: boolean): TwolayerOpt;
   /** get whether the current layout minimized distance */
   dist(): boolean;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 /** @internal */
 function buildOperator(options: {
-  large: LargeHandling;
+  check: OptChecking;
   dist: boolean;
-}): OptOperator {
-  function optCall(
+}): TwolayerOpt {
+  function twolayerOpt(
     topLayer: SugiNode[],
     bottomLayer: SugiNode[],
     topDown: boolean
   ): void {
-    // check if input is too large
+    // swap layers
     const reordered = topDown ? bottomLayer : topLayer;
     const numVars = (reordered.length * Math.max(reordered.length - 1, 0)) / 2;
-    const numEdges = topLayer.reduce((t, n) => t + n.nchildren(), 0);
-    if (options.large !== "large" && numVars > 1200) {
-      throw new Error(
-        `size of dag to twolayerOpt is too large and will likely crash, enable "large" dags to run anyway`
-      );
-    } else if (
-      options.large !== "large" &&
-      options.large !== "medium" &&
-      (numVars > 400 || numEdges > 100)
-    ) {
-      throw new Error(
-        `size of dag to twolayerOpt is too large and will likely not finish, enable "medium" dags to run anyway`
-      );
-    }
 
     // initialize model
     const variables: Record<string, Variable> = {};
@@ -97,15 +79,15 @@ function buildOperator(options: {
 
     let unconstrained, groups;
     if (topDown) {
-      const withParents = new Set(topLayer.flatMap((node) => node.children()));
-      unconstrained = bottomLayer.filter((node) => !withParents.has(node));
+      unconstrained = bottomLayer.filter((n) => !n.nparents());
       groups = topLayer
-        .map((node) => node.children())
+        .map((node) => [...node.children()])
         .filter((cs) => cs.length > 1);
     } else {
       unconstrained = topLayer.filter((n) => !n.nchildren());
-      const parents = getParents(topLayer);
-      groups = [...parents.values()];
+      groups = bottomLayer
+        .map((node) => [...node.parents()])
+        .filter((ps) => ps.length > 1);
     }
     // NOTE distance cost for an unconstrained node ina group can't violate
     // all pairs at once, so the cost is ~(n/2)^2 not n(n-1)/2
@@ -167,8 +149,8 @@ function buildOperator(options: {
     // add crossing minimization
     for (const [i, p1] of topLayer.slice(0, topLayer.length - 1).entries()) {
       for (const p2 of topLayer.slice(i + 1)) {
-        for (const c1 of p1.ichildren()) {
-          for (const c2 of p2.ichildren()) {
+        for (const c1 of p1.children()) {
+          for (const c2 of p2.children()) {
             if (c1 === c2) {
               continue;
             }
@@ -232,6 +214,15 @@ function buildOperator(options: {
       }
     }
 
+    // check for large input
+    const numVari = Object.keys(variables).length;
+    const numCons = Object.keys(constraints).length;
+    if (options.check !== "oom" && numVari > 1200) {
+      throw err`size of dag to twolayerOpt is too large and will likely crash instead of complete; you probably want to use a cheaper twolayer strategy for sugiyama like \`decrossTwoLayer(twolayerAgg())\`, but if you still want to continue you can suppress this check with \`decrossTwoLayer().order(twolayerOpt().check("oom"))\``;
+    } else if (options.check === "fast" && (numVari > 400 || numCons > 1000)) {
+      throw err`size of dag to twolayerOpt is too large and will likely not finish; you probably want to use a cheaper twolayer strategy for sugiyama like \`decrossTwoLayer(twolayerAgg())\`, but if you still want to continue you can suppress this check with \`decrossTwoLayer().order(twolayerOpt().check("slow"))\``;
+    }
+
     // solve objective
     // NOTE bundling sets this to undefined, and we need it to be settable
     const ordering = solve("opt", "min", variables, constraints, ints);
@@ -240,39 +231,42 @@ function buildOperator(options: {
     reordered.sort((n1, n2) => ordering[key(n1, n2)] || -1);
   }
 
-  function large(): LargeHandling;
-  function large(val: LargeHandling): OptOperator;
-  function large(val?: LargeHandling): LargeHandling | OptOperator {
+  function check(): OptChecking;
+  function check(val: OptChecking): TwolayerOpt;
+  function check(val?: OptChecking): OptChecking | TwolayerOpt {
     if (val === undefined) {
-      return options.large;
+      return options.check;
     } else {
-      return buildOperator({ ...options, large: val });
+      return buildOperator({ ...options, check: val });
     }
   }
-  optCall.large = large;
+  twolayerOpt.check = check;
 
   function dist(): boolean;
-  function dist(val: boolean): OptOperator;
-  function dist(val?: boolean): boolean | OptOperator {
+  function dist(val: boolean): TwolayerOpt;
+  function dist(val?: boolean): boolean | TwolayerOpt {
     if (val === undefined) {
       return options.dist;
     } else {
       return buildOperator({ ...options, dist: val });
     }
   }
-  optCall.dist = dist;
+  twolayerOpt.dist = dist;
 
-  return optCall;
+  twolayerOpt.d3dagBuiltin = true as const;
+
+  return twolayerOpt;
 }
 
 /**
- * Create a default {@link OptOperator}, bundled as {@link twolayerOpt}.
+ * Create a default {@link TwolayerOpt}
+ *
+ * - {@link TwolayerOpt#check | `check()`}: `"fast"`
+ * - {@link TwolayerOpt#dist | `dist()`}: `false`
  */
-export function opt(...args: never[]): OptOperator {
+export function twolayerOpt(...args: never[]): TwolayerOpt {
   if (args.length) {
-    throw new Error(
-      `got arguments to opt(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to twolayerOpt(${args}); you probably forgot to construct twolayerOpt before passing to order: \`decrossTwoLayer().order(twolayerOpt())\`, note the trailing "()"`;
   }
-  return buildOperator({ large: "small", dist: false });
+  return buildOperator({ check: "fast", dist: false });
 }

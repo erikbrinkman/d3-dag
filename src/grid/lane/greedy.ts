@@ -1,17 +1,19 @@
 /**
- * A {@link LaneOperator} that assigns lanes greedily, but quickly.
+ * A {@link grid/lane!Lane} that assigns lanes greedily, but quickly.
  *
  * @packageDocumentation
  */
 import { least, median } from "d3-array";
-import { LaneOperator } from ".";
-import { DagNode } from "../../dag";
-import { map, reverse } from "../../iters";
+import { Lane } from ".";
+import { GraphNode } from "../../graph";
+import { map, slice } from "../../iters";
+import { err } from "../../utils";
+import { gridChildren } from "./utils";
 
 /**
  * A lane operator that assigns lanes greedily, but quickly.
  *
- * Create with {@link greedy}.
+ * Create with {@link laneGreedy}.
  *
  * @example
  *
@@ -23,12 +25,12 @@ import { map, reverse } from "../../iters";
  * A bottom up example
  * <img alt="grid example" src="media://grid-greedy-bottomup.png" width="200">
  */
-export interface GreedyOperator extends LaneOperator<unknown, unknown> {
+export interface LaneGreedy extends Lane<unknown, unknown> {
   /**
    * Set whether the greedy assignment should be top-down or bottom-up.
    * (default: true)
    */
-  topDown(val: boolean): GreedyOperator;
+  topDown(val: boolean): LaneGreedy;
   /**
    * Get whether the current operator is set to assign top-down..
    */
@@ -40,7 +42,7 @@ export interface GreedyOperator extends LaneOperator<unknown, unknown> {
    * If output is compressed a free lane will be chosen over minimizing edge
    * lengths. (default: true)
    */
-  compressed(val: boolean): GreedyOperator;
+  compressed(val: boolean): LaneGreedy;
   /** Get the current compressed setting */
   compressed(): boolean;
 
@@ -51,9 +53,12 @@ export interface GreedyOperator extends LaneOperator<unknown, unknown> {
    * fan out in either direction from there, otherwise new lanes will always be
    * added to the right. (default: false)
    */
-  bidirectional(val: boolean): GreedyOperator;
+  bidirectional(val: boolean): LaneGreedy;
   /** Get the current bidirectional setting */
   bidirectional(): boolean;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 /**
@@ -90,7 +95,7 @@ class OneSidedIndexer implements Indexer {
     if (this.uncompressed) {
       free.push(this.indices.length);
     }
-    const targ = target ?? 0;
+    const targ = target === undefined ? 0 : target;
     const ind =
       least(free, (v) => [Math.abs(targ - v), v]) ?? this.indices.length;
     this.setIndex(ind, after);
@@ -144,7 +149,7 @@ class TwoSidedIndexer implements Indexer {
       free.push(this.nextNeg());
       free.push(this.nextPos());
     }
-    const targ = target ?? 0;
+    const targ = target === undefined ? 0 : target;
     const empty =
       this.negIndices.length < this.posIndices.length - 1
         ? this.nextNeg()
@@ -190,24 +195,19 @@ function indexer(compressed: boolean, bidirectional: boolean): Indexer {
  *
  * @internal
  */
-function topDownOp(nodes: readonly DagNode[], inds: Indexer): void {
-  // set all xs to undefined so we know what we've seen before
-  for (const node of nodes) {
-    node.x = undefined;
-  }
-
+function topDownOp(nodes: readonly GraphNode[], inds: Indexer): void {
   // if node is new (no children) give it an arbitrary index
   for (const node of nodes) {
-    if (node.x === undefined) {
-      node.x = inds.getIndex(node.y!);
+    if (node.ux === undefined) {
+      node.x = inds.getIndex(node.y);
     }
 
     // iterate over children from farthest away to closest, assign each a lane
     // in order, trying to be as close to their parent as possible
-    for (const child of [...node.ichildren()].sort((a, b) => b.y! - a.y!)) {
-      if (child.x === undefined) {
-        child.x = inds.getIndex(node.y!, node.x);
-        inds.setIndex(child.x, child.y!);
+    for (const child of [...gridChildren(node)].sort((a, b) => b.y - a.y)) {
+      if (child.ux === undefined) {
+        child.x = inds.getIndex(node.y, node.x);
+        inds.setIndex(child.x, child.y);
       }
     }
   }
@@ -215,7 +215,7 @@ function topDownOp(nodes: readonly DagNode[], inds: Indexer): void {
   // update according to offset
   const offset = inds.offset();
   for (const node of nodes) {
-    node.x! += offset;
+    node.x += offset;
   }
 }
 
@@ -227,50 +227,54 @@ function topDownOp(nodes: readonly DagNode[], inds: Indexer): void {
  *
  * @internal
  */
-function bottomUpOp(nodes: readonly DagNode[], inds: Indexer): void {
+function bottomUpOp(nodes: readonly GraphNode[], inds: Indexer): void {
   // create map of a node to their highest parent, these we assign automatically
-  const highestParent = new Map<DagNode, DagNode>();
+  const highestParent = new Map<GraphNode, GraphNode>();
   for (const node of nodes) {
-    node.x = undefined;
-    for (const child of node.ichildren()) {
+    for (const child of gridChildren(node)) {
       const current = highestParent.get(child);
-      if (current === undefined || node.y! < current.y!) {
+      if (current === undefined || node.y < current.y) {
         highestParent.set(child, node);
       }
     }
   }
 
-  for (const node of reverse(nodes)) {
+  for (const node of slice(nodes, nodes.length - 1, -1, -1)) {
     // if node wasn't a highest parent, find it a lane
-    if (node.x === undefined) {
-      const target = median(map(node.ichildren(), (c) => c.x!));
+    if (node.ux === undefined) {
+      const target = median(map(gridChildren(node), (node) => node.x));
       // note we invert y because we're going bottom up
-      node.x = inds.getIndex(nodes.length - node.y!, target);
+      node.x = inds.getIndex(nodes.length - node.y, target);
     }
 
     // if node has a highest parent, assign it to the same lane
     const par = highestParent.get(node);
     if (par !== undefined) {
-      par.x ??= node.x;
-      inds.setIndex(node.x, nodes.length - par.y!);
+      if (par.ux === undefined) par.x = node.x;
+      inds.setIndex(node.x, nodes.length - par.y);
     }
   }
 
   // adjust for offset
   const offset = inds.offset();
   for (const node of nodes) {
-    node.x! += offset;
+    node.x += offset;
   }
 }
 
-/** @internal */
 function buildOperator(
   topDownVal: boolean,
   compressedVal: boolean,
   bidirectionalVal: boolean
-): GreedyOperator {
-  function greedyCall(ordered: readonly DagNode[]): void {
+): LaneGreedy {
+  function laneGreedy(ordered: readonly GraphNode[]): void {
+    // clear xs
+    for (const node of ordered) {
+      node.ux = undefined;
+    }
+    // build indexer
     const inds = indexer(compressedVal, bidirectionalVal);
+    // order
     if (topDownVal) {
       topDownOp(ordered, inds);
     } else {
@@ -278,50 +282,54 @@ function buildOperator(
     }
   }
 
-  function topDown(val: boolean): GreedyOperator;
+  function topDown(val: boolean): LaneGreedy;
   function topDown(): boolean;
-  function topDown(val?: boolean): GreedyOperator | boolean {
+  function topDown(val?: boolean): LaneGreedy | boolean {
     if (val === undefined) {
       return topDownVal;
     } else {
       return buildOperator(val, compressedVal, bidirectionalVal);
     }
   }
-  greedyCall.topDown = topDown;
+  laneGreedy.topDown = topDown;
 
-  function compressed(val: boolean): GreedyOperator;
+  function compressed(val: boolean): LaneGreedy;
   function compressed(): boolean;
-  function compressed(val?: boolean): GreedyOperator | boolean {
+  function compressed(val?: boolean): LaneGreedy | boolean {
     if (val === undefined) {
       return compressedVal;
     } else {
       return buildOperator(topDownVal, val, bidirectionalVal);
     }
   }
-  greedyCall.compressed = compressed;
+  laneGreedy.compressed = compressed;
 
-  function bidirectional(val: boolean): GreedyOperator;
+  function bidirectional(val: boolean): LaneGreedy;
   function bidirectional(): boolean;
-  function bidirectional(val?: boolean): GreedyOperator | boolean {
+  function bidirectional(val?: boolean): LaneGreedy | boolean {
     if (val === undefined) {
       return bidirectionalVal;
     } else {
       return buildOperator(topDownVal, compressedVal, val);
     }
   }
-  greedyCall.bidirectional = bidirectional;
+  laneGreedy.bidirectional = bidirectional;
 
-  return greedyCall;
+  laneGreedy.d3dagBuiltin = true as const;
+
+  return laneGreedy;
 }
 
 /**
- * Create a default {@link GreedyOperator}, bundled as {@link laneGreedy}.
+ * Create a default {@link LaneGreedy}
+ *
+ * - {@link LaneGreedy#topDown | `topDown()`}: `true`
+ * - {@link LaneGreedy#compressed | `compressed()`}: `true`
+ * - {@link LaneGreedy#bidirectional | `bidirectional()`}: `true`
  */
-export function greedy(...args: never[]): GreedyOperator {
+export function laneGreedy(...args: never[]): LaneGreedy {
   if (args.length) {
-    throw new Error(
-      `got arguments to greedy(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to laneGreedy(${args}); you probably forgot to construct laneGreedy before passing to lane: \`grid().lane(laneGreedy())\`, note the trailing "()"`;
   }
   return buildOperator(true, true, false);
 }

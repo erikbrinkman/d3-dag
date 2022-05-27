@@ -1,29 +1,32 @@
 /**
- * A {@link LaneOperator} that assigns lanes to minimize edge crossings.
+ * A {@link grid/lane!Lane} that assigns lanes to minimize edge crossings.
  *
  * @packageDocumentation
  */
-import { LaneOperator } from ".";
-import { DagNode } from "../../dag";
+import { Lane } from ".";
+import { GraphNode } from "../../graph";
 import { map } from "../../iters";
+import { OptChecking } from "../../layout";
 import { Constraint, solve, Variable } from "../../simplex";
+import { err } from "../../utils";
+import { gridChildren } from "./utils";
 
 /**
  * A lane operator that assigns lanes to minimize edge crossings.
  *
- * Create with {@link opt}.
+ * Create with {@link laneOpt}.
  *
  * @example
  * <img alt="grid greedy example" src="media://grid-opt.png" width="200">
  */
-export interface OptOperator extends LaneOperator<unknown, unknown> {
+export interface LaneOpt extends Lane<unknown, unknown> {
   /**
    * Set whether to used compressed output
    *
    * If output is compressed then the number of crossings will be minimized
    * subject to the fewest number of lanes necessary. (default: false)
    */
-  compressed(val: boolean): OptOperator;
+  compressed(val: boolean): LaneOpt;
   /** Get the current compressed setting */
   compressed(): boolean;
 
@@ -33,29 +36,42 @@ export interface OptOperator extends LaneOperator<unknown, unknown> {
    * This adds more variables and constraints so will take longer, but will
    * likely produce a better layout. (default: true)
    */
-  dist(val: boolean): OptOperator;
+  dist(val: boolean): LaneOpt;
   /** get whether the current layout minimized distance */
   dist(): boolean;
+
+  /**
+   * Set the large dag handling
+   *
+   * Setting to anything but `"fast"` will allow running on larger dags, but
+   * the layout may run forever, or crash the vm. (default: `"fast"`)
+   */
+  check(val: OptChecking): LaneOpt;
+  /** Return the handling of large graphs. */
+  check(): OptChecking;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
-function getCompressedWidth(ordered: readonly DagNode[]): number {
+function getCompressedWidth(ordered: readonly GraphNode[]): number {
   const indices: number[] = [];
-  const assigned = new Set<DagNode>();
+  const assigned = new Set<GraphNode>();
 
-  // if node is new (no children) git it a free index
+  // if node is new (no children) give it a free index
   for (const node of ordered) {
     if (!assigned.has(node)) {
-      const free = indices.findIndex((v) => v <= node.y!);
+      const free = indices.findIndex((v) => v <= node.y);
       const ind = free === -1 ? indices.length : free;
-      indices[ind] = node.y!;
+      indices[ind] = node.y;
     }
 
     // iterate over children from farthest away to closest assigning indices
-    for (const child of [...node.ichildren()].sort((a, b) => b.y! - a.y!)) {
+    for (const child of [...gridChildren(node)].sort((a, b) => b.y - a.y)) {
       if (!assigned.has(child)) {
-        const free = indices.findIndex((v) => v <= node.y!);
+        const free = indices.findIndex((v) => v <= node.y);
         const ind = free === -1 ? indices.length : free;
-        indices[ind] = child.y!;
+        indices[ind] = child.y;
         assigned.add(child);
       }
     }
@@ -66,8 +82,12 @@ function getCompressedWidth(ordered: readonly DagNode[]): number {
 }
 
 /** @internal */
-function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
-  function optCall(ordered: readonly DagNode[]): void {
+function buildOperator(options: {
+  compressed: boolean;
+  dist: boolean;
+  check: OptChecking;
+}): LaneOpt {
+  function laneOpt(ordered: readonly GraphNode[]): void {
     // initialize model
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
@@ -75,16 +95,16 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
 
     // map of node to its unique index / id
     const inds = new Map(map(ordered, (n, i) => [n, i] as const));
-    const width = compressedVal
+    const width = options.compressed
       ? getCompressedWidth(ordered)
-      : ordered.length - 1;
+      : Math.max(ordered.length - 1, 1);
 
     for (const ind of ordered.keys()) {
       variables[ind] = { opt: 0, [ind]: 1 };
       constraints[ind] = { max: width - 1 };
     }
 
-    const parentIndex = new Map<DagNode, number>();
+    const parentIndex = new Map<GraphNode, number>();
     for (const [ind, node] of ordered.entries()) {
       const topIndex = parentIndex.get(node);
       if (topIndex !== undefined) {
@@ -104,7 +124,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
           variables[pair][pairSpan] = -width;
           constraints[pairSpan] = { min: 1 - width, max: -1 };
 
-          for (const child of above.ichildren()) {
+          for (const child of gridChildren(above)) {
             if (child === node) continue; // can't cross self
             // for each child of above node, we check if it crosses, and bound
             // trip node to be one of there's a crossing
@@ -132,7 +152,7 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
       }
 
       // update parent index
-      for (const child of node.ichildren()) {
+      for (const child of gridChildren(node)) {
         if (!parentIndex.has(child)) {
           parentIndex.set(child, ind);
         }
@@ -140,12 +160,12 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
     }
 
     // also add distance minimizers
-    if (distVal) {
+    if (options.dist) {
       // we scale by numEdges and width here to make sure that contribution to
       // optimum is always less than one
-      const numEdges = ordered.reduce((t, n) => t + n.children().length, 0);
+      const numEdges = ordered.reduce((t, n) => t + gridChildren(n).size, 0);
       for (const [ind, node] of ordered.entries()) {
-        for (const child of node.ichildren()) {
+        for (const child of gridChildren(node)) {
           const cind = inds.get(child)!;
           const key = `${ind}-${cind}-dist`;
           variables[key] = { opt: 1 / numEdges };
@@ -165,10 +185,18 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
       }
     }
 
+    // check for large input
+    const numVari = Object.keys(variables).length;
+    const numCons = Object.keys(constraints).length;
+    if (options.check !== "oom" && numVari > 2000) {
+      throw err`size of dag to decrossOpt is too large and will likely crash instead of complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOp().check("oom"))\``;
+    } else if (options.check === "fast" && (numVari > 1000 || numCons > 5000)) {
+      throw err`size of dag to decrossOpt is too large and will likely not complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOp().check("slow"))\``;
+    }
+
     const lanes = solve("opt", "min", variables, constraints, ints);
 
-    if (distVal || compressedVal) {
-      // if we minimize distance, we know this will be compact
+    if (options.compressed) {
       for (const [ind, node] of ordered.entries()) {
         node.x = lanes[ind] ?? 0;
       }
@@ -185,39 +213,54 @@ function buildOperator(compressedVal: boolean, distVal: boolean): OptOperator {
     }
   }
 
-  function compressed(val: boolean): OptOperator;
+  function compressed(val: boolean): LaneOpt;
   function compressed(): boolean;
-  function compressed(val?: boolean): OptOperator | boolean {
+  function compressed(val?: boolean): LaneOpt | boolean {
     if (val === undefined) {
-      return compressedVal;
+      return options.compressed;
     } else {
-      return buildOperator(val, distVal);
+      return buildOperator({ ...options, compressed: val });
     }
   }
-  optCall.compressed = compressed;
+  laneOpt.compressed = compressed;
 
-  function dist(val: boolean): OptOperator;
+  function dist(val: boolean): LaneOpt;
   function dist(): boolean;
-  function dist(val?: boolean): OptOperator | boolean {
+  function dist(val?: boolean): LaneOpt | boolean {
     if (val === undefined) {
-      return distVal;
+      return options.dist;
     } else {
-      return buildOperator(compressedVal, val);
+      return buildOperator({ ...options, dist: val });
     }
   }
-  optCall.dist = dist;
+  laneOpt.dist = dist;
 
-  return optCall;
+  function check(val: OptChecking): LaneOpt;
+  function check(): OptChecking;
+  function check(val?: OptChecking): LaneOpt | OptChecking {
+    if (val === undefined) {
+      return options.check;
+    } else {
+      return buildOperator({ ...options, check: val });
+    }
+  }
+  laneOpt.check = check;
+
+  laneOpt.d3dagBuiltin = true as const;
+
+  return laneOpt;
 }
 
 /**
- * Create a default {@link OptOperator}, bundled as {@link laneOpt}.
+ * Create a default {@link LaneOpt}
+ *
+ * - {@link LaneOpt#compressed | `compressed()`}: `false`
+ * - {@link LaneOpt#dist | `dist()`}: `true`
+ * - {@link LaneOpt#check | `check()`}: `"fast"`
  */
-export function opt(...args: never[]): OptOperator {
+export function laneOpt(...args: never[]): LaneOpt {
   if (args.length) {
-    throw new Error(
-      `got arguments to opt(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to laneOpt(${args}); you probably forgot to construct laneOpt before passing to lane: \`grid().lane(laneOpt())\`, note the trailing "()"`;
   }
-  return buildOperator(false, true);
+  return buildOperator({ compressed: false, dist: true, check: "fast" });
 }

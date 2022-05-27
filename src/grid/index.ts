@@ -1,56 +1,29 @@
 /**
- * A topological layout using {@link GridOperator}.
+ * A topological layout using {@link Grid}.
  *
  * @packageDocumentation
  */
-import { Dag, DagNode } from "../dag";
-import { before } from "../dag/utils";
-import { map } from "../iters";
-import { js, setEqual, Up } from "../utils";
-import { LaneOperator } from "./lane";
-import { greedy, GreedyOperator } from "./lane/greedy";
-
-/**
- * an operator for assigning rank priorities to nodes for a grid layout
- *
- * Nodes with lower ranks will be chose first, so for a rank order to work, a
- * node must have a lower rank than it's children.
- *
- * @remarks
- *
- * This is currently implemented naively, which means that nodes without a rank are considered to have the lowest rank, and will come before any nodes given an explicit rank. In addition, if the ranks are inconsistent with the layout of the dag, then they will be silently ignored.
- *
- * Both of these behaviors may change in the future i.e. where unranked means
- * no condition, and an error will be thrown if the ranks are inconsistent.
- */
-export interface RankOperator<N = never, L = never> {
-  (node: DagNode<N, L>): number | undefined;
-}
+import { Graph, Rank } from "../graph";
+import { LayoutResult, NodeSize } from "../layout";
+import { err, U } from "../utils";
+import { Lane } from "./lane";
+import { LaneGreedy, laneGreedy } from "./lane/greedy";
+import { verifyLanes } from "./lane/utils";
 
 /** all operators for the grid layout */
-export interface Operators<N = never, L = never> {
+export interface GridOps<in N = never, in L = never> {
   /** the operator for assigning nodes to a lane */
-  lane: LaneOperator<N, L>;
+  lane: Lane<N, L>;
   /** the operator for assigning nodes a rank */
-  rank: RankOperator<N, L>;
+  rank: Rank<N, L>;
+  /** node size operator */
+  nodeSize: NodeSize<N, L>;
 }
 
-/** the typed dag specified by a set of operators */
-export type OpDag<Op extends Operators> = Op extends Operators<infer N, infer L>
-  ? Dag<N, L>
+/** the typed graph input of a set of operators */
+export type OpGraph<Op extends GridOps> = Op extends GridOps<infer N, infer L>
+  ? Graph<N, L>
   : never;
-
-/**
- * The return from calling {@link GridOperator}
- *
- * This is the final width and height of the laid out dag.
- */
-export interface GridInfo {
-  /** the total weight after layout */
-  width: number;
-  /** the total height after layout */
-  height: number;
-}
 
 /**
  * A simple grid based topological layout operator.
@@ -65,8 +38,15 @@ export interface GridInfo {
  *
  * Create with {@link grid}.
  *
- * @example
  * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
+ *
+ * @remarks
+ *
+ * The current implementation doesn't multi-dags any differently, so multiple
+ * edges going to the same node will be rendered as a single edge. If the
+ * layout is a dag, and rank is consistent with the dag ordering than this
+ * won't be an issue, but there are no internal checks that the layout fits
+ * these criteria.
  *
  * @example
  * ```typescript
@@ -80,269 +60,235 @@ export interface GridInfo {
  * }
  * ```
  */
-export interface GridOperator<Ops extends Operators> {
-  /** Layout the input dag */
-  (dag: OpDag<Ops>): GridInfo;
+export interface Grid<Ops extends GridOps = GridOps> {
+  (grf: OpGraph<Ops>): LayoutResult;
 
   /**
-   * Set the lane operator to the given {@link LaneOperator} and returns a new
-   * version of this operator. (default: {@link GreedyOperator})
+   * Set the lane operator to the given {@link grid/lane!Lane} and returns a new
+   * version of this operator. (default: {@link grid/lane/greedy!LaneGreedy})
    */
-  lane<NewLane extends LaneOperator>(
-    val: NewLane
-  ): GridOperator<
-    Up<
-      Ops,
-      {
-        /** new lane */
-        lane: NewLane;
-      }
-    >
-  >;
+  lane<NewLane extends Lane>(val: NewLane): Grid<U<Ops, "lane", NewLane>>;
   /** Get the current lane operator */
   lane(): Ops["lane"];
 
   /**
-   * Set the rank operator to the given {@link RankOperator} and returns a new
+   * Set the rank operator to the given {@link graph!Rank} and returns a new
    * version of this operator. (default: () =\> undefined)
    */
-  rank<NewRank extends RankOperator>(
-    val: NewRank
-  ): GridOperator<
-    Up<
-      Ops,
-      {
-        /** new rank */
-        rank: NewRank;
-      }
-    >
-  >;
+  rank<NewRank extends Rank>(val: NewRank): Grid<U<Ops, "rank", NewRank>>;
   /** Get the current lane operator */
   rank(): Ops["rank"];
 
   /**
-   * Sets this grid layout's node size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns a new operator. These sizes are
-   * effectively the grid size, e.g. the spacing between adjacent lanes or rows
-   * in the grid. (default: [1, 1])
+   * Sets the {@link layout!NodeSize}, which assigns how much space is
+   * necessary between nodes.
    *
-   * Note, due to the way that edges are meant to rendered, edges won't
-   * intersect with nodes if width is half of the actual node width.
+   * (default: [1, 1])
    */
-  nodeSize(val: readonly [number, number]): GridOperator<Ops>;
-  /** Get the current node size. */
-  nodeSize(): [number, number];
+  nodeSize<NewNodeSize extends NodeSize>(
+    val: NewNodeSize
+  ): Grid<U<Ops, "nodeSize", NewNodeSize>>;
+  /** Get the current node size */
+  nodeSize(): Ops["nodeSize"];
 
   /**
-   * Update the grid layout size
+   * Set the gap size between nodes
    *
-   * Sets this grid layout's node size to the specified two-element array of
-   * numbers [ *width*, *height* ] and returns a new operator. After the
-   * initial layout, if size is not null, the dag will be rescaled so that it
-   * fits in width x height. (default: null)
+   * (default: [0, 0])
    */
-  size(val: null | readonly [number, number]): GridOperator<Ops>;
-  /** Get the current size. */
-  size(): null | [number, number];
-}
-
-/**
- * Verify that nodes were assigned valid lanes
- *
- * @internal
- */
-function verifyLanes(ordered: DagNode[]): number {
-  for (const node of ordered) {
-    if (node.x === undefined) {
-      throw new Error(js`coord didn't assign an x to node '${node}'`);
-    } else if (node.x < 0) {
-      throw new Error(`coord assigned an x (${node.x}) less than 0`);
-    }
-  }
-
-  const uniqueExes = new Set(ordered.map((n) => n.x));
-  if (!setEqual(uniqueExes, new Set(map(uniqueExes, (_, i) => i)))) {
-    const exStr = [...uniqueExes].join(", ");
-    throw new Error(
-      `didn't assign increasing positive integers for x coordinates: ${exStr}`
-    );
-  }
-
-  const parentIndex = new Map<DagNode, number>();
-  for (const [ind, node] of ordered.entries()) {
-    // test that no nodes overlap with edges
-    const topIndex = parentIndex.get(node);
-    if (topIndex !== undefined) {
-      for (const above of ordered.slice(topIndex + 1, ind)) {
-        if (above.x === node.x) {
-          throw new Error(
-            js`node ${above} was assigned an overlapping lane with ${node}`
-          );
-        }
-      }
-    }
-
-    // update parent index
-    for (const child of node.ichildren()) {
-      if (!parentIndex.has(child)) {
-        parentIndex.set(child, ind);
-      }
-    }
-  }
-
-  return uniqueExes.size;
+  gap(val: readonly [number, number]): Grid<Ops>;
+  /** Get the current gap size */
+  gap(): readonly [number, number];
 }
 
 /** @internal */
-function buildOperator<N, L, Ops extends Operators<N, L>>(
-  options: Ops &
-    Operators<N, L> & {
-      nodeWidth: number;
-      nodeHeight: number;
-      size: null | readonly [number, number];
-    }
-): GridOperator<Ops> {
-  function gridCall(dag: Dag<N, L>): GridInfo {
-    if (dag.multidag()) {
-      throw new Error(
-        "grid layout doesn't make sense to apply to multidags, consider pruning the edges"
-      );
-    }
-
-    const { nodeWidth, nodeHeight, size, lane } = options;
+function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
+  options: Ops & GridOps<ND, LD>,
+  sizes: {
+    xgap: number;
+    ygap: number;
+  }
+): Grid<Ops> {
+  function grid<N extends ND, L extends LD>(grf: Graph<N, L>): LayoutResult {
+    // NOTE this doesn't render multi-link any differently (i.e. they'll
+    // overlap). We could try to check, but we'd have to check for multi-links
+    // after we topologically order, which would be a pain, so we just allow
+    // it.
 
     // topological sort
-    const ordered = [...before(dag, options.rank)];
-
-    // assign ys
-    for (const [i, node] of ordered.entries()) {
-      node.y = i;
+    const ordered = grf.topological(options.rank);
+    for (const [y, node] of ordered.entries()) {
+      node.y = y;
     }
 
     // get lanes
-    lane(ordered);
-    const numLanes = verifyLanes(ordered);
+    options.lane(ordered);
+    const numLanes = verifyLanes(ordered, options.lane);
 
     // adjust x and y by nodeSize
-    for (const node of ordered) {
-      node.x = (node.x! + 0.5) * nodeWidth;
-      node.y = (node.y! + 0.5) * nodeHeight;
-    }
-
-    // scale for size
-    let width = numLanes * nodeWidth;
-    let height = ordered.length * nodeHeight;
-    if (size !== null) {
-      const [newWidth, newHeight] = size;
+    const { xgap, ygap } = sizes;
+    let width, height;
+    if (typeof options.nodeSize === "function") {
+      // assign ys and compute widths
+      const laneWidths = Array<number>(numLanes).fill(0);
+      height = -ygap;
       for (const node of ordered) {
-        node.x! *= newWidth / width;
-        node.y! *= newHeight / height;
+        const [nodeWidth, nodeHeight] = options.nodeSize(node);
+        if (nodeWidth <= 0 || nodeHeight <= 0) {
+          throw err`nodeSize must be positive, but got: [${nodeWidth}, ${nodeHeight}]`;
+        }
+        laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
+        height += ygap;
+        node.y = height + nodeHeight / 2;
+        height += nodeHeight;
       }
-      width = newWidth;
-      height = newHeight;
+      // compute width and xs
+      width = -xgap;
+      for (const [i, laneWidth] of laneWidths.entries()) {
+        width += xgap;
+        laneWidths[i] = width + laneWidth / 2;
+        width += laneWidth;
+      }
+      // assign xs
+      for (const node of ordered) {
+        node.x = laneWidths[node.x];
+      }
+    } else {
+      // constant, so assign simply
+      const [nodeWidth, nodeHeight] = options.nodeSize;
+      for (const node of ordered) {
+        node.x = (node.x + 0.5) * nodeWidth + node.x * xgap;
+        node.y = (node.y + 0.5) * nodeHeight + node.y * ygap;
+      }
+      width = numLanes * (nodeWidth + xgap) - xgap;
+      height = ordered.length * (nodeHeight + ygap) - ygap;
     }
 
     // assign link points
-    for (const { source, target, points } of dag.ilinks()) {
-      points.length = 0;
-      if (source.x !== target.x) {
-        points.push({ x: source.x!, y: source.y! });
+    for (const link of grf.links()) {
+      const { source, target, points } = link;
+      points.splice(0);
+      if (source.x === target.x) {
+        points.push([source.x, source.y], [target.x, target.y]);
+      } else {
+        points.push([source.x, source.y]);
+        if (source.y < target.y) {
+          // effectively reverse edge
+          points.push([target.x, source.y]);
+        } else {
+          points.push([source.x, target.y]);
+        }
+        points.push([target.x, target.y]);
       }
-      points.push({ x: target.x!, y: source.y! });
-      points.push({ x: target.x!, y: target.y! });
     }
 
     return { width, height };
   }
 
   function lane(): Ops["lane"];
-  function lane<NL extends LaneOperator>(
-    val: NL
-  ): GridOperator<Up<Ops, { lane: NL }>>;
-  function lane<NL extends LaneOperator>(
+  function lane<NL extends Lane>(val: NL): Grid<U<Ops, "lane", NL>>;
+  function lane<NL extends Lane>(
     val?: NL
-  ): GridOperator<Up<Ops, { lane: NL }>> | Ops["lane"] {
+  ): Grid<U<Ops, "lane", NL>> | Ops["lane"] {
     if (val === undefined) {
       return options.lane;
     } else {
       const { lane: _, ...rest } = options;
-      return buildOperator({ ...rest, lane: val });
+      return buildOperator({ ...rest, lane: val }, sizes);
     }
   }
-  gridCall.lane = lane;
+  grid.lane = lane;
 
   function rank(): Ops["rank"];
-  function rank<NR extends RankOperator>(
-    val: NR
-  ): GridOperator<Up<Ops, { rank: NR }>>;
-  function rank<NR extends RankOperator>(
+  function rank<NR extends Rank>(val: NR): Grid<U<Ops, "rank", NR>>;
+  function rank<NR extends Rank>(
     val?: NR
-  ): GridOperator<Up<Ops, { rank: NR }>> | Ops["rank"] {
+  ): Grid<U<Ops, "rank", NR>> | Ops["rank"] {
     if (val === undefined) {
       return options.rank;
     } else {
       const { rank: _, ...rest } = options;
-      return buildOperator({ ...rest, rank: val });
+      return buildOperator({ ...rest, rank: val }, sizes);
     }
   }
-  gridCall.rank = rank;
+  grid.rank = rank;
 
-  function nodeSize(): [number, number];
-  function nodeSize(sz: readonly [number, number]): GridOperator<Ops>;
-  function nodeSize(
-    val?: readonly [number, number]
-  ): [number, number] | GridOperator<Ops> {
+  function nodeSize(): Ops["nodeSize"];
+  function nodeSize<NNS extends NodeSize>(
+    val: NNS
+  ): Grid<U<Ops, "nodeSize", NNS>>;
+  function nodeSize<NNS extends NodeSize>(
+    val?: NNS
+  ): Grid<U<Ops, "nodeSize", NNS>> | Ops["nodeSize"] {
     if (val === undefined) {
-      const { nodeWidth, nodeHeight } = options;
-      return [nodeWidth, nodeHeight];
+      return options.nodeSize;
+    } else if (typeof val !== "function" && (val[0] <= 0 || val[1] <= 0)) {
+      const [x, y] = val;
+      throw err`constant nodeSize must be positive, but got: [${x}, ${y}]`;
     } else {
-      const [nodeWidth, nodeHeight] = val;
-      return buildOperator({ ...options, nodeWidth, nodeHeight });
+      const { nodeSize: _, ...rest } = options;
+      return buildOperator(
+        {
+          ...rest,
+          nodeSize: val,
+        },
+        sizes
+      );
     }
   }
-  gridCall.nodeSize = nodeSize;
+  grid.nodeSize = nodeSize;
 
-  function size(): null | [number, number];
-  function size(sz: null | readonly [number, number]): GridOperator<Ops>;
-  function size(
-    val?: null | readonly [number, number]
-  ): null | [number, number] | GridOperator<Ops> {
+  function gap(): readonly [number, number];
+  function gap(val: readonly [number, number]): Grid<Ops>;
+  function gap(
+    val?: readonly [number, number]
+  ): Grid<Ops> | readonly [number, number] {
     if (val !== undefined) {
-      return buildOperator({ ...options, size: val });
-    } else if (options.size === null) {
-      return null;
+      const [xgap, ygap] = val;
+      if (xgap < 0 || ygap < 0) {
+        throw err`gaps must be non-negative, but got [${xgap}, ${ygap}]`;
+      }
+      return buildOperator(options, { xgap, ygap });
     } else {
-      const [width, height] = options.size;
-      return [width, height];
+      const { xgap, ygap } = sizes;
+      return [xgap, ygap];
     }
   }
-  gridCall.size = size;
+  grid.gap = gap;
 
-  return gridCall;
+  return grid;
 }
 
 /** the default grid operator */
-export type DefaultGridOperator = GridOperator<{
+export type DefaultGrid = Grid<{
   /** default lane: greedy */
-  lane: GreedyOperator;
+  lane: LaneGreedy;
   /** default rank: none */
-  rank: RankOperator<unknown, unknown>;
+  rank: Rank<unknown, unknown>;
+  /** default size */
+  nodeSize: readonly [1, 1];
 }>;
 
 /**
- * Create a new {@link GridOperator} with default settings.
+ * Create a new {@link Grid} with default settings.
+ *
+ * - {@link Grid#lane | `lane()`}: {@link grid/lane/greedy!LaneGreedy}
+ * - {@link Grid#rank | `rank()`}: no ranks
+ * - {@link Grid#nodeSize | `nodeSize()`}: [1, 1]
  */
-export function grid(...args: never[]): DefaultGridOperator {
+export function grid(...args: never[]): DefaultGrid {
   if (args.length) {
-    throw new Error(
-      `got arguments to grid(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to grid(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`grid()(...)\``;
   }
-  return buildOperator({
-    lane: greedy(),
-    rank: () => undefined,
-    nodeWidth: 1,
-    nodeHeight: 1,
-    size: null,
-  });
+  return buildOperator(
+    {
+      lane: laneGreedy(),
+      rank: () => undefined,
+      nodeSize: [1, 1] as const,
+    },
+    {
+      xgap: 1,
+      ygap: 1,
+    }
+  );
 }

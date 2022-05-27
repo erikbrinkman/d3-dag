@@ -1,16 +1,15 @@
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-import { TwolayerOperator } from "../../../src/sugiyama/twolayer";
-import { greedy } from "../../../src/sugiyama/twolayer/greedy";
+import { Twolayer } from "../../../src/sugiyama/twolayer";
+import { twolayerGreedy as greedy } from "../../../src/sugiyama/twolayer/greedy";
 
 const init = greedy();
-expectAssignable<TwolayerOperator<unknown, unknown>>(init);
+expectAssignable<Twolayer<unknown, unknown>>(init);
 
-interface MyTwolayer
-  extends TwolayerOperator<{ rank: number }, { link: true }> {
+interface MyTwolayer extends Twolayer<{ rank: number }, { link: true }> {
   myTwolayer: true;
 }
 declare const myTwolayer: MyTwolayer;
 const base = init.base(myTwolayer);
-expectAssignable<TwolayerOperator<{ rank: number }, { link: true }>>(base);
-expectNotAssignable<TwolayerOperator<unknown, unknown>>(base);
+expectAssignable<Twolayer<{ rank: number }, { link: true }>>(base);
+expectNotAssignable<Twolayer<unknown, unknown>>(base);
 expectType<MyTwolayer>(base.base());

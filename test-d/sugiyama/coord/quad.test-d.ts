@@ -1,83 +1,78 @@
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-import { CoordOperator } from "../../../src/sugiyama/coord";
-import {
-  LinkWeightAccessor,
-  NodeWeightAccessor,
-  quad,
-} from "../../../src/sugiyama/coord/quad";
+import { GraphLink, GraphNode } from "../../../src/graph";
+import { Coord } from "../../../src/sugiyama/coord";
+import { coordQuad as quad } from "../../../src/sugiyama/coord/quad";
 
 const init = quad();
-expectAssignable<CoordOperator<unknown, unknown>>(init);
-expectType<[number, number]>(init.vertical());
-expectType<[number, number]>(init.curve());
+expectAssignable<Coord<unknown, unknown>>(init);
 
-interface MyVertWeak
-  extends LinkWeightAccessor<{ rank: number }, { link: true }> {
+interface MyVertWeak {
+  (inp: GraphLink<{ rank: number }, { link: true }>): number;
   myVertWeak: true;
 }
 declare const myVertWeak: MyVertWeak;
 const vertWeak = init.vertWeak(myVertWeak);
-expectAssignable<CoordOperator<{ rank: number }, { link: true }>>(vertWeak);
-expectNotAssignable<CoordOperator<unknown, unknown>>(vertWeak);
+expectAssignable<Coord<{ rank: number }, { link: true }>>(vertWeak);
+expectNotAssignable<Coord<unknown, unknown>>(vertWeak);
 expectType<MyVertWeak>(vertWeak.vertWeak());
-expectType<null>(vertWeak.vertical());
 
-interface MyLinkCurve extends LinkWeightAccessor<{ curve: string }, unknown> {
+interface MyLinkCurve {
+  (inp: GraphLink<{ curve: string }, unknown>): number;
   myLinkCurve: true;
 }
 declare const myLinkCurve: MyLinkCurve;
 const linkCurve = vertWeak.linkCurve(myLinkCurve);
-expectAssignable<
-  CoordOperator<{ rank: number; curve: string }, { link: true }>
->(linkCurve);
-expectNotAssignable<CoordOperator<{ rank: number }, { link: true }>>(linkCurve);
+expectAssignable<Coord<{ rank: number; curve: string }, { link: true }>>(
+  linkCurve
+);
+expectNotAssignable<Coord<{ rank: number }, { link: true }>>(linkCurve);
 expectType<MyLinkCurve>(linkCurve.linkCurve());
-expectType<null>(linkCurve.curve());
 
-interface MyNodeCurve extends NodeWeightAccessor<unknown, { index: number }> {
+interface MyNodeCurve {
+  (inp: GraphNode<unknown, { index: number }>): number;
   myNodeCurve: true;
 }
 declare const myNodeCurve: MyNodeCurve;
 const nodeCurve = linkCurve.nodeCurve(myNodeCurve);
 expectAssignable<
-  CoordOperator<{ rank: number; curve: string }, { link: true; index: number }>
+  Coord<{ rank: number; curve: string }, { link: true; index: number }>
 >(nodeCurve);
-expectNotAssignable<
-  CoordOperator<{ rank: number; curve: string }, { link: true }>
->(nodeCurve);
+expectNotAssignable<Coord<{ rank: number; curve: string }, { link: true }>>(
+  nodeCurve
+);
 expectType<MyNodeCurve>(nodeCurve.nodeCurve());
 
-interface MyVertStrong
-  extends LinkWeightAccessor<{ strong: true }, { tag: string }> {
+interface MyVertStrong {
+  (inp: GraphLink<{ strong: true }, { tag: string }>): number;
   myVertStrong: true;
 }
 declare const myVertStrong: MyVertStrong;
 const vertStrong = nodeCurve.vertStrong(myVertStrong);
 expectAssignable<
-  CoordOperator<
+  Coord<
     { rank: number; curve: string; strong: true },
     { link: true; index: number; tag: string }
   >
 >(vertStrong);
 expectNotAssignable<
-  CoordOperator<{ rank: number; curve: string }, { link: true; index: number }>
+  Coord<{ rank: number; curve: string }, { link: true; index: number }>
 >(vertStrong);
 expectType<MyVertStrong>(vertStrong.vertStrong());
 
-interface MyNodeCurveRep
-  extends NodeWeightAccessor<{ index: number }, unknown> {
+interface MyNodeCurveRep {
+  (inp: GraphNode<{ index: number }, unknown>): number;
   myNodeCurveRep: true;
 }
 declare const myNodeCurveRep: MyNodeCurveRep;
 const nodeCurveRep = vertStrong.nodeCurve(myNodeCurveRep);
 expectAssignable<
-  CoordOperator<
+  Coord<
     { rank: number; curve: string; index: number; strong: true },
     { link: true; tag: string }
   >
 >(nodeCurveRep);
 expectNotAssignable<
-  CoordOperator<
+  Coord<
     { rank: number; curve: string; strong: true },
     { link: true; index: number; tag: string }
   >

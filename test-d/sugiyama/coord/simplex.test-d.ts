@@ -1,15 +1,17 @@
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
-import { CoordOperator } from "../../../src/sugiyama/coord";
-import { simplex, WeightAccessor } from "../../../src/sugiyama/coord/simplex";
+import { GraphLink } from "../../../src/graph";
+import { Coord } from "../../../src/sugiyama/coord";
+import { coordSimplex } from "../../../src/sugiyama/coord/simplex";
 
-const init = simplex();
-expectAssignable<CoordOperator<unknown, unknown>>(init);
+const init = coordSimplex();
+expectAssignable<Coord<unknown, unknown>>(init);
 
-interface MyWeight extends WeightAccessor<{ rank: number }, { link: true }> {
+interface MyWeight {
+  (inp: GraphLink<{ rank: number }, { link: true }>): [number, number, number];
   myWeight: true;
 }
 declare const myWeight: MyWeight;
 const weight = init.weight(myWeight);
-expectAssignable<CoordOperator<{ rank: number }, { link: true }>>(weight);
-expectNotAssignable<CoordOperator<unknown, unknown>>(weight);
+expectAssignable<Coord<{ rank: number }, { link: true }>>(weight);
+expectNotAssignable<Coord<unknown, unknown>>(weight);
 expectType<MyWeight>(weight.weight());

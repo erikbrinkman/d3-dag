@@ -5,11 +5,28 @@
  * @packageDocumentation
  */
 // TODO turn this into an operator for zherebko
-import { DagNode } from "../dag";
-import { entries } from "../iters";
+import { GraphLink, GraphNode } from "../graph";
+import { bigrams } from "../iters";
+
+function* zhereParentLinks(
+  node: GraphNode
+): IterableIterator<[GraphNode, GraphNode, GraphLink]> {
+  for (const link of node.parentLinks()) {
+    const { source } = link;
+    if (source.y < node.y) {
+      yield [source, node, link];
+    }
+  }
+  for (const link of node.childLinks()) {
+    const { target } = link;
+    if (target.y < node.y) {
+      yield [target, node, link];
+    }
+  }
+}
 
 function firstAvailable(inds: number[], target: number) {
-  const index = inds.findIndex((i) => i <= target);
+  const index = inds.findIndex((i) => i < target);
   if (index >= 0) {
     return index;
   } else {
@@ -21,56 +38,47 @@ function firstAvailable(inds: number[], target: number) {
  * @returns link map which takes source, target, and ind to get lane
  */
 export function greedy(
-  nodes: readonly (readonly [DagNode, number])[]
-): Map<DagNode, number[]> {
+  nodes: readonly GraphNode[],
+  gap: number
+): Map<GraphLink, number> {
   // We first create an array of every link we want to render, with the layer
   // of their source and target node so that we can sort first by target layer
   // then by source layer to greedily assign lanes so they don't intersect
-  const layers = new Map(nodes);
   const links = [];
-  for (const [i, [node, nodeLayer]] of nodes.entries()) {
-    // here we don't include a link if it's to the next node in the stack, and
-    // if it's the first time we've seen that node among this node's children.
+  for (const [last, node] of bigrams(nodes)) {
     let seen = false;
-    const next = nodes[i + 1]?.[0];
-    for (const [index, { target }] of entries(node.ichildLinks())) {
-      const childLayer = layers.get(target)!;
-      if (next === target && !seen) {
-        seen = true; // skip the first time
+    for (const info of zhereParentLinks(node)) {
+      const [source] = info;
+      if (last === source && !seen) {
+        seen = true;
       } else {
-        links.push([nodeLayer, childLayer, node, index] as const);
+        links.push(info);
       }
     }
   }
-  links.sort(([asrcl, atgtl], [bsrcl, btgtl]) =>
-    atgtl === btgtl ? bsrcl - asrcl : atgtl - btgtl
-  );
 
-  const indices = new Map<DagNode, number[]>();
+  links.sort(([fs, ft], [ss, st]) => ft.y - st.y || ss.y - fs.y);
+
   const pos: number[] = [];
   const neg: number[] = [];
 
-  for (const [nodeLayer, childLayer, node, linkIndex] of links) {
-    let targets = indices.get(node);
-    if (targets === undefined) {
-      targets = [];
-      indices.set(node, targets);
-    }
-
-    const negIndex = firstAvailable(neg, nodeLayer);
-    const posIndex = firstAvailable(pos, nodeLayer);
+  const indices = new Map<GraphLink, number>();
+  for (const [source, target, link] of links) {
+    // we can technically put the gap both in the query and the save, but this
+    // allows a little floating point tolerance.
+    const negIndex = firstAvailable(neg, source.y);
+    const posIndex = firstAvailable(pos, source.y);
     if (negIndex < posIndex) {
       // TODO tiebreak with crossing for insertion
       // NOTE there may not be a better layout than this, so this may not need
       // to be an operator if we can solve this aspect.
       // tie-break right
-      targets[linkIndex] = -negIndex - 1;
-      neg[negIndex] = childLayer - 1;
+      indices.set(link, -negIndex - 1);
+      neg[negIndex] = target.y - gap;
     } else {
-      targets[linkIndex] = posIndex + 1;
-      pos[posIndex] = childLayer - 1;
+      indices.set(link, posIndex + 1);
+      pos[posIndex] = target.y - gap;
     }
   }
-
   return indices;
 }

@@ -4,19 +4,20 @@
  * @internal
  * @packageDocumentation
  */
+import { err } from "./utils";
 
 /** iterable callback that maps a value into another */
-export interface MapCallback<T, S> {
+export interface MapCallback<in T, out S> {
   (element: T, index: number): S;
 }
 
 /** reduce callback */
-export interface ReduceCallback<T, S> {
+export interface ReduceCallback<in T, in out S> {
   (accumulator: S, currentValue: T, index: number): S;
 }
 
 /** filter guard callback */
-export interface FilterGuardCallback<T, S extends T> {
+export interface FilterGuardCallback<in T, out S extends T> {
   (element: T, index: number): element is S;
 }
 
@@ -103,9 +104,67 @@ export function every<T>(
   return !some(iter, (e, i) => !callback(e, i));
 }
 
-/** iterator over array reverse */
-export function* reverse<T>(arr: readonly T[]): IterableIterator<T> {
-  for (let i = arr.length; i != 0; ) {
-    yield arr[--i];
+/** iterable length */
+export function length(iter: Iterable<unknown>): number {
+  let count = 0;
+  for (const _ of iter) ++count;
+  return count;
+}
+
+function* slicePos<T>(
+  arr: readonly T[],
+  frm: number,
+  to: number,
+  stride: number
+): IterableIterator<T> {
+  const limit = Math.min(to, arr.length);
+  for (let i = frm; i < limit; i += stride) {
+    yield arr[i];
+  }
+}
+
+function* sliceNeg<T>(
+  arr: readonly T[],
+  frm: number,
+  to: number,
+  stride: number
+): IterableIterator<T> {
+  const limit = Math.max(to, -1);
+  for (let i = frm; i > limit; i += stride) {
+    yield arr[i];
+  }
+}
+
+/** iterable slice of an array */
+export function slice<T>(
+  arr: readonly T[],
+  frm: number = 0,
+  to: number = arr.length,
+  stride: number = 1
+): IterableIterator<T> {
+  if (stride > 0) {
+    return slicePos(arr, frm, to, stride);
+  } else if (stride < 0) {
+    return sliceNeg(arr, frm, to, stride);
+  } else {
+    throw err`can't slice with zero stride`;
+  }
+}
+
+/** chain several iterables */
+export function* chain<T>(...iters: Iterable<T>[]): IterableIterator<T> {
+  for (const iter of iters) {
+    yield* iter;
+  }
+}
+
+/** iterate over bigrams of an iterable */
+export function* bigrams<T>(iterable: Iterable<T>): IterableIterator<[T, T]> {
+  const iter = iterable[Symbol.iterator]() as Iterator<T, T>;
+  let { value: last } = iter.next();
+  let value;
+  while (!({ value } = iter.next()).done) {
+    yield [last, value];
+    last = value;
   }
 }

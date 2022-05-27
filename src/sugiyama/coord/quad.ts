@@ -1,158 +1,87 @@
 /**
- * The {@link QuadOperator} positions nodes to minimize a quadratic
+ * The {@link CoordQuad} positions nodes to minimize a quadratic
  * optimization.
  *
  * @packageDocumentation
  */
-import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { DagLink, DagNode } from "../../dag";
-import { flatMap, map, some } from "../../iters";
-import { bigrams, dfs, Up } from "../../utils";
-import { SugiNode } from "../utils";
-import {
-  componentMap,
-  indices,
-  init,
-  layout,
-  minBend,
-  minDist,
-  solve,
-  splitComponentLayers,
-} from "./utils";
+import { Coord } from ".";
+import { GraphLink, GraphNode } from "../../graph";
+import { flatMap } from "../../iters";
+import { err, ierr, U } from "../../utils";
+import { SugiNode, SugiSeparation } from "../sugify";
+import { indices, init, layout, minBend, minDist, solve } from "./utils";
 
+/**
+ * A strictly callable {@link NodeWeight}
+ */
+export interface CallableNodeWeight<NodeDatum = never, LinkDatum = never> {
+  (node: GraphNode<NodeDatum, LinkDatum>): number;
+}
 /**
  * an accessor to get the optimization of the weight for a node
  *
- * Currently this is only used to set the {@link QuadOperator.nodeCurve}.
+ * Currently this is only used to set the {@link CoordQuad.nodeCurve}.
  */
-export interface NodeWeightAccessor<NodeDatum = never, LinkDatum = never> {
-  (node: DagNode<NodeDatum, LinkDatum>): number;
-}
+export type NodeWeight<NodeDatum = never, LinkDatum = never> =
+  | number
+  | CallableNodeWeight<NodeDatum, LinkDatum>;
 
+/**
+ * A strictly callable {@link LinkWeight}
+ */
+export interface CallableLinkWeight<NodeDatum = never, LinkDatum = never> {
+  (link: GraphLink<NodeDatum, LinkDatum>): number;
+}
 /**
  * an accessor to get the optimization of the weight for a link
  *
- * Currently this is only used to set the following accessors: {@link
- * QuadOperator.linkCurve}, {@link QuadOperator.vertWeak}, {@link
- * QuadOperator.vertStrong}.
+ * Currently this is only used to set the following accessors:
+ * {@link CoordQuad.linkCurve}, {@link CoordQuad.vertWeak},
+ * {@link CoordQuad.vertStrong}.
  */
-export interface LinkWeightAccessor<NodeDatum = never, LinkDatum = never> {
-  (link: DagLink<NodeDatum, LinkDatum>): number;
-}
-
-/**
- * a {@link NodeWeightAccessor} or {@link LinkWeightAccessor} that returns a constant value
- *
- * If using a constant value, this provides some small memory and time savings
- * over a regular accessor.
- */
-export interface ConstAccessor<T extends number = number>
-  extends NodeWeightAccessor<unknown, unknown>,
-    LinkWeightAccessor<unknown, unknown> {
-  (): T;
-  /** the constant value */
-  value: T;
-}
-
-/**
- * a function for creating a {@link ConstAccessor}
- */
-export function createConstAccessor<T extends number>(
-  value: T
-): ConstAccessor<T> {
-  if (value < 0) {
-    throw new Error("const accessors should return non-negative values");
-  }
-  const accessor = () => value;
-  accessor.value = value;
-  return accessor;
-}
-
-/**
- * If an accessor is a const accessor
- */
-function isConstAccessor(
-  acc: LinkWeightAccessor | NodeWeightAccessor | ConstAccessor
-): acc is ConstAccessor {
-  return "value" in acc && typeof acc.value === "number";
-}
+export type LinkWeight<NodeDatum = never, LinkDatum = never> =
+  | number
+  | CallableLinkWeight<NodeDatum, LinkDatum>;
 
 /** the operators for the quad operator */
 export interface Operators<N = never, L = never> {
   /** the vert weak accessor */
-  vertWeak: LinkWeightAccessor<N, L>;
+  vertWeak: LinkWeight<N, L>;
   /** the vert strong accessor */
-  vertStrong: LinkWeightAccessor<N, L>;
+  vertStrong: LinkWeight<N, L>;
   /** the link weight accessor */
-  linkCurve: LinkWeightAccessor<N, L>;
+  linkCurve: LinkWeight<N, L>;
   /** the node weight accessor */
-  nodeCurve: NodeWeightAccessor<N, L>;
+  nodeCurve: NodeWeight<N, L>;
 }
 
 /** node datum for operators */
-type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
+export type OpNodeDatum<O extends Operators> = O extends Operators<
+  infer N,
+  never
+>
   ? N
   : never;
 /** link datum for operators */
-type OpLinkDatum<O extends Operators> = O extends Operators<never, infer L>
+export type OpLinkDatum<O extends Operators> = O extends Operators<
+  never,
+  infer L
+>
   ? L
   : never;
 
 /**
- * A {@link CoordOperator} that places nodes to minimize a quadratic function
- *
- * The minimization involves minimizing the distance between {@link vertical |
- * connected nodes}, the {@link curve | curvature of edges}, and the distance
- * between {@link component | disconnected components}.
+ * A {@link sugiyama/coord!Coord} that places nodes to minimize a quadratic function
  *
  * This operators generally takes the longest of all built-in operators but
  * produces the most pleasing layout.
  *
- * Create with {@link quad}.
+ * Create with {@link coordQuad}.
  *
  * <img alt="quad example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
-export interface QuadOperator<Ops extends Operators>
-  extends CoordOperator<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
-  /**
-   * Set the weight for verticality. Higher weights mean connected nodes should
-   * be closer together, or corollarily edges should be closer to vertical
-   * lines. There are two different weights, [ *regular nodes*, *dummy nodes*
-   * ], the weight for a pair of connected nodes the sum of the weight value
-   * for each node depending on whether not that node is a dummy node. Setting
-   * them both to positive means all lines should be roughly vertical, while
-   * setting a weight to zero doesn't peanalize edges between those types of
-   * nodes. (default: [1, 0])
-   *
-   * @remarks
-   * `.vertical([a, b])` is the same as `.vertWeak(() => a).vertStrong(() => b)`
-   */
-  vertical(val: readonly [number, number]): QuadOperator<
-    Up<
-      Ops,
-      {
-        /** new vert weak */
-        vertWeak: ConstAccessor;
-        /** new vert strong */
-        vertStrong: ConstAccessor;
-      }
-    >
-  >;
-  /**
-   * Get the current vertical weights if they're constant. If {@link
-   * QuadOperator.vertWeak} or {@link QuadOperator.vertStrong} is not constant,
-   * then null is returned. By setting the weight of dummy nodes to zero,
-   * longer edges aren't penalized to be straighter than short edges.
-   */
-  vertical(): Ops extends {
-    /** const vert weak */
-    vertWeak: ConstAccessor;
-    /** const vert strong */
-    vertStrong: ConstAccessor;
-  }
-    ? [number, number]
-    : null;
-
+export interface CoordQuad<Ops extends Operators>
+  extends Coord<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
   /**
    * Set the weak vertical accessor.
    *
@@ -161,17 +90,9 @@ export interface QuadOperator<Ops extends Operators>
    * while it penalized non vertical edges, it allows curving in the middle of
    * long edges. (default: () =\> 1)
    */
-  vertWeak<NewVertWeak extends LinkWeightAccessor>(
+  vertWeak<NewVertWeak extends LinkWeight>(
     val: NewVertWeak
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        /** new vert weak */
-        vertWeak: NewVertWeak;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>>;
   /**
    * Get the current vertWeak accessor
    */
@@ -184,57 +105,13 @@ export interface QuadOperator<Ops extends Operators>
    * penealizes any section of an edge that isn't vertical, making longer edges
    * contribute more to the overall impact on the objective. (default: () =\> 0)
    */
-  vertStrong<NewVertStrong extends LinkWeightAccessor>(
+  vertStrong<NewVertStrong extends LinkWeight>(
     val: NewVertStrong
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        /** new vert strong */
-        vertStrong: NewVertStrong;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>>;
   /**
    * Get the current vertStrong accessor
    */
   vertStrong(): Ops["vertStrong"];
-
-  /**
-   * Set the weight for curviness. Higher weights mean an edge going through a
-   * node type should be roughly straight.  There are two different weights, [
-   * *regular nodes*, *dummy nodes* ], that impact the curvature through those
-   * node types. Setting regular nodes to positive will create a type of flow
-   * of edges going through a node, while setting dummy nodes will enforce the
-   * longer edges should try to be straight. (default: [0, 1])
-   *
-   * @remarks
-   * `.curve([a, b])` is the same as `.nodeCurve(() =\> a).linkCurve(() =\> b)`
-   */
-  curve(val: readonly [number, number]): QuadOperator<
-    Up<
-      Ops,
-      {
-        /** new link curve */
-        linkCurve: ConstAccessor;
-        /** new node curve */
-        nodeCurve: ConstAccessor;
-      }
-    >
-  >;
-  /**
-   * Get the current curve weights if they're constant, otherwise return null.
-   * By setting the weight of non-dummy nodes to zero, we only care about the
-   * curvature of edges, not lines that pass through nodes.
-   */
-  curve(): Ops extends {
-    /** constant link curve */
-    linkCurve: ConstAccessor;
-    /** constant node curve */
-    nodeCurve: ConstAccessor;
-  }
-    ? [number, number]
-    : null;
 
   /**
    * Set the link curve weight accessor
@@ -243,17 +120,9 @@ export interface QuadOperator<Ops extends Operators>
    * dependent of their verticality. If using strongVert for an edge, it
    * probably won't need a strong link curve weight. (default: () =\> 1)
    */
-  linkCurve<NewLinkCurve extends LinkWeightAccessor>(
+  linkCurve<NewLinkCurve extends LinkWeight>(
     val: NewLinkCurve
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        /** new link curve */
-        linkCurve: NewLinkCurve;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>>;
   /**
    * Get the current link curve weight accessor
    */
@@ -269,32 +138,29 @@ export interface QuadOperator<Ops extends Operators>
    * clear why this would ever be desirable, but it's possible to specify.
    * (default: () =\> 0)
    */
-  nodeCurve<NewNodeCurve extends NodeWeightAccessor>(
+  nodeCurve<NewNodeCurve extends NodeWeight>(
     val: NewNodeCurve
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        /** new node curve */
-        nodeCurve: NewNodeCurve;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>>;
   /**
    * Get the current node curve accessor
    */
   nodeCurve(): Ops["nodeCurve"];
 
   /**
-   * Set the weight for how close different disconnected components should be.
-   * The higher the weight, the more different components will be close to each
-   * other at the expense of other objectives. This needs to be greater than
-   * zero to make the objective sound when there are disconnected components,
-   * but otherwise should probably be very small. (default: 1)
+   * Set the weight for how close nodes should be to zero.
+   *
+   * This ensures the optimization is sound, and is necessary if there are
+   * certain types of disconnected components or zero weights for different
+   * curvature constraints. If the graph is connected and the weights are
+   * positive this can be set to zero, otherwise it should be positive, but
+   * small. (default: 1e-6)
    */
-  component(val: number): QuadOperator<Ops>;
-  /** Get the current component weight. */
-  component(): number;
+  compress(val: number): CoordQuad<Ops>;
+  /** Get the current compress weight. */
+  compress(): number;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 /**
@@ -305,71 +171,58 @@ export interface QuadOperator<Ops extends Operators>
  * we then have to iterate over the links in advance.
  */
 function cacheVertWeak<N, L>(
-  vertWeak: LinkWeightAccessor<N, L>,
+  vertWeak: LinkWeight<N, L>,
   layers: SugiNode<N, L>[][]
-): (src: DagNode<N, L>, targ: DagNode<N, L>) => number {
-  if (isConstAccessor(vertWeak)) {
-    // verify that it's actually const since we'll never actually call it normally
-    const val = vertWeak.value;
-    for (const node of flatMap(layers, (l) => l)) {
-      if ("node" in node.data) {
-        const source = node.data.node;
-        for (const link of source.ichildLinks()) {
-          if (vertWeak(link) !== val) {
-            throw new Error(
-              "passed in a vertWeak accessor with a `value` property that wasn't a const accessor"
-            );
-          }
-        }
-      }
-    }
-    return () => val;
+): (src: GraphNode<N, L>, targ: GraphNode<N, L>) => number {
+  if (typeof vertWeak !== "function") {
+    return () => vertWeak;
   } else {
-    const vertWeakMap = new Map<DagNode<N, L>, Map<DagNode<N, L>, number>>();
+    const vertWeakMap = new Map<
+      GraphNode<N, L>,
+      Map<GraphNode<N, L>, number>
+    >();
     for (const node of flatMap(layers, (l) => l)) {
       if ("node" in node.data) {
         // regular node
         const source = node.data.node;
-        const targetLinks = new Map(
-          map(
-            source.ichildLinks(),
-            (link) => [link.target, vertWeak(link)] as const
-          )
-        );
+        const targetLinks = new Map<GraphNode<N, L>, number>();
+        for (const link of source.childLinks()) {
+          const val = vertWeak(link);
+          if (val < 0) {
+            throw err`link weights must be non-negative; double check the accessor passed into \`coordQuad().vertWeak(...)\``;
+          } else {
+            targetLinks.set(link.target, val);
+          }
+        }
         vertWeakMap.set(source, targetLinks);
       }
     }
-    return (src: DagNode<N, L>, targ: DagNode<N, L>): number =>
+    return (src: GraphNode<N, L>, targ: GraphNode<N, L>): number =>
       vertWeakMap.get(src)!.get(targ)!;
   }
 }
 
-/**
- * cache an arbitrary link weight accessor
- */
-function cacheLinkWeightAccessor<N, L>(
-  accessor: LinkWeightAccessor<N, L>
-): LinkWeightAccessor<N, L> {
-  if (isConstAccessor(accessor)) {
-    // don't need to cache constant accessors
-    return accessor;
+function normalizeAccessor<T>(
+  accessor: number | ((inp: T) => number),
+  typ: "node" | "link",
+  func: "nodeCurve" | "linkCurve" | "vertStrong"
+): (inp: T) => number {
+  if (typeof accessor !== "function") {
+    return () => accessor;
   } else {
-    const cache = new Map<DagNode<N, L>, Map<DagNode<N, L>, number>>();
-    return (link: DagLink<N, L>) => {
-      const { source, target } = link;
-      let targets = cache.get(source);
-      if (targets === undefined) {
-        targets = new Map<DagNode<N, L>, number>();
-        cache.set(source, targets);
-      }
-      const cached = targets.get(target);
+    const cache = new Map<T, number>();
+    return (inp: T) => {
+      const cached = cache.get(inp);
       if (cached === undefined) {
-        const val = accessor(link);
+        const val = accessor(inp);
         if (val < 0) {
-          throw new Error("link weights must be non-negative");
+          throw new Error(
+            `${typ} weights must be non-negative; double check the accessor passed into \`coordQuad().${func}(...)\``
+          );
+        } else {
+          cache.set(inp, val);
+          return val;
         }
-        targets.set(target, val);
-        return val;
       } else {
         return cached;
       }
@@ -377,61 +230,47 @@ function cacheLinkWeightAccessor<N, L>(
   }
 }
 
-/**
- * cache an arbitrary node weight accessor
- */
-function cacheNodeWeightAccessor<N, L>(
-  accessor: NodeWeightAccessor<N, L>
-): NodeWeightAccessor<N, L> {
-  if (isConstAccessor(accessor)) {
-    return accessor;
-  } else {
-    const cache = new Map<DagNode<N, L>, number>();
-    return (node: DagNode<N, L>) => {
-      const cached = cache.get(node);
-      if (cached === undefined) {
-        const val = accessor(node);
-        if (val < 0) {
-          throw new Error("node weights must be non-negative");
-        }
-        cache.set(node, val);
-        return val;
-      } else {
-        return cached;
-      }
-    };
-  }
-}
-
+// TODO why extends never? Seems wrong, but the types seem to work...
 function buildOperator<
-  NodeDatum,
-  LinkDatum,
-  Ops extends Operators<NodeDatum, LinkDatum>
+  ND extends never,
+  LD extends never,
+  Ops extends Operators<ND, LD>
 >(
   opts: Ops &
-    Operators<NodeDatum, LinkDatum> & {
+    Operators<ND, LD> & {
       comp: number;
     }
-): QuadOperator<Ops> {
-  function quadComponent<N extends NodeDatum, L extends LinkDatum>(
+): CoordQuad<Ops> {
+  function coordQuad<N extends ND, L extends LD>(
     layers: SugiNode<N, L>[][],
-    nodeSize: CoordNodeSizeAccessor<N, L>,
-    compMap: Map<SugiNode, number>
+    sep: SugiSeparation<N, L>
   ): number {
-    const { comp } = opts;
     const inds = indices(layers);
-    const [Q, c, A, b] = init(layers, inds, nodeSize);
+    const [Q, c, A, b] = init(layers, inds, sep, opts.comp);
 
     const cachedVertWeak = cacheVertWeak(opts.vertWeak, layers);
-    const cachedVertStrong = cacheLinkWeightAccessor(opts.vertStrong);
-    const cachedLinkCurve = cacheLinkWeightAccessor(opts.linkCurve);
-    const cachedNodeCurve = cacheNodeWeightAccessor(opts.nodeCurve);
+    const cachedVertStrong = normalizeAccessor(
+      opts.vertStrong,
+      "link",
+      "vertStrong"
+    );
+    const cachedLinkCurve = normalizeAccessor(
+      opts.linkCurve,
+      "link",
+      "linkCurve"
+    );
+    const cachedNodeCurve = normalizeAccessor(
+      opts.nodeCurve,
+      "node",
+      "nodeCurve"
+    );
+
     // add loss for nearby nodes and for curve of nodes
     for (const par of flatMap(layers, (l) => l)) {
       const pind = inds.get(par)!;
       const pdata = par.data;
       const source = "node" in pdata ? pdata.node : pdata.link.source;
-      for (const node of par.ichildren()) {
+      for (const node of par.children()) {
         const nind = inds.get(node)!;
         const ndata = node.data;
         const target = "node" in ndata ? ndata.node : ndata.link.target;
@@ -449,198 +288,42 @@ function buildOperator<
             ? cachedNodeCurve(ndata.node)
             : cachedLinkCurve(ndata.link);
         minDist(Q, pind, nind, wpdist + wndist);
-        for (const child of node.ichildren()) {
+        for (const child of node.children()) {
           const cind = inds.get(child)!;
           minBend(Q, pind, nind, cind, wcurve);
         }
       }
     }
 
-    // for disconnected dags, add loss for being too far apart
-    // However, we only need to do this if a component is strictly to one side
-    // of the other component. We can compute this by first making a graph
-    // between components representing "to the left of" and then look for
-    // cycles, which don't need to be constrained
-
-    // create left map
-    const leftOf = new Map();
-    for (const layer of layers) {
-      for (const [first, second] of bigrams(layer)) {
-        const firstComp = compMap.get(first)!;
-        const secondComp = compMap.get(second)!;
-        if (firstComp !== secondComp) {
-          const rights = leftOf.get(firstComp);
-          if (rights === undefined) {
-            leftOf.set(firstComp, new Set([secondComp]));
-          } else {
-            rights.add(secondComp);
-          }
-        }
-      }
-    }
-
-    // preserve links in left map if they're not part of a cycle
-    // Enumerating all cycles would be prohibitive, but there are a few ways we
-    // could speed up the current implementation
-    // 1. Check if left appears in any rights which we could do by making
-    //    another ancillary set. This doesn't improve worst case complexity,
-    //    but will probably speed up a lot of common slow paths.
-    // 2. Changing dfs to also return any cycles found along the way. This will
-    //    require more space and also won't change worst case time, but will
-    //    allow us to prune a lot of the available cycles and will at least
-    //    remove some redundant computation in terms of the length of a cycle.
-    // 3. Gate this behind a flag to prevent the long execution in large
-    //    disconnected dags.
-    const cons = new Map();
-    for (const [left, rights] of leftOf.entries()) {
-      const newRights = new Set();
-      for (const right of rights) {
-        const reachable = dfs((c) => leftOf.get(c) ?? [], right);
-        const inCycle = some(reachable, (c) => c === left);
-        if (!inCycle) {
-          newRights.add(right);
-        }
-      }
-      cons.set(left, newRights);
-    }
-    // add constraints if they're still there
-    for (const layer of layers) {
-      for (const [first, second] of bigrams(layer)) {
-        const firstComp = compMap.get(first)!;
-        const secondComp = compMap.get(second)!;
-        if (firstComp !== secondComp && cons.get(firstComp)?.has(secondComp)) {
-          minDist(Q, inds.get(first)!, inds.get(second)!, comp);
-        }
-      }
-    }
-
     // get actual solution
+    let width;
     try {
       const solution = solve(Q, c, A, b);
-      return layout(layers, nodeSize, inds, solution);
+      width = layout(layers, sep, inds, solution);
     } catch (ex) {
-      /* istanbul ignore else */
-      if (
-        ex instanceof Error &&
-        ex.message ===
-          "quadratic program failed: matrix D in quadratic function is not positive definite!"
-      ) {
-        throw new Error(
-          "quad objective wasn't well defined, this happens when too many of the weights were set to zero (or really small). Try changing the weight accessors to return nonzero values in more instances."
-        );
-      } else {
-        throw ex;
-      }
+      /* istanbul ignore next */
+      const msg = (ex as object)?.toString() ?? "unknown error message";
+      /* istanbul ignore next */
+      throw ierr`${msg}`;
     }
-  }
-
-  function quadCall<N extends NodeDatum, L extends LinkDatum>(
-    layers: SugiNode<N, L>[][],
-    nodeSize: CoordNodeSizeAccessor<N, L>
-  ): number {
-    // split components
-    const compMap = componentMap(layers);
-    const components = splitComponentLayers(layers, compMap);
-
-    // layout each component and get width
-    const widths = components.map((compon) =>
-      quadComponent(compon, nodeSize, compMap)
-    );
-
-    // center components
-    const maxWidth = Math.max(...widths);
-    if (maxWidth <= 0) {
-      throw new Error("must assign nonzero width to at least one node");
-    }
-    for (const [i, compon] of components.entries()) {
-      const offset = (maxWidth - widths[i]) / 2;
-      for (const layer of compon) {
-        for (const node of layer) {
-          node.x! += offset;
-        }
-      }
-    }
-
-    return maxWidth;
-  }
-
-  function vertical(): Ops extends {
-    vertWeak: ConstAccessor;
-    vertStrong: ConstAccessor;
-  }
-    ? [number, number]
-    : null;
-  function vertical(val: readonly [number, number]): QuadOperator<
-    Up<
-      Ops,
-      {
-        vertWeak: ConstAccessor;
-        vertStrong: ConstAccessor;
-      }
-    >
-  >;
-  function vertical(val?: readonly [number, number]):
-    | QuadOperator<
-        Up<
-          Ops,
-          {
-            vertWeak: ConstAccessor;
-            vertStrong: ConstAccessor;
-          }
-        >
-      >
-    | [number, number]
-    | null {
-    if (val === undefined) {
-      const { vertWeak, vertStrong } = opts;
-      if (isConstAccessor(vertWeak) && isConstAccessor(vertStrong)) {
-        return [vertWeak.value, vertStrong.value];
-      } else {
-        return null;
-      }
+    if (width <= 0) {
+      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     } else {
-      const [vertNode, vertDummy] = val;
-      if (vertNode < 0 || vertDummy < 0) {
-        throw new Error(
-          `weights must be non-negative, but were ${vertNode} and ${vertDummy}`
-        );
-      } else {
-        const { vertWeak: _, vertStrong: __, ...rest } = opts;
-        return buildOperator({
-          ...rest,
-          vertWeak: createConstAccessor(vertNode),
-          vertStrong: createConstAccessor(vertDummy),
-        });
-      }
+      return width;
     }
   }
-  quadCall.vertical = vertical;
 
-  function vertWeak<NewVertWeak extends LinkWeightAccessor>(
+  function vertWeak<NewVertWeak extends LinkWeight>(
     val: NewVertWeak
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        vertWeak: NewVertWeak;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>>;
   function vertWeak(): Ops["vertWeak"];
-  function vertWeak<NewVertWeak extends LinkWeightAccessor>(
+  function vertWeak<NewVertWeak extends LinkWeight>(
     val?: NewVertWeak
-  ):
-    | QuadOperator<
-        Up<
-          Ops,
-          {
-            vertWeak: NewVertWeak;
-          }
-        >
-      >
-    | Ops["vertWeak"] {
+  ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>> | Ops["vertWeak"] {
     if (val === undefined) {
       return opts.vertWeak;
+    } else if (typeof val === "number" && val < 0) {
+      throw err`vertWeak must be non-negative but was: ${val}`;
     } else {
       const { vertWeak: _, ...rest } = opts;
       return buildOperator({
@@ -649,33 +332,19 @@ function buildOperator<
       });
     }
   }
-  quadCall.vertWeak = vertWeak;
+  coordQuad.vertWeak = vertWeak;
 
-  function vertStrong<NewVertStrong extends LinkWeightAccessor>(
+  function vertStrong<NewVertStrong extends LinkWeight>(
     val: NewVertStrong
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        vertStrong: NewVertStrong;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>>;
   function vertStrong(): Ops["vertStrong"];
-  function vertStrong<NewVertStrong extends LinkWeightAccessor>(
+  function vertStrong<NewVertStrong extends LinkWeight>(
     val?: NewVertStrong
-  ):
-    | QuadOperator<
-        Up<
-          Ops,
-          {
-            vertStrong: NewVertStrong;
-          }
-        >
-      >
-    | Ops["vertStrong"] {
+  ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>> | Ops["vertStrong"] {
     if (val === undefined) {
       return opts.vertStrong;
+    } else if (typeof val === "number" && val < 0) {
+      throw err`vertStrong must be non-negative but was: ${val}`;
     } else {
       const { vertStrong: _, ...rest } = opts;
       return buildOperator({
@@ -684,85 +353,19 @@ function buildOperator<
       });
     }
   }
-  quadCall.vertStrong = vertStrong;
+  coordQuad.vertStrong = vertStrong;
 
-  function curve(): Ops extends {
-    linkCurve: ConstAccessor;
-    nodeCurve: ConstAccessor;
-  }
-    ? [number, number]
-    : null;
-  function curve(val: readonly [number, number]): QuadOperator<
-    Up<
-      Ops,
-      {
-        linkCurve: ConstAccessor;
-        nodeCurve: ConstAccessor;
-      }
-    >
-  >;
-  function curve(val?: readonly [number, number]):
-    | QuadOperator<
-        Up<
-          Ops,
-          {
-            linkCurve: ConstAccessor;
-            nodeCurve: ConstAccessor;
-          }
-        >
-      >
-    | [number, number]
-    | null {
-    if (val === undefined) {
-      const { linkCurve, nodeCurve } = opts;
-      if (isConstAccessor(linkCurve) && isConstAccessor(nodeCurve)) {
-        return [nodeCurve.value, linkCurve.value];
-      } else {
-        return null;
-      }
-    } else {
-      const [curveNode, curveDummy] = val;
-      if (curveNode < 0 || curveDummy < 0) {
-        throw new Error(
-          `weights must be non-negative, but were ${curveNode} and ${curveDummy}`
-        );
-      } else {
-        const { linkCurve: _, nodeCurve: __, ...rest } = opts;
-        return buildOperator({
-          ...rest,
-          linkCurve: createConstAccessor(curveDummy),
-          nodeCurve: createConstAccessor(curveNode),
-        });
-      }
-    }
-  }
-  quadCall.curve = curve;
-
-  function linkCurve<NewLinkCurve extends LinkWeightAccessor>(
+  function linkCurve<NewLinkCurve extends LinkWeight>(
     val: NewLinkCurve
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        linkCurve: NewLinkCurve;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>>;
   function linkCurve(): Ops["linkCurve"];
-  function linkCurve<NewLinkCurve extends LinkWeightAccessor>(
+  function linkCurve<NewLinkCurve extends LinkWeight>(
     val?: NewLinkCurve
-  ):
-    | QuadOperator<
-        Up<
-          Ops,
-          {
-            linkCurve: NewLinkCurve;
-          }
-        >
-      >
-    | Ops["linkCurve"] {
+  ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>> | Ops["linkCurve"] {
     if (val === undefined) {
       return opts.linkCurve;
+    } else if (typeof val === "number" && val < 0) {
+      throw err`linkCurve must be non-negative but was: ${val}`;
     } else {
       const { linkCurve: _, ...rest } = opts;
       return buildOperator({
@@ -771,33 +374,19 @@ function buildOperator<
       });
     }
   }
-  quadCall.linkCurve = linkCurve;
+  coordQuad.linkCurve = linkCurve;
 
-  function nodeCurve<NewNodeCurve extends NodeWeightAccessor>(
+  function nodeCurve<NewNodeCurve extends NodeWeight>(
     val: NewNodeCurve
-  ): QuadOperator<
-    Up<
-      Ops,
-      {
-        nodeCurve: NewNodeCurve;
-      }
-    >
-  >;
+  ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>>;
   function nodeCurve(): Ops["nodeCurve"];
-  function nodeCurve<NewNodeCurve extends NodeWeightAccessor>(
+  function nodeCurve<NewNodeCurve extends NodeWeight>(
     val?: NewNodeCurve
-  ):
-    | QuadOperator<
-        Up<
-          Ops,
-          {
-            nodeCurve: NewNodeCurve;
-          }
-        >
-      >
-    | Ops["nodeCurve"] {
+  ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>> | Ops["nodeCurve"] {
     if (val === undefined) {
       return opts.nodeCurve;
+    } else if (typeof val === "number" && val < 0) {
+      throw err`nodeCurve must be non-negative but was: ${val}`;
     } else {
       const { nodeCurve: _, ...rest } = opts;
       return buildOperator({
@@ -806,51 +395,57 @@ function buildOperator<
       });
     }
   }
-  quadCall.nodeCurve = nodeCurve;
+  coordQuad.nodeCurve = nodeCurve;
 
-  function component(): number;
-  function component(val: number): QuadOperator<Ops>;
-  function component(val?: number): number | QuadOperator<Ops> {
+  function compress(): number;
+  function compress(val: number): CoordQuad<Ops>;
+  function compress(val?: number): number | CoordQuad<Ops> {
     if (val === undefined) {
       return opts.comp;
     } else if (val <= 0) {
-      throw new Error(`weight must be positive, but was ${val}`);
+      throw err`compress weight must be positive, but was: ${val}`;
     } else {
       return buildOperator({ ...opts, comp: val });
     }
   }
-  quadCall.component = component;
+  coordQuad.compress = compress;
 
-  return quadCall;
+  coordQuad.d3dagBuiltin = true as const;
+
+  return coordQuad;
 }
 
 /** default quad operator */
-export type DefaultQuadOperator = QuadOperator<{
+export type DefaultCoordQuad = CoordQuad<{
   /** default vert weak */
-  vertWeak: ConstAccessor<1>;
+  vertWeak: 1;
   /** default vert strong */
-  vertStrong: ConstAccessor<0>;
+  vertStrong: 0;
   /** default link curve */
-  linkCurve: ConstAccessor<1>;
+  linkCurve: 1;
   /** default node curve */
-  nodeCurve: ConstAccessor<0>;
+  nodeCurve: 0;
 }>;
 
 /**
- * Create a default {@link QuadOperator}, bundled as {@link coordQuad}.
+ * Create a default {@link CoordQuad}
+ *
+ * - {@link CoordQuad#vertWeak | `vertWeak()`}: `1`
+ * - {@link CoordQuad#vertStrong | `vertStrong()`}: `0`
+ * - {@link CoordQuad#linkCurve | `linkCurve()`}: `1`
+ * - {@link CoordQuad#nodeCurve | `nodeCurve()`}: `0`
+ * - {@link CoordQuad#compress | `compress()`}: `1e-6`
  */
-export function quad(...args: never[]): DefaultQuadOperator {
+export function coordQuad(...args: never[]): DefaultCoordQuad {
   if (args.length) {
-    throw new Error(
-      `got arguments to quad(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to coordQuad(${args}); you probably forgot to construct coordQuad before passing to coord: \`sugiyama().coord(coordQuad())\`, note the trailing "()"`;
+  } else {
+    return buildOperator({
+      vertWeak: 1,
+      vertStrong: 0,
+      linkCurve: 1,
+      nodeCurve: 0,
+      comp: 1e-6,
+    });
   }
-
-  return buildOperator({
-    vertWeak: createConstAccessor(1),
-    vertStrong: createConstAccessor(0),
-    linkCurve: createConstAccessor(1),
-    nodeCurve: createConstAccessor(0),
-    comp: 1,
-  });
 }

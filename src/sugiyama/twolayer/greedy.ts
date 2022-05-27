@@ -1,39 +1,47 @@
 /**
- * An {@link GreedyOperator} that calls another {@link TwolayerOperator} before
+ * An {@link TwolayerGreedy} that calls another {@link sugiyama/twolayer!Twolayer} before
  * greedily swapping nodes to minimize crossings.
  *
  * @packageDocumentation
  */
-import { TwolayerOperator } from ".";
-import { getParents } from "../../dag/utils";
-import { SugiNode } from "../utils";
+import { Twolayer } from ".";
+import { err } from "../../utils";
+import { SugiNode } from "../sugify";
 
 /** the node datum of a set of operators */
-export type OpNodeDatum<Op extends TwolayerOperator> =
-  Op extends TwolayerOperator<infer D, never> ? D : never;
+export type OpNodeDatum<Op extends Twolayer> = Op extends Twolayer<
+  infer D,
+  never
+>
+  ? D
+  : never;
 /** the link datum of a set of operators */
-export type OpLinkDatum<Op extends TwolayerOperator> =
-  Op extends TwolayerOperator<never, infer L> ? L : never;
+export type OpLinkDatum<Op extends Twolayer> = Op extends Twolayer<
+  never,
+  infer L
+>
+  ? L
+  : never;
 
 /**
- * A {@link TwolayerOperator} that first calls a base twolayer operator, then
+ * A {@link sugiyama/twolayer!Twolayer} that first calls a base twolayer operator, then
  * greedily swaps nodes to minimize crossings.
  *
- * This may be faster than {@link OptOperator}, but should produce better
- * layouts than {@link AggOperator}.
+ * This may be faster than {@link sugiyama/twolayer/opt!TwolayerOpt},
+ * but should produce better layouts than {@link sugiyama/twolayer/agg!TwolayerAgg}.
  *
- * Create with {@link greedy}.
+ * Create with {@link twolayerGreedy}.
  */
-export interface GreedyOperator<Op extends TwolayerOperator = TwolayerOperator>
-  extends TwolayerOperator<OpNodeDatum<Op>, OpLinkDatum<Op>> {
+export interface TwolayerGreedy<Op extends Twolayer = Twolayer>
+  extends Twolayer<OpNodeDatum<Op>, OpLinkDatum<Op>> {
   /**
-   * Set the {@link TwolayerOperator} for this operator.
+   * Set the {@link sugiyama/twolayer!Twolayer} for this operator.
    *
    * This operator will first call its base operator, and the greedily swap
    * nodes to minimize edge crossings. To only greedily minimize edge
    * crossings, set base to a no op.
    */
-  base<NewOp extends TwolayerOperator>(val: NewOp): GreedyOperator<NewOp>;
+  base<NewOp extends Twolayer>(val: NewOp): TwolayerGreedy<NewOp>;
   /**
    * Get the current base operator.
    */
@@ -45,11 +53,14 @@ export interface GreedyOperator<Op extends TwolayerOperator = TwolayerOperator>
    * Using the scan method takes longer (quadratic in layer size, versus
    * linear), but produces fewer crossings.
    */
-  scan(val: boolean): GreedyOperator<Op>;
+  scan(val: boolean): TwolayerGreedy<Op>;
   /**
    * Get the current base operator.
    */
   scan(): boolean;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 interface SwapChange<N, L> {
@@ -125,7 +136,9 @@ function scanSwap<N, L>(
   layer: SugiNode<N, L>[],
   swapChange: SwapChange<N, L>
 ): void {
-  const costs: number[] = new Array((layer.length * (layer.length - 1)) / 2);
+  const costs: number[] = Array<number>(
+    (layer.length * (layer.length - 1)) / 2
+  );
   for (;;) {
     let start = 0;
     for (let ti = 1; ti < layer.length; ++ti) {
@@ -163,14 +176,14 @@ function scanSwap<N, L>(
   }
 }
 
-function buildOperator<N, L, Op extends TwolayerOperator<N, L>>({
+function buildOperator<N, L, Op extends Twolayer<N, L>>({
   baseOp,
   doScan,
 }: {
-  baseOp: Op & TwolayerOperator<N, L>;
+  baseOp: Op & Twolayer<N, L>;
   doScan: boolean;
-}): GreedyOperator<Op> {
-  function greedyCall(
+}): TwolayerGreedy<Op> {
+  function twolayerGreedy(
     topLayer: SugiNode<N, L>[],
     bottomLayer: SugiNode<N, L>[],
     topDown: boolean
@@ -179,15 +192,13 @@ function buildOperator<N, L, Op extends TwolayerOperator<N, L>>({
 
     let layer, swapChange;
     if (topDown) {
-      const parents = getParents(topLayer);
-      swapChange = createSwapChange(
-        topLayer,
-        (node: SugiNode<N, L>) => parents.get(node) ?? []
+      swapChange = createSwapChange(topLayer, (node: SugiNode<N, L>) =>
+        node.parents()
       );
       layer = bottomLayer;
     } else {
       swapChange = createSwapChange(bottomLayer, (node: SugiNode) =>
-        node.ichildren()
+        node.children()
       );
       layer = topLayer;
     }
@@ -199,48 +210,47 @@ function buildOperator<N, L, Op extends TwolayerOperator<N, L>>({
     }
   }
 
-  function base<NewOp extends TwolayerOperator>(
-    val: NewOp
-  ): GreedyOperator<NewOp>;
+  function base<NewOp extends Twolayer>(val: NewOp): TwolayerGreedy<NewOp>;
   function base(): Op;
-  function base<NewOp extends TwolayerOperator>(
+  function base<NewOp extends Twolayer>(
     val?: NewOp
-  ): Op | GreedyOperator<NewOp> {
+  ): Op | TwolayerGreedy<NewOp> {
     if (val === undefined) {
       return baseOp;
     } else {
       return buildOperator({ baseOp: val, doScan });
     }
   }
-  greedyCall.base = base;
+  twolayerGreedy.base = base;
 
-  function scan(val: boolean): GreedyOperator<Op>;
+  function scan(val: boolean): TwolayerGreedy<Op>;
   function scan(): boolean;
-  function scan(val?: boolean): boolean | GreedyOperator<Op> {
+  function scan(val?: boolean): boolean | TwolayerGreedy<Op> {
     if (val === undefined) {
       return doScan;
     } else {
       return buildOperator({ baseOp, doScan: val });
     }
   }
-  greedyCall.scan = scan;
+  twolayerGreedy.scan = scan;
 
-  return greedyCall;
+  twolayerGreedy.d3dagBuiltin = true as const;
+
+  return twolayerGreedy;
 }
 
 /** default greedy operator */
-export type DefaultGreedyOperator = GreedyOperator<
-  TwolayerOperator<unknown, unknown>
->;
+export type DefaultTwolayerGreedy = TwolayerGreedy<Twolayer<unknown, unknown>>;
 
 /**
- * Create a default {@link GreedyOperator}, bundled as {@link twolayerGreedy}.
+ * Create a default {@link TwolayerGreedy}
+ *
+ * - {@link TwolayerGreedy#base | `base()`}: noop
+ * - {@link TwolayerGreedy#scan | `scan()`}: `false`
  */
-export function greedy(...args: never[]): DefaultGreedyOperator {
+export function twolayerGreedy(...args: never[]): DefaultTwolayerGreedy {
   if (args.length) {
-    throw new Error(
-      `got arguments to greedy(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to twolayerGreedy(${args}); you probably forgot to construct twolayerGreedy before passing to order: \`decrossTwoLayer().order(twolayerGreedy())\`, note the trailing "()"`;
   }
   return buildOperator({ baseOp: () => undefined, doScan: false });
 }

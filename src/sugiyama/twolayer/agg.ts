@@ -1,14 +1,15 @@
 /**
- * An {@link AggOperator} that orders nodes based on the aggregation of their
+ * An {@link TwolayerAgg} that orders nodes based on the aggregation of their
  * parents' or children's indices.
  *
  * @packageDocumentation
  */
 import { median } from "d3-array";
-import { TwolayerOperator } from ".";
+import { Twolayer } from ".";
+import { listMultimapPush } from "../../collections";
 import { map } from "../../iters";
-import { listMultimapPush } from "../../utils";
-import { SugiNode } from "../utils";
+import { err } from "../../utils";
+import { SugiNode } from "../sugify";
 
 /**
  * An interface for aggregating numbers
@@ -24,7 +25,9 @@ export interface Aggregator {
 /**
  * A way to create aggregators
  */
-export type AggFactory<A extends Aggregator = Aggregator> = () => A;
+export interface AggFactory<A extends Aggregator = Aggregator> {
+  (): A;
+}
 
 class Mean implements Aggregator {
   private mean: number = 0.0;
@@ -40,10 +43,9 @@ class Mean implements Aggregator {
 }
 
 /**
- * A {@link AggFactory | factory} that creates mean {@link Aggregator}s,
- * bundled as {@link aggMeanFactory}.
+ * A {@link AggFactory | factory} that creates mean {@link Aggregator}s
  */
-export const meanFactory = (): Aggregator => new Mean();
+export const aggMeanFactory = (): Aggregator => new Mean();
 
 class Median implements Aggregator {
   private vals: number[] = [];
@@ -58,10 +60,9 @@ class Median implements Aggregator {
 }
 
 /**
- * A {@link AggFactory | factory} that creates median {@link Aggregator}s,
- * bundled as {@link aggMedianFactory}.
+ * A {@link AggFactory | factory} that creates median {@link Aggregator}s
  */
-export const medianFactory = (): Aggregator => new Median();
+export const aggMedianFactory = (): Aggregator => new Median();
 
 class WeightedMedian implements Aggregator {
   private vals: number[] = [];
@@ -98,46 +99,48 @@ class WeightedMedian implements Aggregator {
 }
 
 /**
- * A {@link AggFactory | factory} that creates weighted median {@link Aggregator}s,
- * bundled as {@link aggWeightedMedianFactory}.
+ * A {@link AggFactory | factory} that creates weighted median {@link Aggregator}s
  *
  * @remarks
- * This is slightly slower than the {@link medianFactory}.
+ * This is slightly slower than the {@link aggMedianFactory}.
  */
-export const weightedMedianFactory = (): Aggregator => new WeightedMedian();
+export const aggWeightedMedianFactory = (): Aggregator => new WeightedMedian();
 
 /**
- * A {@link TwolayerOperator} that orders nodes based off the aggregation of their
+ * A {@link sugiyama/twolayer!Twolayer} that orders nodes based off the aggregation of their
  * parents' or children's indices.
  *
- * This is much faster than {@link OptOperator}, and often produces comparable
- * or better layouts. If memory is an issue then {@link meanFactory} uses a
- * little less memory, but there is little reason to use it. Nodes without
- * parents or children respectively will be placed first to minimize the
- * distance between nodes with common parents, and then to minimize rank
- * inversions with respect to the initial ordering.
+ * This is much faster than {@link sugiyama/twolayer/opt!TwolayerOpt}, and
+ * often produces comparable or better layouts. If memory is an issue then
+ * {@link aggMeanFactory} uses a little less memory, but there is little reason
+ * to use it. Nodes without parents or children respectively will be placed
+ * first to minimize the distance between nodes with common parents, and then
+ * to minimize rank inversions with respect to the initial ordering.
  *
- * Create with {@link agg}.
+ * Create with {@link twolayerAgg}.
  *
  * <img alt="two layer agg example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
-export interface AggOperator<Factory extends AggFactory = AggFactory>
-  extends TwolayerOperator<unknown, unknown> {
+export interface TwolayerAgg<Factory extends AggFactory = AggFactory>
+  extends Twolayer<unknown, unknown> {
   /**
    * Set the {@link AggFactory} for this operator.
    *
    * The aggregators that this produces are used to fuse the indices of parents
    * or children of an node into it's target index for ordering. The provided
-   * {@link medianFactory} works very well, but {@link meanFactory} works too,
-   * as will any user provided method. (default: {@link medianFactory})
+   * {@link aggMedianFactory} works very well, but {@link aggMeanFactory} works too,
+   * as will any user provided method. (default: {@link aggMedianFactory})
    */
   aggregator<NewFactory extends AggFactory>(
     val: NewFactory
-  ): AggOperator<NewFactory>;
+  ): TwolayerAgg<NewFactory>;
   /**
    * Get the current aggregator factory.
    */
   aggregator(): Factory;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 /** perform aggregation over an iterable */
@@ -234,8 +237,8 @@ function buildOperator<Factory extends AggFactory>({
   factory,
 }: {
   factory: Factory;
-}): AggOperator<Factory> {
-  function aggCall(
+}): TwolayerAgg<Factory> {
+  function twolayerAgg(
     topLayer: SugiNode[],
     bottomLayer: SugiNode[],
     topDown: boolean
@@ -245,7 +248,7 @@ function buildOperator<Factory extends AggFactory>({
         bottomLayer.map((node) => [node, factory()] as const)
       );
       for (const [i, node] of topLayer.entries()) {
-        for (const child of node.ichildren()) {
+        for (const child of node.children()) {
           incr.get(child)!.add(i);
         }
       }
@@ -259,7 +262,7 @@ function buildOperator<Factory extends AggFactory>({
         topLayer.map((node) => {
           const agg = aggregate(
             factory,
-            map(node.ichildren(), (child) => inds.get(child)!)
+            map(node.children(), (child) => inds.get(child)!)
           );
           return [node, agg] as const;
         })
@@ -270,30 +273,32 @@ function buildOperator<Factory extends AggFactory>({
 
   function aggregator<NewFactory extends AggFactory>(
     val: NewFactory
-  ): AggOperator<NewFactory>;
+  ): TwolayerAgg<NewFactory>;
   function aggregator(): Factory;
   function aggregator<NewFactory extends AggFactory>(
     val?: NewFactory
-  ): Factory | AggOperator<NewFactory> {
+  ): Factory | TwolayerAgg<NewFactory> {
     if (val === undefined) {
       return factory;
     } else {
       return buildOperator({ factory: val });
     }
   }
-  aggCall.aggregator = aggregator;
+  twolayerAgg.aggregator = aggregator;
 
-  return aggCall;
+  twolayerAgg.d3dagBuiltin = true as const;
+
+  return twolayerAgg;
 }
 
 /**
- * Create a default {@link AggOperator}, bundled as {@link twolayerAgg}.
+ * Create a default {@link TwolayerAgg}
+ *
+ * - {@link TwolayerAgg#aggregator | `aggregator()`}: `aggWeightedMedianFactory`
  */
-export function agg(...args: never[]): AggOperator {
+export function twolayerAgg(...args: never[]): TwolayerAgg {
   if (args.length) {
-    throw new Error(
-      `got arguments to agg(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to twolayerAgg(${args}); you probably forgot to construct twolayerAgg before passing to order: \`decrossTwoLayer().order(twolayerAgg())\`, note the trailing "()"`;
   }
-  return buildOperator({ factory: weightedMedianFactory });
+  return buildOperator({ factory: aggWeightedMedianFactory });
 }

@@ -1,5 +1,6 @@
 {
   "entryPoints": ["src"],
+  "exclude": ["**/*.test.ts"],
   "media": "resources",
   "out": "docs",
   "entryPointStrategy": "expand",

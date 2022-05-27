@@ -1,37 +1,30 @@
 /**
- * A {@link SimplexOperator} that assigns layers to minimize the number of
+ * A {@link LayeringSimplex} that assigns layers to minimize the number of
  * dummy nodes.
  *
  * @packageDocumentation
  */
-import { GroupAccessor, LayeringOperator, RankAccessor } from ".";
-import { Dag, DagNode } from "../../dag";
-import { map } from "../../iters";
+import { Group, Layering } from ".";
+import { Graph, GraphNode, Rank } from "../../graph";
+import { bigrams, map } from "../../iters";
 import { Constraint, solve, Variable } from "../../simplex";
-import { assert, bigrams, Up } from "../../utils";
+import { err, ierr, U } from "../../utils";
+import { Separation } from "../utils";
 
 /** simplex operator operators */
-export interface Operators<N = never, L = never> {
+export interface LayeringSimplexOps<in N = never, in L = never> {
   /** rank operator */
-  rank: RankAccessor<N, L>;
+  rank: Rank<N, L>;
   /** group operator */
-  group: GroupAccessor<N, L>;
+  group: Group<N, L>;
 }
 
 /** the node datum of a set of operators */
-export type OpsNodeDatum<Ops extends Operators> = Ops extends Operators<
-  infer N,
-  never
->
-  ? N
-  : never;
+export type OpsNodeDatum<Ops extends LayeringSimplexOps> =
+  Ops extends LayeringSimplexOps<infer N, never> ? N : never;
 /** the link datum of a set of operators */
-export type OpsLinkDatum<Ops extends Operators> = Ops extends Operators<
-  never,
-  infer L
->
-  ? L
-  : never;
+export type OpsLinkDatum<Ops extends LayeringSimplexOps> =
+  Ops extends LayeringSimplexOps<never, infer L> ? L : never;
 
 /**
  * A layering operator that assigns layers to minimize the number of dummy
@@ -50,61 +43,51 @@ export type OpsLinkDatum<Ops extends Operators> = Ops extends Operators<
  * Note that adding these constraints can cause the optimization to become
  * ill-defined.
  *
- * Create with {@link simplex}.
+ * Create with {@link layeringSimplex}.
  *
  * <img alt="simplex example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
-export interface SimplexOperator<Ops extends Operators = Operators>
-  extends LayeringOperator<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
+export interface LayeringSimplex<
+  Ops extends LayeringSimplexOps = LayeringSimplexOps
+> extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
-   * Set the {@link RankAccessor}. Any node with a rank assigned will have a second
+   * Set the {@link graph!Rank}. Any node with a rank assigned will have a second
    * ordering enforcing ordering of the ranks. Note, this can cause the simplex
    * optimization to be ill-defined, and may result in an error during layout.
    */
-  rank<NewRank extends RankAccessor>(
+  rank<NewRank extends Rank>(
     newRank: NewRank
-  ): SimplexOperator<
-    Up<
-      Ops,
-      {
-        /** new rank */
-        rank: NewRank;
-      }
-    >
-  >;
+  ): LayeringSimplex<U<Ops, "rank", NewRank>>;
   /**
-   * Get the current {@link RankAccessor}.
+   * Get the current {@link graph!Rank}.
    */
   rank(): Ops["rank"];
 
   /**
-   * Set the {@link GroupAccessor}. Any node with a group assigned will have a second
-   * ordering enforcing all nodes with the same group have the same layer.
-   * Note, this can cause the simplex optimization to be ill-defined, and may
-   * result in an error during layout.
+   * Set the {@link sugiyama/layering!Group}. Any node with a group
+   * assigned will have a second ordering enforcing all nodes with the same
+   * group have the same layer.  Note, this can cause the simplex optimization
+   * to be ill-defined, and may result in an error during layout.
    */
-  group<NewGroup extends GroupAccessor>(
+  group<NewGroup extends Group>(
     newGroup: NewGroup
-  ): SimplexOperator<
-    Up<
-      Ops,
-      {
-        /** new group */
-        group: NewGroup;
-      }
-    >
-  >;
+  ): LayeringSimplex<U<Ops, "group", NewGroup>>;
   /**
-   * Get the current {@link GroupAccessor}.
+   * Get the current {@link sugiyama/layering!Group}.
    */
   group(): Ops["group"];
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
-/** @internal */
-function buildOperator<N, L, Ops extends Operators<N, L>>(
-  options: Ops & Operators<N, L>
-): SimplexOperator<Ops> {
-  function simplexCall(dag: Dag<N, L>): void {
+function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
+  options: Ops & LayeringSimplexOps<ND, LD>
+): LayeringSimplex<Ops> {
+  function layeringSimplex<N extends ND, L extends LD>(
+    dag: Graph<N, L>,
+    sep: Separation<N, L>
+  ): number {
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
     const ints: Record<string, 1> = {};
@@ -112,12 +95,12 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     const ids = new Map(map(dag, (node, i) => [node, i.toString()] as const));
 
     /** get node id */
-    function n(node: DagNode<N, L>): string {
+    function n(node: GraphNode<N, L>): string {
       return ids.get(node)!;
     }
 
     /** get variable associated with a node */
-    function variable(node: DagNode<N, L>): Variable {
+    function variable(node: GraphNode<N, L>): Variable {
       return variables[n(node)];
     }
 
@@ -128,9 +111,10 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
      */
     function before(
       prefix: string,
-      first: DagNode<N, L>,
-      second: DagNode<N, L>,
-      diff: number = 1
+      first: GraphNode<N, L>,
+      second: GraphNode<N, L>,
+      diff: number,
+      opt: number = 0
     ): void {
       const fvar = variable(first);
       const svar = variable(second);
@@ -139,20 +123,23 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       constraints[cons] = { min: diff };
       fvar[cons] = -1;
       svar[cons] = 1;
+
+      fvar.opt += opt;
+      svar.opt -= opt;
     }
 
     /** enforce that first and second occur on the same layer */
     function equal(
       prefix: string,
-      first: DagNode<N, L>,
-      second: DagNode<N, L>
+      first: GraphNode<N, L>,
+      second: GraphNode<N, L>
     ): void {
       before(`${prefix} before`, first, second, 0);
       before(`${prefix} after`, second, first, 0);
     }
 
-    const ranks: [number, DagNode<N, L>][] = [];
-    const groups = new Map<string, DagNode<N, L>[]>();
+    const ranks: [number, GraphNode<N, L>][] = [];
+    const groups = new Map<string, GraphNode<N, L>[]>();
 
     // Add node variables and fetch ranks
     for (const node of dag) {
@@ -176,20 +163,23 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     }
 
     // Add link constraints
-    for (const node of dag) {
-      for (const [child, count] of node.ichildrenCounts()) {
-        // make sure that multi nodes have at least one dummy row between them
-        before("link", node, child, count > 1 ? 2 : 1);
-        variable(node).opt += count;
-        variable(child).opt -= count;
+    const seen = new Set();
+    for (const node of dag.topological(options.rank)) {
+      for (const [child, count] of node.childCounts()) {
+        if (seen.has(child)) {
+          before("link", child, node, sep(child, node), count);
+        } else {
+          before("link", node, child, sep(node, child), count);
+        }
       }
+      seen.add(node);
     }
 
     // Add rank constraints
     const ranked = ranks.sort(([a], [b]) => a - b);
     for (const [[frank, fnode], [srank, snode]] of bigrams(ranked)) {
       if (frank < srank) {
-        before("rank", fnode, snode);
+        before("rank", fnode, snode, sep(fnode, snode));
       } else {
         equal("rank", fnode, snode);
       }
@@ -206,25 +196,36 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
     try {
       const assignment = solve("opt", "max", variables, constraints, ints);
 
-      // lp solver doesn't assign some zeros
+      let min = 0;
+      let max = 0;
       for (const node of dag) {
-        node.value = assignment[n(node)] ?? 0;
+        // lp solver doesn't assign some zeros
+        const val = assignment[n(node)] ?? 0;
+        node.y = val;
+        min = Math.min(min, val - sep(undefined, node));
+        max = Math.max(max, val + sep(node, undefined));
       }
+      for (const node of dag) {
+        node.y -= min;
+      }
+      return max - min;
     } catch {
-      assert(ranks.length || groups.size);
-      throw new Error(
-        "could not find a feasible simplex layout, check that rank or group accessors are not ill-defined"
-      );
+      /* istanbul ignore else */
+      if (groups.size) {
+        throw err`could not find a feasible simplex layout; this is likely due to group constraints producing an infeasible layout, try relaxing the functions you're passing to \`layeringSimplex().group(...)\``;
+      } else {
+        throw ierr`could not find a feasible simplex solution`;
+      }
     }
   }
 
-  function rank<NR extends RankAccessor>(
+  function rank<NR extends Rank>(
     newRank: NR
-  ): SimplexOperator<Up<Ops, { rank: NR }>>;
+  ): LayeringSimplex<U<Ops, "rank", NR>>;
   function rank(): Ops["rank"];
-  function rank<NR extends RankAccessor>(
+  function rank<NR extends Rank>(
     newRank?: NR
-  ): SimplexOperator<Up<Ops, { rank: NR }>> | Ops["rank"] {
+  ): LayeringSimplex<U<Ops, "rank", NR>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
     } else {
@@ -232,15 +233,15 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       return buildOperator({ ...rest, rank: newRank });
     }
   }
-  simplexCall.rank = rank;
+  layeringSimplex.rank = rank;
 
-  function group<NG extends GroupAccessor>(
+  function group<NG extends Group>(
     newGroup: NG
-  ): SimplexOperator<Up<Ops, { group: NG }>>;
+  ): LayeringSimplex<U<Ops, "group", NG>>;
   function group(): Ops["group"];
-  function group<NG extends GroupAccessor>(
+  function group<NG extends Group>(
     newGroup?: NG
-  ): SimplexOperator<Up<Ops, { group: NG }>> | Ops["group"] {
+  ): LayeringSimplex<U<Ops, "group", NG>> | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;
     } else {
@@ -248,9 +249,11 @@ function buildOperator<N, L, Ops extends Operators<N, L>>(
       return buildOperator({ ...rest, group: newGroup });
     }
   }
-  simplexCall.group = group;
+  layeringSimplex.group = group;
 
-  return simplexCall;
+  layeringSimplex.d3dagBuiltin = true as const;
+
+  return layeringSimplex;
 }
 
 /** @internal */
@@ -259,21 +262,22 @@ function defaultAccessor(): undefined {
 }
 
 /** default simplex operator */
-export type DefaultSimplexOperator = SimplexOperator<{
+export type DefaultLayeringSimplex = LayeringSimplex<{
   /** unconstrained rank */
-  rank: RankAccessor<unknown, unknown>;
+  rank: Rank<unknown, unknown>;
   /** unconstrained group */
-  group: GroupAccessor<unknown, unknown>;
+  group: Group<unknown, unknown>;
 }>;
 
 /**
- * Create a default {@link SimplexOperator}, bundled as {@link layeringSimplex}.
+ * Create a default {@link LayeringSimplex}
+ *
+ * - {@link LayeringSimplex#rank | `rank()`}: no ranks
+ * - {@link LayeringSimplex#group | `group()`}: no groups
  */
-export function simplex(...args: never[]): DefaultSimplexOperator {
+export function layeringSimplex(...args: never[]): DefaultLayeringSimplex {
   if (args.length) {
-    throw new Error(
-      `got arguments to simplex(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to layeringSimplex(${args}); you probably forgot to construct layeringSimplex before passing to layering: \`sugiyama().layering(layeringSimplex())\`, note the trailing "()"`;
   }
   return buildOperator({ rank: defaultAccessor, group: defaultAccessor });
 }

@@ -36,6 +36,7 @@ const config = {
       { resourceRegExp: /^fs$/ },
       { resourceRegExp: /^child_process$/ },
     ]),
+    // FIXME remove?
     pnpPlugin(),
   ],
   banner: {

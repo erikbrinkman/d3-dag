@@ -1,61 +1,67 @@
 /**
- * The {@link CenterOperator} centers all of the nodes as compactly as
+ * The {@link CoordCenter} centers all of the nodes as compactly as
  * possible. It produces generally poor layouts, but is very fast.
  *
  * @packageDocumentation
  */
-import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { SugiNode } from "../utils";
+import { Coord } from ".";
+import { err } from "../../utils";
+import { SugiNode, SugiSeparation } from "../sugify";
 
 /**
- * A {@link CoordOperator} that spaces every node out by node size, and then
+ * A {@link sugiyama/coord!Coord} that spaces every node out by node size, and then
  * centers them.
  *
  * This is a very fast operator, but doesn't produce very pleasing layouts.
  *
- * Create with {@link center}.
+ * Create with {@link coordCenter}.
  *
  * <img alt="center example" src="media://sugi-simplex-opt-center.png" width="400">
  */
-export type CenterOperator = CoordOperator<unknown, unknown>;
+export interface CoordCenter extends Coord<unknown, unknown> {
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
+}
 
 /**
- * Create a {@link CenterOperator}. Bundled as {@link coordCenter}.
+ * Create a {@link CoordCenter}
  */
-export function center(...args: never[]): CenterOperator {
+export function coordCenter(...args: never[]): CoordCenter {
   if (args.length) {
-    throw new Error(
-      `got arguments to center(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to coordCenter(${args}); you probably forgot to construct coordCenter before passing to coord: \`sugiyama().coord(coordCenter())\`, note the trailing "()"`;
   }
 
-  function centerCall<N, L>(
+  function coordCenter<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: CoordNodeSizeAccessor<N, L>
+    sep: SugiSeparation<N, L>
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;
+      let last;
       for (const node of layer) {
-        const nodeWidth = nodeSize(node);
-        node.x = width + nodeWidth / 2;
-        width += nodeWidth;
+        width += sep(last, node);
+        node.x = width;
+        last = node;
       }
+      width += sep(last, undefined);
       return width;
     });
     const maxWidth = Math.max(...widths);
     if (maxWidth <= 0) {
-      throw new Error("must assign nonzero width to at least one node");
+      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     }
     for (const [i, layer] of layers.entries()) {
       const width = widths[i];
       const offset = (maxWidth - width) / 2;
       for (const node of layer) {
-        node.x! += offset;
+        node.x += offset;
       }
     }
 
     return maxWidth;
   }
 
-  return centerCall;
+  coordCenter.d3dagBuiltin = true as const;
+
+  return coordCenter;
 }

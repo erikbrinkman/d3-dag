@@ -1,40 +1,36 @@
 /**
- * A {@link TwoLayerOperator} heuristic for reducing the number of crossings in
+ * A {@link DecrossTwoLayer} heuristic for reducing the number of crossings in
  * large dags efficiently.
  *
  * @packageDocumentation
  */
-import { DecrossOperator } from ".";
-import { bigrams, Up } from "../../utils";
-import { TwolayerOperator as OrderOperator } from "../twolayer";
-import { agg, AggOperator } from "../twolayer/agg";
-import { greedy, GreedyOperator } from "../twolayer/greedy";
-import { crossings, SugiNode } from "../utils";
-import { dfs, DfsOperator } from "./dfs";
-
-/** initializers */
-export type Inits<N = never, L = never> = readonly [
-  DecrossOperator<N, L>,
-  ...DecrossOperator<N, L>[]
-];
+import { Decross } from ".";
+import { bigrams } from "../../iters";
+import { err, U } from "../../utils";
+import { SugiNode } from "../sugify";
+import { Twolayer } from "../twolayer";
+import { TwolayerAgg, twolayerAgg } from "../twolayer/agg";
+import { TwolayerGreedy, twolayerGreedy } from "../twolayer/greedy";
+import { crossings } from "../utils";
+import { decrossDfs, DecrossDfs } from "./dfs";
 
 /** two layer operators */
-export interface Operators<N = never, L = never> {
+export interface TwolayerOps<N = never, L = never> {
   /** the order operator */
-  order: OrderOperator<N, L>;
+  order: Twolayer<N, L>;
   /** the initializers */
-  inits: Inits<N, L>;
+  inits: readonly Decross<N, L>[];
 }
 
 /** the node datum of a set of operators */
-export type OpNodeDatum<O extends Operators> = O extends Operators<
+export type OpNodeDatum<O extends TwolayerOps> = O extends TwolayerOps<
   infer N,
   never
 >
   ? N
   : never;
 /** the link datum of a set of operators */
-export type OpLinkDatum<O extends Operators> = O extends Operators<
+export type OpLinkDatum<O extends TwolayerOps> = O extends TwolayerOps<
   never,
   infer L
 >
@@ -46,55 +42,40 @@ export type OpLinkDatum<O extends Operators> = O extends Operators<
  *
  * This method can be very fast and is a general heuristic for efficient
  * minimization. Customize with a two layer operator with {@link order} or use
- * one of the built-in {@link TwolayerOperator}s.
+ * one of the built-in {@link sugiyama/twolayer!Twolayer}s.
  *
  * This method can also make multiple {@link passes} in an attempt to produce a
  * better layout.
  *
  * <img alt="two layer example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
-export interface TwoLayerOperator<Ops extends Operators = Operators>
-  extends DecrossOperator<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
+export interface DecrossTwoLayer<Ops extends TwolayerOps = TwolayerOps>
+  extends Decross<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
   /**
-   * Sets the order accessor to the specified {@link TwolayerOperator} and returns
-   * a new operator. (default: {@link AggOperator}).
+   * Sets the order accessor to the specified {@link sugiyama/twolayer!Twolayer} and returns
+   * a new operator. (default: {@link sugiyama/twolayer/agg!TwolayerAgg}).
    */
-  order<NewOrder extends OrderOperator>(
+  order<NewOrder extends Twolayer>(
     val: NewOrder
-  ): TwoLayerOperator<
-    Up<
-      Ops,
-      {
-        /** new order */
-        order: NewOrder;
-      }
-    >
-  >;
+  ): DecrossTwoLayer<U<Ops, "order", NewOrder>>;
   /**
-   * Get the current {@link TwolayerOperator} for ordering.
+   * Get the current {@link sugiyama/twolayer!Twolayer} for ordering.
    */
   order(): Ops["order"];
 
   /**
-   * Sets the initialization passes to the specified {@link DecrossOperator}s and returns
+   * Sets the initialization passes to the specified {@link sugiyama/decross!Decross}s and returns
    * a new operator.
    *
    * For every initialization operator, this will run the two layer heuristic,
    * ultimately choosing the ordering that minimized overall crossings. For
    * this reason, only quick decrossing operators should be used, not expensive
-   * ones.  (default: [noop])
+   * ones. The empty list is treated as a singleton list with a noop operator.
+   * (default: [decrossDfs(), decrossDfs().topDown(false)])
    */
-  inits<NewInits extends Inits>(
+  inits<NewInits extends readonly Decross[]>(
     val: NewInits
-  ): TwoLayerOperator<
-    Up<
-      Ops,
-      {
-        /** new inits */
-        inits: NewInits;
-      }
-    >
-  >;
+  ): DecrossTwoLayer<U<Ops, "inits", NewInits>>;
   /**
    * Get the current initialization passes
    */
@@ -104,28 +85,33 @@ export interface TwoLayerOperator<Ops extends Operators = Operators>
    * Sets the number of passes to make, more takes longer, but might result in
    * a better output. (default: 24)
    */
-  passes(val: number): TwoLayerOperator<Ops>;
+  passes(val: number): DecrossTwoLayer<Ops>;
   /**
    * Get the current number of passes
    */
   passes(): number;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 /** @internal */
-function buildOperator<N, L, O extends Operators<N, L>>(
+function buildOperator<N, L, O extends TwolayerOps<N, L>>(
   options: O &
-    Operators<N, L> & {
+    TwolayerOps<N, L> & {
       passes: number;
     }
-): TwoLayerOperator<O> {
-  function twoLayerCall(layers: SugiNode<N, L>[][]): void {
+): DecrossTwoLayer<O> {
+  function decrossTwoLayer(layers: SugiNode<N, L>[][]): void {
     const reversed = layers.slice().reverse();
 
     // save optimal ordering
     let opt = layers.map((l) => l.slice());
     let optCrossings = crossings(opt);
 
-    for (const init of options.inits) {
+    // NOTE empty inits is the same as one noop init
+    const inits = options.inits.length ? options.inits : [() => undefined];
+    for (const init of inits) {
       init(layers);
 
       let changed = true;
@@ -166,13 +152,13 @@ function buildOperator<N, L, O extends Operators<N, L>>(
     layers.splice(0, layers.length, ...opt);
   }
 
-  function order<NO extends OrderOperator>(
+  function order<NO extends Twolayer>(
     ord: NO
-  ): TwoLayerOperator<Up<O, { order: NO }>>;
+  ): DecrossTwoLayer<U<O, "order", NO>>;
   function order(): O["order"];
-  function order<NO extends OrderOperator>(
+  function order<NO extends Twolayer>(
     ord?: NO
-  ): O["order"] | TwoLayerOperator<Up<O, { order: NO }>> {
+  ): O["order"] | DecrossTwoLayer<U<O, "order", NO>> {
     if (ord === undefined) {
       return options.order;
     } else {
@@ -180,66 +166,64 @@ function buildOperator<N, L, O extends Operators<N, L>>(
       return buildOperator({ ...rest, order: ord });
     }
   }
-  twoLayerCall.order = order;
+  decrossTwoLayer.order = order;
 
-  function inits<NewInits extends Inits>(
+  function inits<NewInits extends readonly Decross[]>(
     val: NewInits
-  ): TwoLayerOperator<Up<O, { inits: NewInits }>>;
+  ): DecrossTwoLayer<U<O, "inits", NewInits>>;
   function inits(): O["inits"];
-  function inits<NewInits extends Inits>(
+  function inits<NewInits extends readonly Decross[]>(
     val?: NewInits
-  ): O["inits"] | TwoLayerOperator<Up<O, { inits: NewInits }>> {
+  ): O["inits"] | DecrossTwoLayer<U<O, "inits", NewInits>> {
     if (val === undefined) {
       return [...options.inits];
-    } else if (val.length) {
-      const { inits: _, ...rest } = options;
-      // not sure why the cast here is necessary
-      return buildOperator({ ...rest, inits: [...val] as NewInits });
     } else {
-      throw new Error(
-        "inits must be a non-empty array, maybe you intended the singleton noop: `[() => undefined]`"
-      );
+      const { inits: _, ...rest } = options;
+      return buildOperator({ ...rest, inits: val });
     }
   }
-  twoLayerCall.inits = inits;
+  decrossTwoLayer.inits = inits;
 
-  function passes(val: number): TwoLayerOperator<O>;
+  function passes(val: number): DecrossTwoLayer<O>;
   function passes(): number;
-  function passes(val?: number): TwoLayerOperator<O> | number {
+  function passes(val?: number): DecrossTwoLayer<O> | number {
     if (val === undefined) {
       return options.passes;
     } else if (val <= 0) {
-      throw new Error("number of passes must be positive");
+      throw err`number of passes must be positive`;
     } else {
       return buildOperator({ ...options, passes: val });
     }
   }
-  twoLayerCall.passes = passes;
+  decrossTwoLayer.passes = passes;
 
-  return twoLayerCall;
+  decrossTwoLayer.d3dagBuiltin = true as const;
+
+  return decrossTwoLayer;
 }
 
 /** default two layer operator */
-export type DefaultTwoLayerOperator = TwoLayerOperator<{
+export type DefaultDecrossTwoLayer = DecrossTwoLayer<{
   /** default order */
-  order: GreedyOperator<AggOperator>;
+  order: TwolayerGreedy<TwolayerAgg>;
   /** default inits, both dfs based */
-  inits: [DfsOperator, DfsOperator];
+  inits: readonly [DecrossDfs, DecrossDfs];
 }>;
 
 /**
- * Create a default {@link TwoLayerOperator}, bundled as
- * {@link decrossTwoLayer}.
+ * Create a default {@link DecrossTwoLayer}
+ *
+ * - {@link DecrossTwoLayer#order | `order()`}: `twolayerGreedy().base(twolayerAgg())`
+ * - {@link DecrossTwoLayer#inits | `inits()`}: `[decrossDfs(), decrossDfs().topDown(false)]`
+ * - {@link DecrossTwoLayer#passes | `passes()`}: `24`
  */
-export function twoLayer(...args: never[]): DefaultTwoLayerOperator {
+export function decrossTwoLayer(...args: never[]): DefaultDecrossTwoLayer {
   if (args.length) {
-    throw new Error(
-      `got arguments to twoLayer(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to decrossTwoLayer(${args}); you probably forgot to construct decrossTwoLayer before passing to decross: \`sugiyama().decross(decrossTwoLayer())\`, note the trailing "()"`;
   }
   return buildOperator({
-    order: greedy().base(agg()),
-    inits: [dfs(), dfs().topDown(false)],
+    order: twolayerGreedy().base(twolayerAgg()),
+    inits: [decrossDfs().topDown(true), decrossDfs().topDown(false)] as const,
     passes: 24,
   });
 }

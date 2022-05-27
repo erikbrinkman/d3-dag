@@ -5,11 +5,9 @@
  * @packageDocumentation
  */
 import { solveQP } from "quadprog";
-import { CoordNodeSizeAccessor } from ".";
-import { getParents } from "../../dag/utils";
-import { flatMap } from "../../iters";
-import { bigrams, dfs, setIntersect } from "../../utils";
-import { SugiNode } from "../utils";
+import { bigrams } from "../../iters";
+import { ierr } from "../../utils";
+import { SugiNode, SugiSeparation } from "../sugify";
 
 /** wrapper for solveQP */
 function qp(
@@ -43,8 +41,9 @@ function qp(
   bvec.push(...b.map((v) => -v));
 
   const { solution, message } = solveQP(Dmat, dvec, Amat, bvec, meq);
+  /* istanbul ignore if */
   if (message.length) {
-    throw new Error(`quadratic program failed: ${message}`);
+    throw ierr`quadratic program failed: ${message}`;
   }
   solution.shift();
   return solution;
@@ -85,10 +84,20 @@ export function indices(layers: SugiNode[][]): Map<SugiNode, number> {
 export function init<N, L>(
   layers: SugiNode<N, L>[][],
   inds: Map<SugiNode, number>,
-  nodeSize: CoordNodeSizeAccessor<N, L>
+  sep: SugiSeparation<N, L>,
+  compress: number = 0
 ): [number[][], number[], number[][], number[]] {
   // NOTE max because we might assign a node the same index
   const n = 1 + Math.max(...inds.values());
+
+  const Q = Array<null>(n)
+    .fill(null)
+    .map((_, i) =>
+      Array<null>(n)
+        .fill(null)
+        .map((_, j) => (i === j ? compress : 0))
+    );
+  const c = Array<number>(n).fill(0);
   const A: number[][] = [];
   const b: number[] = [];
 
@@ -96,16 +105,13 @@ export function init<N, L>(
     for (const [first, second] of bigrams(layer)) {
       const find = inds.get(first)!;
       const sind = inds.get(second)!;
-      const cons = new Array(n).fill(0);
+      const cons = Array<number>(n).fill(0);
       cons[find] = 1;
       cons[sind] = -1;
       A.push(cons);
-      b.push(-(nodeSize(first) + nodeSize(second)) / 2);
+      b.push(-sep(first, second));
     }
   }
-
-  const c = new Array(n).fill(0);
-  const Q = [...new Array(n)].map(() => new Array(n).fill(0));
 
   return [Q, c, A, b];
 }
@@ -152,7 +158,7 @@ export function minBend(
  */
 export function layout<N, L>(
   layers: SugiNode<N, L>[][],
-  nodeSize: CoordNodeSizeAccessor<N, L>,
+  sep: SugiSeparation<N, L>,
   inds: Map<SugiNode, number>,
   solution: number[]
 ): number {
@@ -163,77 +169,19 @@ export function layout<N, L>(
     const first = layer[0];
     const last = layer[layer.length - 1];
 
-    start = Math.min(start, solution[inds.get(first)!] - nodeSize(first) / 2);
-    finish = Math.max(finish, solution[inds.get(last)!] + nodeSize(last) / 2);
+    start = Math.min(start, solution[inds.get(first)!] - sep(undefined, first));
+    finish = Math.max(finish, solution[inds.get(last)!] + sep(last, undefined));
   }
   const width = finish - start;
 
   // assign indices based off of span
   for (const layer of layers) {
     for (const node of layer) {
+      // clip for numeric errors
       node.x = Math.min(Math.max(0, solution[inds.get(node)!] - start), width);
     }
   }
 
   // return width
   return width;
-}
-
-/**
- * Compute a map from node ids to a connected component index. This is useful
- * to quickly compare if two nodes are in the same connected component.
- *
- * @internal
- */
-export function componentMap(layers: SugiNode[][]): Map<SugiNode, number> {
-  // create parent map to allow accessing parents
-  const parents = getParents(flatMap(layers, (lay) => lay));
-
-  // "children" function that returns children and parents
-  function* graph(node: SugiNode): Generator<SugiNode, void, undefined> {
-    yield* node.ichildren();
-    yield* parents.get(node) ?? [];
-  }
-
-  // depth first search over all nodes
-  let component = 0;
-  const compMap = new Map<SugiNode, number>();
-  for (const node of flatMap(layers, (l) => l)) {
-    if (compMap.has(node)) continue;
-    for (const comp of dfs(graph, node)) {
-      compMap.set(comp, component);
-    }
-    component++;
-  }
-
-  return compMap;
-}
-
-/**
- * If disconnected components exist in the same layer, then we can minimize the
- * distance between them to make a reasonable objective. If, however, layers
- * share no common components then they are truly independent in assignment of
- * x coordinates and should be solved separately.
- *
- * @internal
- */
-export function splitComponentLayers<N, L>(
-  layers: SugiNode<N, L>[][],
-  compMap: Map<SugiNode, number>
-): SugiNode<N, L>[][][] {
-  // Because of dummy nodes, there's no way for a component to skip a layer,
-  // thus for layers to share no common components, there must be a clear
-  // boundary between any two.
-  const split = [];
-  let newLayers = [];
-  let lastComponents = new Set<number>();
-  for (const layer of layers) {
-    const currentComponents = new Set(layer.map((n) => compMap.get(n)!));
-    if (!setIntersect(lastComponents, currentComponents)) {
-      split.push((newLayers = []));
-    }
-    newLayers.push(layer);
-    lastComponents = currentComponents;
-  }
-  return split;
 }

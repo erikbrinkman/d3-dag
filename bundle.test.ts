@@ -1,18 +1,17 @@
 import * as d3runtime from ".";
 import * as d3types from "./src";
-import { square } from "./test/examples";
-import {
-  createLayers,
-  getIndex,
-  getLayers,
-  nodeSize,
-} from "./test/sugiyama/utils";
+import { createLayers, getIndex, getLayers } from "./src/sugiyama/test-utils";
+import { square } from "./src/test-graphs";
 
 // so that the runtime types align with the test utilties types
 const d3dag = d3runtime as unknown as typeof d3types;
 
+function nodeSize(): number {
+  return 1;
+}
+
 describe("tests that require a built bundle", () => {
-  // javascript=lp-solver
+  // javascript-lp-solver
   test("decrossOpt() propogates to both layers when bundled", () => {
     // o o    o o
     //  X     | |
@@ -45,11 +44,12 @@ describe("tests that require a built bundle", () => {
     expect(inds).toEqual([1, 0]);
   });
 
-  // javascript=lp-solver
+  // javascript-lp-solver
   test("layeringSimplex() works for square", () => {
     const dag = square();
-    d3dag.layeringSimplex()(dag);
-    const layers = getLayers(dag);
+    const layering = d3dag.layeringSimplex();
+    const num = layering(dag, d3dag.layerSeparation);
+    const layers = getLayers(dag, num + 1);
     expect([[0], [1, 2], [3]]).toEqual(layers);
   });
 
@@ -57,7 +57,8 @@ describe("tests that require a built bundle", () => {
   test("coordQuad() works for square like layout", () => {
     const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);
     const [[head], [left, right], [tail]] = layers;
-    d3dag.coordQuad()(layers, nodeSize);
+    const coord = d3dag.coordQuad();
+    coord(layers, d3dag.sizedSeparation(nodeSize, 0));
 
     expect(head.x).toBeCloseTo(1.0);
     expect(left.x).toBeCloseTo(0.5);
@@ -73,13 +74,5 @@ describe("tests that require a built bundle", () => {
     agg.add(2);
     agg.add(4);
     expect(agg.val()).toEqual(2);
-  });
-
-  // fastpriorityqueue
-  test("layeringCoffmanGraham() works for square", () => {
-    const dag = square();
-    d3dag.layeringCoffmanGraham()(dag);
-    const layers = getLayers(dag);
-    expect([[0], [1, 2], [3]]).toEqual(layers);
   });
 });

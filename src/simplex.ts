@@ -1,4 +1,5 @@
 import { Constraint, Solve, Variable } from "javascript-lp-solver";
+import { ierr } from "./utils";
 export type { Constraint, Variable };
 
 /** solve an lp with a better interface */
@@ -21,7 +22,7 @@ export function solve(
     }
   );
   if (!feasible) {
-    throw new Error("could not find a feasible simplex solution");
+    throw ierr`could not find a feasible simplex solution`;
   }
   return assignment;
 }

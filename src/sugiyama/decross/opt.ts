@@ -1,47 +1,36 @@
 /**
- * An {@link OptOperator} for optimally minimizing the number of crossings.
+ * An {@link DecrossOpt} for optimally minimizing the number of crossings.
  *
  * @packageDocumentation
  */
-import { DecrossOperator } from ".";
-import { getParents } from "../../dag/utils";
+import { Decross } from ".";
+import { bigrams } from "../../iters";
+import { OptChecking } from "../../layout";
 import { Constraint, solve, Variable } from "../../simplex";
-import { bigrams } from "../../utils";
-import { SugiNode } from "../utils";
+import { err } from "../../utils";
+import { SugiNode } from "../sugify";
 
 /**
- * What size of dags to error on
- *
- * Modifying this is probably a bad idea unless you know what you're doing.
- *
- * Optimally decrossing a dag can be prohibitively expensive. As a result, if
- * you try to decross any dag that is heuristically determined to be too big,
- * this will raise an error. Modifying how large graphs are handled will allow
- * you to override these heuristic limits, but is probably unwise.
- */
-export type LargeHandling = "small" | "medium" | "large";
-
-/**
- * A {@link DecrossOperator} that minimizes the number of crossings.
+ * A {@link sugiyama/decross!Decross} that minimizes the number of crossings.
  *
  * This method brute forces an NP-Complete problem, and as such may run for an
  * exceedingly long time on large graphs. As a result, any graph that is
  * probably too large will throw an error instead of running. Use with care.
  *
- * Create with {@link opt}.
+ * Create with {@link decrossOpt}.
  *
  * <img alt="optimal decross example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
-export interface OptOperator extends DecrossOperator<unknown, unknown> {
+export interface DecrossOpt extends Decross<unknown, unknown> {
   /**
    * Set the large dag handling
    *
    * If you modify this, the layout may run forever, or may crash. See
-   * {@link LargeHandling} for more details. (default: `"small"`)
+   * {@link layout!OptChecking} for more details. (default: `"small"`)
    */
-  large(val: LargeHandling): OptOperator;
+  check(val: OptChecking): DecrossOpt;
   /** Get the current large graph handling value. */
-  large(): LargeHandling;
+  check(): OptChecking;
 
   /**
    * Set whether to also minimize distance between nodes that share a parent /
@@ -52,57 +41,40 @@ export interface OptOperator extends DecrossOperator<unknown, unknown> {
    * share common parents or children will be put closer together if it doesn't
    * affect the number of crossings. (default: false)
    */
-  dist(val: boolean): OptOperator;
+  dist(val: boolean): DecrossOpt;
   /** get whether the current layout minimized distance */
   dist(): boolean;
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
 }
 
 /** @internal */
 function buildOperator(options: {
-  large: LargeHandling;
+  check: OptChecking;
   dist: boolean;
-}): OptOperator {
+}): DecrossOpt {
   // TODO optimize this for disconnected graphs by breaking them apart, solving
   // each, then mushing them back together
 
-  function optCall(layers: SugiNode[][]): void {
-    // check for large input
+  function decrossOpt(layers: SugiNode[][]): void {
     const numVars = layers.reduce(
       (t, l) => t + (l.length * Math.max(l.length - 1, 0)) / 2,
       0
     );
-    const numEdges = layers.reduce(
-      (t, l) => t + l.reduce((s, n) => s + n.nchildren(), 0),
-      0
-    );
-    if (options.large !== "large" && numVars > 1200) {
-      throw new Error(
-        `size of dag to decrossOpt is too large and will likely crash instead of complete, enable "large" graphs to run anyway`
-      );
-    } else if (
-      options.large !== "large" &&
-      options.large !== "medium" &&
-      (numVars > 400 || numEdges > 100)
-    ) {
-      throw new Error(
-        `size of dag to decrossOpt is too large and will likely not complete, enable "medium" graphs to run anyway`
-      );
-    }
 
     const distanceConstraints: [SugiNode[], SugiNode[][]][] = [];
     for (const [topLayer, bottomLayer] of bigrams(layers)) {
-      const withParents = new Set(topLayer.flatMap((node) => node.children()));
-      const topUnconstrained = bottomLayer.filter(
-        (node) => !withParents.has(node)
-      );
+      const topUnconstrained = bottomLayer.filter((node) => !node.nparents());
       const topGroups = topLayer
-        .map((node) => node.children())
+        .map((node) => [...node.children()])
         .filter((cs) => cs.length > 1);
       distanceConstraints.push([topUnconstrained, topGroups]);
 
       const bottomUnconstrained = topLayer.filter((n) => !n.nchildren());
-      const parents = getParents(topLayer);
-      const bottomGroups = [...parents.values()];
+      const bottomGroups = bottomLayer
+        .map((node) => [...node.parents()])
+        .filter((ps) => ps.length > 1);
       distanceConstraints.push([bottomUnconstrained, bottomGroups]);
     }
 
@@ -195,8 +167,8 @@ function buildOperator(options: {
       for (const [i, p1] of layer.slice(0, layer.length - 1).entries()) {
         for (const p2 of layer.slice(i + 1)) {
           const pairp = key(p1, p2);
-          for (const c1 of p1.ichildren()) {
-            for (const c2 of p2.ichildren()) {
+          for (const c1 of p1.children()) {
+            for (const c2 of p2.children()) {
               if (c1 === c2) {
                 continue;
               }
@@ -292,6 +264,15 @@ function buildOperator(options: {
       }
     }
 
+    // check for large input
+    const numVari = Object.keys(variables).length;
+    const numCons = Object.keys(constraints).length;
+    if (options.check !== "oom" && numVari > 2000) {
+      throw err`size of dag to decrossOpt is too large and will likely crash instead of complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOp().check("oom"))\``;
+    } else if (options.check === "fast" && (numVari > 1000 || numCons > 5000)) {
+      throw err`size of dag to decrossOpt is too large and will likely not complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOp().check("slow"))\``;
+    }
+
     // solve objective
     // NOTE bundling sets this to undefined, and we need it to be settable
     const ordering = solve("opt", "min", variables, constraints, ints);
@@ -302,39 +283,42 @@ function buildOperator(options: {
     }
   }
 
-  function large(): LargeHandling;
-  function large(val: LargeHandling): OptOperator;
-  function large(val?: LargeHandling): LargeHandling | OptOperator {
+  function check(): OptChecking;
+  function check(val: OptChecking): DecrossOpt;
+  function check(val?: OptChecking): OptChecking | DecrossOpt {
     if (val === undefined) {
-      return options.large;
+      return options.check;
     } else {
-      return buildOperator({ ...options, large: val });
+      return buildOperator({ ...options, check: val });
     }
   }
-  optCall.large = large;
+  decrossOpt.check = check;
 
   function dist(): boolean;
-  function dist(val: boolean): OptOperator;
-  function dist(val?: boolean): boolean | OptOperator {
+  function dist(val: boolean): DecrossOpt;
+  function dist(val?: boolean): boolean | DecrossOpt {
     if (val === undefined) {
       return options.dist;
     } else {
       return buildOperator({ ...options, dist: val });
     }
   }
-  optCall.dist = dist;
+  decrossOpt.dist = dist;
 
-  return optCall;
+  decrossOpt.d3dagBuiltin = true as const;
+
+  return decrossOpt;
 }
 
 /**
- * Create a default {@link OptOperator}, bundled as {@link decrossOpt}.
+ * Create a default {@link DecrossOpt}
+ *
+ * - {@link DecrossOpt#check | `check()`}: `"fast"`
+ * - {@link DecrossOpt#dist | `dist()`}: `false`
  */
-export function opt(...args: never[]): OptOperator {
+export function decrossOpt(...args: never[]): DecrossOpt {
   if (args.length) {
-    throw new Error(
-      `got arguments to opt(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to decrossOpt(${args}); you probably forgot to construct decrossOpt before passing to decross: \`sugiyama().decross(decrossOpt())\`, note the trailing "()"`;
   }
-  return buildOperator({ large: "small", dist: false });
+  return buildOperator({ check: "fast", dist: false });
 }

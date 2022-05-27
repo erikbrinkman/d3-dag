@@ -1,48 +1,51 @@
 /**
- * The {@link GreedyOperator} assigns nodes close to the mean of their parents,
+ * The {@link CoordGreedy} assigns nodes close to the mean of their parents,
  * then spreads them out.
  *
  * @packageDocumentation
  */
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
-import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { SugiNode } from "../utils";
+import { Coord } from ".";
+import { slice } from "../../iters";
+import { err } from "../../utils";
+import { SugiNode, SugiSeparation } from "../sugify";
 
 /**
- * A {@link CoordOperator} that tries to place nodes close to their parents
+ * A {@link sugiyama/coord!Coord} that tries to place nodes close to their parents
  *
  * Nodes that can't be placed at the mean of their parents' location, will be
  * spaced out with their priority equal to their degree.
  *
- * This is generally slower than {@link CenterOperator} but still reasonably
+ * This is generally slower than {@link sugiyama/coord/center!CoordCenter} but still reasonably
  * fast.
  *
- * Create with {@link greedy}.
+ * Create with {@link coordGreedy}.
  *
  * <img alt="greedy example" src="media://sugi-simplex-opt-greedy.png" width="400">
  */
-export type GreedyOperator = CoordOperator<unknown, unknown>;
+export interface CoordGreedy extends Coord<unknown, unknown> {
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
+}
 
 /**
- * Create a new {@link GreedyOperator}, bundled as {@link coordGreedy}.
+ * Create a new {@link CoordGreedy}
  */
-export function greedy(...args: never[]): GreedyOperator {
+export function coordGreedy(...args: never[]): CoordGreedy {
   if (args.length) {
-    throw new Error(
-      `got arguments to greedy(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to coordGreedy(${args}); you probably forgot to construct coordGreedy before passing to coord: \`sugiyama().coord(coordGreedy())\`, note the trailing "()"`;
   }
 
-  function greedyCall<N, L>(
+  function coordGreedy<N, L>(
     layers: SugiNode<N, L>[][],
-    nodeSize: CoordNodeSizeAccessor<N, L>
+    sep: SugiSeparation<N, L>
   ): number {
     // TODO other initial assignments
     const assignment = meanAssignment;
 
     // assign degrees
-    const degrees = new Map<SugiNode, number>();
+    const degrees = new Map<SugiNode<N, L>, number>();
     for (const layer of layers) {
       for (const node of layer) {
         // the -3 at the end ensures that dummy nodes have the lowest priority,
@@ -53,7 +56,7 @@ export function greedy(...args: never[]): GreedyOperator {
     }
     for (const layer of layers) {
       for (const node of layer) {
-        for (const child of node.ichildren()) {
+        for (const child of node.children()) {
           degrees.set(child, degrees.get(child)! + 1);
         }
       }
@@ -63,11 +66,13 @@ export function greedy(...args: never[]): GreedyOperator {
     let [lastLayer, ...restLayers] = layers;
     let start = 0;
     let finish = 0;
+    let last;
     for (const node of lastLayer) {
-      const size = nodeSize(node);
-      node.x = finish + size / 2;
-      finish += size;
+      finish += sep(last, node);
+      node.x = finish;
+      last = node;
     }
+    finish += sep(last, undefined);
 
     // assign the rest of nodes
     for (const layer of restLayers) {
@@ -84,26 +89,26 @@ export function greedy(...args: never[]): GreedyOperator {
         });
       // Iterate over nodes in degree order
       for (const [j, node] of ordered) {
+        let last;
+
         // first push nodes over to left
         // TODO we do left than right, but really we should do both and average
-        const nwidth = nodeSize(node);
-
-        let end = node.x! + nwidth / 2;
-        for (const next of layer.slice(j + 1)) {
-          const hsize = nodeSize(next) / 2;
-          const nx = (next.x = Math.max(next.x!, end + hsize));
-          end = nx + hsize;
+        let end = node.x;
+        last = node;
+        for (const next of slice(layer, j + 1)) {
+          end = next.x = Math.max(next.x, end + sep(last, next));
+          last = next;
         }
-        finish = Math.max(finish, end);
+        finish = Math.max(finish, end + sep(last, undefined));
 
         // then push from the right
-        let begin = node.x! - nwidth / 2;
-        for (const next of layer.slice(0, j).reverse()) {
-          const hsize = nodeSize(next) / 2;
-          const nx = (next.x = Math.min(next.x!, begin - hsize));
-          begin = nx - hsize;
+        let begin = node.x;
+        last = node;
+        for (const next of slice(layer, j - 1, -1, -1)) {
+          begin = next.x = Math.min(next.x, begin - sep(next, last));
+          last = next;
         }
-        start = Math.min(start, begin);
+        start = Math.min(start, begin - sep(undefined, last));
       }
 
       lastLayer = layer;
@@ -112,17 +117,19 @@ export function greedy(...args: never[]): GreedyOperator {
     // separate for zero based
     for (const layer of layers) {
       for (const node of layer) {
-        node.x! -= start;
+        node.x -= start;
       }
     }
     const width = finish - start;
     if (width <= 0) {
-      throw new Error("must assign nonzero width to at least one node");
+      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     }
     return width;
   }
 
-  return greedyCall;
+  coordGreedy.d3dagBuiltin = true as const;
+
+  return coordGreedy;
 }
 
 // TODO this is very similar to the twolayerMean method, there might be a
@@ -135,10 +142,10 @@ function meanAssignment(topLayer: SugiNode[], bottomLayer: SugiNode[]): void {
   }
   const counts = new Map<SugiNode, number>();
   for (const node of topLayer) {
-    for (const child of node.ichildren()) {
-      const newCount = (counts.get(child) || 0) + 1;
+    for (const child of node.children()) {
+      const newCount = (counts.get(child) ?? 0) + 1;
       counts.set(child, newCount);
-      child.x! += (node.x! - child.x!) / newCount;
+      child.x += (node.x - child.x) / newCount;
     }
   }
 }

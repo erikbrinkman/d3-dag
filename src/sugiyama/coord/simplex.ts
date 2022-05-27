@@ -1,17 +1,22 @@
 /**
- * The {@link SimplexOperator} positions nodes to maximize line straightness.
+ * The {@link CoordSimplex} positions nodes to maximize line straightness.
  * This is adapted from methods used for dot layout.
  *
  * @packageDocumentation
  */
-import { CoordNodeSizeAccessor, CoordOperator } from ".";
-import { DagLink } from "../../dag";
-import { entries, flatMap } from "../../iters";
+import { Coord } from ".";
+import { GraphLink, GraphNode } from "../../graph";
+import { bigrams, entries, flatMap } from "../../iters";
 import { Constraint, solve, Variable } from "../../simplex";
-import { bigrams } from "../../utils";
-import { SugiNode } from "../utils";
-import { componentMap, splitComponentLayers } from "./utils";
+import { err, ierr } from "../../utils";
+import { SugiNode, SugiSeparation } from "../sugify";
 
+/**
+ * A strictly callable {@link SimplexWeight}
+ */
+export interface CallableSimplexWeight<NodeDatum = never, LinkDatum = never> {
+  (link: GraphLink<NodeDatum, LinkDatum>): readonly [number, number, number];
+}
 /**
  * An accessor to get how vertical a weight should be.
  *
@@ -20,86 +25,45 @@ import { componentMap, splitComponentLayers } from "./utils";
  * short edges, the second to medium edges, and the last one to the middle of
  * long edges. These numbers should generally be increasing.
  */
-export interface WeightAccessor<NodeDatum = never, LinkDatum = never> {
-  (link: DagLink<NodeDatum, LinkDatum>): readonly [number, number, number];
-}
-
-/**
- * a {@link WeightAccessor} that returns a constant value
- *
- * If using a constant value, this provides some small memory and time savings
- * over a regular accessor.
- */
-export interface ConstAccessor<
-  T extends readonly [number, number, number] = readonly [
-    number,
-    number,
-    number
-  ]
-> extends WeightAccessor<unknown, unknown> {
-  (): T;
-  /** the constant value */
-  value: Readonly<T>;
-}
-
-/**
- * a function for creating a {@link ConstAccessor}
- */
-export function createConstAccessor<
-  T extends readonly [number, number, number]
->(value: T): ConstAccessor<T> {
-  const [a, b, c] = value;
-  if (a <= 0 || b <= 0 || c <= 0) {
-    throw new Error("const accessors should return non-negative values");
-  }
-  const accessor = () => value;
-  accessor.value = value;
-  return accessor;
-}
-
-/**
- * If an accessor is a const accessor
- */
-function isConstAccessor(
-  acc: WeightAccessor | ConstAccessor
-): acc is ConstAccessor {
-  return (
-    "value" in acc &&
-    typeof acc.value === "object" &&
-    acc.value.length === 3 &&
-    acc.value.every((v) => typeof v === "number")
-  );
-}
+export type SimplexWeight<NodeDatum = never, LinkDatum = never> =
+  | readonly [number, number, number]
+  | CallableSimplexWeight<NodeDatum, LinkDatum>;
 
 /** the operators of the simplex operator */
 export interface Operators<N = never, L = never> {
   /** the weights for each edge */
-  weight: WeightAccessor<N, L>;
+  weight: SimplexWeight<N, L>;
 }
 
 /** node datum for operators */
-type OpNodeDatum<O extends Operators> = O extends Operators<infer N, never>
+export type OpNodeDatum<O extends Operators> = O extends Operators<
+  infer N,
+  never
+>
   ? N
   : never;
 /** link datum for operators */
-type OpLinkDatum<O extends Operators> = O extends Operators<never, infer L>
+export type OpLinkDatum<O extends Operators> = O extends Operators<
+  never,
+  infer L
+>
   ? L
   : never;
 
 /**
- * A {@link CoordOperator} that places nodes to maximize edge verticality
+ * A {@link sugiyama/coord!Coord} that places nodes to maximize edge verticality
  *
  * The minimization mirrors that of Gansner, Emden R., et al. "A technique for
  * drawing directed graphs." IEEE Transactions on Software Engineering (1993).
  * This tries to make nodes close together, assigning greater weight for nodes
  * as part of an edge.
  *
- * Create with {@link simplex}.
+ * Create with {@link coordSimplex}.
  *
  * <img alt="quad example" src="media://sugi-simplex-twolayer-simplex.png" width="400">
  */
-export interface SimplexOperator<Ops extends Operators>
-  extends CoordOperator<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
+export interface CoordSimplex<Ops extends Operators>
+  extends Coord<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
   /**
    * Set the weights for how vertical edges should be.
    * The higher the weight, the more vertical an edge should be. Weights are
@@ -108,14 +72,23 @@ export interface SimplexOperator<Ops extends Operators>
    * the last is for the extents of long edges. Generally the number should be
    * increasing, and all must be positive. (default: () =\> [1, 2, 8])
    */
-  weight<NewWeight extends WeightAccessor>(
+  weight<NewWeight extends SimplexWeight>(
     val: NewWeight
-  ): SimplexOperator<{
+  ): CoordSimplex<{
     /** new weight */
     weight: NewWeight;
   }>;
   /** Gets the current weight accessor */
   weight(): Ops["weight"];
+
+  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  readonly d3dagBuiltin: true;
+}
+
+function validateWeights([two, one, zero]: readonly [number, number, number]) {
+  if (two <= 0 || one <= 0 || zero <= 0) {
+    throw err`simplex weights must be positive, but got: ${two}, ${one}, ${zero}`;
+  }
 }
 
 /**
@@ -124,19 +97,13 @@ export interface SimplexOperator<Ops extends Operators>
  * This short circuits the constant operator, verifies the weights are
  * positive, and makes sure that we only call it once for each pair of nodes.
  */
-function createCachedWeightAccessor<N, L>(
+function createCachedSimplexWeightAccessor<N, L>(
   layers: readonly SugiNode<N, L>[][],
-  weight: WeightAccessor<N, L>
+  weight: SimplexWeight<N, L>
 ): (par: SugiNode<N, L>, child: SugiNode<N, L>) => number {
-  if (isConstAccessor(weight)) {
-    const [two, one, zero] = weight.value;
-    if (two <= 0 || one <= 0 || zero <= 0) {
-      throw new Error(
-        `simplex weights must be positive, but got: ${two}, ${one}, ${zero}`
-      );
-    }
-
-    const cached = (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
+  if (typeof weight !== "function") {
+    const [two, one, zero] = weight;
+    return (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
       const count = +("node" in par.data) + +("node" in child.data);
       /* istanbul ignore next */
       switch (count) {
@@ -148,27 +115,26 @@ function createCachedWeightAccessor<N, L>(
           return two;
         default:
           /* istanbul ignore next */
-          throw new Error("internal error");
+          throw ierr`invalid count`;
       }
     };
-
-    return cached;
   } else {
-    const cache = new Map();
+    const cache = new Map<
+      GraphNode<N, L>,
+      Map<GraphNode<N, L>, readonly [number, number, number]>
+    >();
     for (const node of flatMap(layers, (l) => l)) {
       if ("node" in node.data) {
         const rawNode = node.data.node;
-        const targets = new Map();
+        const targets = new Map<
+          GraphNode<N, L>,
+          readonly [number, number, number]
+        >();
 
-        for (const link of rawNode.ichildLinks()) {
+        for (const link of rawNode.childLinks()) {
           const { target } = link;
           const vals = weight(link);
-          const [zero, one, two] = vals;
-          if (zero <= 0 || one <= 0 || two <= 0) {
-            throw new Error(
-              `simplex weights must be positive, but got: ${zero}, ${one}, ${two}`
-            );
-          }
+          validateWeights(vals);
           targets.set(target, vals);
         }
 
@@ -176,7 +142,7 @@ function createCachedWeightAccessor<N, L>(
       }
     }
 
-    const cached = (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
+    return (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
       // NOTE this structure is to make sure type script does inference about
       // the sugi data appropriately
       if ("link" in par.data) {
@@ -192,8 +158,6 @@ function createCachedWeightAccessor<N, L>(
         return val;
       }
     };
-
-    return cached;
   }
 }
 
@@ -201,18 +165,18 @@ function buildOperator<
   NodeDatum,
   LinkDatum,
   Ops extends Operators<NodeDatum, LinkDatum>
->(opts: Ops & Operators<NodeDatum, LinkDatum>): SimplexOperator<Ops> {
-  function simplexComponent<N extends NodeDatum, L extends LinkDatum>(
+>(opts: Ops & Operators<NodeDatum, LinkDatum>): CoordSimplex<Ops> {
+  function coordSimplex<N extends NodeDatum, L extends LinkDatum>(
     layers: SugiNode<N, L>[][],
-    nodeSize: CoordNodeSizeAccessor<N, L>
+    sep: SugiSeparation<N, L>
   ): number {
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
 
-    const cachedWeight = createCachedWeightAccessor(layers, opts.weight);
+    const cachedWeight = createCachedSimplexWeightAccessor(layers, opts.weight);
 
     // initialize ids and non-slack variables
-    const ids = new Map();
+    const ids = new Map<SugiNode<N, L>, string>();
     for (const [i, node] of entries(flatMap(layers, (l) => l))) {
       const id = i.toString();
       ids.set(node, id);
@@ -230,8 +194,8 @@ function buildOperator<
         const lid = n(left);
         const rid = n(right);
         const cons = `layer ${lid} -> ${rid}`;
-        const width = (nodeSize(left) + nodeSize(right)) / 2;
-        constraints[cons] = { min: width };
+        const separ = sep(left, right);
+        constraints[cons] = { min: separ };
         variables[lid][cons] = -1;
         variables[rid][cons] = 1;
       }
@@ -240,7 +204,7 @@ function buildOperator<
     // minimize weighted difference
     for (const node of flatMap(layers, (l) => l)) {
       const nid = n(node);
-      for (const child of node.ichildren()) {
+      for (const child of node.children()) {
         const cid = n(child);
         const slack = `link ${nid} -> ${cid}`;
 
@@ -269,62 +233,40 @@ function buildOperator<
         node.x = assignment[n(node)] ?? 0;
       }
       const first = layer[0];
-      offset = Math.min(offset, first.x! - nodeSize(first) / 2);
+      offset = Math.min(offset, first.x - sep(undefined, first));
       const last = layer[layer.length - 1];
-      width = Math.max(width, last.x! + nodeSize(last) / 2);
+      width = Math.max(width, last.x + sep(last, undefined));
     }
     for (const node of flatMap(layers, (l) => l)) {
-      node.x! -= offset;
+      node.x -= offset;
     }
-    return width - offset;
-  }
-
-  function simplexCall<N extends NodeDatum, L extends LinkDatum>(
-    layers: SugiNode<N, L>[][],
-    nodeSize: CoordNodeSizeAccessor<N, L>
-  ): number {
-    // split components
-    const compMap = componentMap(layers);
-    const components = splitComponentLayers(layers, compMap);
-
-    // layout each component and get width
-    const widths = components.map((compon) =>
-      simplexComponent(compon, nodeSize)
-    );
-
-    // center components
-    const maxWidth = Math.max(...widths);
+    const maxWidth = width - offset;
     if (maxWidth <= 0) {
-      throw new Error("must assign nonzero width to at least one node");
+      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
+    } else {
+      return maxWidth;
     }
-    for (const [i, compon] of components.entries()) {
-      const offset = (maxWidth - widths[i]) / 2;
-      for (const layer of compon) {
-        for (const node of layer) {
-          node.x! += offset;
-        }
-      }
-    }
-
-    return maxWidth;
   }
 
-  function weight<NewWeight extends WeightAccessor>(
+  function weight<NewWeight extends SimplexWeight>(
     val: NewWeight
-  ): SimplexOperator<{
+  ): CoordSimplex<{
     weight: NewWeight;
   }>;
   function weight(): Ops["weight"];
-  function weight<NewWeight extends WeightAccessor>(
+  function weight<NewWeight extends SimplexWeight>(
     val?: NewWeight
   ):
-    | SimplexOperator<{
+    | CoordSimplex<{
         weight: NewWeight;
       }>
     | Ops["weight"] {
     if (val === undefined) {
       return opts.weight;
     } else {
+      if (typeof val !== "function") {
+        validateWeights(val);
+      }
       const { weight: _, ...rest } = opts;
       return buildOperator({
         ...rest,
@@ -332,28 +274,30 @@ function buildOperator<
       });
     }
   }
-  simplexCall.weight = weight;
+  coordSimplex.weight = weight;
 
-  return simplexCall;
+  coordSimplex.d3dagBuiltin = true as const;
+
+  return coordSimplex;
 }
 
 /** default simplex operator */
-export type DefaultSimplexOperator = SimplexOperator<{
+export type DefaultCoordSimplex = CoordSimplex<{
   /** default weights taken from graphvis */
-  weight: ConstAccessor<readonly [1, 2, 8]>;
+  weight: readonly [1, 2, 8];
 }>;
 
 /**
- * Create a default {@link SimplexOperator}, bundled as {@link coordSimplex}.
+ * Create a default {@link CoordSimplex}
+ *
+ * - {@link CoordSimplex#weight | `weight()`}: `[1, 2, 8]`
  */
-export function simplex(...args: never[]): DefaultSimplexOperator {
+export function coordSimplex(...args: never[]): DefaultCoordSimplex {
   if (args.length) {
-    throw new Error(
-      `got arguments to simplex(${args}), but constructor takes no arguments.`
-    );
+    throw err`got arguments to coordSimplex(${args}); you probably forgot to construct coordSimplex before passing to coord: \`sugiyama().coord(coordSimplex())\`, note the trailing "()"`;
+  } else {
+    return buildOperator({
+      weight: [1, 2, 8] as const,
+    });
   }
-
-  return buildOperator({
-    weight: createConstAccessor([1, 2, 8] as const),
-  });
 }
