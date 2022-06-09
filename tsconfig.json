@@ -9,7 +9,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "strict": true,
-    "incremental": true
+    "incremental": true,
+    "skipLibCheck": true
   },
   "include": ["src", "test"]
 }
