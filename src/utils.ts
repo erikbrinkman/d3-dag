@@ -143,7 +143,7 @@ export interface ChildrenCallback<T> {
 export function* dfs<T>(
   children: ChildrenCallback<T>,
   ...queue: T[]
-): Generator<T> {
+): IterableIterator<T> {
   const seen = new Set<T>();
   let node;
   while ((node = queue.pop()) !== undefined) {

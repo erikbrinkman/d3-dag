@@ -31,10 +31,10 @@
   "scripts": {
     "fmt:prettier": "prettier '{src,test,test-d,types}/**/*.ts' '*.{json,ts}' 'examples/*.json' bundle.mjs",
     "fmt": "yarn fmt:prettier --write",
-    "lint:prettier": "yarn fmt:prettier --check",
     "lint:eslint": "eslint --cache {src,test,test-d}/**/*.ts bundle.mjs",
+    "lint:tsc": "pnpify tsc",
     "lint:doc": "pnpify typedoc --emit none",
-    "lint": "yarn lint:prettier && yarn lint:eslint && yarn lint:doc",
+    "lint": "yarn lint:tsc && yarn lint:eslint && yarn lint:doc",
     "build:ts": "pnpify tsc -p tsconfig.build.json",
     "build:flow": "node flow.mjs --cache",
     "build:bundle": "rm -rf bundle && node bundle.mjs",
@@ -43,7 +43,7 @@
     "test:coverage": "yarn test:jest --coverage",
     "test:tsd": "yarn build:ts && pnpify run tsd",
     "test:bundle": "yarn build:bundle && jest bundle.test.ts",
-    "test": "pnpify tsc && yarn lint && yarn test:coverage && yarn test:tsd && yarn test:bundle",
+    "test": "yarn lint && yarn test:coverage && yarn test:tsd && yarn test:bundle",
     "prepack": "jest --clear-cache && rm -rf dist bundle && yarn test && yarn build",
     "doc": "pnpify typedoc"
   },

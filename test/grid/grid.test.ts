@@ -1,7 +1,7 @@
 import { DagNode } from "../../src/dag";
 import { grid } from "../../src/grid";
 import { greedy } from "../../src/grid/lane/greedy";
-import { dummy, multi, zhere } from "../examples";
+import { dummy, en, multi, zhere } from "../examples";
 
 test("greedy() works for triangle", () => {
   const dag = dummy();
@@ -28,6 +28,25 @@ test("greedy() works for zherebko", () => {
   const { width, height } = layout(dag);
   expect(width).toEqual(10);
   expect(height).toEqual(12);
+});
+
+test("grid() works with rank", () => {
+  function rank({ data }: { data: { id: string } }): number | undefined {
+    if (data.id === "1") {
+      return 2;
+    } else if (data.id === "2") {
+      return 1;
+    } else {
+      return undefined;
+    }
+  }
+
+  const dag = en();
+  const layout = grid().nodeSize([2, 2]).rank(rank);
+  expect(layout.rank()).toBe(rank);
+  const { width, height } = layout(dag);
+  expect(width).toEqual(4);
+  expect(height).toEqual(8);
 });
 
 test("grid() throws for invalid lane operators", () => {
