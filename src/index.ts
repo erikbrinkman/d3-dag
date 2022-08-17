@@ -117,5 +117,14 @@ export { twolayerOpt } from "./sugiyama/twolayer/opt";
 export type { TwolayerOpt } from "./sugiyama/twolayer/opt";
 export { sizedSeparation } from "./sugiyama/utils";
 export type { NodeLength, Separation } from "./sugiyama/utils";
+export {
+  shapeEllipse,
+  shapeRect,
+  tweakFlip,
+  tweakGrid,
+  tweakShape,
+  tweakSize,
+} from "./tweaks";
+export type { Shape, Tweak } from "./tweaks";
 export { zherebko } from "./zherebko";
 export type { DefaultZherebko, Zherebko } from "./zherebko";

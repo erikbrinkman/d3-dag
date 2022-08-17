@@ -21,6 +21,7 @@ minimizing edge inversions where possible (although not optimally)
 
 - Mutable directed graphs, and similar creation methods to warm start them from
   data.
+- Tweaks - a set of various tweaks that modify a layout.
 
 ### Removed
 
@@ -33,6 +34,7 @@ minimizing edge inversions where possible (although not optimally)
   and is relatively expensive and hard to maintain.
 - Link points are now `[x, y]` tuples so they work more conveniently with
   `d3.curve`s default typing.
+- Size funtions on layouts, instead creating a size tweak.
 
 ### Changed
 

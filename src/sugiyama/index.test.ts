@@ -2,6 +2,7 @@ import { sugiyama } from ".";
 import { Graph, GraphNode } from "../graph";
 import { NodeSize } from "../layout";
 import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs";
+import { tweakSize } from "../tweaks";
 import { Coord } from "./coord";
 import { Decross } from "./decross";
 import { Layering } from "./layering";
@@ -121,27 +122,29 @@ test("sugiyama() allows changing nodeSize and gap", () => {
     return [size, size];
   }
 
-  const layout = sugiyama().nodeSize(nodeSize).gap([2, 2]);
+  const tweak = tweakSize({ width: 26, height: 28 });
+  const layout = sugiyama().nodeSize(nodeSize).gap([2, 2]).tweaks([tweak]);
   expect(layout.nodeSize()).toBe(nodeSize);
   expect(layout.gap()).toEqual([2, 2]);
+  expect(layout.tweaks()).toEqual([tweak]);
   const { width, height } = layout(dag);
-  expect(width).toBeCloseTo(13);
-  expect(height).toBeCloseTo(14);
+  expect(width).toBeCloseTo(26);
+  expect(height).toBeCloseTo(28);
   const [head, ...rest] = [...dag].sort(
     (a, b) => parseInt(a.data) - parseInt(b.data)
   );
   const [tail, ...mids] = rest.reverse();
 
   for (const node of mids) {
-    expect(node.x).toBeGreaterThanOrEqual(1);
-    expect(node.x).toBeLessThanOrEqual(12);
+    expect(node.x).toBeGreaterThanOrEqual(2);
+    expect(node.x).toBeLessThanOrEqual(24);
   }
 
-  expect(head.y).toBeCloseTo(0.5);
+  expect(head.y).toBeCloseTo(1);
   for (const mid of mids) {
-    expect(mid.y).toBeCloseTo(5);
+    expect(mid.y).toBeCloseTo(10);
   }
-  expect(tail.y).toBeCloseTo(11.5);
+  expect(tail.y).toBeCloseTo(23);
 });
 
 test("sugiyama() allows changing operators", () => {

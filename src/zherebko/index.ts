@@ -6,10 +6,9 @@
 import { Graph, Rank } from "../graph";
 import { bigrams, map } from "../iters";
 import { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
+import { Tweak } from "../tweaks";
 import { err, U } from "../utils";
 import { greedy } from "./greedy";
-
-// TODO Add node size
 
 /** all operators for the zherebko layout */
 export interface Operators<in N = never, in L = never> {
@@ -17,6 +16,8 @@ export interface Operators<in N = never, in L = never> {
   rank: Rank<N, L>;
   /** node size operator */
   nodeSize: NodeSize<N, L>;
+  /** tweaks */
+  tweaks: readonly Tweak<N, L>[];
 }
 
 /** the typed graph input of a set of operators */
@@ -61,6 +62,17 @@ export interface Zherebko<Ops extends Operators = Operators> {
   rank<NewRank extends Rank>(val: NewRank): Zherebko<U<Ops, "rank", NewRank>>;
   /** Get the current lane operator */
   rank(): Ops["rank"];
+
+  /**
+   * Set the tweaks to apply after layout
+   */
+  tweaks<NewTweaks extends readonly Tweak[]>(
+    val: NewTweaks
+  ): Zherebko<U<Ops, "tweaks", NewTweaks>>;
+  /**
+   * Get the current {@link layout!Tweak}s.
+   */
+  tweaks(): Ops["tweaks"];
 
   /**
    * Sets the {@link layout!NodeSize}, which assigns how much space is
@@ -170,10 +182,16 @@ function buildOperator<ND, LD, O extends Operators<ND, LD>>(
       points.push([target.x, target.y]);
     }
 
-    return {
+    // apply tweaks
+    let res = {
       width: (maxIndex - minIndex) * xgap + maxWidth,
       height,
     };
+    for (const tweak of ops.tweaks) {
+      res = tweak(inp, res);
+    }
+
+    return res;
   }
 
   function rank(): O["rank"];
@@ -189,6 +207,28 @@ function buildOperator<ND, LD, O extends Operators<ND, LD>>(
     }
   }
   zherebko.rank = rank;
+
+  function tweaks(): O["tweaks"];
+  function tweaks<NT extends readonly Tweak[]>(
+    val: NT
+  ): Zherebko<U<O, "tweaks", NT>>;
+  function tweaks<NT extends readonly Tweak[]>(
+    val?: NT
+  ): O["tweaks"] | Zherebko<U<O, "tweaks", NT>> {
+    if (val === undefined) {
+      return ops.tweaks;
+    } else {
+      const { tweaks: _, ...rest } = ops;
+      return buildOperator(
+        {
+          ...rest,
+          tweaks: val,
+        },
+        sizes
+      );
+    }
+  }
+  zherebko.tweaks = tweaks;
 
   function nodeSize(): O["nodeSize"];
   function nodeSize<NNS extends NodeSize>(
@@ -242,6 +282,8 @@ export type DefaultZherebko = Zherebko<{
   rank: Rank<unknown, unknown>;
   /** default node size */
   nodeSize: readonly [1, 1];
+  /** no tweaks */
+  tweaks: readonly [];
 }>;
 
 /**
@@ -256,7 +298,7 @@ export function zherebko(...args: never[]): DefaultZherebko {
     throw err`got arguments to zherebko(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`zherebko()(...)\``;
   }
   return buildOperator(
-    { rank: () => undefined, nodeSize: [1, 1] as const },
+    { rank: () => undefined, nodeSize: [1, 1] as const, tweaks: [] as const },
     {
       xgap: 1,
       ygap: 1,

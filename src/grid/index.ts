@@ -5,6 +5,7 @@
  */
 import { Graph, Rank } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
+import { Tweak } from "../tweaks";
 import { err, U } from "../utils";
 import { Lane } from "./lane";
 import { LaneGreedy, laneGreedy } from "./lane/greedy";
@@ -18,6 +19,8 @@ export interface GridOps<in N = never, in L = never> {
   rank: Rank<N, L>;
   /** node size operator */
   nodeSize: NodeSize<N, L>;
+  /** tweaks */
+  tweaks: readonly Tweak<N, L>[];
 }
 
 /** the typed graph input of a set of operators */
@@ -79,9 +82,22 @@ export interface Grid<Ops extends GridOps = GridOps> {
   /** Get the current lane operator */
   rank(): Ops["rank"];
 
+  /*
+   * Set the tweaks to apply after layout
+   */
+  tweaks<NewTweaks extends readonly Tweak[]>(
+    val: NewTweaks
+  ): Grid<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Sets the {@link layout!NodeSize}, which assigns how much space is
-   * necessary between nodes.
+   * Get the current {@link layout!Tweak}s.
+   */
+  tweaks(): Ops["tweaks"];
+
+  /**
+   * Sets this grid layout's node size to the specified two-element array of
+   * numbers [ *width*, *height* ] and returns a new operator. These sizes are
+   * effectively the grid size, e.g. the spacing between adjacent lanes or rows
+   * in the grid.
    *
    * (default: [1, 1])
    */
@@ -182,7 +198,13 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
       }
     }
 
-    return { width, height };
+    // apply tweaks
+    let res = { width, height };
+    for (const tweak of options.tweaks) {
+      res = tweak(grf, res);
+    }
+
+    return res;
   }
 
   function lane(): Ops["lane"];
@@ -212,6 +234,28 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
     }
   }
   grid.rank = rank;
+
+  function tweaks(): Ops["tweaks"];
+  function tweaks<NT extends readonly Tweak[]>(
+    val: NT
+  ): Grid<U<Ops, "tweaks", NT>>;
+  function tweaks<NT extends readonly Tweak[]>(
+    val?: NT
+  ): Ops["tweaks"] | Grid<U<Ops, "tweaks", NT>> {
+    if (val === undefined) {
+      return options.tweaks;
+    } else {
+      const { tweaks: _, ...rest } = options;
+      return buildOperator(
+        {
+          ...rest,
+          tweaks: val,
+        },
+        sizes
+      );
+    }
+  }
+  grid.tweaks = tweaks;
 
   function nodeSize(): Ops["nodeSize"];
   function nodeSize<NNS extends NodeSize>(
@@ -267,6 +311,8 @@ export type DefaultGrid = Grid<{
   rank: Rank<unknown, unknown>;
   /** default size */
   nodeSize: readonly [1, 1];
+  /** default tweaks: none */
+  tweaks: readonly [];
 }>;
 
 /**
@@ -285,6 +331,7 @@ export function grid(...args: never[]): DefaultGrid {
       lane: laneGreedy(),
       rank: () => undefined,
       nodeSize: [1, 1] as const,
+      tweaks: [] as const,
     },
     {
       xgap: 1,

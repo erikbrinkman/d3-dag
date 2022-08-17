@@ -3,18 +3,21 @@ import { GraphNode } from "../graph";
 import { graphConnect } from "../graph/connect";
 import { filter, map } from "../iters";
 import { doub, line, oh, single } from "../test-graphs";
+import { tweakSize } from "../tweaks";
 
 test("zherebko() works for a point", () => {
   const grf = single();
-  const layout = zherebko().nodeSize([1, 2]).gap([3, 4]);
+  const tweak = tweakSize({ width: 2, height: 4 });
+  const layout = zherebko().nodeSize([1, 2]).gap([3, 4]).tweaks([tweak]);
   expect(layout.nodeSize()).toEqual([1, 2]);
   expect(layout.gap()).toEqual([3, 4]);
+  expect(layout.tweaks()).toEqual([tweak]);
   const { width, height } = layout(grf);
-  expect(width).toEqual(1);
-  expect(height).toEqual(2);
+  expect(width).toEqual(2);
+  expect(height).toEqual(4);
   const [node] = grf;
-  expect(node.x).toBeCloseTo(0.5);
-  expect(node.y).toBeCloseTo(1);
+  expect(node.x).toBeCloseTo(1);
+  expect(node.y).toBeCloseTo(2);
 });
 
 test("zherebko() works for a line", () => {

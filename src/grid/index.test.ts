@@ -2,23 +2,26 @@ import { grid } from ".";
 import { GraphNode } from "../graph";
 import { filter } from "../iters";
 import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs";
+import { tweakSize } from "../tweaks";
 import { laneGreedy } from "./lane/greedy";
 
 test("greedy() works for triangle", () => {
   const grf = dummy();
-  const layout = grid().nodeSize([1, 2]).gap([3, 4]);
+  const tweak = tweakSize({ width: 10, height: 28 });
+  const layout = grid().nodeSize([1, 2]).gap([3, 4]).tweaks([tweak]);
   expect(layout.nodeSize()).toEqual([1, 2]);
   expect(layout.gap()).toEqual([3, 4]);
+  expect(layout.tweaks()).toEqual([tweak]);
   const { width, height } = layout(grf);
-  expect(width).toEqual(5);
-  expect(height).toEqual(14);
+  expect(width).toEqual(10);
+  expect(height).toEqual(28);
   const [head, mid, tail] = grf.topological();
-  expect(head.x).toBeCloseTo(0.5);
-  expect(head.y).toBeCloseTo(1);
-  expect(mid.x).toBeCloseTo(4.5);
-  expect(mid.y).toBeCloseTo(7);
-  expect(tail.x).toBeCloseTo(0.5);
-  expect(tail.y).toBeCloseTo(13);
+  expect(head.x).toBeCloseTo(1);
+  expect(head.y).toBeCloseTo(2);
+  expect(mid.x).toBeCloseTo(9);
+  expect(mid.y).toBeCloseTo(14);
+  expect(tail.x).toBeCloseTo(1);
+  expect(tail.y).toBeCloseTo(26);
 });
 
 test("greedy() works for zherebko", () => {

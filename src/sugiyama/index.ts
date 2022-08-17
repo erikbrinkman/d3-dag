@@ -5,6 +5,7 @@
  */
 import { Graph, GraphNode } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
+import { Tweak } from "../tweaks";
 import { err, U } from "../utils";
 import { Coord } from "./coord";
 import { coordSimplex, DefaultCoordSimplex } from "./coord/simplex";
@@ -31,6 +32,8 @@ export interface SugiyamaOps<in N = never, in L = never> {
   coord: Coord<N, L>;
   /** node size operator */
   nodeSize: NodeSize<N, L>;
+  /** tweaks */
+  tweaks: readonly Tweak<N, L>[];
 }
 
 /** the typed graph input of a set of operators */
@@ -141,7 +144,18 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   coord(): Ops["coord"];
 
   /**
-   * Sets the {@link layout!NodeSize}, which assigns how much space is
+   * Set the tweaks to apply after layout
+   */
+  tweaks<NewTweaks extends readonly Tweak[]>(
+    val: NewTweaks
+  ): Sugiyama<U<Ops, "tweaks", NewTweaks>>;
+  /**
+   * Get the current {@link layout!Tweak}s.
+   */
+  tweaks(): Ops["tweaks"];
+
+  /**
+   * Sets the {@link NodeSizeAccessor}, which assigns how much space is
    * necessary between nodes.
    *
    * (default: [1, 1])
@@ -264,8 +278,14 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
     // assign data back to original graph
     unsugify(layers);
 
+    // apply any tweaks in order
+    let res = { width, height };
+    for (const tweak of options.tweaks) {
+      res = tweak(dag, res);
+    }
+
     // layout info
-    return { width, height };
+    return res;
   }
 
   function layering(): Ops["layering"];
@@ -332,6 +352,28 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   }
   sugiyama.coord = coord;
 
+  function tweaks(): Ops["tweaks"];
+  function tweaks<NT extends readonly Tweak[]>(
+    val: NT
+  ): Sugiyama<U<Ops, "tweaks", NT>>;
+  function tweaks<NT extends readonly Tweak[]>(
+    val?: NT
+  ): Ops["tweaks"] | Sugiyama<U<Ops, "tweaks", NT>> {
+    if (val === undefined) {
+      return options.tweaks;
+    } else {
+      const { tweaks: _, ...rest } = options;
+      return buildOperator(
+        {
+          ...rest,
+          tweaks: val,
+        },
+        sizes
+      );
+    }
+  }
+  sugiyama.tweaks = tweaks;
+
   function nodeSize(): Ops["nodeSize"];
   function nodeSize<NNS extends NodeSize>(
     val: NNS
@@ -388,6 +430,8 @@ export type DefaultSugiyama = Sugiyama<{
   coord: DefaultCoordSimplex;
   /** default node size */
   nodeSize: readonly [1, 1];
+  /** default tweaks */
+  tweaks: readonly [];
 }>;
 
 /**
@@ -419,6 +463,7 @@ export function sugiyama(...args: never[]): DefaultSugiyama {
         decross: decrossTwoLayer(),
         coord: coordSimplex(),
         nodeSize: [1, 1],
+        tweaks: [] as const,
       },
       {
         gap: [0, 0],
