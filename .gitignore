@@ -14,6 +14,7 @@ coverage
 .eslintcache
 tsconfig.tsbuildinfo
 .flow_cache
+.cache
 
 # Artifacts #
 #############
