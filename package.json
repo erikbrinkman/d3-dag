@@ -87,7 +87,8 @@
   },
   "resolutions": {
     "got": "^11.8.5",
-    "minimist": "1.2.6"
+    "minimist": "1.2.6",
+    "minimatch": "^3.0.5"
   },
   "prettier": {
     "plugins": [
@@ -226,5 +227,5 @@
       ]
     }
   },
-  "packageManager": "yarn@3.2.0"
+  "packageManager": "yarn@3.3.0"
 }
