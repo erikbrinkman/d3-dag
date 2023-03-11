@@ -20,22 +20,13 @@ export interface Group<in NodeDatum = never, in LinkDatum = never> {
 /**
  * default separation for layering
  *
- * This separation returns 1 for most nodes, but 2 for nodes that have multiple
- * edges between them to ensure that the augmented sugiyama graph is not a
- * multi-graph.
+ * This separation returns 1 between nodes, or zero if one is not a node.
  */
 export function layerSeparation(
   upper?: GraphNode | undefined,
   lower?: GraphNode | undefined
 ): number {
-  if (!upper || !lower) {
-    return 0;
-  } else {
-    // NOTE we want this to return 1 if lower is not a child (indicating some
-    // other criterion for separation
-    const links = upper.nchildLinksTo(lower) + lower.nchildLinksTo(upper);
-    return Math.min(Math.max(1, links), 2);
-  }
+  return +!!(upper && lower);
 }
 
 /**

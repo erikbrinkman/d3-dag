@@ -35,6 +35,8 @@ minimizing edge inversions where possible (although not optimally)
 - Link points are now `[x, y]` tuples so they work more conveniently with
   `d3.curve`s default typing.
 - Size funtions on layouts, instead creating a size tweak.
+- coordCenter operator as it doesn't work with compact sugiyama and doesn't
+  produce great layouts anyway
 
 ### Changed
 

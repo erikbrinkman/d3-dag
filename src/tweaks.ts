@@ -2,6 +2,7 @@ import { Graph } from "./graph";
 import { LayoutResult, NodeSize } from "./layout";
 import { err } from "./utils";
 
+/** a function to tweak a graph layout */
 export interface Tweak<in N = never, in L = never> {
   (graph: Graph<N, L>, res: Readonly<LayoutResult>): LayoutResult;
 }
@@ -43,7 +44,8 @@ export function tweakSize(
  * This tweak adds extra control points to the grid layout
  *
  * The grid layout often looks best with rounded corners. This tweak adds extra
- * control points to edges so that d3 FIXME curves produce nice rounded edges.
+ * control points to edges so that `d3.curveBasis` curves produce nice rounded
+ * edges.
  *
  * rounding should be set somewhere between 0 and nodeSize.
  */

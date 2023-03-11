@@ -50,7 +50,14 @@ function buildOperator(options: { topDown: boolean }): DecrossDfs {
 
     // re-add in the order seen
     for (const node of iter) {
-      layers[node.data.layer].push(node);
+      const { data } = node;
+      if (data.role === "node") {
+        for (let layer = data.topLayer; layer <= data.bottomLayer; ++layer) {
+          layers[layer].push(node);
+        }
+      } else {
+        layers[data.layer].push(node);
+      }
     }
   }
 

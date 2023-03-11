@@ -1,9 +1,10 @@
 import { layerSeparation } from ".";
 import { GraphNode } from "../../graph";
-import { graphConnect as connect } from "../../graph/connect";
+import { graphConnect } from "../../graph/connect";
 import { doub, ex, eye, multi, oh, square } from "../../test-graphs";
-import { getLayers } from "../test-utils";
+import { canonical, getLayers } from "../test-utils";
 import { layeringSimplex as simplex } from "./simplex";
+import { sizedSep } from "./test-utils";
 
 test("simplex() works for square", () => {
   const dag = square();
@@ -14,8 +15,21 @@ test("simplex() works for square", () => {
   expect(layers).toEqual([[0], [1, 2], [3]]);
 });
 
+test("simplex() works for square with sizedSep", () => {
+  const dag = square();
+  const layering = simplex();
+  const height = layering(dag, sizedSep);
+  expect(height).toBe(7);
+  const [zero, one, two, three] = canonical(dag);
+  expect(zero.y).toBeCloseTo(0.5);
+  expect(one.y).toBeGreaterThanOrEqual(3);
+  expect(one.y).toBeLessThanOrEqual(4);
+  expect(two.y).toBeCloseTo(3.5);
+  expect(three.y).toBeCloseTo(6.5);
+});
+
 test("simplex() works for known failure", () => {
-  const create = connect();
+  const create = graphConnect();
   const dag = create([
     ["0", "1"],
     ["1", "2"],
@@ -27,9 +41,7 @@ test("simplex() works for known failure", () => {
   const layering = simplex();
   const num = layering(dag, layerSeparation);
   expect(num).toBe(4);
-  const nodes = [...dag].sort(
-    ([a], [b]) => parseInt(a.data) - parseInt(b.data)
-  );
+  const nodes = canonical(dag);
   for (const [i, node] of nodes.entries()) {
     expect(node.y).toBeCloseTo(i < 5 ? i : 3);
   }
@@ -97,13 +109,20 @@ test("simplex() works for disconnected dag", () => {
   expect([[0, 1]]).toEqual(layers);
 });
 
+test("simplex() works for disconnected dag with sizedSep", () => {
+  const dag = doub();
+  const layering = simplex();
+  const height = layering(dag, sizedSep);
+  expect(height).toBeCloseTo(2);
+});
+
 test("simplex() works for multi dag", () => {
   const dag = multi();
   const layering = simplex();
   const num = layering(dag, layerSeparation);
-  expect(num).toBe(2);
+  expect(num).toBe(1);
   const layers = getLayers(dag, num + 1);
-  expect([[0], [], [1]]).toEqual(layers);
+  expect([[0], [1]]).toEqual(layers);
 });
 
 test("simplex() works for eye multi dag", () => {
@@ -119,12 +138,23 @@ test("simplex() works for oh", () => {
   const dag = oh();
   const layering = simplex();
   const num = layering(dag, layerSeparation);
-  expect(num).toBe(2);
+  expect(num).toBe(1);
   const layers = getLayers(dag, num + 1);
   expect([
-    [[0], [], [1]],
-    [[1], [], [0]],
+    [[0], [1]],
+    [[1], [0]],
   ]).toContainEqual(layers);
+});
+
+test("simplex() works for oh with sizedSep", () => {
+  const dag = oh();
+  const layering = simplex();
+  const height = layering(dag, sizedSep);
+  expect(height).toBe(4);
+  const [zero, one] = canonical(dag);
+  // NOTE could flip
+  expect(zero.y).toBeCloseTo(3.5);
+  expect(one.y).toBeCloseTo(1);
 });
 
 test("simplex() fails passing an arg to constructor", () => {

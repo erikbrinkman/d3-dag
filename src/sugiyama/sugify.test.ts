@@ -1,213 +1,496 @@
-import { graph } from "../graph";
-import { sugify, unsugify } from "./sugify";
+import { graph, Graph, GraphNode } from "../graph";
+import { assert } from "../test-utils";
+import {
+  compactSugify,
+  layerSugify,
+  SugiDatum,
+  SugiNode,
+  unsugify,
+} from "./sugify";
 
-function layering(): void {
+function noopLayering(): void {
   // noop
 }
 
-test("sugify() / unsugify() works for single node", () => {
+function nodeHeight(): number {
+  return 2;
+}
+
+function dataHeight({ data }: GraphNode<number>): number {
+  return data;
+}
+
+function expectLayersToSatisfyInvariants(
+  layers: readonly (readonly SugiNode[])[],
+  height: number
+): void {
+  for (const layer of layers) {
+    for (const sugi of layer) {
+      expect(sugi.multi()).toBe(false);
+      expect(sugi.acyclic()).toBe(true);
+      expect(sugi.y).toBeGreaterThanOrEqual(0);
+      expect(sugi.y).toBeLessThanOrEqual(height);
+    }
+  }
+}
+
+function expectGraphToSatisfyHeights(
+  grf: Graph,
+  {
+    height = nodeHeight,
+    gap = 1,
+  }: { height?: (node: GraphNode) => number; gap?: number } = {}
+): void {
+  for (const { source, target } of grf.links()) {
+    const sep = height(source) / 2 + height(target) / 2 + gap;
+    expect(Math.abs(source.y - target.y)).toBeGreaterThanOrEqual(sep);
+  }
+}
+
+function layer(data: SugiDatum): number {
+  if (data.role === "node") {
+    assert(data.topLayer === data.bottomLayer);
+    return data.topLayer;
+  } else {
+    return data.layer;
+  }
+}
+
+function topLayer(data: SugiDatum): number {
+  if (data.role === "node") {
+    return data.topLayer;
+  } else {
+    return data.layer;
+  }
+}
+
+function bottomLayer(data: SugiDatum): number {
+  if (data.role === "node") {
+    return data.bottomLayer;
+  } else {
+    return data.layer;
+  }
+}
+
+test("layerSugify() / unsugify() works for single node", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
   node.y = 0;
-  const layers = sugify(grf, 1, layering);
+  const [layers, height] = layerSugify(grf, nodeHeight, 1, 1, noopLayering);
+  expect(height).toBeCloseTo(2);
+  expectLayersToSatisfyInvariants(layers, height);
 
   const [[sugi]] = layers;
-  expect(sugi.data.layer).toEqual(0);
-  expect("node" in sugi.data).toBe(true);
+  expect(layer(sugi.data)).toEqual(0);
+  expect(sugi.data.role).toBe("node");
 
+  expect(sugi.y).toBeCloseTo(1);
   sugi.x = 1;
-  sugi.y = 1;
 
   unsugify(layers);
-  expect(node.x).toEqual(1);
-  expect(node.y).toEqual(1);
+  expectGraphToSatisfyHeights(grf);
+  expect(node.x).toBeCloseTo(1);
+  expect(node.y).toBeCloseTo(1);
 });
 
-test("sugify() / unsugify() works for edges", () => {
+test("layerSugify() / unsugify() works for single edge", () => {
   const grf = graph<undefined, undefined>();
   const above = grf.node();
   const below = grf.node();
   const link = grf.link(above, below);
   above.y = 0;
   below.y = 1;
-  const layers = sugify(grf, 2, layering);
+  const [layers, height] = layerSugify(grf, nodeHeight, 1, 2, noopLayering);
+  expect(height).toBeCloseTo(5);
+  expectLayersToSatisfyInvariants(layers, height);
 
   const [[topSugi], [bottomSugi]] = layers;
-  expect(topSugi.data.layer).toEqual(0);
-  expect("node" in topSugi.data).toBe(true);
-  expect(bottomSugi.data.layer).toEqual(1);
-  expect("node" in bottomSugi.data).toBe(true);
+  expect(layer(topSugi.data)).toEqual(0);
+  expect(topSugi.data.role).toBe("node");
+  expect(layer(bottomSugi.data)).toEqual(1);
+  expect(bottomSugi.data.role).toBe("node");
 
   topSugi.x = 1;
-  topSugi.y = 1;
+  expect(topSugi.y).toBeCloseTo(1);
   bottomSugi.x = 1;
-  bottomSugi.y = 2;
+  expect(bottomSugi.y).toBeCloseTo(4);
   unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
 
   expect(above.x).toBe(1);
   expect(above.y).toBe(1);
   expect(below.x).toBe(1);
-  expect(below.y).toBe(2);
+  expect(below.y).toBe(4);
   expect(link.points).toEqual([
     [1, 1],
-    [1, 2],
+    [1, 4],
   ]);
 });
 
-test("sugify() / unsugify() works for extended edges", () => {
+test("layerSugify() / unsugify() works for extended edges", () => {
   const grf = graph<undefined, undefined>();
   const above = grf.node();
   const below = grf.node();
-  const link = grf.link(above, below);
-  above.y = 0;
-  below.y = 2;
-  const layers = sugify(grf, 3, layering);
-
-  const [[topSugi], [linkSugi], [bottomSugi]] = layers;
-  expect(topSugi.data.layer).toEqual(0);
-  expect("node" in topSugi.data).toBe(true);
-  expect(linkSugi.data.layer).toEqual(1);
-  expect("link" in linkSugi.data).toBe(true);
-  expect(bottomSugi.data.layer).toEqual(2);
-  expect("node" in bottomSugi.data).toBe(true);
-
-  topSugi.x = 1;
-  topSugi.y = 1;
-  linkSugi.x = 2;
-  linkSugi.y = 2;
-  bottomSugi.x = 1;
-  bottomSugi.y = 3;
-  unsugify(layers);
-
-  expect(above.x).toBe(1);
-  expect(above.y).toBe(1);
-  expect(below.x).toBe(1);
-  expect(below.y).toBe(3);
-  expect(link.points).toEqual([
-    [1, 1],
-    [2, 2],
-    [1, 3],
-  ]);
-});
-
-test("sugify() works for extended edges", () => {
-  const grf = graph<undefined, undefined>();
-  const above = grf.node();
-  const below = grf.node();
-  const link = grf.link(below, above);
+  const link1 = grf.link(above, below);
+  const link2 = grf.link(above, below);
   above.y = 0;
   below.y = 1;
-  const layers = sugify(grf, 2, layering);
+  const [layers, height] = layerSugify(grf, nodeHeight, 1, 2, noopLayering);
+  expect(height).toBeCloseTo(5);
+  expectLayersToSatisfyInvariants(layers, height);
 
-  const [[topSugi], [bottomSugi]] = layers;
-  expect(topSugi.data.layer).toEqual(0);
-  expect("node" in topSugi.data).toBe(true);
-  expect(bottomSugi.data.layer).toEqual(1);
-  expect("node" in bottomSugi.data).toBe(true);
+  const [[topSugi], [linkSugiA, linkSugiB], [bottomSugi]] = layers;
+  expect(layer(topSugi.data)).toEqual(0);
+  expect(topSugi.data.role).toBe("node");
+  expect(layer(linkSugiA.data)).toEqual(1);
+  expect(linkSugiA.data.role).toBe("link");
+  expect(layer(linkSugiB.data)).toEqual(1);
+  expect(linkSugiB.data.role).toBe("link");
+  expect(layer(bottomSugi.data)).toEqual(2);
+  expect(bottomSugi.data.role).toBe("node");
 
   topSugi.x = 1;
-  topSugi.y = 1;
-  bottomSugi.x = 2;
-  bottomSugi.y = 3;
+  expect(topSugi.y).toBeCloseTo(1);
+  linkSugiA.x = 2;
+  expect(linkSugiA.y).toBeCloseTo(2.5);
+  linkSugiB.x = 3;
+  expect(linkSugiB.y).toBeCloseTo(2.5);
+  bottomSugi.x = 1;
+  expect(bottomSugi.y).toBeCloseTo(4);
   unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
 
   expect(above.x).toBe(1);
   expect(above.y).toBe(1);
-  expect(below.x).toBe(2);
-  expect(below.y).toBe(3);
-  expect(link.points).toEqual([
-    [2, 3],
+  expect(below.x).toBe(1);
+  expect(below.y).toBe(4);
+  // NOTE order is brittle
+  expect(link1.points).toEqual([
     [1, 1],
+    [2, 2.5],
+    [1, 4],
+  ]);
+  expect(link2.points).toEqual([
+    [1, 1],
+    [3, 2.5],
+    [1, 4],
   ]);
 });
 
-test("sugify() works for extended inverted edges", () => {
+test("layerSugify() works for extended inverted edges", () => {
   const grf = graph<undefined, undefined>();
   const above = grf.node();
   const below = grf.node();
-  const link = grf.link(below, above);
+  const link1 = grf.link(below, above);
+  const link2 = grf.link(below, above);
   above.y = 0;
-  below.y = 2;
-  const layers = sugify(grf, 3, layering);
+  below.y = 1;
+  const [layers, height] = layerSugify(grf, nodeHeight, 1, 2, noopLayering);
+  expect(height).toBeCloseTo(5);
+  expectLayersToSatisfyInvariants(layers, height);
 
-  const [[topSugi], [linkSugi], [bottomSugi]] = layers;
-  expect(topSugi.data.layer).toEqual(0);
-  expect("node" in topSugi.data).toBe(true);
-  expect(linkSugi.data.layer).toEqual(1);
-  expect("link" in linkSugi.data).toBe(true);
-  expect(bottomSugi.data.layer).toEqual(2);
-  expect("node" in bottomSugi.data).toBe(true);
+  const [[topSugi], [linkSugiA, linkSugiB], [bottomSugi]] = layers;
+  expect(layer(topSugi.data)).toEqual(0);
+  expect(topSugi.data.role).toBe("node");
+  expect(layer(linkSugiA.data)).toEqual(1);
+  expect(linkSugiA.data.role).toBe("link");
+  expect(layer(linkSugiB.data)).toEqual(1);
+  expect(linkSugiB.data.role).toBe("link");
+  expect(layer(bottomSugi.data)).toEqual(2);
+  expect(bottomSugi.data.role).toBe("node");
 
   topSugi.x = 1;
-  topSugi.y = 1;
-  linkSugi.x = 1.5;
-  linkSugi.y = 2;
+  expect(topSugi.y).toBeCloseTo(1);
+  linkSugiA.x = 1.5;
+  expect(linkSugiA.y).toBeCloseTo(2.5);
+  linkSugiB.x = 2.5;
+  expect(linkSugiB.y).toBeCloseTo(2.5);
   bottomSugi.x = 2;
-  bottomSugi.y = 3;
+  expect(bottomSugi.y).toBeCloseTo(4);
+
   unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
 
   expect(above.x).toBe(1);
   expect(above.y).toBe(1);
   expect(below.x).toBe(2);
-  expect(below.y).toBe(3);
-  expect(link.points).toEqual([
-    [2, 3],
-    [1.5, 2],
+  expect(below.y).toBe(4);
+  // NOTE order is brittle
+  expect(link1.points).toEqual([
+    [2, 4],
+    [1.5, 2.5],
+    [1, 1],
+  ]);
+  expect(link2.points).toEqual([
+    [2, 4],
+    [2.5, 2.5],
     [1, 1],
   ]);
 });
 
-test("sugify() throws for missing layer", () => {
+test("layerSugify() throws for missing layer", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
-  expect(() => sugify(grf, 0, layering)).toThrow(
-    "custom layering 'layering' didn't assign a layer to a node"
+  expect(() => layerSugify(grf, nodeHeight, 1, 0, noopLayering)).toThrow(
+    "custom layering 'noopLayering' didn't assign a layer to a node"
   );
 });
 
-test("sugify() throws for edge in the same layer", () => {
+test("layerSugify() throws for edge in the same layer", () => {
   const grf = graph<undefined, undefined>();
   const left = grf.node();
   const right = grf.node();
   grf.link(left, right);
   left.y = 0;
   right.y = 0;
-  expect(() => sugify(grf, 1, layering)).toThrow(
-    "custom layering 'layering' assigned nodes with an edge to the same layer"
+  expect(() => layerSugify(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
+    "custom layering 'noopLayering' assigned nodes with an edge to the same layer"
   );
 });
 
-test("sugify() throws for un-separated multi-graph", () => {
-  const grf = graph<undefined, undefined>();
-  const above = grf.node();
-  const below = grf.node();
-  grf.link(above, below);
-  grf.link(above, below);
-  above.y = 0;
-  below.y = 1;
-  expect(() => sugify(grf, 2, layering)).toThrow(
-    "custom layering 'layering' did not separate multi-graph children with an extra layer"
-  );
-});
-
-test("sugify() throws for invalid layers", () => {
+test("layerSugify() throws for invalid layers", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
   node.y = -1;
-  expect(() => sugify(grf, 1, layering)).toThrow(
-    "custom layering 'layering' assigned node an invalid layer: -1"
+  expect(() => layerSugify(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
+    "custom layering 'noopLayering' assigned node an invalid layer: -1"
   );
   node.y = 1;
-  expect(() => sugify(grf, 1, layering)).toThrow(
-    "custom layering 'layering' assigned node an invalid layer: 1"
+  expect(() => layerSugify(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
+    "custom layering 'noopLayering' assigned node an invalid layer: 1"
   );
 });
 
-test("sugify() throws for empty layers", () => {
+test("layerSugify() throws for empty layers", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
   node.y = 0;
-  expect(() => sugify(grf, 2, layering)).toThrow(
-    "custom layering 'layering' didn't assign a node to every layer"
+  expect(() => layerSugify(grf, nodeHeight, 1, 2, noopLayering)).toThrow(
+    "custom layering 'noopLayering' didn't assign a node to every layer"
+  );
+});
+
+test("compactSugify() / unsugify() works for single node", () => {
+  const grf = graph<number, undefined>();
+  const node = grf.node(2);
+  node.y = 1;
+  const height = 2;
+  const layers = compactSugify(grf, dataHeight, height, noopLayering);
+  expectLayersToSatisfyInvariants(layers, height);
+
+  const [[sugi], [bottom]] = layers;
+  expect(sugi).toBe(bottom);
+  expect(sugi.data.role).toBe("node");
+  expect(topLayer(sugi.data)).toBe(0);
+  expect(bottomLayer(sugi.data)).toBe(1);
+
+  expect(sugi.y).toBeCloseTo(1);
+  sugi.x = 1;
+
+  unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
+  expect(node.x).toBeCloseTo(1);
+  expect(node.y).toBeCloseTo(1);
+});
+
+test("compactSugify() / unsugify() works for single edge", () => {
+  const grf = graph<number, undefined>();
+  const above = grf.node(2);
+  const below = grf.node(4);
+  const link = grf.link(above, below);
+  above.y = 1;
+  below.y = 5;
+  const height = 7;
+  const layers = compactSugify(grf, dataHeight, height, noopLayering);
+  expectLayersToSatisfyInvariants(layers, height);
+
+  const [[topSugi], [topBottom], [bottomSugi], [bottomBottom]] = layers;
+  expect(topBottom).toBe(topSugi);
+  expect(bottomBottom).toBe(bottomSugi);
+
+  expect(topLayer(topSugi.data)).toEqual(0);
+  expect(bottomLayer(topSugi.data)).toEqual(1);
+  expect(topSugi.data.role).toBe("node");
+  expect(topLayer(bottomSugi.data)).toEqual(2);
+  expect(bottomLayer(bottomSugi.data)).toEqual(3);
+  expect(bottomSugi.data.role).toBe("node");
+
+  topSugi.x = 1;
+  expect(topSugi.y).toBeCloseTo(1);
+  bottomSugi.x = 2;
+  expect(bottomSugi.y).toBeCloseTo(5);
+  unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
+
+  expect(above.x).toBe(1);
+  expect(above.y).toBe(1);
+  expect(below.x).toBe(2);
+  expect(below.y).toBe(5);
+  expect(link.points).toEqual([
+    [1, 1],
+    [2, 5],
+  ]);
+});
+
+test("compactSugify() / unsugify() works for extended edges", () => {
+  const grf = graph<number, undefined>();
+  const above = grf.node(2);
+  const below = grf.node(4);
+  const link1 = grf.link(above, below);
+  const link2 = grf.link(above, below);
+  above.y = 1;
+  below.y = 6;
+  const height = 8;
+  const layers = compactSugify(grf, dataHeight, height, noopLayering);
+  expectLayersToSatisfyInvariants(layers, height);
+
+  const [
+    [topSugi],
+    [topBottom],
+    [linkSugiA, linkSugiB],
+    [bottomSugi],
+    [bottomBottom],
+  ] = layers;
+  expect(topBottom).toBe(topSugi);
+  expect(bottomBottom).toBe(bottomSugi);
+
+  expect(topLayer(topSugi.data)).toEqual(0);
+  expect(bottomLayer(topSugi.data)).toEqual(1);
+  expect(topSugi.data.role).toBe("node");
+  expect(topLayer(linkSugiA.data)).toEqual(2);
+  expect(linkSugiA.data.role).toBe("link");
+  expect(bottomLayer(linkSugiB.data)).toEqual(2);
+  expect(linkSugiB.data.role).toBe("link");
+  expect(topLayer(bottomSugi.data)).toEqual(3);
+  expect(bottomLayer(bottomSugi.data)).toEqual(4);
+  expect(bottomSugi.data.role).toBe("node");
+
+  topSugi.x = 1;
+  expect(topSugi.y).toBeCloseTo(1);
+  linkSugiA.x = 0;
+  expect(linkSugiA.y).toBeCloseTo(3);
+  linkSugiB.x = 2;
+  expect(linkSugiB.y).toBeCloseTo(3);
+  bottomSugi.x = 1;
+  expect(bottomSugi.y).toBeCloseTo(6);
+  unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
+
+  expect(above.x).toBe(1);
+  expect(above.y).toBe(1);
+  expect(below.x).toBe(1);
+  expect(below.y).toBe(6);
+  // NOTE order is brittle
+  expect(link1.points).toEqual([
+    [1, 1],
+    [0, 3],
+    [1, 6],
+  ]);
+  expect(link2.points).toEqual([
+    [1, 1],
+    [2, 3],
+    [1, 6],
+  ]);
+});
+
+test("compactSugify() / unsugify() works for extended duplicate edges", () => {
+  const grf = graph<undefined, undefined>();
+  const above1 = grf.node();
+  const below1 = grf.node();
+  grf.link(above1, below1);
+  grf.link(above1, below1);
+  const above2 = grf.node();
+  const below2 = grf.node();
+  grf.link(above2, below2);
+  grf.link(above2, below2);
+  above1.y = 1;
+  below1.y = 4;
+  above2.y = 1;
+  below2.y = 4;
+  const height = 5;
+  const layers = compactSugify(grf, nodeHeight, height, noopLayering);
+  expectLayersToSatisfyInvariants(layers, height);
+  // only one dummy layer
+  expect(layers).toHaveLength(5);
+});
+
+test("compactSugify() / unsugify() works with predefined cuts", () => {
+  const grf = graph<number, undefined>();
+  const above = grf.node(2);
+  const below = grf.node(4);
+  const extra = grf.node(3);
+  const link1 = grf.link(above, below);
+  const link2 = grf.link(above, below);
+  above.y = 1;
+  extra.y = 1.5;
+  below.y = 7;
+  const height = 9;
+  const layers = compactSugify(grf, dataHeight, height, noopLayering);
+  expectLayersToSatisfyInvariants(layers, height);
+
+  // NOTE unpacking order not guaranteed
+  const [
+    [exSugi, topSugi],
+    [exMid, topBottom],
+    [exBottom, linkSugiA, linkSugiB],
+    [bottomSugi],
+    [bottomBottom],
+  ] = layers;
+  expect(topBottom).toBe(topSugi);
+  expect(exMid).toBe(exSugi);
+  expect(exBottom).toBe(exSugi);
+  expect(bottomBottom).toBe(bottomSugi);
+
+  expect(topLayer(topSugi.data)).toEqual(0);
+  expect(bottomLayer(topSugi.data)).toEqual(1);
+  expect(topSugi.data.role).toBe("node");
+  expect(topLayer(exSugi.data)).toEqual(0);
+  expect(bottomLayer(exSugi.data)).toEqual(2);
+  expect(exSugi.data.role).toBe("node");
+  expect(topLayer(linkSugiA.data)).toEqual(2);
+  expect(linkSugiA.data.role).toBe("link");
+  expect(bottomLayer(linkSugiB.data)).toEqual(2);
+  expect(linkSugiB.data.role).toBe("link");
+  expect(topLayer(bottomSugi.data)).toEqual(3);
+  expect(bottomLayer(bottomSugi.data)).toEqual(4);
+  expect(bottomSugi.data.role).toBe("node");
+
+  topSugi.x = 1;
+  expect(topSugi.y).toBeCloseTo(1);
+  exSugi.x = 3;
+  expect(exSugi.y).toBeCloseTo(1.5);
+  linkSugiA.x = 0;
+  expect(linkSugiA.y).toBeCloseTo(3);
+  linkSugiB.x = 2;
+  expect(linkSugiB.y).toBeCloseTo(3);
+  bottomSugi.x = 1;
+  expect(bottomSugi.y).toBeCloseTo(7);
+  unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
+
+  expect(above.x).toBe(1);
+  expect(above.y).toBe(1);
+  expect(extra.x).toBe(3);
+  expect(extra.y).toBe(1.5);
+  expect(below.x).toBe(1);
+  expect(below.y).toBe(7);
+  // NOTE order is brittle
+  expect(link1.points).toEqual([
+    [1, 1],
+    [0, 3],
+    [1, 7],
+  ]);
+  expect(link2.points).toEqual([
+    [1, 1],
+    [2, 3],
+    [1, 7],
+  ]);
+});
+
+test("compactSugify() throws for missing coordinate", () => {
+  const grf = graph<undefined, undefined>();
+  grf.node();
+  expect(() => compactSugify(grf, nodeHeight, 1, noopLayering)).toThrow(
+    "custom layering 'noopLayering' didn't assign a y coordinate to every node"
   );
 });

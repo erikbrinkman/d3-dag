@@ -9,7 +9,15 @@ import { GraphLink, GraphNode } from "../../graph";
 import { flatMap } from "../../iters";
 import { err, ierr, U } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
-import { indices, init, layout, minBend, minDist, solve } from "./utils";
+import {
+  avgHeight,
+  indices,
+  init,
+  layout,
+  minBend,
+  minDist,
+  solve,
+} from "./utils";
 
 /**
  * A strictly callable {@link NodeWeight}
@@ -182,7 +190,7 @@ function cacheVertWeak<N, L>(
       Map<GraphNode<N, L>, number>
     >();
     for (const node of flatMap(layers, (l) => l)) {
-      if ("node" in node.data) {
+      if (node.data.role === "node") {
         // regular node
         const source = node.data.node;
         const targetLinks = new Map<GraphNode<N, L>, number>();
@@ -265,32 +273,36 @@ function buildOperator<
       "nodeCurve"
     );
 
+    // normalization factor for height difference
+    const heightNorm = avgHeight(inds.keys());
+
     // add loss for nearby nodes and for curve of nodes
-    for (const par of flatMap(layers, (l) => l)) {
-      const pind = inds.get(par)!;
+    for (const [par, pind] of inds) {
       const pdata = par.data;
-      const source = "node" in pdata ? pdata.node : pdata.link.source;
+      const source = pdata.role === "node" ? pdata.node : pdata.link.source;
       for (const node of par.children()) {
         const nind = inds.get(node)!;
         const ndata = node.data;
-        const target = "node" in ndata ? ndata.node : ndata.link.target;
+        const target = ndata.role === "node" ? ndata.node : ndata.link.target;
 
         const wpdist =
-          "node" in pdata
+          pdata.role === "node"
             ? cachedVertWeak(source, target)
             : cachedVertStrong(pdata.link);
         const wndist =
-          "node" in ndata
+          ndata.role === "node"
             ? cachedVertWeak(source, target)
             : cachedVertStrong(ndata.link);
         const wcurve =
-          "node" in ndata
+          ndata.role === "node"
             ? cachedNodeCurve(ndata.node)
             : cachedLinkCurve(ndata.link);
-        minDist(Q, pind, nind, wpdist + wndist);
+        const parh = (node.y - par.y) / heightNorm;
+        minDist(Q, pind, nind, (wpdist + wndist) / parh);
         for (const child of node.children()) {
           const cind = inds.get(child)!;
-          minBend(Q, pind, nind, cind, wcurve);
+          const chih = (child.y - node.y) / heightNorm;
+          minBend(Q, pind, nind, cind, wcurve / parh, wcurve / chih);
         }
       }
     }

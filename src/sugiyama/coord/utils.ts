@@ -5,9 +5,11 @@
  * @packageDocumentation
  */
 import { solveQP } from "quadprog";
-import { bigrams } from "../../iters";
+import { GraphNode } from "../../graph";
+import { bigrams, flatMap, map } from "../../iters";
 import { ierr } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
+import { aggMean } from "../twolayer/agg";
 
 /** wrapper for solveQP */
 function qp(
@@ -74,10 +76,19 @@ export function solve(
 }
 
 /** compute indices used to index arrays */
-export function indices(layers: SugiNode[][]): Map<SugiNode, number> {
-  return new Map(
-    layers.flatMap((layer) => layer).map((n, i) => [n, i] as const)
-  );
+export function indices<N, L>(
+  layers: SugiNode<N, L>[][]
+): Map<SugiNode<N, L>, number> {
+  const mapping = new Map<SugiNode<N, L>, number>();
+  let i = 0;
+  for (const layer of layers) {
+    for (const node of layer) {
+      if (!mapping.has(node)) {
+        mapping.set(node, i++);
+      }
+    }
+  }
+  return mapping;
 }
 
 /** Compute constraint arrays for layer separation */
@@ -139,17 +150,19 @@ export function minBend(
   pind: number,
   nind: number,
   cind: number,
-  coef: number
+  pcoef: number,
+  ccoef: number
 ): void {
-  Q[cind][cind] += coef;
-  Q[cind][nind] -= 2 * coef;
-  Q[cind][pind] += coef;
-  Q[nind][cind] -= 2 * coef;
-  Q[nind][nind] += 4 * coef;
-  Q[nind][pind] -= 2 * coef;
-  Q[pind][cind] += coef;
-  Q[pind][nind] -= 2 * coef;
-  Q[pind][pind] += coef;
+  const ncoef = pcoef + ccoef;
+  Q[cind][cind] += ccoef * ccoef;
+  Q[cind][nind] -= ccoef * ncoef;
+  Q[cind][pind] += ccoef * pcoef;
+  Q[nind][cind] -= ncoef * ccoef;
+  Q[nind][nind] += ncoef * ncoef;
+  Q[nind][pind] -= ncoef * pcoef;
+  Q[pind][cind] += pcoef * ccoef;
+  Q[pind][nind] -= pcoef * ncoef;
+  Q[pind][pind] += pcoef * pcoef;
 }
 
 /**
@@ -162,26 +175,35 @@ export function layout<N, L>(
   inds: Map<SugiNode, number>,
   solution: number[]
 ): number {
+  // assign solution
+  for (const [node, key] of inds) {
+    node.x = solution[key];
+  }
+
   // find span of solution
-  let start = Number.POSITIVE_INFINITY;
-  let finish = Number.NEGATIVE_INFINITY;
+  let start = Infinity;
+  let finish = -Infinity;
   for (const layer of layers) {
     const first = layer[0];
     const last = layer[layer.length - 1];
 
-    start = Math.min(start, solution[inds.get(first)!] - sep(undefined, first));
-    finish = Math.max(finish, solution[inds.get(last)!] + sep(last, undefined));
+    start = Math.min(start, first.x - sep(undefined, first));
+    finish = Math.max(finish, last.x + sep(last, undefined));
   }
-  const width = finish - start;
 
   // assign indices based off of span
-  for (const layer of layers) {
-    for (const node of layer) {
-      // clip for numeric errors
-      node.x = Math.min(Math.max(0, solution[inds.get(node)!] - start), width);
-    }
+  for (const node of inds.keys()) {
+    node.x -= start;
   }
 
   // return width
-  return width;
+  return finish - start;
+}
+
+export function avgHeight(nodes: Iterable<GraphNode>): number {
+  return aggMean(
+    flatMap(nodes, (node) =>
+      map(node.childCounts(), ([child, num]) => [child.y - node.y, num])
+    )
+  )!;
 }

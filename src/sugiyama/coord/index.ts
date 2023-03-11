@@ -18,15 +18,9 @@ import { SugiNode, SugiSeparation } from "../sugify";
  * - {@link sugiyama/coord/simplex!CoordSimplex} - positions nodes according to a simplex optimization, striving for vertical edges
  * - {@link sugiyama/coord/quad!CoordQuad} - positions nodes according to quadratic optimization, striving for minimum overall curvature
  * - {@link sugiyama/coord/greedy!CoordGreedy} - positions nodes greedily according to their parent's positions
- * - {@link sugiyama/coord/center!CoordCenter} - positions nodes close together centering each layer
  * - {@link sugiyama/coord/topological!CoordTopological} - positions nodes using quadratic optimization if they were layered using topological layering
  *
  * @example
- *
- * Given that there are five builtin coordinate operators, it's probably
- * unnecessary to implement your own, but it is still possible. To see the most
- * trivial coordinate operator, see the source code for
- * {@link sugiyama/coord/center!CoordCenter}.
  *
  * In order to illustrate what it might look like, below we demonstrate a
  * coordinate operator that assigns an x attached to the nodes themselves. If
@@ -42,7 +36,7 @@ import { SugiNode, SugiSeparation } from "../sugify";
  *     for (const layer of layers) {
  *         for (const node of layer) {
  *             const { data } = node;
- *             const x = node.x = "node" in data ? data.node.data.x : (data.link.source.data.x + data.link.target.data.x) / 2;
+ *             const x = node.x = data.role === "node" ? data.node.data.x : (data.link.source.data.x + data.link.target.data.x) / 2;
  *             min = Math.min(min, x - sep(undefined, node));
  *             max = Math.max(max, x + sep(node, undefined));
  *         }

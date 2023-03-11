@@ -151,6 +151,11 @@ export function slice<T>(
   }
 }
 
+/** iterable reverse of an array */
+export function reverse<T>(arr: readonly T[]): IterableIterator<T> {
+  return slice(arr, arr.length - 1, -1, -1);
+}
+
 /** chain several iterables */
 export function* chain<T>(...iters: Iterable<T>[]): IterableIterator<T> {
   for (const iter of iters) {
@@ -166,5 +171,12 @@ export function* bigrams<T>(iterable: Iterable<T>): IterableIterator<[T, T]> {
   while (!({ value } = iter.next()).done) {
     yield [last, value];
     last = value;
+  }
+}
+
+/** return the first element of an iterable */
+export function first<T>(iterable: Iterable<T>): T | undefined {
+  for (const item of iterable) {
+    return item;
   }
 }

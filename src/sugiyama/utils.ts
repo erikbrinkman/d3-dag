@@ -33,15 +33,16 @@ export function sizedSeparation<NodeDatum, LinkDatum>(
   len: NodeLength<NodeDatum, LinkDatum>,
   gap: number
 ): Separation<NodeDatum, LinkDatum> {
-  return (
+  function sizedSeparation(
     left: GraphNode<NodeDatum, LinkDatum> | undefined,
     right: GraphNode<NodeDatum, LinkDatum> | undefined
-  ): number => {
+  ): number {
     const llen = left ? len(left) : 0;
     const rlen = right ? len(right) : 0;
     const base = (llen + rlen) / 2;
     return left && right ? base + gap : base;
-  };
+  }
+  return sizedSeparation;
 }
 
 /** compute the number of crossings in a layered sugi node */

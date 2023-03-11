@@ -6,20 +6,40 @@
  *
  * @packageDocumentation
  */
-import { graph, Graph, GraphLink, GraphNode, MutGraphNode } from "../graph";
-import { bigrams, chain, map } from "../iters";
-import { berr, ierr, Named } from "../utils";
+import {
+  graph,
+  Graph,
+  GraphLink,
+  GraphNode,
+  MutGraph,
+  MutGraphNode,
+} from "../graph";
+import { bigrams, chain, map, some } from "../iters";
+import { berr, Named } from "../utils";
 import { NodeLength, Separation } from "./utils";
 
 /** data for a sugi node that maps to a real node */
-export interface SugiNodeDatum<NodeDatum = unknown, LinkDatum = unknown> {
-  /** layer of the sugi node */
-  layer: number;
+export interface SugiNodeDatum<
+  out NodeDatum = unknown,
+  out LinkDatum = unknown
+> {
+  /** tag indicating that this sugi node is backed by a graph node */
+  role: "node";
+  /** top layer of the sugi node */
+  topLayer: number;
+  /** bottom layer of the sugi node */
+  bottomLayer: number;
   /** original node this sugi node wraps */
   node: GraphNode<NodeDatum, LinkDatum>;
 }
+
 /** data for a dummy sugi node that maps to part of a link */
-export interface SugiLinkDatum<NodeDatum = unknown, LinkDatum = unknown> {
+export interface SugiLinkDatum<
+  out NodeDatum = unknown,
+  out LinkDatum = unknown
+> {
+  /** tag indicating that this sugi node is backed by a link */
+  role: "link";
   /** layer of the sugi node */
   layer: number;
   /** original link this sugi node is on */
@@ -58,41 +78,22 @@ export type MutSugiNode<NodeDatum, LinkDatum> = MutGraphNode<
   undefined
 >;
 
-/**
- * Convert a layered graph in a sugi graph
- *
- * A sugi-graph is a non-multi dag that is layered, where each node is assigned
- * to a layer, and links only span a single layer.
- */
-export function sugify<N, L>(
-  input: Graph<N, L>,
+function addSugiLinks<N, L>(
+  sugied: MutGraph<SugiDatum<N, L>, undefined>,
+  nodeMap: Map<GraphNode<N, L>, MutSugiNode<N, L>>,
   numLayers: number,
   layering: Named
 ): SugiNode<N, L>[][] {
-  // create sugi graph
-  const sugied = graph<SugiDatum<N, L>, undefined>();
-
-  // map normal nodes to sugi nodes
-  const nodeMap = new Map<GraphNode<N, L>, MutSugiNode<N, L>>();
-  for (const node of input) {
-    const layer = node.uy;
-    if (layer !== undefined) {
-      nodeMap.set(node, sugied.node({ node, layer }));
-    } else {
-      throw berr`layering ${layering} didn't assign a layer to a node`;
-    }
-  }
-
   // create dummy nodes for all child links
   for (const [node, sugiSource] of nodeMap) {
-    const initLayer = sugiSource.data.layer;
+    const initLayer = (sugiSource.data as SugiNodeDatum).bottomLayer;
     for (const link of node.childLinks()) {
       const sugiTarget = nodeMap.get(link.target)!;
-      const targetLayer = sugiTarget.data.layer;
+      const targetLayer = (sugiTarget.data as SugiNodeDatum).topLayer;
       if (targetLayer > initLayer) {
         let last = sugiSource;
         for (let layer = initLayer + 1; layer < targetLayer; ++layer) {
-          const dummy = sugied.node({ link, layer });
+          const dummy = sugied.node({ link, layer, role: "link" });
           last.child(dummy, undefined);
           last = dummy;
         }
@@ -100,7 +101,7 @@ export function sugify<N, L>(
       } else if (targetLayer < initLayer) {
         let last = sugiTarget;
         for (let layer = targetLayer + 1; layer < initLayer; ++layer) {
-          const dummy = sugied.node({ link, layer });
+          const dummy = sugied.node({ link, layer, role: "link" });
           last.child(dummy, undefined);
           last = dummy;
         }
@@ -111,22 +112,19 @@ export function sugify<N, L>(
     }
   }
 
-  /* istanbul ignore else */
-  if (sugied.multi()) {
-    throw berr`layering ${layering} did not separate multi-graph children with an extra layer`;
-  } else if (!sugied.acyclic()) {
-    throw ierr`failed to produce acyclic sugiyama representation`;
-  }
-
   // allocate the sugi nodes to layers
   const layers: SugiNode<N, L>[][] = Array<null>(numLayers)
     .fill(null)
     .map(() => []);
   for (const sugiNode of sugied) {
-    const { layer } = sugiNode.data;
-    if (layer < 0 || layer >= numLayers) {
-      throw berr`layering ${layering} assigned node an invalid layer: ${layer}`;
+    const { data } = sugiNode;
+    if (data.role === "node") {
+      const { topLayer, bottomLayer } = data;
+      for (let layer = topLayer; layer <= bottomLayer; ++layer) {
+        layers[layer].push(sugiNode);
+      }
     } else {
+      const { layer } = data;
       layers[layer].push(sugiNode);
     }
   }
@@ -134,6 +132,188 @@ export function sugify<N, L>(
   for (const layer of layers) {
     if (!layer.length) {
       throw berr`layering ${layering} didn't assign a node to every layer`;
+    }
+  }
+
+  return layers;
+}
+
+/**
+ * Convert a layered graph in a sugi graph
+ *
+ * A sugi-graph is a non-multi dag that is layered, where each node is assigned
+ * to a layer, and links only span a single layer.
+ */
+export function layerSugify<N, L>(
+  input: Graph<N, L>,
+  nodeHeight: NodeLength<N, L>,
+  gap: number,
+  numLayers: number,
+  layering: Named
+): readonly [SugiNode<N, L>[][], number] {
+  // create sugi graph
+  const sugied = graph<SugiDatum<N, L>, undefined>();
+
+  // map normal nodes to sugi nodes
+  const layerBoosts = Array<boolean>(numLayers).fill(false);
+  const nodeMap = new Map<GraphNode<N, L>, MutSugiNode<N, L>>();
+  for (const node of input) {
+    const layer = node.uy;
+    if (layer === undefined) {
+      throw berr`layering ${layering} didn't assign a layer to a node`;
+    } else if (layer < 0 || layer >= numLayers) {
+      throw berr`layering ${layering} assigned node an invalid layer: ${layer}`;
+    } else {
+      const ancestors = chain(node.parentCounts(), node.childCounts());
+      if (
+        !layerBoosts[layer] &&
+        some(ancestors, ([{ uy }, cnt]) => cnt > 1 && uy === layer - 1)
+      ) {
+        layerBoosts[layer] = true;
+      }
+      nodeMap.set(
+        node,
+        sugied.node({ node, topLayer: layer, bottomLayer: layer, role: "node" })
+      );
+    }
+  }
+
+  // boost layers for adjacent multi-links
+  let sum = 0;
+  const cumBoosts = layerBoosts.map((boost) => (sum += +boost));
+  for (const { data } of nodeMap.values()) {
+    const dat = data as SugiNodeDatum;
+    const boost = cumBoosts[dat.topLayer];
+    dat.topLayer += boost;
+    dat.bottomLayer += boost;
+  }
+
+  // create dummy nodes for all child links
+  const layers = addSugiLinks(sugied, nodeMap, numLayers + sum, layering);
+
+  // assign ys
+  let height = -gap;
+  for (const layer of layers) {
+    height += gap;
+    const layerHeight = Math.max(
+      -gap, // in case all dummy nodes
+      ...map(layer, ({ data }) =>
+        data.role === "node" ? nodeHeight(data.node) : -Infinity
+      )
+    );
+    const y = height + layerHeight / 2;
+    for (const sugi of layer) {
+      sugi.y = y;
+    }
+    height += layerHeight;
+  }
+  return [layers, height];
+}
+
+/**
+ * Convert a layered graph in a sugi graph
+ *
+ * A sugi-graph is a non-multi dag that is layered, where each node is assigned
+ * to a layer, and links only span a single layer.
+ */
+export function compactSugify<N, L>(
+  input: Graph<N, L>,
+  nodeHeight: NodeLength<N, L>,
+  height: number,
+  layering: Named
+): SugiNode<N, L>[][] {
+  // create sugi graph
+  const sugied = graph<SugiDatum<N, L>, undefined>();
+
+  // map original nodes
+  const cuts = [0, height];
+  const nodeMap = new Map<GraphNode<N, L>, MutSugiNode<N, L>>();
+  for (const node of input) {
+    const y = node.uy;
+    if (y === undefined) {
+      throw berr`layering ${layering} didn't assign a y coordinate to every node`;
+    } else {
+      const halfHeight = nodeHeight(node) / 2;
+      const topLayer = y - halfHeight;
+      const bottomLayer = y + halfHeight;
+      const sugi = sugied.node({
+        node,
+        topLayer,
+        bottomLayer,
+        role: "node",
+      });
+      nodeMap.set(node, sugi);
+      cuts.push(topLayer, bottomLayer);
+    }
+  }
+
+  // find unique cuts
+  cuts.sort((a, b) => a - b);
+  const tol = (height / nodeMap.size) * 1e-3;
+  const layerCuts: number[] = [];
+  const cutLayers = new Map<number, number>();
+  let last = 0;
+  let layer = 0;
+  for (const cut of cuts) {
+    if (cut > last + tol) {
+      layerCuts.push(last);
+      last = cut;
+      layer++;
+    }
+    cutLayers.set(cut, layer);
+  }
+  layerCuts.push(last);
+
+  // add cut for multi-edges that are still on adjacent layers
+  const boosts = Array<boolean>(layerCuts.length).fill(false);
+  for (const [node, { data }] of nodeMap) {
+    const { topLayer } = data as SugiNodeDatum;
+    const layer = cutLayers.get(topLayer)!;
+    const target = layer - 1;
+    for (const [child, count] of chain(
+      node.childCounts(),
+      node.parentCounts()
+    )) {
+      if (count > 1) {
+        const { bottomLayer } = nodeMap.get(child)!.data as SugiNodeDatum;
+        if (cutLayers.get(bottomLayer) === target) {
+          if (!boosts[layer]) {
+            boosts[layer] = true;
+            layerCuts.push((topLayer + bottomLayer) / 2);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // resort for new cuts
+  // NOTE this could be a merge sort between the first and second halves
+  layerCuts.sort((a, b) => a - b);
+  let sum = 0;
+  const layerBoosts = boosts.map((boost) => (sum += +boost));
+  for (const [y, layer] of cutLayers) {
+    cutLayers.set(y, layer + layerBoosts[layer]);
+  }
+
+  // remap to layers
+  for (const sugi of nodeMap.values()) {
+    const data = sugi.data as SugiNodeDatum;
+    data.topLayer = cutLayers.get(data.topLayer)!;
+    data.bottomLayer = cutLayers.get(data.bottomLayer)!;
+  }
+
+  // create dummy nodes for all child links
+  const layers = addSugiLinks(sugied, nodeMap, layerCuts.length, layering);
+
+  // assign ys
+  for (const layer of layers) {
+    for (const sugi of layer) {
+      if (sugi.data.role === "node") {
+        sugi.y = sugi.data.node.y;
+      } else {
+        sugi.y = layerCuts[sugi.data.layer];
+      }
     }
   }
 
@@ -151,7 +331,7 @@ export function unsugify<N, L>(layers: SugiNode<N, L>[][]) {
   // find all true nodes
   for (const layer of layers) {
     for (const sugi of layer) {
-      if ("node" in sugi.data) {
+      if (sugi.data.role === "node") {
         const { node } = sugi.data;
         node.x = sugi.x;
         node.y = sugi.y;
@@ -160,7 +340,7 @@ export function unsugify<N, L>(layers: SugiNode<N, L>[][]) {
         for (let next of sugi.children()) {
           const points: [number, number][] = [[sugi.x, sugi.y]];
           let link;
-          while ("link" in next.data) {
+          while (next.data.role === "link") {
             link = next.data.link;
             points.push([next.x, next.y]);
             [next] = next.children(); // guaranteed to have one child
@@ -209,7 +389,7 @@ export function sugiNodeLength<N, L>(
   dummy: number = 0
 ): SugiNodeLength<N, L> {
   return ({ data }: SugiNode<N, L>): number =>
-    "node" in data ? len(data.node) : dummy;
+    data.role === "node" ? len(data.node) : dummy;
 }
 
 /** validate accurate coordinate assignment */

@@ -1,8 +1,8 @@
 import { layerSeparation } from ".";
 import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs";
-import { getLayers } from "../test-utils";
 import { layeringLongestPath } from "./longest-path";
 import { layeringSimplex } from "./simplex";
+import { sizedSep } from "./test-utils";
 import { layeringTopological } from "./topological";
 
 for (const dat of [doub, ex, square, ccoz, multi, oh, zhere]) {
@@ -12,13 +12,13 @@ for (const dat of [doub, ex, square, ccoz, multi, oh, zhere]) {
     ["longest path bottom up", layeringLongestPath().topDown(false)],
     ["topological", layeringTopological()],
   ] as const) {
-    test(`invariants apply to ${dat.name} layered by ${name}`, () => {
-      const dag = dat();
+    for (const sep of [layerSeparation, sizedSep]) {
+      test(`invariants apply to ${dat.name} layered by ${name} with ${sep.name}`, () => {
+        const dag = dat();
 
-      const num = layering(dag, layerSeparation);
-      expect(num).toBeGreaterThanOrEqual(0);
-      const layers = getLayers(dag, num + 1);
-      expect(layers.length).toBeTruthy();
-    });
+        const num = layering(dag, sep);
+        expect(num).toBeGreaterThanOrEqual(0);
+      });
+    }
   }
 }

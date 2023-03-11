@@ -1,9 +1,17 @@
 import { zherebko } from ".";
-import { GraphNode } from "../graph";
+import { graph, GraphNode } from "../graph";
 import { graphConnect } from "../graph/connect";
 import { filter, map } from "../iters";
 import { doub, line, oh, single } from "../test-graphs";
 import { tweakSize } from "../tweaks";
+
+test("zherebko() works for empty graph", () => {
+  const grf = graph();
+  const layout = zherebko();
+  const { width, height } = layout(grf);
+  expect(width).toEqual(0);
+  expect(height).toEqual(0);
+});
 
 test("zherebko() works for a point", () => {
   const grf = single();

@@ -73,11 +73,9 @@ export type { LaneGreedy } from "./grid/lane/greedy";
 export { laneOpt } from "./grid/lane/opt";
 export type { LaneOpt } from "./grid/lane/opt";
 export type { LayoutResult, NodeSize } from "./layout";
-export { cachedNodeSize, coordVertical, sugiyama } from "./sugiyama";
+export { cachedNodeSize, sugiyama } from "./sugiyama";
 export type { DefaultSugiyama, Sugiyama } from "./sugiyama";
 export type { Coord } from "./sugiyama/coord";
-export { coordCenter } from "./sugiyama/coord/center";
-export type { CoordCenter } from "./sugiyama/coord/center";
 export { coordGreedy } from "./sugiyama/coord/greedy";
 export type { CoordGreedy } from "./sugiyama/coord/greedy";
 export { coordQuad } from "./sugiyama/coord/quad";
@@ -101,13 +99,18 @@ export { layeringSimplex } from "./sugiyama/layering/simplex";
 export type { LayeringSimplex } from "./sugiyama/layering/simplex";
 export { layeringTopological } from "./sugiyama/layering/topological";
 export type { LayeringTopological } from "./sugiyama/layering/topological";
-export { sugify, sugiNodeLength, unsugify } from "./sugiyama/sugify";
+export {
+  compactSugify,
+  layerSugify,
+  sugiNodeLength,
+  unsugify,
+} from "./sugiyama/sugify";
 export type { SugiNode } from "./sugiyama/sugify";
 export type { Twolayer } from "./sugiyama/twolayer";
 export {
-  aggMeanFactory,
-  aggMedianFactory,
-  aggWeightedMedianFactory,
+  aggMean,
+  aggMedian,
+  aggWeightedMedian,
   twolayerAgg,
 } from "./sugiyama/twolayer/agg";
 export type { Aggregator, TwolayerAgg } from "./sugiyama/twolayer/agg";

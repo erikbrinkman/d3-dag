@@ -13,98 +13,74 @@ import { SugiNode } from "../sugify";
 
 /**
  * An interface for aggregating numbers
+ *
+ * It takes an iterable of indices and weights and returns an aggregate index.
+ * Currently weights are always 1. The returned value must be between the min
+ * and the max index, and only return undefined if and only if indices is
+ * empty.
  */
 export interface Aggregator {
-  /** add another value to the aggregator */
-  add(inp: number): void;
+  (indices: Iterable<[number, number]>): number | undefined;
+}
 
-  /** return the aggregate of all added values */
-  val(): number | undefined;
+/** a simple efficient mean aggregator */
+export function aggMean(
+  indices: Iterable<[number, number]>
+): number | undefined {
+  let mean = 0;
+  let count = 0;
+  for (const [val, weight] of indices) {
+    count += weight;
+    mean += ((val - mean) * weight) / count;
+  }
+  return count ? mean : undefined;
 }
 
 /**
- * A way to create aggregators
- */
-export interface AggFactory<A extends Aggregator = Aggregator> {
-  (): A;
-}
-
-class Mean implements Aggregator {
-  private mean: number = 0.0;
-  private count: number = 0;
-
-  add(val: number): void {
-    this.mean += (val - this.mean) / ++this.count;
-  }
-
-  val(): number | undefined {
-    return this.count ? this.mean : undefined;
-  }
-}
-
-/**
- * A {@link AggFactory | factory} that creates mean {@link Aggregator}s
- */
-export const aggMeanFactory = (): Aggregator => new Mean();
-
-class Median implements Aggregator {
-  private vals: number[] = [];
-
-  add(val: number): void {
-    this.vals.push(val);
-  }
-
-  val(): number | undefined {
-    return median(this.vals);
-  }
-}
-
-/**
- * A {@link AggFactory | factory} that creates median {@link Aggregator}s
- */
-export const aggMedianFactory = (): Aggregator => new Median();
-
-class WeightedMedian implements Aggregator {
-  private vals: number[] = [];
-
-  add(val: number): void {
-    this.vals.push(val);
-  }
-
-  val(): number | undefined {
-    // NOTE this could be linear time, but we already do other sorts, so
-    // probably not terrible
-    this.vals.sort((a, b) => a - b);
-    if (this.vals.length === 0) {
-      return undefined;
-    } else if (this.vals.length === 2) {
-      return (this.vals[0] + this.vals[1]) / 2;
-    } else if (this.vals.length % 2 === 0) {
-      const ind = this.vals.length / 2;
-
-      const first = this.vals[0];
-      const left = this.vals[ind - 1];
-      const right = this.vals[ind];
-      const last = this.vals[this.vals.length - 1];
-
-      // all elements are guaranteed to be different, so we don't need to worry
-      // about leftDiff or rightDiff being 0
-      const leftDiff = left - first;
-      const rightDiff = last - right;
-      return (left * rightDiff + right * leftDiff) / (leftDiff + rightDiff);
-    } else {
-      return this.vals[(this.vals.length - 1) / 2];
-    }
-  }
-}
-
-/**
- * A {@link AggFactory | factory} that creates weighted median {@link Aggregator}s
+ * a median aggregator
  *
- * @remarks
- * This is slightly slower than the {@link aggMedianFactory}.
+ * This produces close to optimal results.
  */
-export const aggWeightedMedianFactory = (): Aggregator => new WeightedMedian();
+export function aggMedian(
+  indices: Iterable<[number, number]>
+): number | undefined {
+  // TODO use weights?
+  return median([...map(indices, ([val]) => val)]);
+}
+
+/**
+ * a weighted median aggregator
+ *
+ * This produces close to optimal results, slightly better than median, with
+ * slightly more computation time.
+ */
+export function aggWeightedMedian(
+  indices: Iterable<[number, number]>
+): number | undefined {
+  // TODO use weights?
+  const vals = [...map(indices, ([val]) => val)];
+  vals.sort((a, b) => a - b);
+  if (vals.length === 0) {
+    return undefined;
+  } else if (vals.length === 2) {
+    return (vals[0] + vals[1]) / 2;
+  } else if (vals.length % 2 === 0) {
+    const ind = vals.length / 2;
+
+    const first = vals[0];
+    const left = vals[ind - 1];
+    const right = vals[ind];
+    const last = vals[vals.length - 1];
+
+    // all elements are guaranteed to be different, so we don't need to worry
+    // about leftDiff or rightDiff being 0
+    const leftDiff = left - first;
+    const rightDiff = last - right;
+    return (left * rightDiff + right * leftDiff) / (leftDiff + rightDiff);
+  } else {
+    return vals[(vals.length - 1) / 2];
+  }
+}
 
 /**
  * A {@link sugiyama/twolayer!Twolayer} that orders nodes based off the aggregation of their
@@ -112,47 +88,33 @@ export const aggWeightedMedianFactory = (): Aggregator => new WeightedMedian();
  *
  * This is much faster than {@link sugiyama/twolayer/opt!TwolayerOpt}, and
  * often produces comparable or better layouts. If memory is an issue then
- * {@link aggMeanFactory} uses a little less memory, but there is little reason
- * to use it. Nodes without parents or children respectively will be placed
- * first to minimize the distance between nodes with common parents, and then
- * to minimize rank inversions with respect to the initial ordering.
+ * {@link aggMean} uses a little less memory, but there is little reason to use
+ * it. Nodes without parents or children respectively will be placed first to
+ * minimize the distance between nodes with common parents, and then to
+ * minimize rank inversions with respect to the initial ordering.
  *
  * Create with {@link twolayerAgg}.
  *
  * <img alt="two layer agg example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
-export interface TwolayerAgg<Factory extends AggFactory = AggFactory>
+export interface TwolayerAgg<Agg extends Aggregator = Aggregator>
   extends Twolayer<unknown, unknown> {
   /**
-   * Set the {@link AggFactory} for this operator.
+   * Set the {@link Aggregator} for this operator.
    *
    * The aggregators that this produces are used to fuse the indices of parents
    * or children of an node into it's target index for ordering. The provided
-   * {@link aggMedianFactory} works very well, but {@link aggMeanFactory} works too,
-   * as will any user provided method. (default: {@link aggMedianFactory})
+   * {@link aggMedian} works very well, but {@link aggMean} works too,
+   * as will any user provided method. (default: {@link aggMedian})
    */
-  aggregator<NewFactory extends AggFactory>(
-    val: NewFactory
-  ): TwolayerAgg<NewFactory>;
+  aggregator<NewAgg extends Aggregator>(val: NewAgg): TwolayerAgg<NewAgg>;
   /**
    * Get the current aggregator factory.
    */
-  aggregator(): Factory;
+  aggregator(): Agg;
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
-}
-
-/** perform aggregation over an iterable */
-function aggregate(
-  aggregator: AggFactory,
-  iter: Iterable<number>
-): number | undefined {
-  const agg = aggregator();
-  for (const val of iter) {
-    agg.add(val);
-  }
-  return agg.val();
 }
 
 /**
@@ -233,55 +195,47 @@ function order(
   }
 }
 
-function buildOperator<Factory extends AggFactory>({
-  factory,
+function buildOperator<Agg extends Aggregator>({
+  aggregate,
 }: {
-  factory: Factory;
-}): TwolayerAgg<Factory> {
+  aggregate: Agg;
+}): TwolayerAgg<Agg> {
   function twolayerAgg(
     topLayer: SugiNode[],
     bottomLayer: SugiNode[],
     topDown: boolean
   ): void {
-    if (topDown) {
-      const incr = new Map(
-        bottomLayer.map((node) => [node, factory()] as const)
-      );
-      for (const [i, node] of topLayer.entries()) {
-        for (const child of node.children()) {
-          incr.get(child)!.add(i);
-        }
-      }
-      const aggs = new Map(
-        [...incr.entries()].map(([node, agg]) => [node, agg.val()] as const)
-      );
-      order(bottomLayer, aggs);
-    } else {
-      const inds = new Map(bottomLayer.map((node, i) => [node, i] as const));
-      const aggs = new Map(
-        topLayer.map((node) => {
-          const agg = aggregate(
-            factory,
-            map(node.children(), (child) => inds.get(child)!)
-          );
-          return [node, agg] as const;
-        })
-      );
-      order(topLayer, aggs);
-    }
+    const [reordered, reference] = topDown
+      ? [bottomLayer, topLayer]
+      : [topLayer, bottomLayer];
+    const counts = topDown
+      ? (node: SugiNode) => node.parentCounts()
+      : (node: SugiNode) => node.childCounts();
+
+    const inds = new Map(reference.map((node, i) => [node, i]));
+    const aggs = new Map(
+      reordered.map((node) => {
+        const ind = inds.get(node);
+        const agg =
+          ind ?? aggregate(map(counts(node), ([c, w]) => [inds.get(c)!, w]));
+        return [node, agg] as const;
+      })
+    );
+
+    order(reordered, aggs);
   }
 
-  function aggregator<NewFactory extends AggFactory>(
-    val: NewFactory
-  ): TwolayerAgg<NewFactory>;
-  function aggregator(): Factory;
-  function aggregator<NewFactory extends AggFactory>(
-    val?: NewFactory
-  ): Factory | TwolayerAgg<NewFactory> {
+  function aggregator<NewAgg extends Aggregator>(
+    val: NewAgg
+  ): TwolayerAgg<NewAgg>;
+  function aggregator(): Agg;
+  function aggregator<NewAgg extends Aggregator>(
+    val?: NewAgg
+  ): Agg | TwolayerAgg<NewAgg> {
     if (val === undefined) {
-      return factory;
+      return aggregate;
     } else {
-      return buildOperator({ factory: val });
+      return buildOperator({ aggregate: val });
     }
   }
   twolayerAgg.aggregator = aggregator;
@@ -300,5 +254,5 @@ export function twolayerAgg(...args: never[]): TwolayerAgg {
   if (args.length) {
     throw err`got arguments to twolayerAgg(${args}); you probably forgot to construct twolayerAgg before passing to order: \`decrossTwoLayer().order(twolayerAgg())\`, note the trailing "()"`;
   }
-  return buildOperator({ factory: aggWeightedMedianFactory });
+  return buildOperator({ aggregate: aggWeightedMedian });
 }

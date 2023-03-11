@@ -74,6 +74,30 @@ test("topological().straight(false) works for disconnected", () => {
   }
 });
 
+test("topological() works for compact", () => {
+  const layered = createLayers([[0n], [[0, 1]], [0n, 1], [[], 0], [0n], [[]]]);
+  const coord = topological();
+  const width = coord(layered, nodeSep);
+  for (const layer of layered) {
+    for (const node of layer) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(width);
+    }
+  }
+});
+
+test("topological().straight(false) works for compact", () => {
+  const layered = createLayers([[0n], [[0, 1]], [0n, 1], [[], 0], [0n], [[]]]);
+  const coord = topological().straight(false);
+  const width = coord(layered, nodeSep);
+  for (const layer of layered) {
+    for (const node of layer) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(width);
+    }
+  }
+});
+
 test("topological() throws for non-topological", () => {
   const layers = createLayers([[[0], [0]], [[]]]);
   expect(() => topological()(layers, nodeSep)).toThrow(

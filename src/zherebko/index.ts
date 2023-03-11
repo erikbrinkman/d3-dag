@@ -70,7 +70,7 @@ export interface Zherebko<Ops extends Operators = Operators> {
     val: NewTweaks
   ): Zherebko<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Get the current {@link layout!Tweak}s.
+   * Get the current {@link tweaks!Tweak}s.
    */
   tweaks(): Ops["tweaks"];
 
@@ -115,82 +115,88 @@ function buildOperator<ND, LD, O extends Operators<ND, LD>>(
   function zherebko<N extends ND, L extends LD>(
     inp: Graph<N, L>
   ): LayoutResult {
-    const { xgap, ygap } = sizes;
-    const nodeSize = normalize(ops.nodeSize);
+    let res;
+    // short-circuit empty graph
+    if (!inp.nnodes()) {
+      res = { width: 0, height: 0 };
+    } else {
+      const { xgap, ygap } = sizes;
+      const nodeSize = normalize(ops.nodeSize);
 
-    // topological-ish sort
-    const ordered = [...inp.topological(ops.rank)];
-    let y = -ygap;
-    let maxWidth = 0;
-    for (const node of ordered) {
-      const [width, height] = nodeSize(node);
-      if (width <= 0 || height <= 0) {
-        throw err`constant nodeSize must be positive, but got: [${width}, ${height}]`;
-      }
-      maxWidth = Math.max(maxWidth, width);
-      y += ygap;
-      node.y = y + height / 2;
-      y += height;
-    }
-    const height = y;
-
-    // determine edge curve
-    const gap = Math.min(
-      // space between adjacent nodes or half for multi links
-      ...map(
-        bigrams(ordered),
-        ([f, s]) =>
-          (s.y - f.y) / (f.nchildLinksTo(s) + f.nparentLinksTo(s) > 1 ? 2 : 1)
-      )
-    );
-
-    // get link indices
-    const indices = greedy(ordered, gap * 1.5);
-
-    // map to coordinates
-    let minIndex = 0;
-    let maxIndex = 0;
-    for (const index of indices.values()) {
-      minIndex = Math.min(minIndex, index);
-      maxIndex = Math.max(maxIndex, index);
-    }
-
-    // assign node positions
-    const nodex = -minIndex * xgap + maxWidth / 2;
-    for (const node of ordered) {
-      node.x = nodex;
-    }
-
-    // assign link points
-    for (const link of inp.links()) {
-      const index = indices.get(link) ?? 0;
-      const { source, target, points } = link;
-      points.splice(0);
-
-      points.push([source.x, source.y]);
-      if (index !== 0) {
-        // assumed long link
-        const x = (index - minIndex) * xgap + (index > 0 ? maxWidth : 0);
-        const y1 = source.y + gap;
-        const y2 = target.y - gap;
-        if (y2 - y1 > 1e-3 * gap) {
-          points.push([x, y1], [x, y2]);
-        } else {
-          points.push([x, y1]);
+      // topological-ish sort
+      const ordered = [...inp.topological(ops.rank)];
+      let y = -ygap;
+      let maxWidth = 0;
+      for (const node of ordered) {
+        const [width, height] = nodeSize(node);
+        if (width <= 0 || height <= 0) {
+          throw err`constant nodeSize must be positive, but got: [${width}, ${height}]`;
         }
+        maxWidth = Math.max(maxWidth, width);
+        y += ygap;
+        node.y = y + height / 2;
+        y += height;
       }
-      points.push([target.x, target.y]);
+      const height = y;
+
+      // determine edge curve
+      const gap = Math.min(
+        // space between adjacent nodes or half for multi links
+        ...map(
+          bigrams(ordered),
+          ([f, s]) =>
+            (s.y - f.y) / (f.nchildLinksTo(s) + f.nparentLinksTo(s) > 1 ? 2 : 1)
+        )
+      );
+
+      // get link indices
+      const indices = greedy(ordered, gap * 1.5);
+
+      // map to coordinates
+      let minIndex = 0;
+      let maxIndex = 0;
+      for (const index of indices.values()) {
+        minIndex = Math.min(minIndex, index);
+        maxIndex = Math.max(maxIndex, index);
+      }
+
+      // assign node positions
+      const nodex = -minIndex * xgap + maxWidth / 2;
+      for (const node of ordered) {
+        node.x = nodex;
+      }
+
+      // assign link points
+      for (const link of inp.links()) {
+        const index = indices.get(link) ?? 0;
+        const { source, target, points } = link;
+        points.splice(0);
+
+        points.push([source.x, source.y]);
+        if (index !== 0) {
+          // assumed long link
+          const x = (index - minIndex) * xgap + (index > 0 ? maxWidth : 0);
+          const y1 = source.y + gap;
+          const y2 = target.y - gap;
+          if (y2 - y1 > 1e-3 * gap) {
+            points.push([x, y1], [x, y2]);
+          } else {
+            points.push([x, y1]);
+          }
+        }
+        points.push([target.x, target.y]);
+      }
+
+      res = {
+        width: (maxIndex - minIndex) * xgap + maxWidth,
+        height,
+      };
     }
 
     // apply tweaks
-    let res = {
-      width: (maxIndex - minIndex) * xgap + maxWidth,
-      height,
-    };
     for (const tweak of ops.tweaks) {
       res = tweak(inp, res);
     }
-
     return res;
   }
 

@@ -67,12 +67,9 @@ describe("tests that require a built bundle", () => {
   });
 
   // d3-array
-  test("aggMedianFactory() gets median", () => {
-    const agg = d3dag.aggMedianFactory();
-    expect(agg.val()).toBeUndefined();
-    agg.add(1);
-    agg.add(2);
-    agg.add(4);
-    expect(agg.val()).toEqual(2);
+  test("aggMedian() gets median", () => {
+    const agg = d3dag.aggMedian;
+    expect(agg([])).toBeUndefined();
+    expect(agg([1, 2, 4].map((v) => [v, 1]))).toEqual(2);
   });
 });

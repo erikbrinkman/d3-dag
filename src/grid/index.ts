@@ -82,14 +82,14 @@ export interface Grid<Ops extends GridOps = GridOps> {
   /** Get the current lane operator */
   rank(): Ops["rank"];
 
-  /*
+  /**
    * Set the tweaks to apply after layout
    */
   tweaks<NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Grid<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Get the current {@link layout!Tweak}s.
+   * Get the current {@link tweaks!Tweak}s.
    */
   tweaks(): Ops["tweaks"];
 
@@ -131,79 +131,85 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
     // after we topologically order, which would be a pain, so we just allow
     // it.
 
-    // topological sort
-    const ordered = grf.topological(options.rank);
-    for (const [y, node] of ordered.entries()) {
-      node.y = y;
-    }
-
-    // get lanes
-    options.lane(ordered);
-    const numLanes = verifyLanes(ordered, options.lane);
-
-    // adjust x and y by nodeSize
-    const { xgap, ygap } = sizes;
-    let width, height;
-    if (typeof options.nodeSize === "function") {
-      // assign ys and compute widths
-      const laneWidths = Array<number>(numLanes).fill(0);
-      height = -ygap;
-      for (const node of ordered) {
-        const [nodeWidth, nodeHeight] = options.nodeSize(node);
-        if (nodeWidth <= 0 || nodeHeight <= 0) {
-          throw err`nodeSize must be positive, but got: [${nodeWidth}, ${nodeHeight}]`;
-        }
-        laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
-        height += ygap;
-        node.y = height + nodeHeight / 2;
-        height += nodeHeight;
-      }
-      // compute width and xs
-      width = -xgap;
-      for (const [i, laneWidth] of laneWidths.entries()) {
-        width += xgap;
-        laneWidths[i] = width + laneWidth / 2;
-        width += laneWidth;
-      }
-      // assign xs
-      for (const node of ordered) {
-        node.x = laneWidths[node.x];
-      }
+    let res;
+    // short-circuit empty graph
+    if (!grf.nnodes()) {
+      res = { width: 0, height: 0 };
     } else {
-      // constant, so assign simply
-      const [nodeWidth, nodeHeight] = options.nodeSize;
-      for (const node of ordered) {
-        node.x = (node.x + 0.5) * nodeWidth + node.x * xgap;
-        node.y = (node.y + 0.5) * nodeHeight + node.y * ygap;
+      // topological sort
+      const ordered = grf.topological(options.rank);
+      for (const [y, node] of ordered.entries()) {
+        node.y = y;
       }
-      width = numLanes * (nodeWidth + xgap) - xgap;
-      height = ordered.length * (nodeHeight + ygap) - ygap;
-    }
 
-    // assign link points
-    for (const link of grf.links()) {
-      const { source, target, points } = link;
-      points.splice(0);
-      if (source.x === target.x) {
-        points.push([source.x, source.y], [target.x, target.y]);
-      } else {
-        points.push([source.x, source.y]);
-        if (source.y < target.y) {
-          // effectively reverse edge
-          points.push([target.x, source.y]);
-        } else {
-          points.push([source.x, target.y]);
+      // get lanes
+      options.lane(ordered);
+      const numLanes = verifyLanes(ordered, options.lane);
+
+      // adjust x and y by nodeSize
+      const { xgap, ygap } = sizes;
+      let width, height;
+      if (typeof options.nodeSize === "function") {
+        // assign ys and compute widths
+        const laneWidths = Array<number>(numLanes).fill(0);
+        height = -ygap;
+        for (const node of ordered) {
+          const [nodeWidth, nodeHeight] = options.nodeSize(node);
+          if (nodeWidth <= 0 || nodeHeight <= 0) {
+            throw err`nodeSize must be positive, but got: [${nodeWidth}, ${nodeHeight}]`;
+          }
+          laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
+          height += ygap;
+          node.y = height + nodeHeight / 2;
+          height += nodeHeight;
         }
-        points.push([target.x, target.y]);
+        // compute width and xs
+        width = -xgap;
+        for (const [i, laneWidth] of laneWidths.entries()) {
+          width += xgap;
+          laneWidths[i] = width + laneWidth / 2;
+          width += laneWidth;
+        }
+        // assign xs
+        for (const node of ordered) {
+          node.x = laneWidths[node.x];
+        }
+      } else {
+        // constant, so assign simply
+        const [nodeWidth, nodeHeight] = options.nodeSize;
+        for (const node of ordered) {
+          node.x = (node.x + 0.5) * nodeWidth + node.x * xgap;
+          node.y = (node.y + 0.5) * nodeHeight + node.y * ygap;
+        }
+        width = numLanes * (nodeWidth + xgap) - xgap;
+        height = ordered.length * (nodeHeight + ygap) - ygap;
       }
+
+      // assign link points
+      for (const link of grf.links()) {
+        const { source, target, points } = link;
+        points.splice(0);
+        if (source.x === target.x) {
+          points.push([source.x, source.y], [target.x, target.y]);
+        } else {
+          points.push([source.x, source.y]);
+          if (source.y < target.y) {
+            // effectively reverse edge
+            points.push([target.x, source.y]);
+          } else {
+            points.push([source.x, target.y]);
+          }
+          points.push([target.x, target.y]);
+        }
+      }
+
+      res = { width, height };
     }
 
     // apply tweaks
-    let res = { width, height };
     for (const tweak of options.tweaks) {
       res = tweak(grf, res);
     }
-
     return res;
   }
 

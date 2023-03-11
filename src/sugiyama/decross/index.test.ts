@@ -1,4 +1,5 @@
-import { createLayers, getIndex } from "../test-utils";
+import { bigrams } from "../../iters";
+import { compactCrossings, createLayers, getIndex } from "../test-utils";
 import { twolayerAgg } from "../twolayer/agg";
 import { twolayerOpt } from "../twolayer/opt";
 import { decrossDfs } from "./dfs";
@@ -13,8 +14,9 @@ const doub = () =>
     [[1], [0]],
     [[], []],
   ]);
+const sizedLine = () => createLayers([[0n], [[0]], [0n], [[]]]);
 
-for (const dat of [square, ccoz, dtopo, doub]) {
+for (const dat of [square, ccoz, dtopo, doub, sizedLine]) {
   for (const [name, method] of [
     ["two layer agg", decrossTwoLayer().order(twolayerAgg())],
     ["two layer opt", decrossTwoLayer().order(twolayerOpt())],
@@ -28,6 +30,10 @@ for (const dat of [square, ccoz, dtopo, doub]) {
       method(layered);
       const after = layered.map((layer) => layer.map(getIndex).sort());
       expect(after).toEqual(before);
+
+      for (const [topLayer, bottomLayer] of bigrams(layered)) {
+        expect(compactCrossings(topLayer, bottomLayer)).toBeFalsy();
+      }
     });
   }
 }

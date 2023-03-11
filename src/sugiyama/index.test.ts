@@ -1,18 +1,39 @@
 import { sugiyama } from ".";
-import { Graph, GraphNode } from "../graph";
+import { Graph, graph, GraphNode } from "../graph";
 import { NodeSize } from "../layout";
-import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs";
+import {
+  doub,
+  dummy,
+  multi,
+  oh,
+  single,
+  square,
+  three,
+  trip,
+} from "../test-graphs";
 import { tweakSize } from "../tweaks";
 import { Coord } from "./coord";
 import { Decross } from "./decross";
 import { Layering } from "./layering";
 import { layeringTopological } from "./layering/topological";
 import { SugiNode } from "./sugify";
+import { canonical } from "./test-utils";
+
+test("sugiyama() works on empty graph", () => {
+  const dag = graph<undefined, undefined>();
+  const layout = sugiyama();
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(0);
+  expect(height).toBeCloseTo(0);
+});
 
 test("sugiyama() works for single node", () => {
   const dag = single();
   const layout = sugiyama();
-  layout(dag);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(1);
+  expect(height).toBeCloseTo(1);
+
   const [node] = dag;
   expect(node.x).toBeCloseTo(0.5);
   expect(node.y).toBeCloseTo(0.5);
@@ -21,38 +42,47 @@ test("sugiyama() works for single node", () => {
 test("sugiyama() works for double node vertically", () => {
   const dag = doub();
   const layout = sugiyama().layering(layeringTopological());
-  layout(dag);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(1);
+  expect(height).toBeCloseTo(3);
+
   const [first, second] = dag.topological();
   expect(first.x).toBeCloseTo(0.5);
   expect(first.y).toBeCloseTo(0.5);
   expect(second.x).toBeCloseTo(0.5);
-  expect(second.y).toBeCloseTo(1.5);
+  expect(second.y).toBeCloseTo(2.5);
 });
 
 test("sugiyama() works for triple node horizontally", () => {
   const dag = trip();
   const layout = sugiyama();
-  layout(dag);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(5);
+  expect(height).toBeCloseTo(1);
+
   const [first, second, third] = dag.topological();
   expect(first.x).toBeCloseTo(0.5);
   expect(first.y).toBeCloseTo(0.5);
-  expect(second.x).toBeCloseTo(1.5);
+  expect(second.x).toBeCloseTo(2.5);
   expect(second.y).toBeCloseTo(0.5);
-  expect(third.x).toBeCloseTo(2.5);
+  expect(third.x).toBeCloseTo(4.5);
   expect(third.y).toBeCloseTo(0.5);
 });
 
 test("sugiyama() works for triple node horizontally sized", () => {
   const dag = trip();
   const layout = sugiyama().nodeSize(() => [2, 2]);
-  layout(dag);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(8);
+  expect(height).toBeCloseTo(2);
+
   const [first, second, third] = dag.topological();
-  expect(first.x).toBeCloseTo(1.0);
-  expect(first.y).toBeCloseTo(1.0);
-  expect(second.x).toBeCloseTo(3.0);
-  expect(second.y).toBeCloseTo(1.0);
-  expect(third.x).toBeCloseTo(5.0);
-  expect(third.y).toBeCloseTo(1.0);
+  expect(first.x).toBeCloseTo(1);
+  expect(first.y).toBeCloseTo(1);
+  expect(second.x).toBeCloseTo(4);
+  expect(second.y).toBeCloseTo(1);
+  expect(third.x).toBeCloseTo(7);
+  expect(third.y).toBeCloseTo(1);
 });
 
 test("sugiyama() works with a dummy node", () => {
@@ -63,16 +93,16 @@ test("sugiyama() works with a dummy node", () => {
     (a, b) => parseInt(a.data) - parseInt(b.data)
   );
 
-  expect(width).toBeCloseTo(1.5);
-  expect(height).toBeCloseTo(3);
+  expect(width).toBeCloseTo(2.5);
+  expect(height).toBeCloseTo(5);
 
   expect(first.y).toBeCloseTo(0.5);
-  expect(second.y).toBeCloseTo(1.5);
-  expect(third.y).toBeCloseTo(2.5);
+  expect(second.y).toBeCloseTo(2.5);
+  expect(third.y).toBeCloseTo(4.5);
 
   // NOTE these x's could flip, so this is brittle
   expect(first.x).toBeCloseTo(0.5);
-  expect(second.x).toBeCloseTo(1.0);
+  expect(second.x).toBeCloseTo(2.0);
   expect(third.x).toBeCloseTo(0.5);
 });
 
@@ -85,14 +115,28 @@ test("sugiyama() works with a multi dag", () => {
 
   // the width and height imply that the dummy nodes got positioned appropriately
   expect(width).toBeCloseTo(2);
-  expect(height).toBeCloseTo(6);
+  expect(height).toBeCloseTo(5);
 
   // NOTE either could be one or two, so this is brittle
   expect(root.x).toBeCloseTo(1);
   expect(root.y).toBeCloseTo(1);
 
   expect(leaf.x).toBeCloseTo(1);
-  expect(leaf.y).toBeCloseTo(5);
+  expect(leaf.y).toBeCloseTo(4);
+
+  const xes = [];
+  for (const { points } of dag.links()) {
+    const [[x1, y1], [xc, yc], [x2, y2]] = points;
+    expect(x1).toBeCloseTo(1);
+    expect(y1).toBeCloseTo(1);
+    expect(yc).toBeCloseTo(2.5);
+    expect(x2).toBeCloseTo(1);
+    expect(y2).toBeCloseTo(4);
+
+    xes.push(xc);
+  }
+  const [x1, x2] = xes;
+  expect(Math.abs(x1 - x2)).toBeGreaterThanOrEqual(1);
 });
 
 test("sugiyama() works with cycles", () => {
@@ -106,12 +150,12 @@ test("sugiyama() works with cycles", () => {
 
   // the width and height imply that the dummy nodes got positioned appropriately
   expect(width).toBeCloseTo(2);
-  expect(height).toBeCloseTo(6);
+  expect(height).toBeCloseTo(5);
 
   // NOTE either could be one or two, so this is brittle
   expect(root.x).toBeCloseTo(1);
   expect(leaf.x).toBeCloseTo(1);
-  expect([root.y, leaf.y].sort()).toEqual([1, 5]);
+  expect([root.y, leaf.y].sort()).toEqual([1, 4]);
 });
 
 test("sugiyama() allows changing nodeSize and gap", () => {
@@ -161,27 +205,58 @@ test("sugiyama() allows changing operators", () => {
     return dag.nnodes() - 1;
   };
   const decross: Decross<string, unknown> = () => undefined;
-  const coord: Coord<string, unknown> = (layers): number => {
+  const coord: Coord<string, unknown> = (layers, sep): number => {
+    let width = 0;
     for (const layer of layers) {
-      const div = Math.max(1, layer.length);
-      layer.forEach((node, i) => {
-        node.x = i / div;
-      });
+      let x = 0;
+      let last = undefined;
+      for (const node of layer) {
+        node.x = x += sep(last, node);
+        last = node;
+      }
+      width = Math.max(width, x + sep(last, undefined));
     }
-    return 1;
+    return width;
   };
-  const nodeSize: NodeSize<string, unknown> = () => [0, 2];
+  const nodeSize: NodeSize<string, unknown> = () => [1, 2];
   const layout = sugiyama()
     .layering(layering)
     .decross(decross)
     .coord(coord)
-    .nodeSize(nodeSize);
+    .nodeSize(nodeSize)
+    .gap([1, 1]);
   expect(layout.layering()).toBe(layering);
   expect(layout.decross()).toBe(decross);
   expect(layout.coord()).toBe(coord);
   expect(layout.nodeSize()).toBe(nodeSize);
   // still runs
   layout(dag);
+});
+
+test("sugiyama() works for compact layouts", () => {
+  const dag = square();
+
+  function nodeSize(node: GraphNode<string>): [number, number] {
+    const size = (parseInt(node.data) % 3) + 1;
+    return [size, size];
+  }
+
+  const layout = sugiyama().nodeSize(nodeSize).compact(true);
+  expect(layout.compact()).toBe(true);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(6);
+  expect(height).toBeCloseTo(7);
+  const [zero, one, two, three] = canonical(dag);
+
+  // NOTE the square xs can be 1 or 4.5 based in implementation
+  expect(zero.x).toBeCloseTo(1);
+  expect(zero.y).toBeCloseTo(0.5);
+  expect(one.x).toBeCloseTo(1);
+  expect(one.y).toBeCloseTo(3);
+  expect(two.x).toBeCloseTo(4.5);
+  expect(two.y).toBeCloseTo(3.5);
+  expect(three.x).toBeCloseTo(1);
+  expect(three.y).toBeCloseTo(6.5);
 });
 
 const noop = (): number => 1;
@@ -280,28 +355,16 @@ test("sugiyama() throws with non-positive const node height", () => {
   );
 });
 
-test("sugiyama() throws with negative node width", () => {
+test("sugiyama() throws with zero node width", () => {
   const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [-1, 1]);
-  expect(() => layout(dag)).toThrow(
-    "all node sizes must be non-negative, but got width -1 and height 1 for node with data"
-  );
-});
-
-test("sugiyama() throws with negative node height", () => {
-  const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [1, -1]);
-  expect(() => layout(dag)).toThrow(
-    "all node sizes must be non-negative, but got width 1 and height -1 for node with data"
-  );
+  const layout = sugiyama().nodeSize(() => [0, 1]);
+  expect(() => layout(dag)).toThrow("all node sizes must be positive");
 });
 
 test("sugiyama() throws with zero node height", () => {
   const dag = dummy();
   const layout = sugiyama().nodeSize(() => [1, 0]);
-  expect(() => layout(dag)).toThrow(
-    "at least one node must have positive height, but total height was zero"
-  );
+  expect(() => layout(dag)).toThrow("all node sizes must be positive");
 });
 
 test("sugiyama() throws with negative gap width", () => {

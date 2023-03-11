@@ -7,18 +7,16 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 import { Coord } from ".";
-import { slice } from "../../iters";
+import { bigrams, entries, map, slice } from "../../iters";
 import { err } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
+import { aggMedian, Aggregator } from "../twolayer/agg";
 
 /**
  * A {@link sugiyama/coord!Coord} that tries to place nodes close to their parents
  *
  * Nodes that can't be placed at the mean of their parents' location, will be
  * spaced out with their priority equal to their degree.
- *
- * This is generally slower than {@link sugiyama/coord/center!CoordCenter} but still reasonably
- * fast.
  *
  * Create with {@link coordGreedy}.
  *
@@ -27,6 +25,75 @@ import { SugiNode, SugiSeparation } from "../sugify";
 export interface CoordGreedy extends Coord<unknown, unknown> {
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
+}
+
+function degree(node: SugiNode): number {
+  return node.data.role === "node" ? node.nparents() + node.nchildren() : -1;
+}
+
+function assign(
+  layer: readonly SugiNode[],
+  agg: Aggregator,
+  counts: (node: SugiNode) => Iterable<readonly [SugiNode, number]>
+): void {
+  for (const node of layer) {
+    const x = agg(map(counts(node), ([{ x }, num]) => [x, num]));
+    if (x !== undefined) {
+      node.x = x;
+    }
+  }
+}
+
+function heur<N, L>(
+  layer: readonly SugiNode<N, L>[],
+  sep: SugiSeparation<N, L>,
+  inds: readonly number[]
+): void {
+  // iterate over nodes in degree order
+  for (const ind of inds) {
+    // space apart in neighborhood
+    for (const [last, next] of bigrams(slice(layer, ind))) {
+      const x = last.x + sep(last, next);
+      if (x > next.x) {
+        next.x = x;
+      } else {
+        break;
+      }
+    }
+    for (const [last, next] of bigrams(slice(layer, ind, -1, -1))) {
+      const x = last.x - sep(next, last);
+      if (x < next.x) {
+        next.x = x;
+      } else {
+        break;
+      }
+    }
+  }
+}
+
+function space<N, L>(
+  layer: readonly SugiNode<N, L>[],
+  sep: SugiSeparation<N, L>
+): void {
+  const ind = Math.floor(layer.length / 2);
+  for (const [last, next] of bigrams(slice(layer, ind))) {
+    next.x = Math.max(next.x, last.x + sep(last, next));
+  }
+  for (const [last, next] of bigrams(slice(layer, ind, -1, -1))) {
+    next.x = Math.min(next.x, last.x - sep(next, last));
+  }
+}
+
+function unchanged(layers: SugiNode[][], snapshot: number[][]): boolean {
+  for (const [i, layer] of layers.entries()) {
+    const snap = snapshot[i];
+    for (const [j, { x }] of layer.entries()) {
+      if (snap[j] !== x) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 /**
@@ -41,86 +108,100 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     layers: SugiNode<N, L>[][],
     sep: SugiSeparation<N, L>
   ): number {
-    // TODO other initial assignments
-    const assignment = meanAssignment;
+    // TODO allow other aggregations
+    const agg = aggMedian;
 
-    // assign degrees
-    const degrees = new Map<SugiNode<N, L>, number>();
+    // get statistics on layers
+    let numPasses = 1;
+    let xmean = 0;
+    let xcount = 0;
+    const nodes = new Set<SugiNode<N, L>>();
     for (const layer of layers) {
       for (const node of layer) {
-        // the -3 at the end ensures that dummy nodes have the lowest priority,
-        // as dummy nodes always have degree 2, degree -1 ensures they are
-        // below any other valid node
-        degrees.set(node, node.nchildren() + ("node" in node.data ? 0 : -3));
-      }
-    }
-    for (const layer of layers) {
-      for (const node of layer) {
-        for (const child of node.children()) {
-          degrees.set(child, degrees.get(child)! + 1);
+        nodes.add(node);
+        if (node.ux !== undefined) {
+          xmean += (node.ux - xmean) / ++xcount;
+        }
+        if (node.data.role === "node") {
+          const span = node.data.bottomLayer - node.data.topLayer + 1;
+          numPasses = Math.max(numPasses, span);
         }
       }
     }
 
-    // set first layer
-    let [lastLayer, ...restLayers] = layers;
-    let start = 0;
-    let finish = 0;
-    let last;
-    for (const node of lastLayer) {
-      finish += sep(last, node);
-      node.x = finish;
-      last = node;
-    }
-    finish += sep(last, undefined);
+    // compute order for spacing heuristic
+    const degInds = layers.map((layer) => {
+      const ordered = [...layer.entries()];
+      ordered.sort(([aj, anode], [bj, bnode]) => {
+        const adeg = degree(anode);
+        const bdeg = degree(bnode);
+        return adeg === bdeg ? aj - bj : bdeg - adeg;
+      });
+      return ordered.map(([ind]) => ind);
+    });
 
-    // assign the rest of nodes
-    for (const layer of restLayers) {
-      // initial greedy assignment
-      assignment(lastLayer, layer);
-
-      // order nodes nodes by degree and start with highest degree
-      const ordered = layer
-        .map((node, j) => [j, node] as const)
-        .sort(([aj, anode], [bj, bnode]) => {
-          const adeg = degrees.get(anode)!;
-          const bdeg = degrees.get(bnode)!;
-          return adeg === bdeg ? aj - bj : bdeg - adeg;
-        });
-      // Iterate over nodes in degree order
-      for (const [j, node] of ordered) {
-        let last;
-
-        // first push nodes over to left
-        // TODO we do left than right, but really we should do both and average
-        let end = node.x;
-        last = node;
-        for (const next of slice(layer, j + 1)) {
-          end = next.x = Math.max(next.x, end + sep(last, next));
-          last = next;
-        }
-        finish = Math.max(finish, end + sep(last, undefined));
-
-        // then push from the right
-        let begin = node.x;
-        last = node;
-        for (const next of slice(layer, j - 1, -1, -1)) {
-          begin = next.x = Math.min(next.x, begin - sep(next, last));
-          last = next;
-        }
-        start = Math.min(start, begin - sep(undefined, last));
-      }
-
-      lastLayer = layer;
-    }
-
-    // separate for zero based
-    for (const layer of layers) {
+    // initialize xes on all layers
+    for (const [i, layer] of layers.entries()) {
+      let mean = 0;
+      let count = 0;
       for (const node of layer) {
-        node.x -= start;
+        if (node.ux !== undefined) {
+          mean += (node.ux - mean) / ++count;
+        }
+      }
+      const def = count ? mean : xmean;
+      for (const node of layer) {
+        if (node.ux === undefined) {
+          node.ux = def;
+        }
+      }
+      heur(layer, sep, degInds[i]);
+    }
+
+    // do an up and down pass using the assignment operator
+    // down pass
+    for (const [i, layer] of entries(slice(layers, 1))) {
+      assign(layer, agg, (node) => node.parentCounts());
+      heur(layer, sep, degInds[i + 1]);
+    }
+    // up pass
+    for (const [i, layer] of entries(
+      slice(layers, layers.length - 2, -1, -1)
+    )) {
+      assign(layer, agg, (node) => node.childCounts());
+      heur(layer, sep, degInds[layers.length - i - 2]);
+    }
+
+    // another set of passes to guarantee nodes spaced apart enough
+    for (let i = 0; i < numPasses; ++i) {
+      const snapshot = layers.map((layer) => layer.map(({ x }) => x));
+      for (const layer of slice(layers, 1)) {
+        space(layer, sep);
+      }
+      for (const layer of slice(layers, layers.length - 2, -1, -1)) {
+        space(layer, sep);
+      }
+      if (unchanged(layers, snapshot)) {
+        break;
       }
     }
-    const width = finish - start;
+
+    // figure out width and offset
+    let start = Infinity;
+    let end = -Infinity;
+    for (const layer of layers) {
+      const first = layer[0];
+      start = Math.min(start, first.x - sep(undefined, first));
+      const last = layer[layer.length - 1];
+      end = Math.max(end, last.x + sep(last, undefined));
+    }
+
+    // apply offset
+    for (const node of nodes) {
+      node.x -= start;
+    }
+
+    const width = end - start;
     if (width <= 0) {
       throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     }
@@ -130,22 +211,4 @@ export function coordGreedy(...args: never[]): CoordGreedy {
   coordGreedy.d3dagBuiltin = true as const;
 
   return coordGreedy;
-}
-
-// TODO this is very similar to the twolayerMean method, there might be a
-// clever way to combine then, but it's not immediately obvious since twolayer
-// uses the index of top layer, and this uses the x value
-/** @internal */
-function meanAssignment(topLayer: SugiNode[], bottomLayer: SugiNode[]): void {
-  for (const node of bottomLayer) {
-    node.x = 0.0;
-  }
-  const counts = new Map<SugiNode, number>();
-  for (const node of topLayer) {
-    for (const child of node.children()) {
-      const newCount = (counts.get(child) ?? 0) + 1;
-      counts.set(child, newCount);
-      child.x += (node.x - child.x) / newCount;
-    }
-  }
 }

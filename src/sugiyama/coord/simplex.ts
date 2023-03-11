@@ -6,10 +6,11 @@
  */
 import { Coord } from ".";
 import { GraphLink, GraphNode } from "../../graph";
-import { bigrams, entries, flatMap } from "../../iters";
+import { bigrams, flatMap } from "../../iters";
 import { Constraint, solve, Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
+import { avgHeight } from "./utils";
 
 /**
  * A strictly callable {@link SimplexWeight}
@@ -104,7 +105,7 @@ function createCachedSimplexWeightAccessor<N, L>(
   if (typeof weight !== "function") {
     const [two, one, zero] = weight;
     return (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
-      const count = +("node" in par.data) + +("node" in child.data);
+      const count = +(par.data.role === "node") + +(child.data.role === "node");
       /* istanbul ignore next */
       switch (count) {
         case 0:
@@ -124,7 +125,7 @@ function createCachedSimplexWeightAccessor<N, L>(
       Map<GraphNode<N, L>, readonly [number, number, number]>
     >();
     for (const node of flatMap(layers, (l) => l)) {
-      if ("node" in node.data) {
+      if (node.data.role === "node") {
         const rawNode = node.data.node;
         const targets = new Map<
           GraphNode<N, L>,
@@ -145,11 +146,11 @@ function createCachedSimplexWeightAccessor<N, L>(
     return (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
       // NOTE this structure is to make sure type script does inference about
       // the sugi data appropriately
-      if ("link" in par.data) {
+      if (par.data.role === "link") {
         const { source, target } = par.data.link;
         const [, one, two] = cache.get(source)!.get(target)!;
-        return "link" in child.data ? two : one;
-      } else if ("link" in child.data) {
+        return child.data.role === "link" ? two : one;
+      } else if (child.data.role === "link") {
         const { source, target } = child.data.link;
         const [, val] = cache.get(source)!.get(target)!;
         return val;
@@ -177,10 +178,15 @@ function buildOperator<
 
     // initialize ids and non-slack variables
     const ids = new Map<SugiNode<N, L>, string>();
-    for (const [i, node] of entries(flatMap(layers, (l) => l))) {
-      const id = i.toString();
-      ids.set(node, id);
-      variables[id] = {};
+    let i = 0;
+    for (const layer of layers) {
+      for (const node of layer) {
+        if (!ids.has(node)) {
+          const id = `${i++}`;
+          ids.set(node, id);
+          variables[id] = {};
+        }
+      }
     }
 
     /** get node id */
@@ -201,8 +207,10 @@ function buildOperator<
       }
     }
 
+    const heightNorm = avgHeight(ids.keys());
+
     // minimize weighted difference
-    for (const node of flatMap(layers, (l) => l)) {
+    for (const node of ids.keys()) {
       const nid = n(node);
       for (const child of node.children()) {
         const cid = n(child);
@@ -221,25 +229,34 @@ function buildOperator<
         variables[cid][ccons] = 1;
 
         const weight = cachedWeight(node, child);
-        variables[slack] = { opt: weight, [pcons]: 1, [ccons]: 1 };
+        const height = (child.y - node.y) / heightNorm;
+        variables[slack] = { opt: weight / height, [pcons]: 1, [ccons]: 1 };
       }
     }
 
     const assignment = solve("opt", "min", variables, constraints);
+
+    // assign initial xes
+    for (const [node, id] of ids) {
+      node.x = assignment[id] ?? 0;
+    }
+
+    // figure out width and offset
     let offset = 0;
     let width = 0;
     for (const layer of layers) {
-      for (const node of layer) {
-        node.x = assignment[n(node)] ?? 0;
-      }
       const first = layer[0];
       offset = Math.min(offset, first.x - sep(undefined, first));
       const last = layer[layer.length - 1];
       width = Math.max(width, last.x + sep(last, undefined));
     }
-    for (const node of flatMap(layers, (l) => l)) {
+
+    // apply offset
+    for (const node of ids.keys()) {
       node.x -= offset;
     }
+
+    // return width
     const maxWidth = width - offset;
     if (maxWidth <= 0) {
       throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;

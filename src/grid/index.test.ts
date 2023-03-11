@@ -1,9 +1,17 @@
 import { grid } from ".";
-import { GraphNode } from "../graph";
+import { graph, GraphNode } from "../graph";
 import { filter } from "../iters";
 import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs";
 import { tweakSize } from "../tweaks";
 import { laneGreedy } from "./lane/greedy";
+
+test("grid() works for empty graph", () => {
+  const grf = graph();
+  const layout = grid();
+  const { width, height } = layout(grf);
+  expect(width).toEqual(0);
+  expect(height).toEqual(0);
+});
 
 test("greedy() works for triangle", () => {
   const grf = dummy();

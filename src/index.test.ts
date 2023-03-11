@@ -1,18 +1,16 @@
 import {
-  aggMeanFactory,
-  aggMedianFactory,
+  aggMean,
+  aggMedian,
   Aggregator,
-  aggWeightedMedianFactory,
+  aggWeightedMedian,
   cachedNodeSize,
   ChildrenDataOperator,
   ChildrenOperator,
   Coord,
-  coordCenter,
   coordGreedy,
   coordQuad,
   coordSimplex,
   coordTopological,
-  coordVertical,
   Decross,
   decrossOpt,
   decrossTwoLayer,
@@ -41,6 +39,7 @@ import {
   layeringSimplex,
   layeringTopological,
   layerSeparation,
+  layerSugify,
   LinkWeight,
   MutGraph,
   NodeSize,
@@ -50,7 +49,6 @@ import {
   Rank,
   SimplexWeight,
   sizedSeparation,
-  sugify,
   SugiNode,
   sugiNodeLength,
   sugiyama,
@@ -193,17 +191,12 @@ test("sugiyama.decross()", () => {
   const dag = graph<string, number>();
   dag.node("a");
 
-  const sumAgg: () => Aggregator = () => {
-    const agg = {
-      total: 0,
-      add(val: number) {
-        this.total += val;
-      },
-      val() {
-        return this.total;
-      },
-    };
-    return agg;
+  const maxAgg: Aggregator = (indices) => {
+    let max = -Infinity;
+    for (const [val] of indices) {
+      max = Math.max(max, val);
+    }
+    return max === -Infinity ? undefined : max;
   };
   const twolayer: Twolayer<string, number> = (
     topLayer: SugiNode<string, number>[],
@@ -232,10 +225,10 @@ test("sugiyama.decross()", () => {
         .order(twolayer)
         .order(
           twolayerAgg()
-            .aggregator(sumAgg)
-            .aggregator(aggWeightedMedianFactory)
-            .aggregator(aggMedianFactory)
-            .aggregator(aggMeanFactory)
+            .aggregator(maxAgg)
+            .aggregator(aggWeightedMedian)
+            .aggregator(aggMedian)
+            .aggregator(aggMean)
         )
         .order(twolayerOpt())
         .order(twolayerGreedy())
@@ -278,7 +271,6 @@ test("sugiyama.coord()", () => {
     .coord(coord)
     .coord(coordTopological())
     .coord(coordGreedy())
-    .coord(coordCenter())
     .coord(coordQuad().linkCurve(linkWeight).nodeCurve(nodeWeight))
     .coord(coordSimplex().weight(simplexWeight));
   const { width, height } = layout(dag);
@@ -319,8 +311,13 @@ test("manual sugiyama()", () => {
 
   const [xLen, yLen] = cachedNodeSize(nodeSize);
   const numLayers = layering(dag, layerSeparation);
-  const layers = sugify(dag, numLayers + 1, layering);
-  const height = coordVertical(layers, yLen, yGap);
+  const [layers, height] = layerSugify(
+    dag,
+    yLen,
+    yGap,
+    numLayers + 1,
+    layering
+  );
   decross(layers);
   const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
   const width = coord(layers, xSep);

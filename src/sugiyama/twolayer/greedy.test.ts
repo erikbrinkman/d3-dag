@@ -16,6 +16,19 @@ test("greedy() works for very simple case", () => {
   expect(inds).toEqual([1, 0]);
 });
 
+test("greedy() works for very simple compact case", () => {
+  // independent links that need to be swapped
+  const [topLayer, bottomLayer] = createLayers([
+    [[1], [0], 2n, [3], [4]],
+    [[], [], [], [], []],
+  ]);
+  const layout = greedy();
+  expect(layout.scan()).toBe(false);
+  layout(topLayer, bottomLayer, true);
+  const inds = bottomLayer.map(getIndex);
+  expect(inds).toEqual([1, 0, 2, 3, 4]);
+});
+
 test("greedy() works for very simple case bottom-up", () => {
   // independent links that need to be swapped
   const [topLayer, bottomLayer] = createLayers([

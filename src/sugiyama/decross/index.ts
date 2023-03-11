@@ -33,7 +33,7 @@ import { SugiNode } from "../sugify";
  *     for (const layer of layers) {
  *         for (const node of layer) {
  *             const { data } = node;
- *             const val = "node" in data ? data.node.data.ord ? (data.link.source.data.ord + data.link.target.data.ord) / 2;
+ *             const val = data.role === "node" ? data.node.data.ord ? (data.link.source.data.ord + data.link.target.data.ord) / 2;
  *             vals.set(node, val);
  *         }
  *     }

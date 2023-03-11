@@ -69,7 +69,7 @@ interface SwapChange<N, L> {
 
 function createSwapChange<N, L>(
   stationary: readonly SugiNode<N, L>[],
-  children: (node: SugiNode<N, L>) => Iterable<SugiNode<N, L>>
+  children: (node: SugiNode<N, L>) => Iterable<[SugiNode<N, L>, number]>
 ): SwapChange<N, L> {
   const cache = new Map<SugiNode, Map<SugiNode, number>>();
   const inds = new Map<SugiNode, number>(stationary.map((n, i) => [n, i]));
@@ -77,12 +77,16 @@ function createSwapChange<N, L>(
   function swapChange(left: SugiNode<N, L>, right: SugiNode<N, L>): number {
     const val = cache.get(left)?.get(right);
     if (val !== undefined) {
-      return val;
+      return val; // cached
+    } else if (inds.has(left) || inds.has(right)) {
+      return -Infinity; // can't swap compact nodes
     } else {
       let delta = 0;
-      for (const cl of children(left)) {
-        for (const cr of children(right)) {
-          delta += Math.sign(inds.get(cl)! - inds.get(cr)!);
+      for (const [cl, nl] of children(left)) {
+        const il = inds.get(cl)!;
+        for (const [cr, nr] of children(right)) {
+          const ir = inds.get(cr)!;
+          delta += Math.sign(il - ir) * nl * nr;
         }
       }
 
@@ -126,7 +130,9 @@ function adjacentSwap<N, L>(
       }
     }
     if (ind !== end) {
-      [layer[ind], layer[ind + 1]] = [layer[ind + 1], layer[ind]];
+      const temp = layer[ind + 1];
+      layer[ind + 1] = layer[ind];
+      layer[ind] = temp;
       ranges.push([start, ind], [ind + 2, end]);
     }
   }
@@ -172,7 +178,9 @@ function scanSwap<N, L>(
     // no more swaps;
     if (max === 0) break;
     // else do swap and try again
-    [layer[fromInd], layer[toInd]] = [layer[toInd], layer[fromInd]];
+    const temp = layer[toInd];
+    layer[toInd] = layer[fromInd];
+    layer[fromInd] = temp;
   }
 }
 
@@ -190,18 +198,10 @@ function buildOperator<N, L, Op extends Twolayer<N, L>>({
   ): void {
     baseOp(topLayer, bottomLayer, topDown);
 
-    let layer, swapChange;
-    if (topDown) {
-      swapChange = createSwapChange(topLayer, (node: SugiNode<N, L>) =>
-        node.parents()
-      );
-      layer = bottomLayer;
-    } else {
-      swapChange = createSwapChange(bottomLayer, (node: SugiNode) =>
-        node.children()
-      );
-      layer = topLayer;
-    }
+    const layer = topDown ? bottomLayer : topLayer;
+    const swapChange = topDown
+      ? createSwapChange(topLayer, (node) => node.parentCounts())
+      : createSwapChange(bottomLayer, (node) => node.childCounts());
 
     if (doScan) {
       scanSwap(layer, swapChange);

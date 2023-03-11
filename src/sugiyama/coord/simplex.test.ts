@@ -106,6 +106,39 @@ test("simplex() works with complex disconnected component", () => {
   expect(below.x).toBeCloseTo(3.5);
 });
 
+test("simplex() works with compact dag", () => {
+  //    r
+  //   / \
+  //  /   #
+  // l  c r
+  //  \   #
+  //   \ /
+  //    t
+  const layers = createLayers([
+    [0n],
+    [[0, 1]],
+    [0, 2n],
+    [0n, 1n, 2n],
+    [[0], [], 1n],
+    [0, [0]],
+    [0n],
+    [[]],
+  ]);
+  const [[root], , [topDummy], [left, center, right], , [bottomDummy], [tail]] =
+    layers;
+  const layout = simplex();
+  const width = layout(layers, nodeSep);
+
+  expect(width).toBeCloseTo(3);
+  expect(root.x).toBeCloseTo(0.5);
+  expect(topDummy.x).toBeCloseTo(0.5);
+  expect(left.x).toBeCloseTo(0.5);
+  expect(center.x).toBeCloseTo(1.5);
+  expect(right.x).toBeCloseTo(2.5);
+  expect(bottomDummy.x).toBeCloseTo(0.5);
+  expect(tail.x).toBeCloseTo(0.5);
+});
+
 test("simplex() fails with non-positive constant weight", () => {
   const layout = simplex();
   expect(() => layout.weight([0, 1, 2])).toThrow(

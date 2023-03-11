@@ -14,8 +14,8 @@ import { decrossTwoLayer, DefaultDecrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
 import {
-  sugify,
-  SugiNode,
+  compactSugify,
+  layerSugify,
   sugiNodeLength,
   unsugify,
   validateCoord,
@@ -150,12 +150,12 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
     val: NewTweaks
   ): Sugiyama<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Get the current {@link layout!Tweak}s.
+   * Get the current {@link tweaks!Tweak}s.
    */
   tweaks(): Ops["tweaks"];
 
   /**
-   * Sets the {@link NodeSizeAccessor}, which assigns how much space is
+   * Sets the {@link layout!NodeSize}, which assigns how much space is
    * necessary between nodes.
    *
    * (default: [1, 1])
@@ -174,6 +174,19 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   gap(val: readonly [number, number]): Sugiyama<Ops>;
   /** Get the current gap size */
   gap(): readonly [number, number];
+
+  /**
+   * Set whether to use compact rendering
+   *
+   * In compact rendering, variable height nodes will be positioned closer
+   * together. This is more expensive than the non-compact layout, so it's only
+   * worth using when necessary.
+   *
+   * (default: false)
+   */
+  compact(val: boolean): Sugiyama<Ops>;
+  /** Get the current compact setting */
+  compact(): boolean;
 }
 
 /**
@@ -201,8 +214,8 @@ export function cachedNodeSize<N, L>(
       if (val === undefined) {
         val = nodeSize(node);
         const [width, height] = val;
-        if (width < 0 || height < 0) {
-          throw err`all node sizes must be non-negative, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the callback passed to \`sugiyama().nodeSize(...)\` is doing that`;
+        if (width <= 0 || height <= 0) {
+          throw err`all node sizes must be positive, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the callback passed to \`sugiyama().nodeSize(...)\` is doing that`;
         }
         cache.set(node, val);
       }
@@ -213,78 +226,62 @@ export function cachedNodeSize<N, L>(
   }
 }
 
-/**
- * Given layers and node heights, assign y coordinates.
- *
- * This is only exported so that each step of {@link sugiyama} can be executed
- * independently or controlled. In the future it may make sense to make
- * vertical coordinates part of the sugiyama operators.
- */
-export function coordVertical<N, L>(
-  layers: readonly (readonly SugiNode<N, L>[])[],
-  size: NodeLength<N, L>,
-  gap: number
-): number {
-  let height = -gap;
-  for (const layer of layers) {
-    height += gap;
-    const layerHeight = Math.max(
-      0,
-      ...layer.map(({ data }) => ("node" in data ? size(data.node) : 0))
-    );
-    for (const node of layer) {
-      node.y = height + layerHeight / 2;
-    }
-    height += layerHeight;
-  }
-  if (height <= 0) {
-    throw err`at least one node must have positive height, but total height was zero; make sure the callback passed to \`sugiyama().nodeSize(...)\` is doing that`;
-  }
-  return height;
-}
-
 function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   options: Ops & SugiyamaOps<ON, OL>,
   sizes: {
     gap: readonly [number, number];
+    compact: boolean;
   }
 ): Sugiyama<Ops> {
   function sugiyama<N extends ON, L extends OL>(
     dag: Graph<N, L>
   ): LayoutResult {
-    // cache and split node sizes
-    const [xLen, yLen] = cachedNodeSize(options.nodeSize);
+    let res;
+    // short circuit for empty graph
+    if (!dag.nnodes()) {
+      res = { width: 0, height: 0 };
+    } else {
+      // cache and split node sizes
+      const [xLen, yLen] = cachedNodeSize(options.nodeSize);
 
-    // separate gaps
-    const [xGap, yGap] = sizes.gap;
+      // separate gaps
+      const [xGap, yGap] = sizes.gap;
 
-    // compute layers
-    const numLayers = options.layering(dag, layerSeparation);
+      // create layers
+      let layers, height;
+      if (sizes.compact) {
+        const ySep = sizedSeparation(yLen, yGap);
+        height = options.layering(dag, ySep);
+        layers = compactSugify(dag, yLen, height, options.layering);
+      } else {
+        const numLayers = options.layering(dag, layerSeparation) + 1;
+        [layers, height] = layerSugify(
+          dag,
+          yLen,
+          yGap,
+          numLayers,
+          options.layering
+        );
+      }
 
-    // create layers
-    const layers = sugify(dag, numLayers + 1, options.layering);
+      // minimize edge crossings
+      options.decross(layers);
 
-    // assign y
-    const height = coordVertical(layers, yLen, yGap);
+      // assign coordinates
+      const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
+      const width = options.coord(layers, xSep);
+      validateCoord(layers, xSep, width, options.coord);
 
-    // minimize edge crossings
-    options.decross(layers);
+      // assign data back to original graph
+      unsugify(layers);
 
-    // assign coordinates
-    const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
-    const width = options.coord(layers, xSep);
-    validateCoord(layers, xSep, width, options.coord);
-
-    // assign data back to original graph
-    unsugify(layers);
+      res = { width, height };
+    }
 
     // apply any tweaks in order
-    let res = { width, height };
     for (const tweak of options.tweaks) {
       res = tweak(dag, res);
     }
-
-    // layout info
     return res;
   }
 
@@ -409,13 +406,24 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
       if (width < 0 || height < 0) {
         throw err`gap width (${width}) and height (${height}) must be non-negative`;
       }
-      return buildOperator(options, { gap: val });
+      return buildOperator(options, { ...sizes, gap: val });
     } else {
       const [xgap, ygap] = sizes.gap;
       return [xgap, ygap];
     }
   }
   sugiyama.gap = gap;
+
+  function compact(): boolean;
+  function compact(val: boolean): Sugiyama<Ops>;
+  function compact(val?: boolean): Sugiyama<Ops> | boolean {
+    if (val !== undefined) {
+      return buildOperator(options, { ...sizes, compact: val });
+    } else {
+      return sizes.compact;
+    }
+  }
+  sugiyama.compact = compact;
 
   return sugiyama;
 }
@@ -466,7 +474,8 @@ export function sugiyama(...args: never[]): DefaultSugiyama {
         tweaks: [] as const,
       },
       {
-        gap: [0, 0],
+        gap: [1, 1],
+        compact: false,
       }
     );
   }

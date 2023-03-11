@@ -90,7 +90,6 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
   ): number {
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
-    const ints: Record<string, 1> = {};
 
     const ids = new Map(map(dag, (node, i) => [node, i.toString()] as const));
 
@@ -144,7 +143,6 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     // Add node variables and fetch ranks
     for (const node of dag) {
       const nid = n(node);
-      ints[nid] = 1;
       variables[nid] = { opt: 0 };
 
       const rank = options.rank(node);
@@ -192,9 +190,8 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
       }
     }
 
-    // NOTE bundling sets `this` to undefined, and we need it to be settable
     try {
-      const assignment = solve("opt", "max", variables, constraints, ints);
+      const assignment = solve("opt", "max", variables, constraints, {});
 
       let min = 0;
       let max = 0;

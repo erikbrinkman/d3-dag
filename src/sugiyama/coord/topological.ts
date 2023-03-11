@@ -5,11 +5,11 @@
  * @packageDocumentation
  */
 import { Coord } from ".";
-import { bigrams, flatMap } from "../../iters";
+import { bigrams } from "../../iters";
 import { Constraint, solve as solveSimp, Variable } from "../../simplex";
 import { err } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
-import { init, layout, minBend, solve as solveQuad } from "./utils";
+import { avgHeight, init, layout, minBend, solve as solveQuad } from "./utils";
 
 /**
  * A {@link sugiyama/coord!Coord} for positioning edges of a topological layout.
@@ -43,7 +43,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
   ): number {
     for (const layer of layers) {
       const numNodes = layer.reduce(
-        (count, node) => count + +("node" in node.data),
+        (count, node) => count + +(node.data.role === "node"),
         0
       );
       if (numNodes > 1) {
@@ -52,6 +52,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
     }
 
     if (opts.simp) {
+      // simplex minimization
       const variables: Record<string, Variable> = { center: {} };
       const constraints: Record<string, Constraint> = {};
 
@@ -61,8 +62,8 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
       for (const layer of layers) {
         let flip = true;
         for (const node of layer) {
-          if ("link" in node.data) {
-            const id = (i++).toString();
+          if (node.data.role === "link") {
+            const id = `${i++}`;
             ids.set(node, [id, flip]);
             variables[id] = {};
           } else {
@@ -90,28 +91,33 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
         }
       }
 
+      const heightNorm = avgHeight(ids.keys());
+
       // minimize weighted difference
-      for (const par of flatMap(layers, (l) => l)) {
-        const [pid, pflip] = n(par);
-        if (pid !== "center") {
-          for (const child of par.children()) {
-            const [cid, cflip] = n(child);
-            if (cid !== "center") {
-              const slack = `link ${pid} -> ${cid}`;
+      for (const layer of layers) {
+        for (const par of layer) {
+          const [pid, pflip] = n(par);
+          if (pid !== "center") {
+            for (const child of par.children()) {
+              const [cid, cflip] = n(child);
+              if (cid !== "center") {
+                const slack = `link ${pid} -> ${cid}`;
 
-              const pcons = `${slack} parent`;
-              constraints[pcons] = { min: 0 };
+                const pcons = `${slack} parent`;
+                constraints[pcons] = { min: 0 };
 
-              const ccons = `${slack} child`;
-              constraints[ccons] = { min: 0 };
+                const ccons = `${slack} child`;
+                constraints[ccons] = { min: 0 };
 
-              variables[pid][pcons] = pflip ? -1 : 1;
-              variables[pid][ccons] = pflip ? 1 : -1;
+                variables[pid][pcons] = pflip ? -1 : 1;
+                variables[pid][ccons] = pflip ? 1 : -1;
 
-              variables[cid][pcons] = cflip ? 1 : -1;
-              variables[cid][ccons] = cflip ? -1 : 1;
+                variables[cid][pcons] = cflip ? 1 : -1;
+                variables[cid][ccons] = cflip ? -1 : 1;
 
-              variables[slack] = { opt: 1, [pcons]: 1, [ccons]: 1 };
+                const height = (child.y - par.y) / heightNorm;
+                variables[slack] = { opt: 1 / height, [pcons]: 1, [ccons]: 1 };
+              }
             }
           }
         }
@@ -120,22 +126,29 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
       delete variables["center"];
 
       const assignment = solveSimp("opt", "min", variables, constraints);
+
+      // assign xes
+      for (const [node, [id, flip]] of ids) {
+        const val = assignment[id];
+        node.x = val === undefined ? 0 : flip ? -val : val;
+      }
+
+      // assign x and compute offset
       let offset = 0;
       let width = 0;
       for (const layer of layers) {
-        for (const node of layer) {
-          const [id, flip] = n(node);
-          const val = assignment[id];
-          node.x = val === undefined ? 0 : flip ? -val : val;
-        }
         const first = layer[0];
         offset = Math.min(offset, first.x - sep(undefined, first));
         const last = layer[layer.length - 1];
         width = Math.max(width, last.x + sep(last, undefined));
       }
-      for (const node of flatMap(layers, (l) => l)) {
+
+      // apply offset
+      for (const node of ids.keys()) {
         node.x -= offset;
       }
+
+      // compute max width
       const maxWidth = width - offset;
       if (maxWidth <= 0) {
         throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
@@ -143,11 +156,12 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
         return maxWidth;
       }
     } else {
+      // quadratic minimization
       const inds = new Map<SugiNode<N, L>, number>();
       let i = 0;
       for (const layer of layers) {
         for (const node of layer) {
-          if (!("node" in node.data)) {
+          if (node.data.role === "link") {
             inds.set(node, i++);
           }
         }
@@ -156,23 +170,25 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
       // always assigns them the same coord: 0.
       for (const layer of layers) {
         for (const node of layer) {
-          if ("node" in node.data) {
+          if (node.data.role === "node") {
             inds.set(node, i);
           }
         }
       }
       const [Q, c, A, b] = init(layers, inds, sep);
 
-      for (const layer of layers) {
-        for (const par of layer) {
-          const pind = inds.get(par)!;
-          for (const node of par.children()) {
-            const nind = inds.get(node)!;
-            if ("link" in node.data) {
-              for (const child of node.children()) {
-                const cind = inds.get(child)!;
-                minBend(Q, pind, nind, cind, 1);
-              }
+      const heightNorm = avgHeight(inds.keys());
+
+      for (const par of inds.keys()) {
+        const pind = inds.get(par)!;
+        for (const node of par.children()) {
+          const nind = inds.get(node)!;
+          const parh = (node.y - par.y) / heightNorm;
+          if (node.data.role === "link") {
+            for (const child of node.children()) {
+              const cind = inds.get(child)!;
+              const chih = (child.y - node.y) / heightNorm;
+              minBend(Q, pind, nind, cind, 1 / parh, 1 / chih);
             }
           }
         }

@@ -29,6 +29,7 @@ const pkg = await new Promise((res, rej) =>
 );
 const config = {
   entryPoints: ["src/index.ts"],
+  tsconfig: "tsconfig.build.json",
   bundle: true,
   minify: true,
   plugins: [

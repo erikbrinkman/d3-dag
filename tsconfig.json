@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "lib": ["esnext"],
-    "module": "es6",
+    "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

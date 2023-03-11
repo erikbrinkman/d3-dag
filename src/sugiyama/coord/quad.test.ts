@@ -1,7 +1,7 @@
 import { createLayers, nodeSep } from "../test-utils";
-import { coordQuad as quad } from "./quad";
+import { coordQuad } from "./quad";
 
-test("quad() modifiers work", () => {
+test("coordQuad() modifiers work", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
 
   const comp = 0.5;
@@ -9,7 +9,7 @@ test("quad() modifiers work", () => {
   const vertStrong = () => 3;
   const linkCurve = () => 4;
   const nodeCurve = () => 5;
-  const advanced = quad()
+  const advanced = coordQuad()
     .vertWeak(vertWeak)
     .vertStrong(vertStrong)
     .linkCurve(linkCurve)
@@ -23,10 +23,10 @@ test("quad() modifiers work", () => {
   advanced(layers, nodeSep);
 });
 
-test("quad() works for square like layout", () => {
+test("coordQuad() works for square like layout", () => {
   const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);
   const [[head], [left, right], [tail]] = layers;
-  quad()(layers, nodeSep);
+  coordQuad()(layers, nodeSep);
 
   expect(head.x).toBeCloseTo(1.0);
   expect(left.x).toBeCloseTo(0.5);
@@ -34,10 +34,10 @@ test("quad() works for square like layout", () => {
   expect(tail.x).toBeCloseTo(1.0);
 });
 
-test("quad() works for triangle", () => {
+test("coordQuad() works for triangle", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const [[one], [two, dummy], [three]] = layers;
-  quad()(layers, nodeSep);
+  coordQuad()(layers, nodeSep);
 
   expect(one.x).toBeCloseTo(1.1);
   expect(two.x).toBeCloseTo(0.5);
@@ -45,10 +45,10 @@ test("quad() works for triangle", () => {
   expect(dummy.x).toBeCloseTo(1.5);
 });
 
-test("quad() works with flat disconnected component", () => {
+test("coordQuad() works with flat disconnected component", () => {
   const layers = createLayers([[[], []], [[0]], [[]]]);
   const [[left, right], [high], [low]] = layers;
-  quad()(layers, nodeSep);
+  coordQuad()(layers, nodeSep);
 
   expect(left.x).toBeCloseTo(0.5);
   expect(right.x).toBeCloseTo(1.5);
@@ -56,7 +56,7 @@ test("quad() works with flat disconnected component", () => {
   expect(low.x).toBeCloseTo(1.0);
 });
 
-test("quad() works with constrained disconnected components", () => {
+test("coordQuad() works with constrained disconnected components", () => {
   // NOTE before the top and bottom nodes would be pulled together by the
   // connected component minimization, but since they're not constrained due to
   // overlap, we can ignore it in this test case
@@ -67,7 +67,7 @@ test("quad() works with constrained disconnected components", () => {
   ]);
   const [[atop, btop], [aleft, bleft, aright, bright], [abottom, bbottom]] =
     layers;
-  const layout = quad();
+  const layout = coordQuad();
   const width = layout(layers, nodeSep);
 
   expect(width).toBeCloseTo(4);
@@ -81,66 +81,96 @@ test("quad() works with constrained disconnected components", () => {
   expect(bbottom.x).toBeCloseTo(3.5);
 });
 
-test("quad() fails with invalid weights", () => {
-  const layout = quad();
+test("coordQuad() works with compact dag", () => {
+  //    r
+  //   / \
+  //  /   #
+  // l  c r
+  //  \   #
+  //   \ /
+  //    t
+  const layers = createLayers([
+    [0n],
+    [[0, 1]],
+    [0, 2n],
+    [0n, 1n, 2n],
+    [[0], [], 1n],
+    [0, [0]],
+    [0n],
+    [[]],
+  ]);
+  const layout = coordQuad();
+  const width = layout(layers, nodeSep);
+
+  expect(width).toBeCloseTo(3);
+  for (const layer of layers) {
+    for (const node of layer) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(width);
+    }
+  }
+});
+
+test("coordQuad() fails with invalid weights", () => {
+  const layout = coordQuad();
   expect(() => layout.compress(0)).toThrow(
     "compress weight must be positive, but was: 0"
   );
 });
 
-test("quad() fails with negative constant vert weak", () => {
-  const layout = quad();
+test("coordQuad() fails with negative constant vert weak", () => {
+  const layout = coordQuad();
   expect(() => layout.vertWeak(-1)).toThrow("vertWeak must be non-negative");
 });
 
-test("quad() fails with negative constant vert string", () => {
-  const layout = quad();
+test("coordQuad() fails with negative constant vert string", () => {
+  const layout = coordQuad();
   expect(() => layout.vertStrong(-1)).toThrow(
     "vertStrong must be non-negative"
   );
 });
 
-test("quad() fails with negative constant link curve", () => {
-  const layout = quad();
+test("coordQuad() fails with negative constant link curve", () => {
+  const layout = coordQuad();
   expect(() => layout.linkCurve(-1)).toThrow("linkCurve must be non-negative");
 });
 
-test("quad() fails with negative constant node curve", () => {
-  const layout = quad();
+test("coordQuad() fails with negative constant node curve", () => {
+  const layout = coordQuad();
   expect(() => layout.nodeCurve(-1)).toThrow("nodeCurve must be non-negative");
 });
 
-test("quad() fails with negative vert weak", () => {
+test("coordQuad() fails with negative vert weak", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
-  const layout = quad().vertWeak(() => -1);
+  const layout = coordQuad().vertWeak(() => -1);
   expect(() => layout(layers, nodeSep)).toThrow(
     `link weights must be non-negative`
   );
 });
 
-test("quad() fails with negative link weight", () => {
+test("coordQuad() fails with negative link weight", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
-  const layout = quad().linkCurve(() => -1);
+  const layout = coordQuad().linkCurve(() => -1);
   expect(() => layout(layers, nodeSep)).toThrow(
     `link weights must be non-negative`
   );
 });
 
-test("quad() fails with negative node weight", () => {
+test("coordQuad() fails with negative node weight", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
-  const layout = quad().nodeCurve(() => -1);
+  const layout = coordQuad().nodeCurve(() => -1);
   expect(() => layout(layers, nodeSep)).toThrow(
     `node weights must be non-negative`
   );
 });
 
-test("quad() fails passing an arg to constructor", () => {
-  expect(() => quad(null as never)).toThrow("got arguments to coordQuad");
+test("coordQuad() fails passing an arg to constructor", () => {
+  expect(() => coordQuad(null as never)).toThrow("got arguments to coordQuad");
 });
 
-test("quad() throws for zero width", () => {
+test("coordQuad() throws for zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => quad()(layers, () => 0)).toThrow(
+  expect(() => coordQuad()(layers, () => 0)).toThrow(
     "must assign nonzero width to at least one node"
   );
 });

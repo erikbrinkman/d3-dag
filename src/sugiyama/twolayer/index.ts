@@ -35,7 +35,7 @@ import { SugiNode } from "../sugify";
  *     const vals = new Map<SugiNode, number>();
  *     for (const node of mutate) {
  *         const { data } = node;
- *         const val = "node" in data ? data.node.data.ord ? (data.link.source.data.ord + data.link.target.data.ord) / 2;
+ *         const val = data.role === "node" ? data.node.data.ord ? (data.link.source.data.ord + data.link.target.data.ord) / 2;
  *         vals.set(node, val);
  *     }
  *     layer.sort((a, b) => vals.get(a)! - vals.get(b)!);
