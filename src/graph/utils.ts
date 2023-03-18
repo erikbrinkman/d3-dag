@@ -11,16 +11,16 @@ export function verifyId(id: string): string {
 }
 
 /**
- * The interface for getting a node id from data. The function must return an
- * appropriate unique string id for given datum. This operator will only be
- * called once for each input.
+ * an accessor for getting ids from node data
+ *
+ * The accessor must return an appropriate unique string id for given datum.
+ * This operator will only be called once for each input.
  *
  * `i` will increment in the order data are processed.
  *
- * This is used in {@link graph/stratify!Stratify#id},
- * {@link graph/connect!Connect#sourceId}, and
- * {@link graph/connect!Connect#targetId}.
+ * This is used in {@link Stratify#id}, {@link Connect#sourceId}, and
+ * {@link Connect#targetId}.
  */
-export interface IdOperator<in Datum = never> {
+export interface Id<in Datum = never> {
   (d: Datum, i: number): string;
 }

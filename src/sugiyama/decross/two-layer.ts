@@ -15,79 +15,83 @@ import { crossings } from "../utils";
 import { decrossDfs, DecrossDfs } from "./dfs";
 
 /** two layer operators */
-export interface TwolayerOps<N = never, L = never> {
+export interface DecrossTwoLayerOps<N = never, L = never> {
   /** the order operator */
   order: Twolayer<N, L>;
   /** the initializers */
   inits: readonly Decross<N, L>[];
 }
 
-/** the node datum of a set of operators */
-export type OpNodeDatum<O extends TwolayerOps> = O extends TwolayerOps<
-  infer N,
-  never
->
-  ? N
-  : never;
-/** the link datum of a set of operators */
-export type OpLinkDatum<O extends TwolayerOps> = O extends TwolayerOps<
-  never,
-  infer L
->
-  ? L
-  : never;
-
 /**
- * A decrossing operator that minimizes the number of crossings by looking at every pair of layers.
+ * a decrossing operator that reorders by looking at pairs of layers
  *
  * This method can be very fast and is a general heuristic for efficient
- * minimization. Customize with a two layer operator with {@link order} or use
- * one of the built-in {@link sugiyama/twolayer!Twolayer}s.
- *
- * This method can also make multiple {@link passes} in an attempt to produce a
- * better layout.
- *
- * <img alt="two layer example" src="media://sugi-simplex-twolayer-quad.png" width="400">
+ * minimization. Customize with a two layer operator with {@link order},
+ * different {@link inits}, or the number of {@link passes}.
  */
-export interface DecrossTwoLayer<Ops extends TwolayerOps = TwolayerOps>
-  extends Decross<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
+export interface DecrossTwoLayer<
+  Ops extends DecrossTwoLayerOps = DecrossTwoLayerOps
+> extends Decross<
+    Ops extends DecrossTwoLayerOps<infer N, never> ? N : never,
+    Ops extends DecrossTwoLayerOps<never, infer L> ? L : never
+  > {
   /**
-   * Sets the order accessor to the specified {@link sugiyama/twolayer!Twolayer} and returns
-   * a new operator. (default: {@link sugiyama/twolayer/agg!TwolayerAgg}).
+   * sets the {@link Twolayer} accessor for minimizing a layer at a time
+   *
+   * The {@link Twolayer} operator takes pairs of layers, and reorders one.
+   * There are three built-in variants:
+   * - {@link twolayerGreedy} - This takes another two-layer operator, runs it,
+   *   and then afterwards performs greedy swaps of nodes to reduce the number
+   *   of edge crossings further. While not perfect, it can improve the results
+   *   of simpler heuristics.
+   * - {@link twolayerAgg} - This aggregates the indices of ancestor nodes and
+   *   orders nodes according to those aggregates. This is very fast and
+   *   produces a good first-order decrossing, but is best when used in
+   *   conjunction with {@link twolayerGreedy}.
+   * - {@link twolayerOpt} - This is the sibling to {@link decrossOpt} that
+   *   only optimizes a single layer, but otherwise has similar options. Just
+   *   like full optimal decrossing, this will fail on large graphs, but also
+   *   rarely produces better results than the combination of {@link
+   *   twolayerGreedy} and {@link twolayerAgg}.
+   *
+   * (default: {@link twolayerGreedy})
    */
   order<NewOrder extends Twolayer>(
     val: NewOrder
   ): DecrossTwoLayer<U<Ops, "order", NewOrder>>;
   /**
-   * Get the current {@link sugiyama/twolayer!Twolayer} for ordering.
+   * get the current {@link Twolayer} for ordering
    */
   order(): Ops["order"];
 
   /**
-   * Sets the initialization passes to the specified {@link sugiyama/decross!Decross}s and returns
-   * a new operator.
+   * sets the initialization passes before decrossings
    *
    * For every initialization operator, this will run the two layer heuristic,
    * ultimately choosing the ordering that minimized overall crossings. For
    * this reason, only quick decrossing operators should be used, not expensive
    * ones. The empty list is treated as a singleton list with a noop operator.
-   * (default: [decrossDfs(), decrossDfs().topDown(false)])
+   *
+   * (default: `[decrossDfs(), decrossDfs().topDown(false)]`)
    */
   inits<const NewInits extends readonly Decross[]>(
     val: NewInits
   ): DecrossTwoLayer<U<Ops, "inits", NewInits>>;
   /**
-   * Get the current initialization passes
+   * get the current initialization passes
    */
   inits(): Ops["inits"];
 
   /**
-   * Sets the number of passes to make, more takes longer, but might result in
-   * a better output. (default: 24)
+   * sets the number of passes to make
+   *
+   * More passes may take longer, but might result in a better output.
+   *
+   * (default: `24`)
    */
   passes(val: number): DecrossTwoLayer<Ops>;
   /**
-   * Get the current number of passes
+   * get the current number of passes
    */
   passes(): number;
 
@@ -96,9 +100,9 @@ export interface DecrossTwoLayer<Ops extends TwolayerOps = TwolayerOps>
 }
 
 /** @internal */
-function buildOperator<N, L, O extends TwolayerOps<N, L>>(
+function buildOperator<N, L, O extends DecrossTwoLayerOps<N, L>>(
   options: O &
-    TwolayerOps<N, L> & {
+    DecrossTwoLayerOps<N, L> & {
       passes: number;
     }
 ): DecrossTwoLayer<O> {
@@ -211,11 +215,26 @@ export type DefaultDecrossTwoLayer = DecrossTwoLayer<{
 }>;
 
 /**
- * Create a default {@link DecrossTwoLayer}
+ * create a default {@link DecrossTwoLayer}
  *
- * - {@link DecrossTwoLayer#order | `order()`}: `twolayerGreedy().base(twolayerAgg())`
- * - {@link DecrossTwoLayer#inits | `inits()`}: `[decrossDfs(), decrossDfs().topDown(false)]`
- * - {@link DecrossTwoLayer#passes | `passes()`}: `24`
+ * This operator scans over the layered representation multiple times, applying
+ * a heuristic to minimize the number of crossings between two layers. This
+ * makes it much faster than complete methods, and produces a reasonable layout
+ * in most cases, but there are some simply edge crossings that it won't
+ * remove.
+ *
+ * It can be altered by setting both the heuristic it uses to
+ * {@link DecrossTwoLayer#order} the nodes in a single layer to minimize edge
+ * crossings, as well as the different {@link DecrossTwoLayer#inits} before
+ * applying the two-layer heuristic. You can also tweak how many
+ * {@link DecrossTwoLayer#passes} it runs. More can produce a better layout,
+ * but may take longer.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().decross(decrossTwoLayer());
+ * ```
  */
 export function decrossTwoLayer(...args: never[]): DefaultDecrossTwoLayer {
   if (args.length) {

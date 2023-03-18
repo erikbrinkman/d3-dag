@@ -11,7 +11,7 @@ import { U, err } from "../utils";
 import { greedy } from "./greedy";
 
 /** all operators for the zherebko layout */
-export interface Operators<in N = never, in L = never> {
+export interface ZherebkoOps<in N = never, in L = never> {
   /** the operator for assigning nodes a rank */
   rank: Rank<N, L>;
   /** node size operator */
@@ -20,16 +20,8 @@ export interface Operators<in N = never, in L = never> {
   tweaks: readonly Tweak<N, L>[];
 }
 
-/** the typed graph input of a set of operators */
-export type OpGraph<Ops extends Operators> = Ops extends Operators<
-  infer N,
-  infer L
->
-  ? Graph<N, L>
-  : never;
-
 /**
- * A simple topological layout operator.
+ * a simple topological layout operator.
  *
  * This layout algorithm constructs a topological representation of the graph
  * meant for visualization. The algorithm is based off a PR by D. Zherebko. The
@@ -37,62 +29,48 @@ export type OpGraph<Ops extends Operators> = Ops extends Operators<
  * to the left and right of the nodes.
  *
  * Create with {@link zherebko}.
- *
- * <img alt="zherebko example" src="media://zherebko.png" width="1000">
- *
- * @example
- * ```typescript
- * const data = [["parent", "child"], ...];
- * const create = connect();
- * const graph = create(data);
- * const layout = zherebko();
- * const { width, height } = layout(graph);
- * for (const node of graph) {
- *   console.log(node.x, node.y);
- * }
- * ```
  */
-export interface Zherebko<Ops extends Operators = Operators> {
-  (graph: OpGraph<Ops>): LayoutResult;
+export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
+  (
+    graph: Ops extends ZherebkoOps<infer N, infer L> ? Graph<N, L> : never
+  ): LayoutResult;
 
   /**
-   * Set the rank operator to the given {@link graph.Rank} and returns a new
-   * version of this operator. (default: () =\> undefined)
+   * set the {@link Rank} operator for the topological ordering
    */
   rank<NewRank extends Rank>(val: NewRank): Zherebko<U<Ops, "rank", NewRank>>;
-  /** Get the current lane operator */
+  /** get the current lane operator */
   rank(): Ops["rank"];
 
   /**
-   * Set the tweaks to apply after layout
+   * set the {@link Tweak}s to apply after layout
    */
   tweaks<const NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Zherebko<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Get the current {@link tweaks!Tweak}s.
+   * get the current {@link Tweak}s.
    */
   tweaks(): Ops["tweaks"];
 
   /**
-   * Sets the {@link layout!NodeSize}, which assigns how much space is
-   * necessary between nodes.
+   * sets the {@link NodeSize}
    *
-   * (default: [1, 1])
+   * (default: `[1, 1]`)
    */
   nodeSize<NewNodeSize extends NodeSize>(
     val: NewNodeSize
   ): Zherebko<U<Ops, "nodeSize", NewNodeSize>>;
-  /** Get the current node size */
+  /** get the current node size */
   nodeSize(): Ops["nodeSize"];
 
   /**
-   * Set the gap size between nodes
+   * set the gap size between nodes
    *
-   * (default: [0, 0])
+   * (default: `[1, 1]`)
    */
   gap(val: readonly [number, number]): Zherebko<Ops>;
-  /** Get the current gap size */
+  /** get the current gap size */
   gap(): readonly [number, number];
 }
 
@@ -105,8 +83,8 @@ function normalize<N, L>(inp: NodeSize<N, L>): CallableNodeSize<N, L> {
 }
 
 /** @internal */
-function buildOperator<ND, LD, O extends Operators<ND, LD>>(
-  ops: O & Operators<ND, LD>,
+function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
+  ops: O & ZherebkoOps<ND, LD>,
   sizes: {
     xgap: number;
     ygap: number;
@@ -293,11 +271,26 @@ export type DefaultZherebko = Zherebko<{
 }>;
 
 /**
- * Create a new {@link Zherebko} with default settings.
+ * create a new {@link Zherebko} with default settings
  *
- * - rank: none
- * - nodeSize: [1, 1]
- * - gap: 1
+ * This layout creates a simple topological layout. It doesn't support behavior
+ * beyond the layout defaults of {@link Zherebko#rank},
+ * {@link Zherebko#nodeSize}, {@link Zherebko#gap}, and
+ * {@link Zherebko#tweaks}.
+ *
+ * <img alt="zherebko example" src="media://zherebko.png" width="1000">
+ *
+ * @example
+ *
+ * ```ts
+ * const graph: Graph = ...
+ * const layout = zherebko();
+ * const { width, height } = layout(graph);
+ * for (const node of graph.nodes()) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
+ *
  */
 export function zherebko(...args: never[]): DefaultZherebko {
   if (args.length) {

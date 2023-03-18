@@ -1,6 +1,6 @@
 /**
- * An {@link TwolayerGreedy} that calls another {@link sugiyama/twolayer!Twolayer} before
- * greedily swapping nodes to minimize crossings.
+ * a {@link TwolayerGreedy} that calls another {@link Twolayer} before greedily
+ * swapping nodes to minimize crossings.
  *
  * @packageDocumentation
  */
@@ -8,54 +8,42 @@ import { Twolayer } from ".";
 import { err } from "../../utils";
 import { SugiNode } from "../sugify";
 
-/** the node datum of a set of operators */
-export type OpNodeDatum<Op extends Twolayer> = Op extends Twolayer<
-  infer D,
-  never
->
-  ? D
-  : never;
-/** the link datum of a set of operators */
-export type OpLinkDatum<Op extends Twolayer> = Op extends Twolayer<
-  never,
-  infer L
->
-  ? L
-  : never;
-
 /**
- * A {@link sugiyama/twolayer!Twolayer} that first calls a base twolayer operator, then
- * greedily swaps nodes to minimize crossings.
- *
- * This may be faster than {@link sugiyama/twolayer/opt!TwolayerOpt},
- * but should produce better layouts than {@link sugiyama/twolayer/agg!TwolayerAgg}.
+ * a {@link Twolayer} that greedily swaps nodes
  *
  * Create with {@link twolayerGreedy}.
  */
 export interface TwolayerGreedy<Op extends Twolayer = Twolayer>
-  extends Twolayer<OpNodeDatum<Op>, OpLinkDatum<Op>> {
+  extends Twolayer<
+    Op extends Twolayer<infer N, never> ? N : never,
+    Op extends Twolayer<never, infer L> ? L : never
+  > {
   /**
-   * Set the {@link sugiyama/twolayer!Twolayer} for this operator.
+   * set the base {@link Twolayer} for this operator
    *
-   * This operator will first call its base operator, and the greedily swap
-   * nodes to minimize edge crossings. To only greedily minimize edge
-   * crossings, set base to a no op.
+   * Greedy will first call its base operator, and the greedily swap nodes to
+   * minimize edge crossings. To only greedily minimize edge crossings, set
+   * base to a no op.
+   *
+   * (default: noop)
    */
   base<NewOp extends Twolayer>(val: NewOp): TwolayerGreedy<NewOp>;
   /**
-   * Get the current base operator.
+   * get the current base operator
    */
   base(): Op;
 
   /**
-   * Set whether this operator should scan to find swaps.
+   * set whether this operator should scan to find swaps.
    *
    * Using the scan method takes longer (quadratic in layer size, versus
    * linear), but produces fewer crossings.
+   *
+   * (default: `false`)
    */
   scan(val: boolean): TwolayerGreedy<Op>;
   /**
-   * Get the current base operator.
+   * get the current scan setting
    */
   scan(): boolean;
 
@@ -243,10 +231,16 @@ function buildOperator<N, L, Op extends Twolayer<N, L>>({
 export type DefaultTwolayerGreedy = TwolayerGreedy<Twolayer<unknown, unknown>>;
 
 /**
- * Create a default {@link TwolayerGreedy}
+ * create a default {@link TwolayerGreedy}
  *
- * - {@link TwolayerGreedy#base | `base()`}: noop
- * - {@link TwolayerGreedy#scan | `scan()`}: `false`
+ * This may be faster than {@link twolayerOpt}, but should produce better
+ * layouts than {@link twolayerAgg} on its own.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().decross(decrossTwoLayer().order(twolayerGreedy()));
+ * ```
  */
 export function twolayerGreedy(...args: never[]): DefaultTwolayerGreedy {
   if (args.length) {

@@ -10,18 +10,24 @@ import { dfs as depthFirstSearch, err } from "../../utils";
 import { SugiNode } from "../sugify";
 
 /**
- * Depth first search operator
+ * a depth first search operator
  *
  * This is a fast heuristic that runs a depth first search, incrementally
- * adding nodes to their appropriate layer.
+ * adding nodes to their appropriate layer. It creates a reasonable ordering to
+ * potentially be further optimized by other operators.
  */
 export interface DecrossDfs extends Decross<unknown, unknown> {
   /**
-   * Sets whether the dfs should be top down or bottom up. (default: true)
+   * sets whether the dfs should be top down or bottom up
+   *
+   * This has a small tweak in effect and can be useful for multiple initial
+   * configurations.
+   *
+   * (default: `true`)
    */
   topDown(val: boolean): DecrossDfs;
   /**
-   * Get the current number of passes
+   * get whether the current operator is topDown
    */
   topDown(): boolean;
 
@@ -32,6 +38,9 @@ export interface DecrossDfs extends Decross<unknown, unknown> {
 /** @internal */
 function buildOperator(options: { topDown: boolean }): DecrossDfs {
   function decrossDfs(layers: SugiNode[][]): void {
+    // FIXME we should look into some other heuristic like ordering by degree
+    // (in the appropriate direction?)
+
     // get iteration over nodes in dfs order
     let iter: Iterable<SugiNode>;
     if (options.topDown) {
@@ -78,9 +87,16 @@ function buildOperator(options: { topDown: boolean }): DecrossDfs {
 }
 
 /**
- * Create a default {@link DecrossDfs}
+ * create a default {@link DecrossDfs}
  *
- * - {@link DecrossDfs#topDown | `topDown()`}: `true`
+ * This is a fast heuristic decrossings operator that runs a depth first
+ * search, incrementally adding nodes to their appropriate layer. It creates a
+ * reasonable ordering to potentially be further optimized by other operators.
+ *
+ * @example
+ * ```ts
+ * const layout = sugiyama().decross(decrossDfs());
+ * ```
  */
 export function decrossDfs(...args: never[]): DecrossDfs {
   if (args.length) {

@@ -12,39 +12,42 @@ import { err } from "../../utils";
 import { gridChildren } from "./utils";
 
 /**
- * A lane operator that assigns lanes to minimize edge crossings.
+ * a lane operator that assigns lanes to minimize edge crossings.
  *
  * Create with {@link laneOpt}.
- *
- * @example
- * <img alt="grid greedy example" src="media://grid-opt.png" width="200">
  */
 export interface LaneOpt extends Lane<unknown, unknown> {
   /**
-   * Set whether to used compressed output
+   * set whether to used compressed output
    *
    * If output is compressed then the number of crossings will be minimized
-   * subject to the fewest number of lanes necessary. (default: false)
+   * subject to the fewest number of lanes necessary.
+   *
+   * (default: `false`)
    */
   compressed(val: boolean): LaneOpt;
-  /** Get the current compressed setting */
+  /** get the current compressed setting */
   compressed(): boolean;
 
   /**
-   * Set whether to also minimize distance between connected nodes
+   * set whether to also minimize distance between connected nodes
    *
    * This adds more variables and constraints so will take longer, but will
-   * likely produce a better layout. (default: true)
+   * likely produce a better layout.
+   *
+   * (default: `true`)
    */
   dist(val: boolean): LaneOpt;
   /** get whether the current layout minimized distance */
   dist(): boolean;
 
   /**
-   * Set the large dag handling
+   * set the large dag handling
    *
    * Setting to anything but `"fast"` will allow running on larger dags, but
-   * the layout may run forever, or crash the vm. (default: `"fast"`)
+   * the layout may run forever, or crash the vm.
+   *
+   * (default: `"fast"`)
    */
   check(val: OptChecking): LaneOpt;
   /** Return the handling of large graphs. */
@@ -252,11 +255,18 @@ function buildOperator(options: {
 }
 
 /**
- * Create a default {@link LaneOpt}
+ * create a default {@link LaneOpt}
  *
- * - {@link LaneOpt#compressed | `compressed()`}: `false`
- * - {@link LaneOpt#dist | `dist()`}: `true`
- * - {@link LaneOpt#check | `check()`}: `"fast"`
+ * This {@link Lane} operator optimally minimizes edge crossings, but can take
+ * a long time and may crash on large graphs. The {@link LaneOpt#check} option
+ * is set to error if the graph is too big. {@link LaneOpt#compressed} and
+ * {@link LaneOpt#dist} slightly tweak the resulting layout.
+ *
+ * @example
+ *
+ * ```ts
+ * const builder = grid().lane(laneOpt().compressed(true));
+ * ```
  */
 export function laneOpt(...args: never[]): LaneOpt {
   if (args.length) {

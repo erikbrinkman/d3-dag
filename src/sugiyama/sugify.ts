@@ -2,7 +2,7 @@
  * Utility types for sugiyama layout
  *
  * This module should only really matter for those looking to develop custom
- * {@link sugiyama/coord!Coord}s or {@link sugiyama/decross!Decross}s.
+ * {@link Coord}s or {@link Decross}s.
  *
  * @packageDocumentation
  */
@@ -47,7 +47,7 @@ export interface SugiLinkDatum<
 }
 
 /**
- * The NodeDatum used for layered {@link sugiyama!Sugiyama} layouts
+ * the NodeDatum used for layered {@link sugiyama} layouts
  *
  * Nodes in the original graph have a layer and a reference to the original
  * node. "dummy nodes" have a link to the parent and child of the edge their on
@@ -59,9 +59,7 @@ export type SugiDatum<NodeDatum = unknown, LinkDatum = unknown> =
   | SugiLinkDatum<NodeDatum, LinkDatum>;
 
 /**
- * A {@link graph!GraphNode} with {@link SugiDatum | SugiData}
- *
- * This is mostly a convenience type.
+ * a {@link GraphNode} with {@link SugiDatum | SugiData}
  */
 export type SugiNode<NodeDatum = unknown, LinkDatum = unknown> = GraphNode<
   SugiDatum<NodeDatum, LinkDatum>,
@@ -69,9 +67,7 @@ export type SugiNode<NodeDatum = unknown, LinkDatum = unknown> = GraphNode<
 >;
 
 /**
- * A {@link graph!MutGraphNode} with {@link SugiDatum | SugiData}
- *
- * This is mostly a convenience type.
+ * a {@link MutGraphNode} with {@link SugiDatum | SugiData}
  */
 export type MutSugiNode<NodeDatum, LinkDatum> = MutGraphNode<
   SugiDatum<NodeDatum, LinkDatum>,
@@ -145,12 +141,12 @@ function addSugiLinks<N, L>(
 type MapVal<N, L> = readonly [SugiNodeDatum<N, L>, MutSugiNode<N, L>];
 
 /**
- * Convert a layered graph in a sugi graph
+ * convert a layered graph in a sugi graph
  *
  * A sugi-graph is a non-multi dag that is layered, where each node is assigned
  * to a layer, and links only span a single layer.
  */
-export function layerSugify<N, L>(
+export function sugifyLayer<N, L>(
   input: Graph<N, L>,
   nodeHeight: NodeLength<N, L>,
   gap: number,
@@ -224,7 +220,7 @@ export function layerSugify<N, L>(
  * A sugi-graph is a non-multi dag that is layered, where each node is assigned
  * to a layer, and links only span a single layer.
  */
-export function compactSugify<N, L>(
+export function sugifyCompact<N, L>(
   input: Graph<N, L>,
   nodeHeight: NodeLength<N, L>,
   height: number,

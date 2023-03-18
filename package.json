@@ -31,7 +31,7 @@
     "lint:ts": "tsc",
     "lint:es": "eslint --cache src/**/*.ts",
     "lint:doc": "typedoc --emit none",
-    "lint": "yarn lint:ts && yarn lint:es && yarn lint:doc",
+    "lint": "yarn lint:ts && yarn lint:doc && yarn lint:es",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:flow": "node flow.mjs --cache",
     "build:bundle": "rm -rf bundle && node bundle.mjs",
@@ -41,7 +41,8 @@
     "test:bundle": "yarn build:bundle && jest bundle.test.ts",
     "test": "yarn test:cov && yarn test:bundle",
     "prepack": "jest --clear-cache && rm -rf dist bundle && yarn lint && yarn test && yarn build",
-    "doc": "typedoc"
+    "doc": "typedoc",
+    "doc:watch": "typedoc --watch"
   },
   "dependencies": {
     "d3-array": "^3.2.3",
@@ -74,8 +75,7 @@
     "prettier": "^2.8.7",
     "prettier-plugin-organize-imports": "^3.2.2",
     "read-package-json": "^6.0.1",
-    "typedoc": "^0.24.1",
-    "typedoc-plugin-missing-exports": "^1.0.0",
+    "typedoc": "^0.24.4",
     "typescript": "^5.0.4"
   },
   "prettier": {
@@ -152,6 +152,7 @@
             "accessor",
             "accessors",
             "acyclic",
+            "advisee",
             "aggregator",
             "aggregators",
             "bidirectionalizes",

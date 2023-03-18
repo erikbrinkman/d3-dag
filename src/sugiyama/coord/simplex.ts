@@ -7,19 +7,19 @@
 import { Coord } from ".";
 import { GraphLink, GraphNode } from "../../graph";
 import { bigrams, flatMap } from "../../iters";
-import { Constraint, solve, Variable } from "../../simplex";
+import { Constraint, Variable, solve } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
 import { avgHeight } from "./utils";
 
 /**
- * A strictly callable {@link SimplexWeight}
+ * a strictly callable {@link SimplexWeight}
  */
 export interface CallableSimplexWeight<NodeDatum = never, LinkDatum = never> {
   (link: GraphLink<NodeDatum, LinkDatum>): readonly [number, number, number];
 }
 /**
- * An accessor to get how vertical a weight should be.
+ * an accessor to get how vertical a weight should be.
  *
  * A weight accessor returns three postitive numbers, where higher numbers
  * indicate than edge should be more vertical. The first number corresponds to
@@ -31,20 +31,20 @@ export type SimplexWeight<NodeDatum = never, LinkDatum = never> =
   | CallableSimplexWeight<NodeDatum, LinkDatum>;
 
 /** the operators of the simplex operator */
-export interface Operators<N = never, L = never> {
+export interface CoordSimplexOps<N = never, L = never> {
   /** the weights for each edge */
   weight: SimplexWeight<N, L>;
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends Operators> = O extends Operators<
+export type OpNodeDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
   infer N,
   never
 >
   ? N
   : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends Operators> = O extends Operators<
+export type OpLinkDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
   never,
   infer L
 >
@@ -52,7 +52,7 @@ export type OpLinkDatum<O extends Operators> = O extends Operators<
   : never;
 
 /**
- * A {@link sugiyama/coord!Coord} that places nodes to maximize edge verticality
+ * a {@link Coord} that places nodes to maximize edge verticality
  *
  * The minimization mirrors that of Gansner, Emden R., et al. "A technique for
  * drawing directed graphs." IEEE Transactions on Software Engineering (1993).
@@ -60,18 +60,19 @@ export type OpLinkDatum<O extends Operators> = O extends Operators<
  * as part of an edge.
  *
  * Create with {@link coordSimplex}.
- *
- * <img alt="quad example" src="media://sugi-simplex-twolayer-simplex.png" width="400">
  */
-export interface CoordSimplex<Ops extends Operators>
+export interface CoordSimplex<Ops extends CoordSimplexOps>
   extends Coord<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
   /**
-   * Set the weights for how vertical edges should be.
+   * set the weights for how vertical edges should be
+   *
    * The higher the weight, the more vertical an edge should be. Weights are
    * are triplets of numbers describing the weight for different parts of edge.
    * The first is between true nodes, the second is for near true nodes, and
    * the last is for the extents of long edges. Generally the number should be
-   * increasing, and all must be positive. (default: () =\> [1, 2, 8])
+   * increasing, and all must be positive.
+   *
+   * (default: `[1, 2, 8]`)
    */
   weight<NewWeight extends SimplexWeight>(
     val: NewWeight
@@ -79,7 +80,7 @@ export interface CoordSimplex<Ops extends Operators>
     /** new weight */
     weight: NewWeight;
   }>;
-  /** Gets the current weight accessor */
+  /** gets the current weight accessor */
   weight(): Ops["weight"];
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
@@ -165,8 +166,8 @@ function createCachedSimplexWeightAccessor<N, L>(
 function buildOperator<
   NodeDatum,
   LinkDatum,
-  Ops extends Operators<NodeDatum, LinkDatum>
->(opts: Ops & Operators<NodeDatum, LinkDatum>): CoordSimplex<Ops> {
+  Ops extends CoordSimplexOps<NodeDatum, LinkDatum>
+>(opts: Ops & CoordSimplexOps<NodeDatum, LinkDatum>): CoordSimplex<Ops> {
   function coordSimplex<N extends NodeDatum, L extends LinkDatum>(
     layers: SugiNode<N, L>[][],
     sep: SugiSeparation<N, L>
@@ -305,9 +306,18 @@ export type DefaultCoordSimplex = CoordSimplex<{
 }>;
 
 /**
- * Create a default {@link CoordSimplex}
+ * create a default {@link CoordSimplex}
  *
- * - {@link CoordSimplex#weight | `weight()`}: `[1, 2, 8]`
+ * The simplex coordinate assignment operator tries to minimize edge length,
+ * while also trying to make long edges vertical. This uses an optimization
+ * that can take a long time, but is usually fast enough on moderately sized
+ * graphs.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().coord(coordSimplex().weight([2, 2, 4]));
+ * ```
  */
 export function coordSimplex(...args: never[]): DefaultCoordSimplex {
   if (args.length) {

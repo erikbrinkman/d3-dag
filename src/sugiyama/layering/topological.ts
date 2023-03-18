@@ -5,7 +5,7 @@
  */
 import { Layering } from ".";
 import { Graph, Rank } from "../../graph";
-import { err, U } from "../../utils";
+import { U, err } from "../../utils";
 import { Separation } from "../utils";
 
 /** topological operator operators */
@@ -23,34 +23,29 @@ export type OpsLinkDatum<Ops extends LayeringTopologicalOps> =
   Ops extends LayeringTopologicalOps<never, infer L> ? L : never;
 
 /**
- * A layering that assigns every node a distinct layer, creating a topological
- * layout.
+ * a layering that assigns every node a distinct layer
  *
  * This combined with topological coordinate assignment can be thought of as an
- * alternative to {@link zherebko!Zherebko}. The latter generally produces more
- * pleasing layouts, but both are options. This operator is
- *
- * Assigns every node a distinct layer. This layering operator is often only
- * useful in conjunction with topological coordinate assignment. This layering
- * is very fast, but it may make other steps take longer due to the many
- * created dummy nodes.
+ * alternative to {@link zherebko}. The latter generally produces more pleasing
+ * layouts, but both are options.  This layering is very fast, but it may make
+ * other steps take longer due to the many created dummy nodes.
  *
  * Create with {@link layeringTopological}.
- *
- * <img alt="topological example" src="media://sugi-topological-opt-topological.png" width="1000">
  */
 export interface LayeringTopological<
   Ops extends LayeringTopologicalOps = LayeringTopologicalOps
 > extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
-   * Set the {@link graph!Rank}. Nodes will first be in rank order, and then
-   * in topological order attempting to minimize edge inversions.
+   * set the {@link Rank}
+   *
+   * Nodes will first be in rank order, and then in topological order
+   * attempting to minimize edge inversions.
    */
   rank<NewRank extends Rank>(
     newRank: NewRank
   ): LayeringTopological<U<Ops, "rank", NewRank>>;
   /**
-   * Get the current {@link graph!Rank}.
+   * get the current {@link Rank}.
    */
   rank(): Ops["rank"];
 
@@ -111,7 +106,15 @@ export type DefaultLayeringTopological = LayeringTopological<{
 }>;
 
 /**
- * Create a default {@link LayeringTopological}
+ * create a default {@link LayeringTopological}
+ *
+ * This is a layering that assigns every node to a distinct layer.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().layering(layeringTopological());
+ * ```
  */
 export function layeringTopological(
   ...args: never[]

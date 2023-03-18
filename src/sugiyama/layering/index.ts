@@ -1,7 +1,7 @@
 /**
- * A {@link Layering} for assigning nodes in a dag a non-negative
- * layer. {@link graph!Rank} and {@link Group} allow specifying extra
- * constraints on the layout.
+ * A {@link Layering} for assigning nodes in a dag a non-negative layer.
+ * {@link Rank} and {@link Group} allow specifying extra constraints on the
+ * layout.
  *
  * @packageDocumentation
  */
@@ -9,7 +9,9 @@ import { Graph, GraphNode } from "../../graph";
 import { Separation } from "../utils";
 
 /**
- * A group accessor assigns a group string to specific nodes. Layering
+ * a group assignment accessor
+ *
+ * A group accessor assigns specific nodes a group string. Layering
  * operators that take a group accessor should respect the convention that
  * nodes with the same group should have the same layer.
  */
@@ -20,7 +22,7 @@ export interface Group<in NodeDatum = never, in LinkDatum = never> {
 /**
  * default separation for layering
  *
- * This separation returns 1 between nodes, or zero if one is not a node.
+ * This separation returns 1 between nodes, or zero if any is not a node.
  */
 export function layerSeparation(
   upper?: GraphNode | undefined,
@@ -32,22 +34,16 @@ export function layerSeparation(
 /**
  * An operator for layering a graph.
  *
- * Layering operators take a graph and a separation function `sep`, and must
- * assign every node in the graph a y-coordinate that respects `sep` along edges
- * in the graph. In general the coordinates should try to respect
- * the same order as returned by
- * {@link graph!Graph.topological | `graph.topological()`} but it's not required.
- * This should also return the total "height" of the layout, such that all
- * nodes coordinates + `sep(node, undefined)` is less than height.
- *
- * There are several built in layering operators:
- * - {@link sugiyama/layering/longest-path!LayeringLongestPath} - minimum height layout
- * - {@link sugiyama/layering/simplex!LayeringSimplex} - minimize the length of edges
- * - {@link sugiyama/layering/topological!LayeringTopological} - topological layering (one node per layer)
+ * Layering operators take a graph and a {@link Separation} function `sep`, and
+ * must assign every node in the graph a y-coordinate that respects `sep` along
+ * edges in the graph. In general the coordinates should try to respect
+ * the same order as returned by {@link Graph#topological} but it's not
+ * required.  This should also return the total "height" of the layout, such
+ * that all nodes coordinates + `sep(node, undefined)` is less than height.
  *
  * @example
  *
- * The builtin layering oerators should cover the majority of use cases, but
+ * The built-in layering operators should cover the majority of use cases, but
  * you may need to implement your own for custom layouts.
  *
  * We illistrate implementing a custom layering operator where the nodes are

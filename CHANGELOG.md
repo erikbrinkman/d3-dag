@@ -1,5 +1,4 @@
-Changelog
-=========
+# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -8,49 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This change is a major rewrite of a lot of the library, so expect some effort
+to migrate. Most invocations stayed similar, so hopefully the change won't be
+too difficult.
+
 ### Upgrading
 
-This change is a major rewrite of a lot of the library, so expect some effort to migrate.
-
-The notable change was switching the backing data structure from a static DAG
-to a mutable Graph. This change will enable building dynamic layouts much more
-easily. Graphs have a `topological()` method to get nodes in DAG order,
-minimizing edge inversions where possible (although not optimally)
+- `dagStratify`, `dagConnect`, and `dagHierarchy` are now prefixed by graph,
+  e.g. `graphStratify`.
+- `Graph` and `GraphNode` aren't iterable, you must call `.nodes()` to get an
+  iterator.
+- `nodes()` no longer has traversal order. To get someting similar to "before"
+  use the `.topological()` method.
+- Points on links are now tuples of numbers, e.g. `[1, 1]` not
+  `{ x: 1, y: 1 }`, adjust usage accordingly.
+- Layout operators no longer have a `.size(...)` method, instead use
+  `.tweaks([tweakSize(...)])`.
+- All types have been given consistent naming, check the api documentation to
+  find the new name.
 
 ### Added
 
-- Mutable directed graphs, and similar creation methods to warm start them from
-  data.
-- Tweaks - a set of various tweaks that modify a layout.
-- toJSON method on graphs so they can be serialized.
+- `Tweaks` - a set of various tweaks that modify a layout.
+- a `toJSON` method on graphs so they can be serialized.
 
 ### Removed
 
-- dag
-- Automatic flow typings. The current version uses the new in/out type
+- Automatic flow typings - The current version uses the new in/out type
   designations, and there's an
   [issue](https://github.com/joarwilk/flowgen/pull/192) with upgrading
   flowgen's support
-- The Coffman-Graham layering method was removed. This method was rarely used,
+- `layeringCoffmanGraham` - This method was rarely used,
   and is relatively expensive and hard to maintain.
-- Link points are now `[x, y]` tuples so they work more conveniently with
-  `d3.curve`s default typing.
-- Size funtions on layouts, instead creating a size tweak.
-- coordCenter operator as it doesn't work with compact sugiyama and doesn't
-  produce great layouts anyway
+- `coordCenter` - it doesn't work with compact sugiyama and doesn't produce
+  great layouts anyway
+- `.size()` funtion on layouts - instead creating a size tweak.
 - graphs are no longer iterable instead explicitely call `.nodes()`
+- Experimental es6 imports for a simplified interface and documentation.
 
 ### Changed
 
-- Layering operators now take a separation function instead of always keeping
+- Static DAGs have been changed to Mutable directed graphs. The creation
+  methods associated have changed from being prefixed by `dag` to being
+  prefixed by `graph`, e.g. `dagStratify` is now `graphStratify`.
+- `Layering` operators now take a separation function instead of always keeping
   separation at one. This can now be thought of more generally as a height
   assignment which will be grouped into layers. This is to support more compact
   sugiyama layouts with minimal effort.
-- Coordinate assignment operators were tweaked to take separation as a
-  parameter instead of node size.
+- `Coord` operators were tweaked to take separation as a parameter instead of
+  node size.
 - Type names have been simplified and rearranged.
 - All layouts have four consistent attributes, the layout function, `nodeSize`,
   `gap`, and `tweaks`.
+- Link points are now `[x, y]` tuples so they work more conveniently with
+  `d3.line`s default typing.
+- Various interfaces for accessors now accept constants as well, e.g. you can
+  now pass `[2, 2]` into `.nodeSize()` without having to make it a constant
+  function. This also serves as the indicator that it's constant giving it the
+  benefits of the old `constAccessor()`.
 
 ## [0.11.0] - 2022-03-23
 

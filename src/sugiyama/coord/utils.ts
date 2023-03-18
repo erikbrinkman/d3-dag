@@ -201,9 +201,8 @@ export function layout<N, L>(
 }
 
 export function avgHeight(nodes: Iterable<GraphNode>): number {
+  // NOTE graph is guaranteed not to be multi
   return aggMean(
-    flatMap(nodes, (node) =>
-      map(node.childCounts(), ([child, num]) => [child.y - node.y, num])
-    )
+    flatMap(nodes, (node) => map(node.children(), (child) => child.y - node.y))
   )!;
 }

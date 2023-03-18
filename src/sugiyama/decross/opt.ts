@@ -7,40 +7,50 @@ import { Decross } from ".";
 import { listMultimapPush } from "../../collections";
 import { bigrams, entries, slice } from "../../iters";
 import { OptChecking } from "../../layout";
-import { Constraint, solve, Variable } from "../../simplex";
+import { Constraint, Variable, solve } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode } from "../sugify";
 
 /**
- * A {@link sugiyama/decross!Decross} that minimizes the number of crossings.
+ * a {@link Decross} that minimizes the number of crossings
  *
  * This method brute forces an NP-Complete problem, and as such may run for an
  * exceedingly long time on large graphs. As a result, any graph that is
  * probably too large will throw an error instead of running. Use with care.
  *
  * Create with {@link decrossOpt}.
- *
- * <img alt="optimal decross example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
 export interface DecrossOpt extends Decross<unknown, unknown> {
   /**
-   * Set the large dag handling
+   * set how to check for large dags
    *
-   * If you modify this, the layout may run forever, or may crash. See
-   * {@link layout!OptChecking} for more details. (default: `"small"`)
+   * The default settings is set to error if the graph is too large.  If you
+   * modify this, the layout may run forever, or may crash. See
+   * {@link OptChecking} for more details.
+   *
+   * (default: `"fast"`)
+   *
+   * @example
+   *
+   * ```ts
+   * const decross = decrossOpt().check("slow");
+   * ```
    */
   check(val: OptChecking): DecrossOpt;
-  /** Get the current large graph handling value. */
+  /** get the current check for large graphs */
   check(): OptChecking;
 
   /**
-   * Set whether to also minimize distance between nodes that share a parent /
-   * child
+   * set whether to also minimize distance between nodes that share an ancestor
    *
-   * This adds more variables and constraints, and so will make the decrossing
-   * step take longer, but will likely produce a better layout as nodes that
-   * share common parents or children will be put closer together if it doesn't
-   * affect the number of crossings. (default: false)
+   * This setting adds more variables and constraints, and so will make the
+   * decrossing step take longer, but will likely produce a better layout as
+   * nodes that share common parents or children will be put closer together if
+   * it doesn't affect the number of crossings. It is especially usefuly for
+   * ancestry layoutss where nodes that share a child will inherently be put
+   * closer together even if it doesn't reduce the number of crossings.
+   *
+   * (default: `false`)
    */
   dist(val: boolean): DecrossOpt;
   /** get whether the current layout minimized distance */
@@ -426,10 +436,20 @@ function buildOperator(options: {
 }
 
 /**
- * Create a default {@link DecrossOpt}
+ * create a default {@link DecrossOpt}
  *
- * - {@link DecrossOpt#check | `check()`}: `"fast"`
- * - {@link DecrossOpt#dist | `dist()`}: `false`
+ * This operator optimally reduces the number of edge crossings, and can
+ * optionally reduce the distance between nodes that share a common ancestor.
+ * This should produce the best layouts, but due to the complexity can only be
+ * run on fairly small graphs.
+ *
+ * By default it's set to error if the graph is too large. You can relax if it
+ * errors with {@link DecrossOpt#check}, but this isn't advised.
+ *
+ * @example
+ * ```ts
+ * const layout = sugiyama().decross(decrossOpt().dist(true));
+ * ```
  */
 export function decrossOpt(...args: never[]): DecrossOpt {
   if (args.length) {

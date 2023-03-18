@@ -1,24 +1,21 @@
 /**
  * The definition of the {@link Twolayer} interface, which is used to
- * customize {@link sugiyama/decross/two-layer!DecrossTwoLayer}.
+ * customize {@link DecrossTwoLayer}.
  *
  * @packageDocumentation
  */
 import { SugiNode } from "../sugify";
 
 /**
- * An operator for optimizing decrossings one layer at a time.
+ * an operator for optimizing decrossings one layer at a time.
  *
- * This is used to customize
- * {@link sugiyama/decross/two-layer!DecrossTwoLayer}.
+ * This is used to customize {@link DecrossTwoLayer}.
  *
  * When called with `topDown = true` `topLayer` should be untouched, and
- * `bottomLayer` should be rearranged to minimize crossings. When `topDown = false`
- * then `topLayer` should be rearranged, and `bottomLayer` should remain fixed.
- *
- * There are two built in two-layer operators:
- * - {@link sugiyama/twolayer/opt!TwolayerOpt} - optimal crossing minimization for the layer in question
- * - {@link sugiyama/twolayer/agg!TwolayerAgg} - order according to the aggregate of parent indices, fast
+ * `bottomLayer` should be rearranged to minimize crossings. When `topDown =
+ * false` then `topLayer` should be rearranged, and `bottomLayer` should remain
+ * fixed. There are no requirements for how these needs to order nodes, but
+ * doing so in such a way to minimize edge crossings is usually desired.
  *
  * @example
  *

@@ -38,42 +38,44 @@ export type OpsLinkDatum<Ops extends LayeringSimplexOps> =
  *
  * Because this is solving a linear program, it is relatively easy to add new
  * constraints. The current implementation allows specifying {@link rank}
- * constriants that indicate which nodes should be above other nodes, or
+ * constraints that indicate which nodes should be above other nodes, or
  * {@link group} constraints that say which nodes should be on the same layer.
  * Note that adding these constraints can cause the optimization to become
  * ill-defined.
  *
  * Create with {@link layeringSimplex}.
- *
- * <img alt="simplex example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
 export interface LayeringSimplex<
   Ops extends LayeringSimplexOps = LayeringSimplexOps
 > extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
-   * Set the {@link graph!Rank}. Any node with a rank assigned will have a second
-   * ordering enforcing ordering of the ranks. Note, this can cause the simplex
-   * optimization to be ill-defined, and may result in an error during layout.
+   * set the {@link Rank}
+   *
+   * Any node with a rank assigned will have a second ordering enforcing
+   * ordering of the ranks. Note, this can cause the simplex optimization to be
+   * ill-defined, and may result in an error during layout.
    */
   rank<NewRank extends Rank>(
     newRank: NewRank
   ): LayeringSimplex<U<Ops, "rank", NewRank>>;
   /**
-   * Get the current {@link graph!Rank}.
+   * get the current {@link Rank}
    */
   rank(): Ops["rank"];
 
   /**
-   * Set the {@link sugiyama/layering!Group}. Any node with a group
-   * assigned will have a second ordering enforcing all nodes with the same
-   * group have the same layer.  Note, this can cause the simplex optimization
-   * to be ill-defined, and may result in an error during layout.
+   * set the {@link Group}
+   *
+   * Any node with a group assigned will have a second ordering enforcing all
+   * nodes with the same group have the same layer.  Note, this can cause the
+   * simplex optimization to be ill-defined, and may result in an error during
+   * layout.
    */
   group<NewGroup extends Group>(
     newGroup: NewGroup
   ): LayeringSimplex<U<Ops, "group", NewGroup>>;
   /**
-   * Get the current {@link sugiyama/layering!Group}.
+   * get the current {@link Group}
    */
   group(): Ops["group"];
 
@@ -269,10 +271,23 @@ export type DefaultLayeringSimplex = LayeringSimplex<{
 }>;
 
 /**
- * Create a default {@link LayeringSimplex}
+ * create a default {@link LayeringSimplex}
  *
- * - {@link LayeringSimplex#rank | `rank()`}: no ranks
- * - {@link LayeringSimplex#group | `group()`}: no groups
+ * This layering operator assigns layers to minimize the overall lengths of
+ * edges. In most cases this strikes a good balance between compactness and
+ * time to compute.
+ *
+ * The current implementation allows specifying {@link LayeringSimplex#rank}
+ * constraints that indicate which nodes should be above other nodes, and
+ * {@link LayeringSimplex#group} constraints that say which nodes should be on
+ * the same layer.  Note that adding these constraints can cause the
+ * optimization to become ill-defined.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().layering(layeringSimplex());
+ * ```
  */
 export function layeringSimplex(...args: never[]): DefaultLayeringSimplex {
   if (args.length) {

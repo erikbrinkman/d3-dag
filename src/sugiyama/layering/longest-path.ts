@@ -10,24 +10,27 @@ import { err } from "../../utils";
 import { Separation } from "../utils";
 
 /**
- * A {@link sugiyama/layering!Layering} that minimizes the height of the final layout.
+ * a {@link Layering} that minimizes the height of the final layout.
  *
  * This often results in very wide and unpleasing graphs, but is very fast. The
  * layout can go {@link topDown | top-down} or bottom-up, either assigning all roots to layer 0
  * or all leaves to the last layer.
  *
  * Create with {@link layeringLongestPath}.
- *
- * <img alt="longest path example" src="media://sugi-longestpath-opt-quad.png" width="400">
  */
 export interface LayeringLongestPath extends Layering<unknown, unknown> {
+  // FIXME this should also take a rank operator
+
   /**
-   * Set whether longest path should go top down or not. If set to true, the
-   * longest path will start at the top, putting nodes as close to the top as
-   * possible. (default: true)
+   * set whether longest path should go top down
+   *
+   * If set to true, the longest path will start at the top, putting nodes as
+   * close to the top as possible.
+   *
+   * (default: `true`)
    */
   topDown(val: boolean): LayeringLongestPath;
-  /** Get whether or not this is using topDown. */
+  /** get whether or not this is using topDown. */
   topDown(): boolean;
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
@@ -66,6 +69,8 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
       node.y = val;
     }
 
+    // FIXME go both way to condense
+
     // flip again if we're not top down
     if (!options.topDown) {
       for (const node of dag.nodes()) {
@@ -93,9 +98,17 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
 }
 
 /**
- * Create a default {@link LayeringLongestPath}
+ * create a default {@link LayeringLongestPath}
  *
- * - {@link LayeringLongestPath#topDown | `topDown()`}: `true`
+ * This {@link Layering} operator minimizes the height of the final layout.
+ * This often results in very wide and unpleasing graphs, but is very fast. You
+ * can set if it goes {@link LayeringLongestPath#topDown}.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().layering(layeringLongestPath().topDown(false));
+ * ```
  */
 export function layeringLongestPath(...args: never[]): LayeringLongestPath {
   if (args.length) {

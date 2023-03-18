@@ -1,5 +1,5 @@
 /**
- * An {@link TwolayerAgg} that orders nodes based on the aggregation of their
+ * A {@link TwolayerAgg} that orders nodes based on the aggregation of their
  * parents' or children's indices.
  *
  * @packageDocumentation
@@ -12,26 +12,23 @@ import { err } from "../../utils";
 import { SugiNode } from "../sugify";
 
 /**
- * An interface for aggregating numbers
+ * an interface for aggregating numbers
  *
- * It takes an iterable of indices and weights and returns an aggregate index.
- * Currently weights are always 1. The returned value must be between the min
- * and the max index, and only return undefined if and only if indices is
- * empty.
+ * It takes an iterable of indices and returns an aggregate index.  The
+ * returned value must be between the min and the max index, and only return
+ * undefined if and only if indices is empty.
  */
 export interface Aggregator {
-  (indices: Iterable<[number, number]>): number | undefined;
+  (indices: Iterable<number>): number | undefined;
 }
 
 /** a simple efficient mean aggregator */
-export function aggMean(
-  indices: Iterable<[number, number]>
-): number | undefined {
+export function aggMean(indices: Iterable<number>): number | undefined {
   let mean = 0;
   let count = 0;
-  for (const [val, weight] of indices) {
-    count += weight;
-    mean += ((val - mean) * weight) / count;
+  for (const val of indices) {
+    count++;
+    mean += (val - mean) / count;
   }
   return count ? mean : undefined;
 }
@@ -41,11 +38,8 @@ export function aggMean(
  *
  * This produces close to optimal results.
  */
-export function aggMedian(
-  indices: Iterable<[number, number]>
-): number | undefined {
-  // TODO use weights?
-  return median([...map(indices, ([val]) => val)]);
+export function aggMedian(indices: Iterable<number>): number | undefined {
+  return median([...indices]);
 }
 
 /**
@@ -55,10 +49,9 @@ export function aggMedian(
  * slightly more computation time.
  */
 export function aggWeightedMedian(
-  indices: Iterable<[number, number]>
+  indices: Iterable<number>
 ): number | undefined {
-  // TODO use weights?
-  const vals = [...map(indices, ([val]) => val)];
+  const vals = [...indices];
   vals.sort((a, b) => a - b);
   if (vals.length === 0) {
     return undefined;
@@ -83,33 +76,42 @@ export function aggWeightedMedian(
 }
 
 /**
- * A {@link sugiyama/twolayer!Twolayer} that orders nodes based off the aggregation of their
- * parents' or children's indices.
+ * a {@link Twolayer} that orders nodes based off aggregated ancestor indices
  *
- * This is much faster than {@link sugiyama/twolayer/opt!TwolayerOpt}, and
- * often produces comparable or better layouts. If memory is an issue then
- * {@link aggMean} uses a little less memory, but there is little reason to use
- * it. Nodes without parents or children respectively will be placed first to
- * minimize the distance between nodes with common parents, and then to
- * minimize rank inversions with respect to the initial ordering.
+ * This is much faster than {@link twolayerOpt}, and often produces comparable
+ * or better layouts.
+ * Nodes without ancestors will be placed first to minimize the distance
+ * between nodes with common ancestors, and then to minimize rank inversions
+ * with respect to the initial ordering.
  *
  * Create with {@link twolayerAgg}.
- *
- * <img alt="two layer agg example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
 export interface TwolayerAgg<Agg extends Aggregator = Aggregator>
   extends Twolayer<unknown, unknown> {
   /**
-   * Set the {@link Aggregator} for this operator.
+   * set the {@link Aggregator} for this operator
    *
-   * The aggregators that this produces are used to fuse the indices of parents
-   * or children of an node into it's target index for ordering. The provided
-   * {@link aggMedian} works very well, but {@link aggMean} works too,
-   * as will any user provided method. (default: {@link aggMedian})
+   * The aggregator is used to combine the indices of ancestors to provide a
+   * suitable rank for ordering. There are three built-in variants:
+   * - {@link aggMean} - The simple mean of indices. This is very fast and
+   *   memory efficient, but is often worse than the other two.
+   * - {@link aggMedian} - Takes the median of the indices. This is often
+   *   better for minimizing edge crossings than mean.
+   * - {@link aggWeightedMedian} - This slightly skews the results for nodes
+   *   with an even number of ancestors, that tends to be a little better than
+   *   {@link aggMedian} but runs a little slower.
+   *
+   * (default: {@link aggWeightedMedian})
+   *
+   * @example
+   *
+   * ```ts
+   * const twolayer = twolayerAgg().aggregator(aggMedian);
+   * ```
    */
   aggregator<NewAgg extends Aggregator>(val: NewAgg): TwolayerAgg<NewAgg>;
   /**
-   * Get the current aggregator factory.
+   * get the current aggregator
    */
   aggregator(): Agg;
 
@@ -208,16 +210,16 @@ function buildOperator<Agg extends Aggregator>({
     const [reordered, reference] = topDown
       ? [bottomLayer, topLayer]
       : [topLayer, bottomLayer];
-    const counts = topDown
-      ? (node: SugiNode) => node.parentCounts()
-      : (node: SugiNode) => node.childCounts();
+    // NOTE this is never a multigraph, so parents are guaranteed to be unique
+    const ancestors = topDown
+      ? (node: SugiNode) => node.parents()
+      : (node: SugiNode) => node.children();
 
     const inds = new Map(reference.map((node, i) => [node, i]));
     const aggs = new Map(
       reordered.map((node) => {
         const ind = inds.get(node);
-        const agg =
-          ind ?? aggregate(map(counts(node), ([c, w]) => [inds.get(c)!, w]));
+        const agg = ind ?? aggregate(map(ancestors(node), (c) => inds.get(c)!));
         return [node, agg] as const;
       })
     );
@@ -246,9 +248,17 @@ function buildOperator<Agg extends Aggregator>({
 }
 
 /**
- * Create a default {@link TwolayerAgg}
+ * create a default {@link TwolayerAgg}
  *
- * - {@link TwolayerAgg#aggregator | `aggregator()`}: `aggWeightedMedianFactory`
+ * This two-layer operator is a heuristic that is very fast, but doesn't do a
+ * great job at minimizing edge crossings. It works well when combined with
+ * {@link twolayerGreedy}.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().decross(decrossTwoLayer().order(twolayerAgg()));
+ * ```
  */
 export function twolayerAgg(...args: never[]): TwolayerAgg {
   if (args.length) {

@@ -1,19 +1,9 @@
 import {
-  aggMean,
-  aggMedian,
   Aggregator,
-  aggWeightedMedian,
-  cachedNodeSize,
-  ChildrenDataOperator,
-  ChildrenOperator,
+  Children,
+  ChildrenData,
   Coord,
-  coordGreedy,
-  coordQuad,
-  coordSimplex,
-  coordTopological,
   Decross,
-  decrossOpt,
-  decrossTwoLayer,
   DefaultConnect,
   DefaultGrid,
   DefaultHierarchy,
@@ -21,38 +11,49 @@ import {
   DefaultSugiyama,
   DefaultZherebko,
   Graph,
-  graph,
-  graphConnect,
-  graphHierarchy,
   GraphLink,
   GraphNode,
-  graphStratify,
-  grid,
   Group,
-  IdNodeDatumOperator,
-  IdOperator,
+  Id,
+  IdNodeDatum,
   Lane,
-  laneGreedy,
-  laneOpt,
   Layering,
-  layeringLongestPath,
-  layeringSimplex,
-  layeringTopological,
-  layerSeparation,
-  layerSugify,
   LinkWeight,
   MutGraph,
   NodeSize,
   NodeWeight,
-  ParentDataOperator,
-  ParentIdsOperator,
+  ParentData,
+  ParentIds,
   Rank,
   SimplexWeight,
-  sizedSeparation,
   SugiNode,
-  sugiNodeLength,
-  sugiyama,
   Twolayer,
+  aggMean,
+  aggMedian,
+  aggWeightedMedian,
+  cachedNodeSize,
+  coordGreedy,
+  coordQuad,
+  coordSimplex,
+  coordTopological,
+  decrossOpt,
+  decrossTwoLayer,
+  graph,
+  graphConnect,
+  graphHierarchy,
+  graphStratify,
+  grid,
+  laneGreedy,
+  laneOpt,
+  layerSeparation,
+  layeringLongestPath,
+  layeringSimplex,
+  layeringTopological,
+  sizedSeparation,
+  sugiNodeLength,
+  sugifyCompact,
+  sugifyLayer,
+  sugiyama,
   twolayerAgg,
   twolayerGreedy,
   twolayerOpt,
@@ -86,21 +87,17 @@ test("graph()", () => {
 
 test("graphStratify()", () => {
   const layout: DefaultStratify = graphStratify();
-  const id: IdOperator<{ myId: string }> = ({
-    myId,
-  }: {
-    myId: string;
-  }): string => myId;
-  const parentIds: ParentIdsOperator<{ parents: string[] }> = ({
+  const id: Id<{ myId: string }> = ({ myId }: { myId: string }): string => myId;
+  const parentIds: ParentIds<{ parents: string[] }> = ({
     parents,
   }: {
     parents: string[];
   }): string[] => parents;
-  const parentData: ParentDataOperator<
-    { parents: [string, number][] },
-    number
-  > = ({ parents }: { parents: [string, number][] }): [string, number][] =>
-    parents;
+  const parentData: ParentData<{ parents: [string, number][] }, number> = ({
+    parents,
+  }: {
+    parents: [string, number][];
+  }): [string, number][] => parents;
   const modified = layout.id(id).parentIds(parentIds).parentData(parentData);
   const grf: MutGraph<{ myId: string; parents: [string, number][] }, number> =
     modified([
@@ -121,10 +118,10 @@ interface ChildData {
 
 test("graphHierarchy()", () => {
   const layout: DefaultHierarchy = graphHierarchy();
-  const children: ChildrenOperator<Childs> = ({
+  const children: Children<Childs> = ({
     childs,
   }: Childs): Childs[] | undefined => childs;
-  const childrenData: ChildrenDataOperator<ChildData, string> = ({
+  const childrenData: ChildrenData<ChildData, string> = ({
     childs,
   }: ChildData): [ChildData, string][] | undefined => childs;
   const modified = layout.children(children).childrenData(childrenData);
@@ -138,18 +135,17 @@ test("graphHierarchy()", () => {
 
 test("graphConnect()", () => {
   const layout: DefaultConnect = graphConnect();
-  const sourceId: IdOperator<{ source: string }> = ({
+  const sourceId: Id<{ source: string }> = ({
     source,
   }: {
     source: string;
   }): string => source;
-  const targetId: IdOperator<{ target: string }> = ({
+  const targetId: Id<{ target: string }> = ({
     target,
   }: {
     target: string;
   }): string => target;
-  const nodeDatum: IdNodeDatumOperator<number> = (id: string): number =>
-    parseInt(id);
+  const nodeDatum: IdNodeDatum<number> = (id: string): number => parseInt(id);
   const modified = layout
     .sourceId(sourceId)
     .targetId(targetId)
@@ -193,7 +189,7 @@ test("sugiyama.decross()", () => {
 
   const maxAgg: Aggregator = (indices) => {
     let max = -Infinity;
-    for (const [val] of indices) {
+    for (const val of indices) {
       max = Math.max(max, val);
     }
     return max === -Infinity ? undefined : max;
@@ -298,7 +294,7 @@ test("sugiyama()", () => {
   expect(height).toBeGreaterThanOrEqual(0);
 });
 
-test("manual sugiyama()", () => {
+test("manual sugiyama() layered", () => {
   const dag = graph<string, number>();
   dag.node("a");
 
@@ -311,13 +307,37 @@ test("manual sugiyama()", () => {
 
   const [xLen, yLen] = cachedNodeSize(nodeSize);
   const numLayers = layering(dag, layerSeparation);
-  const [layers, height] = layerSugify(
+  const [layers, height] = sugifyLayer(
     dag,
     yLen,
     yGap,
     numLayers + 1,
     layering
   );
+  decross(layers);
+  const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
+  const width = coord(layers, xSep);
+  unsugify(layers);
+
+  expect(width).toBeGreaterThan(0);
+  expect(height).toBeGreaterThan(0);
+});
+
+test("manual sugiyama() compact", () => {
+  const dag = graph<string, number>();
+  dag.node("a");
+
+  const layering = layeringLongestPath();
+  const decross = decrossOpt();
+  const coord = coordGreedy();
+  const nodeSize = () => [1, 1] as const;
+  const xGap = 1;
+  const yGap = 1;
+
+  const [xLen, yLen] = cachedNodeSize(nodeSize);
+  const ySep = sizedSeparation(yLen, yGap);
+  const height = layering(dag, ySep);
+  const layers = sugifyCompact(dag, yLen, height, layering);
   decross(layers);
   const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
   const width = coord(layers, xSep);

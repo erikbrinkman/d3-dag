@@ -12,24 +12,25 @@ import { SugiNode, SugiSeparation } from "../sugify";
 import { avgHeight, init, layout, minBend, solve as solveQuad } from "./utils";
 
 /**
- * A {@link sugiyama/coord!Coord} for positioning edges of a topological layout.
+ * a {@link Coord} for positioning edges of a topological layout
  *
- * This operators also minimized a quadratic objective function (similar to
- * {@link sugiyama/coord/quad!CoordQuad}), but is tailored to topological layouts.
+ * This operator can position nodes similar to {@link coordSimplex} or {@link
+ * coordQuad} but is tailored to topological layouts.
  *
  * Create with {@link coordTopological}.
- *
- * <img alt="topological example" src="media://sugi-topological-opt-topological.png" width="1000">
  */
 export interface CoordTopological extends Coord<unknown, unknown> {
   /**
-   * Set whether to use straight edges
+   * set whether to use straight edges
    *
    * If using straight edges, they'll tend to go straight down, where as curved
-   * edges will have gentle slopes. (default: true)
+   * edges will have gentle slopes. `true` corresponds to {@link coordSimplex}
+   * while `false` corresponds to {@link coordQuad}.
+   *
+   * (default: `true`)
    */
   straight(val: boolean): CoordTopological;
-  /** Get the current simplex setting. */
+  /** get the current simplex setting. */
   straight(): boolean;
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
@@ -220,9 +221,22 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
 }
 
 /**
- * Create a new {@link CoordTopological}
+ * create a new {@link CoordTopological}
  *
- * - {@link CoordTopological#straight | `straight()`}: `true`
+ * The topological coordinate assignment operator requires a topological
+ * layering created by {@link layeringTopological}. It assigns all real nodes
+ * the same x coordinate, and curves the links around the column of nodes.
+ *
+ * It may also be worth considering {@link zherebko} as a layout as it's
+ * created entirely for layouts like this.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama()
+ *   .layering(layeringTopological())
+ *   .coord(coordTopological());
+ * ```
  */
 export function coordTopological(...args: never[]): CoordTopological {
   if (args.length) {

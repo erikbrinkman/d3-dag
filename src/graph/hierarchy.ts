@@ -8,13 +8,15 @@ import { err } from "../utils";
 // all of these are typed with the NodeDatum known.
 
 /**
+ * an accessor specifying how to get the children from a node
+ *
  * The interface for getting child data from node data. This function must
  * return data for every child given the data for the current node. `i` will
  * increment for each node processed.
  *
  * Can be modified with {@link Hierarchy#children}.
  */
-export interface ChildrenOperator<in out NodeDatum> {
+export interface Children<in out NodeDatum> {
   (d: NodeDatum, i: number): Iterable<NodeDatum> | undefined;
 }
 
@@ -25,173 +27,133 @@ export interface ChildrenOperator<in out NodeDatum> {
  *
  * Can be modified with {@link Hierarchy#childrenData}.
  */
-export interface ChildrenDataOperator<
-  in out NodeDatum,
-  out LinkDatum = unknown
-> {
+export interface ChildrenData<in out NodeDatum, out LinkDatum = unknown> {
   (d: NodeDatum, i: number):
     | Iterable<readonly [NodeDatum, LinkDatum]>
     | undefined;
 }
 
 /**
- * What gets returned by {@link Hierarchy#childrenData}() when {@link Hierarchy#children} is set.
+ * a wrapped children operator that functions as a children data operator
+ *
+ * When creating a {@link Hierarchy} with a children operator, the
+ * corresponding {@link Hierarchy#childrenData} will be wrapped in this. This
+ * version returns undefined for all link data.
  */
-export interface WrappedChildrenOperator<
-  NodeDatum,
-  Children extends ChildrenOperator<NodeDatum>
-> extends ChildrenDataOperator<NodeDatum, undefined> {
+export interface WrappedChildren<NodeDatum, Child extends Children<NodeDatum>>
+  extends ChildrenData<NodeDatum, undefined> {
   /** the wrapped children operator */
-  wrapped: Children;
+  wrapped: Child;
 }
 
 /**
- * What gets returned by {@link Hierarchy#children}() when {@link Hierarchy#childrenData} is set.
+ * a wrapped children data operator that functions as a children operator
+ *
+ * When creating a {@link Hierarchy} with a children data operator, the
+ * corresponding {@link Hierarchy#children} will be wrapped in this.
  */
-export interface WrappedChildrenDataOperator<
+export interface WrappedChildrenData<
   NodeDatum,
-  ChildrenData extends ChildrenDataOperator<NodeDatum>
-> extends ChildrenOperator<NodeDatum> {
+  ChildData extends ChildrenData<NodeDatum>
+> extends Children<NodeDatum> {
   /** the wrapped children data operator */
-  wrapped: ChildrenData;
+  wrapped: ChildData;
 }
 
-/** the hierarchy operator operators */
-export interface HierarchyOps<NodeDatum, LinkDatum = unknown> {
-  /** the children operator */
-  children: ChildrenOperator<NodeDatum>;
-  /** the children data operator */
-  childrenData: ChildrenDataOperator<NodeDatum, LinkDatum>;
-}
-
-/** a hierarchy operator with children */
-export type ChildrenHierarchy<
-  NodeDatum,
-  Children extends ChildrenOperator<NodeDatum>
-> = Hierarchy<
-  NodeDatum,
-  undefined,
-  {
-    /** new children */
-    children: Children;
-    /** new children data */
-    childrenData: WrappedChildrenOperator<NodeDatum, Children>;
-  }
->;
-
-/** a hierarchy operator with children data specified */
-export type ChildrenDataHierarchy<
-  NodeDatum,
-  LinkDatum,
-  ChildrenData extends ChildrenDataOperator<NodeDatum, LinkDatum>
-> = Hierarchy<
-  NodeDatum,
-  LinkDatum,
-  {
-    /** new children */
-    children: WrappedChildrenDataOperator<NodeDatum, ChildrenData>;
-    /** new children data */
-    childrenData: ChildrenData;
-  }
->;
-
+/**
+ * create a {@link MutGraph} from hierarchical data
+ *
+ * By default, each piece of data passed in corresponds to a node, and their
+ * `children` will be explored recursively creating more nodes. Use
+ * {@link children} to change how children are found, or {@link childrenData}
+ * to also attach link data.
+ *
+ * Created with {@link graphHierarchy}.
+ */
 export interface Hierarchy<
   NodeDatum,
   LinkDatum,
-  Ops extends HierarchyOps<NodeDatum, LinkDatum>
+  Child extends Children<NodeDatum>,
+  ChildData extends ChildrenData<NodeDatum, LinkDatum>
 > {
-  /**
-   * An operator that constructs a {@link graph!Graph} from hierarchy data.
-   *
-   * A default operator can be created with {@link graphHierarchy}. How to access a
-   * piece of data's {@link children} or {@link childrenData | children with
-   * associated link data} can be altered.
-   *
-   * Data passed in will become node data, if {@link childrenData} is specified,
-   * then link data will also be included. This method uses object identity, so
-   * for two nodes to point to the same object, they must both return the same
-   * object in their children.
-   *
-   * @example
-   * ```typescript
-   * const data = { id: "parent", children: [{ id: "child" }] };
-   * const create = hierarchy();
-   * const dag = create(data);
-   * ```
-   *
-   * @example
-   * ```json
-   * {
-   *   "id": "Euler",
-   *   "children": [
-   *     {
-   *       "id": "Lagrange",
-   *       "children": [
-   *         {
-   *           "id": "Fourier"
-   *         },
-   *         {
-   *           "id": "Poisson",
-   *           "children": [
-   *             {
-   *               "id": "Dirichlet"
-   *             }
-   *           ]
-   *         }
-   *       ]
-   *     }
-   *   ]
-   * }
-   * ```
-   *
-   * The children of each node will be further traversed until the entire dag
-   * is explored.
-   *
-   */
   (...data: readonly NodeDatum[]): MutGraph<NodeDatum, LinkDatum>;
 
   /**
-   * Sets the children accessor to the given {@link ChildrenOperator} and
-   * returns a new hierarchy operator. The default operator is:
+   * set a new children accessor
    *
-   * ```js
-   * function children(d) {
-   *   return d.children;
-   * }
+   * This accessor takes passed in node data and returns an iterable of new
+   * node data that correspond to that nodes children. When this is specified,
+   * link data are left undefined.
+   *
+   * Due to the way typescript inference happens, to make this accessor valid
+   * you will likely have to define a separate interface for the data type so
+   * that the recursive definition of children can be specified.
+   *
+   * The default accessor is:
+   * ```ts
+   * ({ children }) => children
    * ```
    */
-  children<NewDatum, NewChildren extends ChildrenOperator<NewDatum>>(
-    ids: NewChildren & ChildrenOperator<NewDatum>
-  ): ChildrenHierarchy<NewDatum, NewChildren>;
+  children<NewNode, NewChildren extends Children<NewNode>>(
+    val: NewChildren & Children<NewNode>
+  ): Hierarchy<
+    NewNode,
+    undefined,
+    NewChildren,
+    WrappedChildren<NewNode, NewChildren>
+  >;
   /**
-   * Gets the current {@link ChildrenOperator}, If {@link childrenData} was specified,
-   * this will return a {@link WrappedChildrenOperator | wrapped version} that
-   * returns only the children of that operator.
+   * get the current children accessor
+   *
+   * This is the current {@link Children}. If {@link childrenData} was specified,
+   * this will return a {@link WrappedChildrenData | wrapped version}
+   * that returns only the children of that operator.
    */
-  children(): Ops["children"];
+  children(): Child;
 
   /**
-   * Sets the childrenData accessor to the given {@link ChildrenDataOperator} and
-   * returns a new hierarchy operator.
+   * set a new children data accessor
+   *
+   * This accessor takes passed in node data and returns an iterable with
+   * tuples of new node data and the link data for the corresponding link.
+   * Use this function when your graph data has link information that you want
+   * to preserve in the graph structure for easy access from links.
+   *
+   * @example
+   *
+   * ```ts
+   * (nodeData) => [[childData, linkData]]
+   * ```
    */
   childrenData<
-    NewDatum,
+    NewNode,
     NewLink,
-    NewChildrenData extends ChildrenDataOperator<NewDatum, NewLink>
+    NewChildrenData extends ChildrenData<NewNode, NewLink>
   >(
-    data: NewChildrenData & ChildrenDataOperator<NewDatum, NewLink>
-  ): ChildrenDataHierarchy<NewDatum, NewLink, NewChildrenData>;
+    data: NewChildrenData & ChildrenData<NewNode, NewLink>
+  ): Hierarchy<
+    NewNode,
+    NewLink,
+    WrappedChildrenData<NewNode, NewChildrenData>,
+    NewChildrenData
+  >;
   /**
-   * Get the current childrenData operator. If {@link children} was specified, this
-   * will return a {@link WrappedChildrenDataOperator | wrapped version} that
-   * returns undefined data.
+   * get the current children data accessor
+   *
+   * This is the current {@link ChildrenData}. If {@link children} was
+   * specified, this will return a
+   * {@link WrappedChildren | wrapped version} that returns undefined
+   * for all link data.
    */
-  childrenData(): Ops["childrenData"];
+  childrenData(): ChildData;
 }
 
-function buildHierarchy<N, L, Ops extends HierarchyOps<N, L>>(
-  operators: Ops & HierarchyOps<N, L>
-): Hierarchy<N, L, Ops> {
+function buildHierarchy<
+  N,
+  L,
+  C extends Children<N>,
+  CD extends ChildrenData<N, L>
+>(childOp: C, childDataOp: CD): Hierarchy<N, L, C, CD> {
   function hierarchy(...data: N[]): MutGraph<N, L> {
     const hierarchied = graph<N, L>();
     const mapping = new Map<N, MutGraphNode<N, L>>();
@@ -203,8 +165,7 @@ function buildHierarchy<N, L, Ops extends HierarchyOps<N, L>>(
       if (!mapping.has(datum)) {
         const pnode = hierarchied.node(datum);
         mapping.set(datum, pnode);
-        for (const [cdatum, ldatum] of operators.childrenData(datum, i++) ??
-          []) {
+        for (const [cdatum, ldatum] of childDataOp(datum, i++) ?? []) {
           queue.push([pnode, cdatum, ldatum]);
         }
       }
@@ -221,7 +182,7 @@ function buildHierarchy<N, L, Ops extends HierarchyOps<N, L>>(
         const cnode = hierarchied.node(ndatum);
         mapping.set(ndatum, cnode);
         hierarchied.link(pnode, cnode, datum);
-        const cdata = operators.childrenData(ndatum, i++) ?? [];
+        const cdata = childDataOp(ndatum, i++) ?? [];
         for (const [cdatum, ldatum] of cdata) {
           queue.push([cnode, cdatum, ldatum]);
         }
@@ -231,42 +192,38 @@ function buildHierarchy<N, L, Ops extends HierarchyOps<N, L>>(
     return hierarchied;
   }
 
-  function children(): Ops["children"];
-  function children<NN, NC extends ChildrenOperator<NN>>(
+  function children(): C;
+  function children<NN, NC extends Children<NN>>(
     childs: NC
-  ): ChildrenHierarchy<NN, NC>;
-  function children<NN, NC extends ChildrenOperator<NN>>(
+  ): Hierarchy<NN, undefined, NC, WrappedChildren<NN, NC>>;
+  function children<NN, NC extends Children<NN>>(
     childs?: NC
-  ): Ops["children"] | ChildrenHierarchy<NN, NC> {
+  ): C | Hierarchy<NN, undefined, NC, WrappedChildren<NN, NC>> {
     if (childs === undefined) {
-      return operators.children;
+      return childOp;
     } else {
-      const { children: _, childrenData: __, ...rest } = operators;
-      return buildHierarchy({
-        ...rest,
-        children: childs,
-        childrenData: wrapChildren(childs),
-      });
+      return buildHierarchy<NN, undefined, NC, WrappedChildren<NN, NC>>(
+        childs,
+        wrapChildren(childs)
+      );
     }
   }
   hierarchy.children = children;
 
-  function childrenData(): Ops["childrenData"];
-  function childrenData<NN, NL, NCD extends ChildrenDataOperator<NN, NL>>(
+  function childrenData(): CD;
+  function childrenData<NN, NL, NCD extends ChildrenData<NN, NL>>(
     data: NCD
-  ): ChildrenDataHierarchy<NN, NL, NCD>;
-  function childrenData<NN, NL, NCD extends ChildrenDataOperator<NN, NL>>(
+  ): Hierarchy<NN, NL, WrappedChildrenData<NN, NCD>, NCD>;
+  function childrenData<NN, NL, NCD extends ChildrenData<NN, NL>>(
     data?: NCD
-  ): Ops["childrenData"] | ChildrenDataHierarchy<NN, NL, NCD> {
+  ): CD | Hierarchy<NN, NL, WrappedChildrenData<NN, NCD>, NCD> {
     if (data === undefined) {
-      return operators.childrenData;
+      return childDataOp;
     } else {
-      const { children: _, childrenData: __, ...rest } = operators;
-      return buildHierarchy({
-        ...rest,
-        children: wrapChildrenData(data),
-        childrenData: data,
-      });
+      return buildHierarchy<NN, NL, WrappedChildrenData<NN, NCD>, NCD>(
+        wrapChildrenData(data),
+        data
+      );
     }
   }
   hierarchy.childrenData = childrenData;
@@ -274,9 +231,9 @@ function buildHierarchy<N, L, Ops extends HierarchyOps<N, L>>(
   return hierarchy;
 }
 
-function wrapChildren<N, C extends ChildrenOperator<N>>(
+function wrapChildren<N, C extends Children<N>>(
   children: C
-): WrappedChildrenOperator<N, C> {
+): WrappedChildren<N, C> {
   function wrapped(d: N, i: number): IterableIterator<[N, undefined]> {
     return map(children(d, i) ?? [], (d) => [d, undefined]);
   }
@@ -284,9 +241,9 @@ function wrapChildren<N, C extends ChildrenOperator<N>>(
   return wrapped;
 }
 
-function wrapChildrenData<N, C extends ChildrenDataOperator<N>>(
+function wrapChildrenData<N, C extends ChildrenData<N>>(
   childrenData: C
-): WrappedChildrenDataOperator<N, C> {
+): WrappedChildrenData<N, C> {
   function wrapped(d: N, i: number): IterableIterator<N> {
     return map(childrenData(d, i) ?? [], ([d]) => d);
   }
@@ -319,23 +276,82 @@ function defaultChildren(d: unknown): Iterable<HasChildren> | undefined {
   }
 }
 
-/** the default hierarchy operator */
-export type DefaultHierarchy = ChildrenHierarchy<
+/**
+ * the default {@link Hierarchy} operator created by {@link graphHierarchy}
+ */
+export type DefaultHierarchy = Hierarchy<
   HasChildren,
-  ChildrenOperator<HasChildren>
+  undefined,
+  Children<HasChildren>,
+  WrappedChildren<HasChildren, Children<HasChildren>>
 >;
 
 /**
- * Constructs a new {@link Hierarchy} with default settings. This is
- * bundled as {@link graphHierarchy}.
+ * create a new {@link Hierarchy} with default settings
+ *
+ * Hierarchy operators create graphs from data that are already in a graph like
+ * form. By default it expects node data to have a `children` property with
+ * more node data.
+ *
+ * You can specify a different way to access children with
+ * {@link Hierarchy#children} or also specify link data with
+ * {@link Hierarchy#childrenData}.
+ *
+ * @example
+ *
+ * If you want to make simple graph with default settings:
+ *
+ * ```ts
+ * const data = {
+ *   "id": "Euler",
+ *   "children": [
+ *     {
+ *       "id": "Lagrange",
+ *       "children": [
+ *         {
+ *           "id": "Fourier"
+ *         },
+ *         {
+ *           "id": "Poisson",
+ *           "children": [ { "id": "Dirichlet" } ]
+ *         }
+ *       ]
+ *     }
+ *   ]
+ * } as const;
+ *
+ * const builder = graphHierarchy();
+ * const grf = builder(data);
+ * ```
+ *
+ * @example
+ *
+ * If you want to make a graph with link data:
+ *
+ * ```ts
+ * const data = {
+ *   "id": "Euler",
+ *   "children": [
+ *     [
+ *       { "id": "Lagrange" },
+ *       "advisee",
+ *     ]
+ *   ]
+ * } as const;
+ *
+ * interface Data {
+ *   children?: [Data, string][];
+ * }
+ *
+ * const builder = graphHierarchy()
+ *   .childrenData(({ children = [] }: Data) => children);
+ * const grf = builder(data);
+ * ```
  */
 export function graphHierarchy(...args: never[]): DefaultHierarchy {
   if (args.length) {
     throw err`got arguments to graphHierarchy(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`graphHierarchy()(...)\``;
   } else {
-    return buildHierarchy({
-      children: defaultChildren,
-      childrenData: wrapChildren(defaultChildren),
-    });
+    return buildHierarchy(defaultChildren, wrapChildren(defaultChildren));
   }
 }

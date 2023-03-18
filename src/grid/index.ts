@@ -23,11 +23,6 @@ export interface GridOps<in N = never, in L = never> {
   tweaks: readonly Tweak<N, L>[];
 }
 
-/** the typed graph input of a set of operators */
-export type OpGraph<Op extends GridOps> = Op extends GridOps<infer N, infer L>
-  ? Graph<N, L>
-  : never;
-
 /**
  * A simple grid based topological layout operator.
  *
@@ -36,60 +31,61 @@ export type OpGraph<Op extends GridOps> = Op extends GridOps<infer N, infer L>
  * are put into lanes such that an edge can travel horizontally to the lane of
  * a child node, and then down without intersecting to that child.
  *
- * This layout produces good representations when you want a compressed layout
- * where each node gets its only line formation.
- *
  * Create with {@link grid}.
- *
- * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
- *
- * @remarks
- *
- * The current implementation doesn't multi-dags any differently, so multiple
- * edges going to the same node will be rendered as a single edge. If the
- * layout is a dag, and rank is consistent with the dag ordering than this
- * won't be an issue, but there are no internal checks that the layout fits
- * these criteria.
- *
- * @example
- * ```typescript
- * const data = [["parent", "child"], ...];
- * const create = connect();
- * const dag = create(data);
- * const layout = grid();
- * const { width, height } = layout(dag);
- * for (const node of dag) {
- *   console.log(node.x, node.y);
- * }
- * ```
  */
 export interface Grid<Ops extends GridOps = GridOps> {
-  (grf: OpGraph<Ops>): LayoutResult;
+  (
+    grf: Ops extends GridOps<infer N, infer L> ? Graph<N, L> : never
+  ): LayoutResult;
 
   /**
-   * Set the lane operator to the given {@link grid/lane!Lane} and returns a new
-   * version of this operator. (default: {@link grid/lane/greedy!LaneGreedy})
+   * set a custom {@link Lane} operator
+   *
+   * The lane operator controls how nodes are assigned to horizontal lanes.
+   * This is the core piece of the layout. There are two builtin lane operators:
+   * - {@link laneGreedy} - This is a fast reasonably effective lane operator.
+   *   It supports a number of further tweaks to alter the layout.
+   * - {@link laneOpt} - This assigns lanes to optimally minimize the number of
+   *   edge crossings. This optimization is NP Hard, so outside of very small
+   *   graphs, it will likely take too long to execute.
+   *
+   * You can also supply any function that satisfies the {@link Lane}
+   * interface. See that documentation for more information about implementing
+   * your own lane assignment.
+   *
+   * (default: {@link laneGreedy})
+   *
+   * @example
+   *
+   * ```ts
+   * const layout = grid().lane(laneOpt());
+   * ```
+   *
    */
   lane<NewLane extends Lane>(val: NewLane): Grid<U<Ops, "lane", NewLane>>;
-  /** Get the current lane operator */
+  /** get the current lane operator */
   lane(): Ops["lane"];
 
   /**
-   * Set the rank operator to the given {@link graph!Rank} and returns a new
-   * version of this operator. (default: () =\> undefined)
+   * set the rank operator for the topological ordering
+   *
+   * Set the rank operator to the given {@link Rank} and returns a new
+   * version of this operator.
+   *
+   * (default: noop)
    */
   rank<NewRank extends Rank>(val: NewRank): Grid<U<Ops, "rank", NewRank>>;
-  /** Get the current lane operator */
+  /** get the current rank operator */
   rank(): Ops["rank"];
 
   /**
-   * Set the tweaks to apply after layout
+   * set the {@link Tweak}s to apply after layout
    */
   tweaks<const NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Grid<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Get the current {@link tweaks!Tweak}s.
+   * get the current {@link Tweak}s.
    */
   tweaks(): Ops["tweaks"];
 
@@ -99,7 +95,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
    * effectively the grid size, e.g. the spacing between adjacent lanes or rows
    * in the grid.
    *
-   * (default: [1, 1])
+   * (default: `[1, 1]`)
    */
   nodeSize<NewNodeSize extends NodeSize>(
     val: NewNodeSize
@@ -110,7 +106,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
   /**
    * Set the gap size between nodes
    *
-   * (default: [0, 0])
+   * (default: `[1, 1]`)
    */
   gap(val: readonly [number, number]): Grid<Ops>;
   /** Get the current gap size */
@@ -322,11 +318,50 @@ export type DefaultGrid = Grid<{
 }>;
 
 /**
- * Create a new {@link Grid} with default settings.
+ * create a new {@link Grid} with default settings.
  *
- * - {@link Grid#lane | `lane()`}: {@link grid/lane/greedy!LaneGreedy}
- * - {@link Grid#rank | `rank()`}: no ranks
- * - {@link Grid#nodeSize | `nodeSize()`}: [1, 1]
+ * The grid layout algorithm constructs a horizontally compact topological
+ * representation of the dag. The nodes are topologically ordered and then
+ * put into lanes such that an edge can travel horizontally to the lane of a
+ * child node, and then down without intersecting to that child.
+ *
+ * This layout produces good representations when you want a compressed layout
+ * where each node is on an independent horizontal line.
+ *
+ * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
+ *
+ * @remarks
+ *
+ * The current implementation doesn't render multi-dags any differently, so
+ * multiple edges going to the same node will be rendered as a single edge.
+ *
+ * @example
+ *
+ * using the default layout
+ *
+ * ```ts
+ * const grf = ...
+ * const layout = grid();
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
+ *
+ * @example
+ *
+ * In addition to the standard modifications of {@link Grid#rank},
+ * {@link Grid#nodeSize}, {@link Grid#gap}, and {@link Grid#tweaks},
+ * {@link Grid} also supports altering the lane assignment {@link Grid#lane}:
+ *
+ * ```ts
+ * const grf = ...
+ * const layout = grid().lane(laneOpt());
+ * const { width, height } = layout(dag);
+ * for (const node of dag) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
  */
 export function grid(...args: never[]): DefaultGrid {
   if (args.length) {

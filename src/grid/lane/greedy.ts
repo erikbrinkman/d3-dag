@@ -11,50 +11,48 @@ import { err } from "../../utils";
 import { gridChildren } from "./utils";
 
 /**
- * A lane operator that assigns lanes greedily, but quickly.
+ * a lane operator that assigns lanes greedily, but quickly.
  *
  * Create with {@link laneGreedy}.
- *
- * @example
- *
- * A top down example
- * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
- *
- * @example
- *
- * A bottom up example
- * <img alt="grid example" src="media://grid-greedy-bottomup.png" width="200">
  */
 export interface LaneGreedy extends Lane<unknown, unknown> {
   /**
-   * Set whether the greedy assignment should be top-down or bottom-up.
-   * (default: true)
+   * set whether the greedy assignment should be top-down or bottom-up.
+   *
+   * These produce slightly different results with the way the nodes are assigned.
+   *
+   * (default: `true`)
    */
   topDown(val: boolean): LaneGreedy;
   /**
-   * Get whether the current operator is set to assign top-down..
+   * get whether the current operator is set to assign top-down..
    */
   topDown(): boolean;
 
   /**
-   * Set whether to used compressed output
+   * set whether to used compressed output
    *
    * If output is compressed a free lane will be chosen over minimizing edge
-   * lengths. (default: true)
+   * lengths. This can sometimes create cluttered layouts, but they will be
+   * less wide.
+   *
+   * (default: `true`)
    */
   compressed(val: boolean): LaneGreedy;
-  /** Get the current compressed setting */
+  /** get the current compressed setting */
   compressed(): boolean;
 
   /**
-   * Set whether to assign bidirectional indices
+   * set whether to assign bidirectional indices
    *
    * The first node will be assigned lane zero. If bidirectional, the lanes can
    * fan out in either direction from there, otherwise new lanes will always be
-   * added to the right. (default: false)
+   * added to the right.
+   *
+   * (default: `false`)
    */
   bidirectional(val: boolean): LaneGreedy;
-  /** Get the current bidirectional setting */
+  /** get the current bidirectional setting */
   bidirectional(): boolean;
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
@@ -321,15 +319,22 @@ function buildOperator(
 }
 
 /**
- * Create a default {@link LaneGreedy}
+ * create a default {@link LaneGreedy}
  *
- * - {@link LaneGreedy#topDown | `topDown()`}: `true`
- * - {@link LaneGreedy#compressed | `compressed()`}: `true`
- * - {@link LaneGreedy#bidirectional | `bidirectional()`}: `true`
+ * This {@link Lane} operator doesn't completely remove edge crossing, but is
+ * much faster than {@link laneOpt}.  This lane operator has three different
+ * settings that allow for alteration: {@link LaneGreedy#bidirectional},
+ * {@link LaneGreedy#compressed}, and {@link LaneGreedy#topDown}.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = grid().lane(laneGreedy().compressed(false));
+ * ```
  */
 export function laneGreedy(...args: never[]): LaneGreedy {
   if (args.length) {
-    throw err`got arguments to laneGreedy(${args}); you probably forgot to construct laneGreedy before passing to lane: \`grid().lane(laneGreedy())\`, note the trailing "()"`;
+    throw err`got arguments to laneGreedy(${args}); you probably forgot to construct laneGreedy before passing to lane: \`grid().lane(laneGreedy())\``;
   }
   return buildOperator(true, true, false);
 }

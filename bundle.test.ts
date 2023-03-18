@@ -70,6 +70,6 @@ describe("tests that require a built bundle", () => {
   test("aggMedian() gets median", () => {
     const agg = d3dag.aggMedian;
     expect(agg([])).toBeUndefined();
-    expect(agg([1, 2, 4].map((v) => [v, 1]))).toEqual(2);
+    expect(agg([1, 2, 4])).toEqual(2);
   });
 });

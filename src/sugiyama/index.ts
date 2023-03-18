@@ -14,9 +14,9 @@ import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
 import {
-  compactSugify,
-  layerSugify,
   sugiNodeLength,
+  sugifyCompact,
+  sugifyLayer,
   unsugify,
   validateCoord,
 } from "./sugify";
@@ -36,27 +36,18 @@ export interface SugiyamaOps<in N = never, in L = never> {
   tweaks: readonly Tweak<N, L>[];
 }
 
-/** the typed graph input of a set of operators */
-export type OpGraph<Op extends SugiyamaOps> = Op extends SugiyamaOps<
-  infer N,
-  infer L
->
-  ? Graph<N, L>
-  : never;
-
 /**
- * The operator used to layout a {@link graph!Graph} using the sugiyama layered method.
+ * the operator used to layout a {@link Graph} using the sugiyama layered method
  *
  * The algorithm is roughly comprised of three steps:
- * 1. {@link sugiyama/layering!Layering | layering} - in this step, every node is
- *    assigned a non-negative integer later such that children are guaranteed
- *    to have higher layers than their parents. (modified with {@link layering})
- * 2. {@link sugiyama/decross!Decross | decrossing} - in the step, nodes in each layer
- *    are reordered to minimize the number of crossings. (modified with {@link
- *    decross})
- * 3. {@link sugiyama/coord!Coord | coordinate assignment} - in the step, the
- *    nodes are assigned x and y coordinates that respect their layer, layer
- *    ordering, and size. (modified with {@link coord} and {@link nodeSize})
+ * 1. {@link Layering} - in this step, every node is assigned a non-negative
+ *    integer later such that children are guaranteed to have higher layers
+ *    than their parents. (modified with {@link layering})
+ * 2. {@link Decross} - in the step, nodes in each layer are reordered to
+ *     minimize the number of crossings. (modified with {@link decross})
+ * 3. {@link Coord} - in the step, the nodes are assigned x and y coordinates
+ *    that respect their layer, layer ordering, and size. (modified with
+ *    {@link coord} and {@link nodeSize})
  *
  * The algorithm is based off ideas presented in K. Sugiyama et al. [1979], but
  * described by {@link http://www.it.usyd.edu.au/~shhong/fab.pdf | S. Hong}.
@@ -68,8 +59,6 @@ export type OpGraph<Op extends SugiyamaOps> = Op extends SugiyamaOps<
  *
  * Create with {@link sugiyama}.
  *
- * <img alt="Sugiyama example" src="media://sugi-simplex-opt-quad.png" width="400">
- *
  * @remarks
  *
  * If one wants even more control over the algorithm, each step is broken down
@@ -77,125 +66,177 @@ export type OpGraph<Op extends SugiyamaOps> = Op extends SugiyamaOps<
  * function. If one wants to call certain pieces incrementally, or adjust how
  * things are called, it's recommended to look at the source and call each
  * component function successively.
- *
- * @example
- *
- * ```typescript
- * const data = [["parent", "child"], ...];
- * const create = connect();
- * const dag = create(data);
- * const layout = sugiyama();
- * const { width, height } = layout(dag);
- * for (const node of dag) {
- *   console.log(node.x, node.y);
- * }
- * ```
- *
- * @example
- *
- * This example highlights tweaking several aspects of dag rendering
- * ```typescript
- * const data = [["parent", "child"], ...];
- * const create = connect();
- * const dag = create(data);
- * const layout = sugiyama()
- *   .nodeSize(n => n === undefined ? [0, 0] : [n.data.id.length, 2])
- *   .coord(greedy());
- * const { width, height } = layout(dag);
- * for (const node of dag) {
- *   console.log(node.x, node.y);
- * }
- * ```
  */
 export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
-  (dag: OpGraph<Ops>): LayoutResult;
+  (
+    dag: Ops extends SugiyamaOps<infer N, infer L> ? Graph<N, L> : never
+  ): LayoutResult;
 
   /**
-   * Set the {@link sugiyama/layering!Layering}. (default: {@link sugiyama/layering/simplex!LayeringSimplex})
+   * set the {@link Layering} operator
+   *
+   * The layering operator takes the graph, and assigns each node layer that
+   * respects
+   *
+   * There are three built-in layering operators:
+   * - {@link layeringSimplex} - This minimizes the overall length of edges,
+   *   and is reasonably fast for most graphs. Minimizing edges also tends to
+   *   make the next steps faster.
+   * - {@link layeringLongestPath} - This minimizes the height of the overall
+   *   graph.
+   * - {@link layeringTopological} - This creates a topological ordering, which
+   *   inherently minimizes the width of the graph, but will only produce good
+   *   layouts with other topological operators.
+   *
+   * You can also supply any function that satisfies the {@link Layering}
+   * interface. See that documentation for more information about implementing
+   * your own layering operator.
+   *
+   * (default: {@link layeringSimplex})
+   *
+   * @example
+   *
+   * ```ts
+   * const layout = sugiyama().layering(layeringLongestPath());
+   * ```
    */
   layering<NewLayering extends Layering>(
     layer: NewLayering
   ): Sugiyama<U<Ops, "layering", NewLayering>>;
   /**
-   * Get the current {@link sugiyama/layering!Layering}.
+   * get the current {@link Layering}.
    */
   layering(): Ops["layering"];
 
   /**
-   * Set the {@link sugiyama/decross!Decross}. (default: {@link sugiyama/decross/two-layer!DecrossTwoLayer})
+   * set the {@link Decross} operator
+   *
+   * The decross operator takes a layered graph with extra nodes for long
+   * paths, and reorders nodes along a layer to minimize the number of edge
+   * crossings (or other desired properties).
+   *
+   * There are three built-in decrossing operators:
+   * - {@link decrossOpt} - This optimally minimizes edge crossings, but due to
+   *   the complex nature of the task, only works for reasonably small graphs.
+   * - {@link decrossTwoLayer} - This is a heuristic method for decrossing
+   *   minimization that tries to strike a balance between a small number of
+   *   edge crossings, and reasonable running time.
+   * - {@link decrossDfs} - This is a very cheap decrossing operator that
+   *   orders nodes via a depth first search. It's mostly used for
+   *   {@link DecrossTwoLayer#inits} of the two-layer operator.
+   *
+   * You can also supply any function that satisfies the {@link Decross}
+   * interface. See that documentation for more information about implementing
+   * your own decrossing operator.
+   *
+   * (default: {@link decrossTwoLayer})
+   *
+   * @example
+   *
+   * ```ts
+   * const layout = sugiyama().decross(decrossOpt());
+   * ```
    */
   decross<NewDecross extends Decross>(
     dec: NewDecross
   ): Sugiyama<U<Ops, "decross", NewDecross>>;
   /**
-   * Get the current {@link sugiyama/decross!Decross}.
+   * get the current {@link Decross}.
    */
   decross(): Ops["decross"];
 
   /**
-   * Set the {@link sugiyama/coord!Coord}. (default: {@link sugiyama/coord/simplex!CoordSimplex})
+   * set the {@link Coord} operator
+   *
+   * The final stage is coordinate assignment, which takes a layered graph with
+   * nodes in the correct order, and assigns them x coordinates.
+   *
+   * There are four built-in coordinate assignment operators:
+   * - {@link coordSimplex} - This assigns x coordinates based on a simplex
+   *   minimization that tries to produce long vertical edges. It usually
+   *   produces attractive layouts in a reasonable amount of time.
+   * - {@link coordQuad} - This uses a quadratic optimization that tries to
+   *   minimize the curvature of lines, but usually produces worse layouts
+   *   than the simplex variant.
+   * - {@link coordGreedy} - If either of the above methods take too long, this
+   *   uses a heuristic to assign x coordinates meaning it will run more
+   *   quickly, but usually produce slightly worse layouts.
+   * - {@link coordTopological} - This is a coordinate assignment tailored for
+   * a {@link layeringTopological | topological layout}. It can use a
+   *   simplex or quadratic optimization to create a topological layout.
+   *
+   * You can also supply any function that satisfies the {@link Coord}
+   * interface. See that documentation for more information about implementing
+   * your own coordinate assignment operator.
+   *
+   * (default: {@link coordSimplex})
+   *
+   * @example
+   *
+   * ```ts
+   * const layout = sugiyama().coord(coordQuad());
+   * ```
    */
   coord<NewCoord extends Coord>(
     crd: NewCoord
   ): Sugiyama<U<Ops, "coord", NewCoord>>;
   /**
-   * Get the current {@link sugiyama/coord!Coord}.
+   * get the current {@link Coord}.
    */
   coord(): Ops["coord"];
 
   /**
-   * Set the tweaks to apply after layout
+   * set the {@link Tweak}s to apply after layout
    */
   tweaks<const NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Sugiyama<U<Ops, "tweaks", NewTweaks>>;
   /**
-   * Get the current {@link tweaks!Tweak}s.
+   * get the current {@link Tweak}s.
    */
   tweaks(): Ops["tweaks"];
 
   /**
-   * Sets the {@link layout!NodeSize}, which assigns how much space is
-   * necessary between nodes.
+   * sets the {@link NodeSize}
    *
-   * (default: [1, 1])
+   * (default: `[1, 1]`)
    */
   nodeSize<NewNodeSize extends NodeSize>(
     acc: NewNodeSize
   ): Sugiyama<U<Ops, "nodeSize", NewNodeSize>>;
-  /** Get the current node size */
+  /** get the current node size */
   nodeSize(): Ops["nodeSize"];
 
   /**
-   * Set the gap size between nodes
+   * get the gap size between nodes
    *
-   * (default: [0, 0])
+   * (default: `[1, 1]`)
    */
   gap(val: readonly [number, number]): Sugiyama<Ops>;
-  /** Get the current gap size */
+  /** get the current gap size */
   gap(): readonly [number, number];
 
   /**
-   * Set whether to use compact rendering
+   * set whether to use compact rendering
    *
    * In compact rendering, variable height nodes will be positioned closer
-   * together. This is more expensive than the non-compact layout, so it's only
+   * together. This can be significantly more expensive than the non-compact
+   * layouts and can make coordinate assignment more difficult, so it's only
    * worth using when necessary.
    *
-   * (default: false)
+   * (default: `false`)
    */
   compact(val: boolean): Sugiyama<Ops>;
-  /** Get the current compact setting */
+  /** get the current compact setting */
   compact(): boolean;
 }
 
 /**
- * Verify, cache, and split the results of an {@link layout!NodeSize} into
- * an x and y {@link sugiyama/utils!NodeLength}.
+ * split a {@link NodeSize} into x and y {@link NodeLength}s
  *
- * This allows you to split a {@link layout!NodeSize} into independent x and y
- * accessors, while also caching the result to prevent potentially expensive
- * computation from being duplicated.
+ * This allows you to split a NodeSize into independent x and y accessors,
+ * while also caching the result to prevent potentially expensive computation
+ * from being duplicated.
  *
  * The only real reason to use this would be to run the steps of
  * {@link sugiyama} independently.
@@ -252,10 +293,10 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
       if (sizes.compact) {
         const ySep = sizedSeparation(yLen, yGap);
         height = options.layering(dag, ySep);
-        layers = compactSugify(dag, yLen, height, options.layering);
+        layers = sugifyCompact(dag, yLen, height, options.layering);
       } else {
         const numLayers = options.layering(dag, layerSeparation) + 1;
-        [layers, height] = layerSugify(
+        [layers, height] = sugifyLayer(
           dag,
           yLen,
           yGap,
@@ -443,20 +484,46 @@ export type DefaultSugiyama = Sugiyama<{
 }>;
 
 /**
- * Construct a new {@link Sugiyama} with the default settings:
+ * construct a new {@link Sugiyama} with the default settings
  *
- * - {@link Sugiyama#layering | `layering()`}: {@link sugiyama/layering/simplex!LayeringSimplex}
- * - {@link Sugiyama#decross | `decross()`}: {@link sugiyama/decross/two-layer!DecrossTwoLayer}
- * - {@link Sugiyama#coord | `coord()`}: {@link sugiyama/coord/simplex!CoordSimplex}
- * - {@link Sugiyama#nodeSize | `nodeSize()`}: [1, 1]
- * - {@link Sugiyama#gap | `gap()`}: [0, 0]
+ * The sugiyama layout takes a three step layering approach. First it calls
+ * {@link Sugiyama#layering} to assign a layer to each node. Then it calls
+ * {@link Sugiyama#decross} to arrange nodes in each layer to minimize edge
+ * crossings. Finally it calls {@link Sugiyama#coord} to assign actual
+ * coordinates given the ordering.
+ *
+ * You can also set {@link Sugiyama#compact} which runs a more expensive
+ * layout, but produces a more compact layout when nodes have varying heights.
+ *
+ * Finally, you can also tweak the standard settings of
+ * {@link Sugiyama#nodeSize}, {@link Sugiyama#gap}, and
+ * {@link Sugiyama#tweaks}. Note that {@link Rank} can be set in some {@link
+ * Layering} operators.
+ *
+ * <img alt="Sugiyama example" src="media://sugi-simplex-twolayer-simplex.png" width="400">
  *
  * @example
- * ```typescript
- * const dag = hierarchy()(...);
- * const layout = sugiyama().nodeSize(d => [d.width, d.height]);
+ *
+ * To use the default layout:
+ *
+ * ```ts
+ * const grf: Graph = ...
+ * const layout = sugiyama();
  * layout(dag);
- * for (const node of dag) {
+ * for (const node of dag.nodes()) {
+ *   console.log(node.x, node.y);
+ * }
+ * ```
+ *
+ * @example
+ *
+ * To use optimal decrossing, which will only work for small graphs:
+ *
+ * ```ts
+ * const grf: Graph = ...
+ * const layout = sugiyama().decross(decrossOpt());
+ * layout(dag);
+ * for (const node of dag.nodes()) {
  *   console.log(node.x, node.y);
  * }
  * ```

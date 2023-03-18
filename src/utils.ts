@@ -7,9 +7,6 @@ import stringify from "stringify-object";
 import { entries, map } from "./iters";
 
 /** utility type for replacing keys with new value */
-export type Up<O, N> = Omit<O, keyof N> & N;
-
-/** utility type for replacing keys with new value */
 export type U<O, K extends keyof O, V> = Omit<O, K> & Record<K, V>;
 
 /** a callback for things with children */
@@ -97,7 +94,7 @@ export function berr(
   /* istanbul ignore next */
   return new Error(
     "d3dagBuiltin" in named
-      ? wrapInternalMsg(`builtin ${typ}'${name}' ${msg.slice(1)}`)
+      ? wrapInternalMsg(`builtin ${typ}'${name}'${msg}`)
       : `custom ${typ}'${name}'${msg}`
   );
 }

@@ -1,9 +1,7 @@
 {
   "entryPoints": ["src"],
-  "exclude": ["**/*.test.ts"],
   "media": "resources",
   "out": "docs",
-  "entryPointStrategy": "expand",
   "excludeInternal": true,
   "cleanOutputDir": true,
   "validation": true,

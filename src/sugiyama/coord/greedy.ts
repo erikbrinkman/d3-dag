@@ -6,26 +6,26 @@
  */
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
+import { median } from "d3-array";
 import { Coord } from ".";
 import { bigrams, entries, map, slice } from "../../iters";
 import { err } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
-import { aggMedian, Aggregator } from "../twolayer/agg";
 
 /**
- * A {@link sugiyama/coord!Coord} that tries to place nodes close to their parents
+ * a {@link Coord} that tries to place nodes close to their parents
  *
  * Nodes that can't be placed at the mean of their parents' location, will be
  * spaced out with their priority equal to their degree.
  *
  * Create with {@link coordGreedy}.
- *
- * <img alt="greedy example" src="media://sugi-simplex-opt-greedy.png" width="400">
  */
 export interface CoordGreedy extends Coord<unknown, unknown> {
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
+
+// FIXME this does not work in compact mode, need to figure out why
 
 function degree(node: SugiNode): number {
   return node.data.role === "node" ? node.nparents() + node.nchildren() : -1;
@@ -33,11 +33,10 @@ function degree(node: SugiNode): number {
 
 function assign(
   layer: readonly SugiNode[],
-  agg: Aggregator,
-  counts: (node: SugiNode) => Iterable<readonly [SugiNode, number]>
+  ancestors: (node: SugiNode) => Iterable<SugiNode>
 ): void {
   for (const node of layer) {
-    const x = agg(map(counts(node), ([{ x }, num]) => [x, num]));
+    const x = median([...map(ancestors(node), ({ x }) => x)]);
     if (x !== undefined) {
       node.x = x;
     }
@@ -97,7 +96,17 @@ function unchanged(layers: SugiNode[][], snapshot: number[][]): boolean {
 }
 
 /**
- * Create a new {@link CoordGreedy}
+ * create a new {@link CoordGreedy}
+ *
+ * This coordinate assignment operator tries to position nodes close to their
+ * parents, but is more lenient in the constraint, so tends to be faster than
+ * optimization based coordinate assignments, but runs much faster.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().coord(coordGreedy());
+ * ```
  */
 export function coordGreedy(...args: never[]): CoordGreedy {
   if (args.length) {
@@ -108,9 +117,6 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     layers: SugiNode<N, L>[][],
     sep: SugiSeparation<N, L>
   ): number {
-    // TODO allow other aggregations
-    const agg = aggMedian;
-
     // get statistics on layers
     let numPasses = 1;
     let xmean = 0;
@@ -161,14 +167,14 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     // do an up and down pass using the assignment operator
     // down pass
     for (const [i, layer] of entries(slice(layers, 1))) {
-      assign(layer, agg, (node) => node.parentCounts());
+      assign(layer, (node) => node.parents());
       heur(layer, sep, degInds[i + 1]);
     }
     // up pass
     for (const [i, layer] of entries(
       slice(layers, layers.length - 2, -1, -1)
     )) {
-      assign(layer, agg, (node) => node.childCounts());
+      assign(layer, (node) => node.children());
       heur(layer, sep, degInds[layers.length - i - 2]);
     }
 

@@ -1,14 +1,3 @@
-/**
- * A {@link Graph} is simply a collection of {@link GraphNode}s, and
- * {@link GraphLink}s.
- *
- * A graph is mutable and so can be built incrementally, but there are also methods for building a graph from data:
- * - {@link graph/hierarchy!Hierarchy} - for data where objects can get their children data
- * - {@link graph/stratify!Stratify} - for data with parent ids
- * - {@link graph/connect!Connect} - for edge data
- *
- * @packageDocumentation
- */
 import {
   setMultimapAdd,
   setMultimapDelete,
@@ -24,17 +13,32 @@ import { toJson } from "./json";
 // ---------- //
 
 /**
- * A rank accessor assigns a numeric rank to specific nodes. Layering operators
- * that take a rank accessor should respect the convention that nodes with
- * higher rank should be pushed farther down, and nodes with the same rank
- * should have the same layer.
+ * a way to enforce specific rankings of nodes
+ *
+ * A rank accessor assigns a numeric rank to some nodes. In general, nodes with
+ * a lower rank come *before* nodes with a higher rank. Layering operators that
+ * take a rank accessor additionally guarantee that nodes with the same rank
+ * will share the same layer (if possible).
+ *
+ * @example
+ *
+ * This example demonstrates passing through a rank value that might exist on a
+ * node.
+ *
+ * ```ts
+ * function memberRank({ data }: GraphNode<{ rank?: number }>): number | undefined {
+ *   return data.rank;
+ * }
+ * ```
  */
 export interface Rank<in NodeDatum = never, in LinkDatum = never> {
   (node: GraphNode<NodeDatum, LinkDatum>): number | undefined;
 }
 
 /**
- * A link between nodes, with attached information
+ * a link between nodes, with attached information
+ *
+ * The immutable version of {@link MutGraphLink}.
  */
 export interface GraphLink<out NodeDatum = unknown, out LinkDatum = unknown> {
   /** The dag node this link comes from */
@@ -43,22 +47,22 @@ export interface GraphLink<out NodeDatum = unknown, out LinkDatum = unknown> {
   /** The dag node this link goes to */
   readonly target: GraphNode<NodeDatum, LinkDatum>;
 
-  /** Layout control points assigned to the link */
+  /** layout control points assigned to the link */
   points: [number, number][];
 
-  /** Arbitrary data attached to this link */
+  /** user data attached to this link */
   data: LinkDatum;
 }
 
 /**
- * A link between nodes, with attached information
+ * a mutable link between nodes
+ *
+ * The mutable version of {@link GraphLink}.
  */
 export interface MutGraphLink<in out NodeDatum, in out LinkDatum>
   extends GraphLink<NodeDatum, LinkDatum> {
-  /** The dag node this link comes from */
+  // NOTE redefined to specify mutability
   readonly source: MutGraphNode<NodeDatum, LinkDatum>;
-
-  /** The dag node this link goes to */
   readonly target: MutGraphNode<NodeDatum, LinkDatum>;
 
   /** remove this link from the graph */
@@ -66,15 +70,14 @@ export interface MutGraphLink<in out NodeDatum, in out LinkDatum>
 }
 
 /**
- * A Directed Graph representation.
+ * A graph representation
  *
  * Graphs are collections of {@link GraphNode}s, held together by
  * {@link GraphLink}s, although there's no requirement that they're connected.
- * Graphs support iterating over their {@link nodes | `nodes`}, or checking if
- * certain properties hold. Similar to
- * {@link https://github.com/d3/d3-hierarchy | `d3-hierarchy`}. A graph is also
- * defined as a connected component, so all methods of a graph also apply to
- * any individual node.
+ * Graphs support iterating over their {@link nodes} and {@link links} as well
+ * as checking if certain properties hold. Each node is also defined as a graph
+ * of just its connected component, so all methods of a graph also apply to any
+ * individual node, treated as all nodes reachable from the current node.
  *
  * The structure of a Graph is immutable, allowing for appropriate variance
  * with readonly methods. For a graph whos structure can be modified, see
@@ -85,286 +88,292 @@ export interface MutGraphLink<in out NodeDatum, in out LinkDatum>
  */
 export interface Graph<out NodeDatum = unknown, out LinkDatum = unknown> {
   /**
-   * Returns an iterator over every {@link GraphNode}
+   * an iterator over every {@link GraphNode | node} in the graph
    *
+   * @remarks
    * Be careful not to modify the graph structure while iterating as any
    * modification, including adding or removing links, can change the behavior
    * of iteration giving unexpected results. If you want to guarantee
-   * consistent iteration, allocating an array first with `[...graph]` will
+   * consistent iteration, allocating an array first with `[...graph.nodes()]` will
    * ensure consistent iteration.
    */
   nodes(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
 
   /**
-   * Return an array of graph nodes in topological order
+   * compute a topological order of the graph
    *
    * If the graph can't be represented in topological order, this will try to
    * minimize the number of edge inversions. Optimally minimizing inversions is
    * np-complete, so this will only be approximate.
+   *
+   * You can optionally specify a {@link Rank} accessor that defines a
+   * numerical rank for every node. Nodes with a lower rank will come before
+   * nodes of a higher rank even if that requires more edge inversions. Nodes
+   * without a rank are unconstrained.
    */
   topological(
     rank?: Rank<NodeDatum, LinkDatum>
   ): GraphNode<NodeDatum, LinkDatum>[];
 
   /**
-   * Returns an iterator over every {@link GraphLink}
+   * an iterator over every {@link GraphLink | link} in the graph
    */
   links(): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 
-  /** Count the number of nodes in the graph */
+  /** the number of nodes in the graph */
   nnodes(): number;
 
-  /** Count the number of links in the graph */
+  /** the number of links in the graph */
   nlinks(): number;
 
   /**
-   * Split a graph into connected components
+   * split a graph into connected components
    *
-   * Returns an iterable over a single node in each connected component.
+   * @remarks
+   * Since each node behaves like a graph of its connected component,
+   * this is equivalent with returning a graph of each connected component.
+   *
+   * @returns splits an iterable over a single node in each connected
+   * component
    */
   split(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
 
   /**
-   * Return true if every node in the graph is reachable from every other.
+   * true if every node in the graph is reachable from every other
    */
   connected(): boolean;
 
   /**
-   * Return true if at least one node in this graph has multiple lints to the same child.
+   * true if at least one node in this graph has multiple links to the same child
    */
   multi(): boolean;
 
   /**
-   * Return true if there no cycles in the graph
+   * true if there no cycles in the graph
    */
   acyclic(): boolean;
 
   /**
-   * Serialize the graph
+   * serialize the graph
+   *
+   * @remarks this is intended to be called automatically by `JSON.stringify`.
    */
   toJSON(): unknown;
 }
 
-/** A node creation method with optional data */
-export interface OptionalNode<NodeDatum, LinkDatum> {
-  (datum?: NodeDatum): MutGraphNode<NodeDatum, LinkDatum>;
-}
-/** A node creation method with required data */
-export interface RequiredNode<NodeDatum, LinkDatum> {
-  (datum: NodeDatum): MutGraphNode<NodeDatum, LinkDatum>;
-}
-
-/** A link creation method with optional data */
-export interface OptionalLink<NodeDatum, LinkDatum> {
-  (
-    source: MutGraphNode<NodeDatum, LinkDatum>,
-    target: MutGraphNode<NodeDatum, LinkDatum>,
-    datum?: LinkDatum
-  ): MutGraphLink<NodeDatum, LinkDatum>;
-}
-/** A link creation method with required data */
-export interface RequiredLink<NodeDatum, LinkDatum> {
-  (
-    source: MutGraphNode<NodeDatum, LinkDatum>,
-    target: MutGraphNode<NodeDatum, LinkDatum>,
-    datum: LinkDatum
-  ): MutGraphLink<NodeDatum, LinkDatum>;
-}
-
 /**
- * A Directed Graph representation.
+ * a mutable graph representation
+ *
+ * In addition to all of the methods inherent to {@link Graph}s, this also
+ * allows structure graph modification with the {@link node} and {@link link}
+ * methods to either create an empty node or create a link between two nodes.
+ * Nodes and links can be removed with the delete method on
+ * {@link MutGraphNode#delete | nodes} and {@link MutGraphLink#delete | links}.
+ *
+ * ## Performance
+ *
+ * In order to keep track of caches, internally adding links runs union-find
+ * which has near, but not quite, constant complexity. However, various methods
+ * can run in linear time making some access patterns run in worst case
+ * quadratic if they're called in between modifications. This was ultimately
+ * deemed acceptable as all modification will likely come before a layout, and
+ * that will always take linear time.
  */
 export interface MutGraph<in out NodeDatum, in out LinkDatum>
   extends Graph<NodeDatum, LinkDatum> {
-  /**
-   * Returns an iterator over every {@link GraphNode}
-   */
+  // NOTE redefined to specify mutability
   nodes(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
-
-  /**
-   * Returns an iterator over every {@link GraphLink}
-   */
   links(): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
-
-  /**
-   * Split a graph into connected components
-   *
-   * Returns an iterable over a single node in each connected component.
-   */
   split(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
 
   /**
-   * Add a new node with datum
+   * add a new node with datum
+   *
+   * If `undefined` extends NodeDatum, datum can be elided and simply called as
+   * ```ts
+   * grf.node();
+   * ```
    */
-  node: undefined extends NodeDatum
-    ? OptionalNode<NodeDatum, LinkDatum>
-    : RequiredNode<NodeDatum, LinkDatum>;
+  node(
+    ...datum: undefined extends NodeDatum
+      ? [datum?: NodeDatum]
+      : [datum: NodeDatum]
+  ): MutGraphNode<NodeDatum, LinkDatum>;
 
   /**
-   * Add a new link between nodes
+   * add a new link from source to target
+   *
+   * If `undefined` extends LinkDatum, datum can be elided and simply called as
+   * ```ts
+   * grf.link(source, target);
+   * ```
    */
-  link: undefined extends LinkDatum
-    ? OptionalLink<NodeDatum, LinkDatum>
-    : RequiredLink<NodeDatum, LinkDatum>;
+  link(
+    source: MutGraphNode<NodeDatum, LinkDatum>,
+    target: MutGraphNode<NodeDatum, LinkDatum>,
+    ...datum: undefined extends LinkDatum
+      ? [datum?: LinkDatum]
+      : [datum: LinkDatum]
+  ): MutGraphLink<NodeDatum, LinkDatum>;
 }
 
-/**
- * A node in a graph
- */
 export interface GraphNodeMixin<out NodeDatum, out LinkDatum> {
-  /** The data backing this node */
+  /** user data for this node */
   data: NodeDatum;
 
-  /** Raw (possibly undefined) x coordinate for a node */
+  /** raw (possibly undefined) x coordinate for a node */
   ux?: number | undefined;
 
-  /** Raw (possibly undefined) y coordinate for a node */
+  /** raw (possibly undefined) y coordinate for a node */
   uy?: number | undefined;
 
   /**
-   * View of {@link ux} that throws if ux is undefined
+   * view of {@link ux} that throws if ux is undefined
    */
   x: number;
 
   /**
-   * View of {@link uy} that throws if uy is undefined
+   * view of {@link uy} that throws if uy is undefined
    */
   y: number;
 
-  /** Return the number of unique parent nodes */
+  /** the number of unique parent nodes */
   nparents(): number;
 
-  /** Return the number of unique child nodes */
+  /** the number of unique child nodes */
   nchildren(): number;
 
-  /** Return the number of child links */
+  /** the number of parent links */
   nparentLinks(): number;
 
-  /** Return the number of child links */
+  /** the number of child links */
   nchildLinks(): number;
 
-  /**
-   * Return the number of links to a child node
-   */
+  /** the number of links from a specific node */
   nparentLinksTo(node: GraphNode<NodeDatum, LinkDatum>): number;
 
-  /** Iterate over ever link to a specific child node */
+  /** iterator over every link from a specific node */
   parentLinksTo(
     node: GraphNode<NodeDatum, LinkDatum>
   ): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 
-  /**
-   * Return the number of links to a child node
-   */
+  /** the number of links to a specific node */
   nchildLinksTo(node: GraphNode<NodeDatum, LinkDatum>): number;
 
-  /** Iterate over ever link to a specific parent node */
+  /** iterator over every link to a specific node */
   childLinksTo(
     node: GraphNode<NodeDatum, LinkDatum>
   ): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 
-  /** Return an iterable over this node's unique parent nodes */
+  /** iterator over this node's unique parent nodes */
   parents(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
 
-  /** Return an iterable over this node's unique child nodes */
+  /** iterator over this node's unique child nodes */
   children(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
 
-  /** Return an iterable over this node's unique parent nodes and the number of links to them */
+  /** iterator over this node's unique parent nodes and the number of links from them */
   parentCounts(): IterableIterator<[GraphNode<NodeDatum, LinkDatum>, number]>;
 
-  /** Return an iterable over this node's unique child nodes and the number of links to them */
+  /** iterator over this node's unique child nodes and the number of links to them */
   childCounts(): IterableIterator<[GraphNode<NodeDatum, LinkDatum>, number]>;
 
   /**
-   * Return an iterator of links between this node and its children
+   * iterator of links to this node from its parents
    *
    * The order of links is guaranteed to not change between iterations.
    */
   parentLinks(): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 
   /**
-   * Return an iterator of links between this node and its children
+   * iterator of links from this node to its children
    *
    * The order of links is guaranteed to not change between iterations.
    */
   childLinks(): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 }
 
+/**
+ * a node in a graph
+ *
+ * Nodes provide all the same interfaces that {@link Graph}s do in terms of
+ * node properties and iteration. When called on a node, the nodes behaves as a
+ * graph of just its connected component. Therefore new nodes will always be
+ * {@link acyclic}, {@link connected}, and not {@link multi}.
+ *
+ * In addition, nodes also expose properties of their immediate neighborhoods,
+ * iterators and counts of nodes they directly touch.
+ *
+ * This is the immutable version of {@link MutGraphNode}.
+ */
 export interface GraphNode<out NodeDatum = unknown, out LinkDatum = unknown>
   extends Graph<NodeDatum, LinkDatum>,
     GraphNodeMixin<NodeDatum, LinkDatum> {}
 
-/** A relative link creation method with optional data */
-export interface OptionalRelative<NodeDatum, LinkDatum> {
-  (other: MutGraphNode<NodeDatum, LinkDatum>, datum?: LinkDatum): MutGraphLink<
-    NodeDatum,
-    LinkDatum
-  >;
-}
-/** A relative link creation method with required data */
-export interface RequiredRelative<NodeDatum, LinkDatum> {
-  (source: MutGraphNode<NodeDatum, LinkDatum>, datum: LinkDatum): MutGraphLink<
-    NodeDatum,
-    LinkDatum
-  >;
-}
 /**
- * A node in a graph
+ * a mutable node in a graph
+ *
+ * This possesses all of the methods of both {@link MutGraph} and {@link
+ * GraphNode}, while also adding the ability to directly add {@link parent}s or
+ * {@link child}ren and to {@link delete | remove} the node and all links from
+ * the graph.
  */
 export interface MutGraphNode<in out NodeDatum, in out LinkDatum>
   extends MutGraph<NodeDatum, LinkDatum>,
     GraphNodeMixin<NodeDatum, LinkDatum> {
-  /** Return an iterable over this node's unique parent nodes */
-  parents(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
+  // NOTE the below functions are redefined to add mutability
 
-  /** Return an iterable over this node's unique child nodes */
-  children(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
-
-  /** Return an iterable over this node's unique parent nodes and the number of links to them */
-  parentCounts(): IterableIterator<
-    [MutGraphNode<NodeDatum, LinkDatum>, number]
-  >;
-
-  /** Return an iterable over this node's unique child nodes and the number of links to them */
-  childCounts(): IterableIterator<[MutGraphNode<NodeDatum, LinkDatum>, number]>;
-
-  /**
-   * Return an iterator of links between this node and its children
-   *
-   * The order of links is guaranteed to not change between iterations.
-   */
-  parentLinks(): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
-
+  /** {@inheritDoc GraphNode#parentLinksTo} */
   parentLinksTo(
     node: GraphNode<NodeDatum, LinkDatum>
   ): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
 
-  /**
-   * Return an iterator of links between this node and its children
-   *
-   * The order of links is guaranteed to not change between iterations.
-   */
-  childLinks(): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
-
+  /** {@inheritDoc GraphNode#childLinksTo} */
   childLinksTo(
     node: GraphNode<NodeDatum, LinkDatum>
   ): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
 
-  /**
-   * Add a new link to a parent node
-   */
-  parent: undefined extends LinkDatum
-    ? OptionalRelative<NodeDatum, LinkDatum>
-    : RequiredRelative<NodeDatum, LinkDatum>;
+  /** {@inheritDoc GraphNode#parents} */
+  parents(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
+
+  /** {@inheritDoc GraphNode#children} */
+  children(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
+
+  /** {@inheritDoc GraphNode#parentCounts} */
+  parentCounts(): IterableIterator<
+    [MutGraphNode<NodeDatum, LinkDatum>, number]
+  >;
+
+  /** {@inheritDoc GraphNode#childCounts} */
+  childCounts(): IterableIterator<[MutGraphNode<NodeDatum, LinkDatum>, number]>;
+
+  /** {@inheritDoc GraphNode#parentLinks} */
+  parentLinks(): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
+
+  /** {@inheritDoc GraphNode#childLinks} */
+  childLinks(): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
+
+  /** add a new link from a parent node */
+  parent(
+    par: MutGraphNode<NodeDatum, LinkDatum>,
+    ...datum: undefined extends LinkDatum
+      ? [datum?: LinkDatum]
+      : [datum: LinkDatum]
+  ): MutGraphLink<NodeDatum, LinkDatum>;
+
+  /** add a new link to a child node */
+  child(
+    chi: MutGraphNode<NodeDatum, LinkDatum>,
+    ...datum: undefined extends LinkDatum
+      ? [datum?: LinkDatum]
+      : [datum: LinkDatum]
+  ): MutGraphLink<NodeDatum, LinkDatum>;
 
   /**
-   * Add a new link to a child node
+   * remove this node and all of its links from the graph
+   *
+   * Once a node is deleted, none of its methods are valid or guaranteed to do
+   * the correct thing.
    */
-  child: undefined extends LinkDatum
-    ? OptionalRelative<NodeDatum, LinkDatum>
-    : RequiredRelative<NodeDatum, LinkDatum>;
-
-  /** remove this node and all of its links from the graph */
   delete(): void;
 }
 
@@ -597,6 +606,7 @@ function acyclic<N, L>(nodes: Iterable<GraphNode<N, L>>): boolean {
   return !counts.size;
 }
 
+// TODO att a private bigint for concurrent modification tests
 class DirectedGraph<N, L> implements MutGraph<N, L> {
   /** number of nodes */
   #nnodes: number = 0;
@@ -1150,7 +1160,39 @@ class DirectedLink<N, L> implements MutGraphLink<N, L> {
 }
 
 /**
- * create a new mutable empty graph
+ * create a new mutable empty {@link MutGraph}
+ *
+ * When creating a new mutable graph via typescript, you must specify the type
+ * of the node data and link data you intend on using, since these types are
+ * invariant for mutable graphs.
+ *
+ * @example
+ * Creating a graph with node and link data:
+ *
+ * ```ts
+ * // create a new graph
+ * const grf = graph<string, number>();
+ * // add two nodes with some data
+ * const a = grf.node("a");
+ * const b = grf.node("b");
+ * // add a new link with the data `1`
+ * const link = grf.link(a, b, 1);
+ * grf.connected(); // true
+ * ```
+ *
+ * @example
+ * If `undefined` extends the data types then they can be omitted:
+ * ```
+ * // create a new graph
+ * const grf = graph<undefined | string, undefined | number>();
+ * const a = grf.node();
+ * const b = grf.node();
+ * const link = grf.link(a, b);
+ * grf.connected(); // true
+ * ```
+ *
+ * @typeParam NodeDatum the extra user data attached to each node
+ * @typeParam LinkDatum the extra data attached to each link
  */
 export function graph<NodeDatum, LinkDatum>(): MutGraph<NodeDatum, LinkDatum> {
   return new DirectedGraph<NodeDatum, LinkDatum>();

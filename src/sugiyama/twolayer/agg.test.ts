@@ -1,6 +1,6 @@
 import { createLayers, getIndex } from "../test-utils";
 import { crossings } from "../utils";
-import { aggMean, aggWeightedMedian, twolayerAgg } from "./agg";
+import { aggMean, aggMedian, aggWeightedMedian, twolayerAgg } from "./agg";
 
 test("twolayerAgg() works for very simple case", () => {
   // independent links that need to be swapped
@@ -129,16 +129,22 @@ test("twolayerAgg() mean preserves order of easy unconstrained nodes", () => {
   expect(inds).toEqual([0, 1, 2]);
 });
 
-test("twolayerAgg() weighted median is different than median", () => {
+test("twolayerAgg() median is different than weighted median", () => {
   // weighted median makes this deterministic
   const [topLayer, bottomLayer] = createLayers([
     [[0, 1], [0, 1], [0, 1], [0], [1]],
     [[], []],
   ]);
-  const order = twolayerAgg().aggregator(aggWeightedMedian);
-  order(topLayer, bottomLayer, true);
-  const inds = bottomLayer.map(getIndex);
-  expect(inds).toEqual([1, 0]);
+
+  const median = twolayerAgg().aggregator(aggMedian);
+  median(topLayer, bottomLayer, true);
+  const minds = bottomLayer.map(getIndex);
+  expect(minds).toEqual([0, 1]);
+
+  const wmedian = twolayerAgg().aggregator(aggWeightedMedian);
+  wmedian(topLayer, bottomLayer, true);
+  const winds = bottomLayer.map(getIndex);
+  expect(winds).toEqual([1, 0]);
 });
 
 test("twolayerAgg() weighted median works for all parent numbers", () => {

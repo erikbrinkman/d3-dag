@@ -2,7 +2,28 @@ import { Graph } from "./graph";
 import { LayoutResult, NodeSize } from "./layout";
 import { err } from "./utils";
 
-/** a function to tweak a graph layout */
+/**
+ * a function to tweak a graph layout
+ *
+ * {@link Tweak}s allow abstracting over general modifications to graph
+ * layouts. There are several built in:
+ * - {@link tweakSize} - This tweak scales the graph so that its final size is
+ *   a specified constant size.
+ * - {@link tweakFlip} - This tweak allows flipping the graph in various ways,
+ *   so you could make a layout bottom up, or horizontal.
+ * - {@link tweakGrid} - Tweaks {@link grid} layout link points to make
+ *   pleasing links easier to render.
+ * - {@link tweakShape} - Given the current {@link NodeSize}, sets the final
+ *   control points of each link so that they end on the edge of the given
+ *   shape. For simple layouts, this should prevent needing to render links
+ *   behind nodes. In complex cases, it allows consistently rendering arrows or
+ *   other link terminal icons at the edge of a shape.
+ *
+ * You can also implement your own tweak. There's not a reason to give an
+ * example, as tweaks are pretty unbounded. As input you get a laidout graph,
+ * and the dimensions of that layout. Modify the graph arbitrarily, and return
+ * the new dimensions after tweaking the layout.
+ */
 export interface Tweak<in N = never, in L = never> {
   (graph: Graph<N, L>, res: Readonly<LayoutResult>): LayoutResult;
 }
@@ -156,18 +177,10 @@ export function tweakFlip(
 }
 
 /**
- * A shape callable used to truncate an edge path at a node
+ * a shape callable used to truncate an edge path at a node
  *
- * # Built-ins
- *
- * There are two built in implementations:
- *
- * - [`shapeRect`] - the full rectangular bounding box
- * - [`shapeEllipse`] - an ellipse bounding box
- *
- * # Implementation
- *
- * A shape callable takes four parameters
+ * You can implement your own shape by satisfying the invariants of the
+ * interface.  A shape callable takes four parameters:
  *
  * - `center` - the center of the node
  * - `nodeSize` - the bounding box size of the node
@@ -177,7 +190,7 @@ export function tweakFlip(
  * This should return a new "start" point that touches the edge of the desired
  * shape. In all cases, `start` should equal `center` and `end` should be
  * ouside of the bounding box, but it won't hurt for implementations to be
- * robust to variations.
+ * robust in case this isn't true.
  */
 export interface Shape {
   (
@@ -323,6 +336,10 @@ export function shapeEllipse(
  * This tweak truncates edges at the extent of a node shape sized by a bounding
  * box. After applying this tweak, edge endings like arrows can be easily
  * rendered in the appropriate place.
+ *
+ * There are two built in {@link Shape}s:
+ * - {@link shapeRect} - a simple rectangle
+ * - {@link shapeEllipse} - an ellipse (circle for square node sizes)
  */
 export function tweakShape<N, L>(
   nodeSize: NodeSize<N, L>,

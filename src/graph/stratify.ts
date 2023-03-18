@@ -1,7 +1,7 @@
 import { graph, MutGraph, MutGraphNode } from ".";
 import { every, isIterable, map } from "../iters";
-import { err, U, Up } from "../utils";
-import { IdOperator, verifyId } from "./utils";
+import { err, U } from "../utils";
+import { Id, verifyId } from "./utils";
 
 /**
  * The interface for getting the parent ids from data. This must return an
@@ -10,13 +10,9 @@ import { IdOperator, verifyId } from "./utils";
  *
  * This can be modified with the {@link Stratify#parentIds} method.
  */
-export interface ParentIdsOperator<in NodeDatum = never> {
+export interface ParentIds<in NodeDatum = never> {
   (d: NodeDatum, i: number): Iterable<string> | undefined;
 }
-
-/** the node datum of a parent ids operator */
-export type ParIdsNodeDatum<P extends ParentIdsOperator> =
-  P extends ParentIdsOperator<infer N> ? N : never;
 
 /**
  * The interface for getting the parent ids and link data from the current node
@@ -26,16 +22,9 @@ export type ParIdsNodeDatum<P extends ParentIdsOperator> =
  *
  * This can be modified with the {@link Stratify#parentData} method.
  */
-export interface ParentDataOperator<
-  in NodeDatum = never,
-  out LinkDatum = unknown
-> {
+export interface ParentData<in NodeDatum = never, out LinkDatum = unknown> {
   (d: NodeDatum, i: number): Iterable<readonly [string, LinkDatum]> | undefined;
 }
-
-/** the node datum of a parent data operator */
-export type ParDataNodeDatum<P extends ParentDataOperator> =
-  P extends ParentDataOperator<infer N> ? N : never;
 
 type StratifyNodeDatum<Ops extends StratifyOps> = Ops extends StratifyOps<
   infer N
@@ -46,122 +35,75 @@ type StratifyNodeDatum<Ops extends StratifyOps> = Ops extends StratifyOps<
 /**
  * What gets returned by {@link Stratify#parentData}() when {@link Stratify#parentIds} is set.
  */
-export interface WrappedParentIdsOperator<ParentIds extends ParentIdsOperator>
-  extends ParentDataOperator<ParIdsNodeDatum<ParentIds>, undefined> {
+export interface WrappedParentIds<ParIds extends ParentIds>
+  extends ParentData<ParIds extends ParentIds<infer N> ? N : never, undefined> {
   /** the wrapped parent ids operator */
-  wrapped: ParentIds;
+  wrapped: ParIds;
 }
 
 /**
  * What gets returned by {@link Stratify#parentIds}() when {@link Stratify#parentData} is set.
  */
-export interface WrappedParentDataOperator<
-  ParentData extends ParentDataOperator
-> extends ParentIdsOperator<ParDataNodeDatum<ParentData>> {
+export interface WrappedParentData<ParData extends ParentData>
+  extends ParentIds<ParData extends ParentData<infer N> ? N : never> {
   /** the wrapped parent data operator */
-  wrapped: ParentData;
+  wrapped: ParData;
 }
 
 /** the operators for the stratify operator */
 export interface StratifyOps<in NodeDatum = never, out LinkDatum = unknown> {
   /** the id operator */
-  id: IdOperator<NodeDatum>;
+  id: Id<NodeDatum>;
   /** the parent ids operator */
-  parentIds: ParentIdsOperator<NodeDatum>;
+  parentIds: ParentIds<NodeDatum>;
   /** the parent data operator */
-  parentData: ParentDataOperator<NodeDatum, LinkDatum>;
+  parentData: ParentData<NodeDatum, LinkDatum>;
 }
 
 /** the id stratify operator */
-export type IdsStratify<
-  Ops extends StratifyOps,
-  ParentIds extends ParentIdsOperator
-> = Stratify<
+type IdsStratify<Ops extends StratifyOps, ParIds extends ParentIds> = Stratify<
   undefined,
-  Up<
-    Ops,
-    {
-      /** new parent ids */
-      parentIds: ParentIds;
-      /** new parent data */
-      parentData: WrappedParentIdsOperator<ParentIds>;
-    }
-  >
+  {
+    id: Ops["id"];
+    parentIds: ParIds;
+    parentData: WrappedParentIds<ParIds>;
+  }
 >;
 
 /** a stratify operator with parent data specified */
-export type DataStratify<
+type DataStratify<
   LinkDatum,
   Ops extends StratifyOps,
-  ParentData extends ParentDataOperator<never, LinkDatum>
+  ParData extends ParentData<never, LinkDatum>
 > = Stratify<
   LinkDatum,
-  Up<
-    Ops,
-    {
-      /** new parent data */
-      parentData: ParentData;
-      /** new parent ids */
-      parentIds: WrappedParentDataOperator<ParentData>;
-    }
-  >
+  {
+    id: Ops["id"];
+    parentData: ParData;
+    parentIds: WrappedParentData<ParData>;
+  }
 >;
 
+/**
+ * The operator that constructs a {@link MutGraph} from stratified tabularesque
+ * data.
+ *
+ * Create a default operator with {@link graphStratify}. The accessors for a node's
+ * {@link id} or {@link parentIds | parents' ids} can be altered, or
+ * {@link parentData} can be specified to specify parent ids and attach data
+ * to the edge for that parent.
+ */
 export interface Stratify<
   LinkDatum,
   Ops extends StratifyOps<never, LinkDatum>
 > {
-  /**
-   * The operator that constructs a {@link graph!Graph} from stratified tabularesque
-   * data.
-   *
-   * Create a default operator with {@link graphStratify}. The accessors for a node's
-   * {@link id} or {@link parentIds | parents' ids} can be altered, or
-   * {@link parentData} can be specified to specify parent ids and attach data
-   * to the edge for that parent.
-   *
-   * @example
-   * ```typescript
-   * const data = [{ id: "parent" }, { id: "child", parents: ["parent"] }];
-   * const create = stratify().parentIds(({ parents }) => parents);
-   * const dag = create(data);
-   * ```
-   *
-   * @example
-   * ```json
-   * [
-   *   {
-   *     "id": "Euler"
-   *   },
-   *   {
-   *     "id": "Lagrange",
-   *     "parentIds": ["Euler"]
-   *   },
-   *   {
-   *     "id": "Fourier",
-   *     "parentIds": ["Lagrange"]
-   *   },
-   *   {
-   *     "id": "Poisson",
-   *     "parentIds": ["Lagrange", "Laplace"]
-   *   },
-   *   {
-   *     "id": "Dirichlet",
-   *     "parentIds": ["Fourier", "Poisson"]
-   *   },
-   *   {
-   *     "id": "Laplace"
-   *   }
-   * ]
-   * ```
-   */
   <N extends StratifyNodeDatum<Ops>>(data: readonly N[]): MutGraph<
     N,
     LinkDatum
   >;
 
   /**
-   * Sets the id accessor to the given {@link graph/utils!IdOperator} and returns a
+   * Sets the id accessor to the given {@link Id} and returns a
    * Stratify. The default operator is:
    *
    * ```js
@@ -170,16 +112,14 @@ export interface Stratify<
    * }
    * ```
    */
-  id<NewId extends IdOperator>(
-    id: NewId
-  ): Stratify<LinkDatum, U<Ops, "id", NewId>>;
+  id<NewId extends Id>(id: NewId): Stratify<LinkDatum, U<Ops, "id", NewId>>;
   /**
    * Gets the current id accessor.
    */
   id(): Ops["id"];
 
   /**
-   * Sets the parentIds accessor to the given {@link ParentIdsOperator}
+   * Sets the parentIds accessor to the given {@link ParentIds}
    * and returns an update operator. The default operator is:
    *
    * ```js
@@ -188,29 +128,49 @@ export interface Stratify<
    * }
    * ```
    */
-  parentIds<NewParentIds extends ParentIdsOperator>(
+  parentIds<NewParentIds extends ParentIds>(
     ids: NewParentIds
-  ): IdsStratify<Ops, NewParentIds>;
+  ): Stratify<
+    undefined,
+    {
+      /** current id operator */
+      id: Ops["id"];
+      /** new parent ids */
+      parentIds: NewParentIds;
+      /** new parent data */
+      parentData: WrappedParentIds<NewParentIds>;
+    }
+  >;
   /**
    * Gets the current parent ids accessor.  If {@link parentData} was passed, the
-   * returned function will {@link WrappedParentDataOperator | wrap} that to
+   * returned function will {@link WrappedParentData | wrap} that to
    * just return the ids.
    */
   parentIds(): Ops["parentIds"];
 
   /**
-   * Sets the parentData accessor to the given {@link ParentDataOperator} and
+   * Sets the parentData accessor to the given {@link ParentData} and
    * returns an updated operator.
    */
   parentData<
     NewLinkDatum,
-    NewParentData extends ParentDataOperator<never, NewLinkDatum>
+    NewParentData extends ParentData<never, NewLinkDatum>
   >(
-    data: NewParentData & ParentDataOperator<never, NewLinkDatum>
-  ): DataStratify<NewLinkDatum, Ops, NewParentData>;
+    data: NewParentData & ParentData<never, NewLinkDatum>
+  ): Stratify<
+    NewLinkDatum,
+    {
+      /** current id operator */
+      id: Ops["id"];
+      /** new parent data */
+      parentData: NewParentData;
+      /** new parent ids */
+      parentIds: WrappedParentData<NewParentData>;
+    }
+  >;
   /**
    * Gets the current parentData accessor. If {@link parentIds} was passed, this
-   * will {@link WrappedParentIdsOperator | wrap} that to just return the ids
+   * will {@link WrappedParentIds | wrap} that to just return the ids
    * with `undefined` data.
    */
   parentData(): Ops["parentData"];
@@ -251,10 +211,8 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
   }
 
   function id(): Ops["id"];
-  function id<I extends IdOperator>(op: I): Stratify<L, U<Ops, "id", I>>;
-  function id<I extends IdOperator>(
-    op?: I
-  ): Ops["id"] | Stratify<L, U<Ops, "id", I>> {
+  function id<I extends Id>(op: I): Stratify<L, U<Ops, "id", I>>;
+  function id<I extends Id>(op?: I): Ops["id"] | Stratify<L, U<Ops, "id", I>> {
     if (op === undefined) {
       return operators.id;
     } else {
@@ -265,10 +223,10 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
   stratify.id = id;
 
   function parentData(): Ops["parentData"];
-  function parentData<NL, D extends ParentDataOperator<never, NL>>(
+  function parentData<NL, D extends ParentData<never, NL>>(
     data: D
   ): DataStratify<NL, Ops, D>;
-  function parentData<NL, D extends ParentDataOperator<never, NL>>(
+  function parentData<NL, D extends ParentData<never, NL>>(
     data?: D
   ): Ops["parentData"] | DataStratify<NL, Ops, D> {
     if (data === undefined) {
@@ -285,8 +243,8 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
   stratify.parentData = parentData;
 
   function parentIds(): Ops["parentIds"];
-  function parentIds<P extends ParentIdsOperator>(ids: P): IdsStratify<Ops, P>;
-  function parentIds<P extends ParentIdsOperator>(
+  function parentIds<P extends ParentIds>(ids: P): IdsStratify<Ops, P>;
+  function parentIds<P extends ParentIds>(
     ids?: P
   ): Ops["parentIds"] | IdsStratify<Ops, P> {
     if (ids === undefined) {
@@ -305,9 +263,9 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
   return stratify;
 }
 
-function wrapParentIds<N, P extends ParentIdsOperator<N>>(
-  parentIds: P & ParentIdsOperator<N>
-): WrappedParentIdsOperator<P> {
+function wrapParentIds<N, P extends ParentIds<N>>(
+  parentIds: P & ParentIds<N>
+): WrappedParentIds<P> {
   function wrapper(d: N, i: number): IterableIterator<[string, undefined]> {
     return map(parentIds(d, i) ?? [], (id) => [id, undefined]);
   }
@@ -315,9 +273,9 @@ function wrapParentIds<N, P extends ParentIdsOperator<N>>(
   return wrapper;
 }
 
-function wrapParentData<N, D extends ParentDataOperator<N>>(
-  parentData: D & ParentDataOperator<N>
-): WrappedParentDataOperator<D> {
+function wrapParentData<N, D extends ParentData<N>>(
+  parentData: D & ParentData<N>
+): WrappedParentData<D> {
   function wrapper(d: N, i: number): IterableIterator<string> {
     return map(parentData(d, i) ?? [], ([id]) => id);
   }
@@ -368,21 +326,73 @@ function defaultParentIds(data: unknown): Iterable<string> | undefined {
 }
 
 /** the default stratify operator */
-export type DefaultStratify = IdsStratify<
+export type DefaultStratify = Stratify<
+  undefined,
   {
     /** the id operator */
-    id: IdOperator<HasId>;
+    id: Id<HasId>;
     /** the parent id operator */
-    parentIds: ParentIdsOperator;
+    parentIds: ParentIds<HasParentIds>;
     /** the parent data operator */
-    parentData: ParentDataOperator;
-  },
-  ParentIdsOperator<HasParentIds>
+    parentData: WrappedParentIds<ParentIds<HasParentIds>>;
+  }
 >;
 
 /**
- * Constructs a new {@link Stratify} with the default settings. This is
- * bundled as {@link graphStratify}.
+ * create a new {@link Stratify} with default settings
+ *
+ * Stratify operators create graphs from data that are in a tabular format,
+ * with references to ids of their parents.  By default it expects node data to
+ * have a string `id` property and `parentIds` property with an iterable of
+ * parent ids.
+ *
+ * @example
+ *
+ * If you want to use the default operator:
+ *
+ * ```ts
+ * data = [
+ *   { "id": "Euler" },
+ *   {
+ *     "id": "Lagrange",
+ *     "parentIds": ["Euler"]
+ *   },
+ *   {
+ *     "id": "Fourier",
+ *     "parentIds": ["Lagrange"]
+ *   },
+ *   {
+ *     "id": "Poisson",
+ *     "parentIds": ["Lagrange", "Laplace"]
+ *   },
+ *   {
+ *     "id": "Dirichlet",
+ *     "parentIds": ["Fourier", "Poisson"]
+ *   },
+ *   { "id": "Laplace" }
+ * ] as const;
+ *
+ * const builder = stratify();
+ * const grf = builder(data);
+ * ```
+ *
+ * @example
+ *
+ * If you want to include custom link data:
+ *
+ * ```ts
+ * data = [
+ *   { "id": "Euler" },
+ *   {
+ *     "id": "Lagrange",
+ *     "parentData": [["Euler", 1]]
+ *   },
+ * ] as const;
+ *
+ * const builder = stratify()
+ *   .parentData(({ parentData = [] }) => parentData;
+ * const grf = builder(data);
+ * ```
  */
 export function graphStratify(...args: never[]): DefaultStratify {
   if (args.length) {

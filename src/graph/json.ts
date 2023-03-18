@@ -132,41 +132,78 @@ function deserialize<N, L>(
   }
 }
 
-/** extra options for deserializing a a graph */
-export interface GraphJsonOptions<NodeDatum, LinkDatum> {
-  /** a hydration option for node data */
-  nodeDatum?: Hydrator<NodeDatum>;
-  /** a hydration option for link data */
-  linkDatum?: Hydrator<LinkDatum>;
-}
-
-/** the operator that define hydration */
-export interface HydrateOps<out N = unknown, out L = unknown> {
+/** the operator that defines hydration */
+export interface JsonOps<out N = unknown, out L = unknown> {
   /** the node datum operator */
   nodeDatum: Hydrator<N>;
   /** the link datum operator */
   linkDatum: Hydrator<L>;
 }
 
-/** An operator that hydrates serialized json into a graph */
-export interface Hydrate<
+/**
+ * an operator that hydrates serialized json into a graph
+ *
+ * Since type information is inherently lost with serialization, use {@link
+ * nodeDatum} and {@link linkDatum} to define node and link data type, and
+ * optionally perform extra deserialization.
+ *
+ * @typeParam NodeDatum the node data type of the deserialized graph
+ * @typeParam LinkDatum the link data type of the deserialized graph
+ * @typeParam Ops the operators associated with deserialization
+ */
+export interface Json<
   NodeDatum,
   LinkDatum,
-  Ops extends HydrateOps<NodeDatum, LinkDatum>
+  Ops extends JsonOps<NodeDatum, LinkDatum>
 > {
   (json: unknown): MutGraph<NodeDatum, LinkDatum>;
 
-  /** set custom hydration for node data */
+  /**
+   * set custom hydration for node data
+   *
+   * @example
+   *
+   * In the simpliest case, this can be used to cast the data types
+   * appropriately (or alternatively you could just cast the Graph itself.
+   *
+   * ```ts
+   * const grf: Graph<number> = ...
+   * const builder = graphJson().nodeDatum(data => data as number);
+   * const deser: MutGraph<number> = builder(JSON.parse(JSON.serialize(grf)));
+   * ```
+   *
+   * @example
+   *
+   * Ideally though, you'll use typescripts warnings to make serialization
+   * error proof:
+   *
+   * ```ts
+   * const grf: Graph<number> = ...
+   * const builder = graphJson().nodeDatum(data => {
+   *   if (typeof data === "number") {
+   *     return data;
+   *   } else {
+   *     throw new Error("...");
+   *   }
+   * });
+   * const deser: MutGraph<number> = builder(JSON.parse(JSON.serialize(grf)));
+   * ```
+   */
   nodeDatum<NN, NewNode extends Hydrator<NN>>(
     val: NewNode & Hydrator<NN>
-  ): Hydrate<NN, LinkDatum, U<Ops, "nodeDatum", NewNode>>;
+  ): Json<NN, LinkDatum, U<Ops, "nodeDatum", NewNode>>;
   /** get the node data hydrator */
   nodeDatum(): Ops["nodeDatum"];
 
-  /** set custom hydration for link data */
+  /**
+   * set custom hydration for link data
+   *
+   * See {@link nodeDatum} for example of what {@link Hydrator}s should look
+   * like.
+   */
   linkDatum<NL, NewLink extends Hydrator<NL>>(
     val: NewLink & Hydrator<NL>
-  ): Hydrate<NodeDatum, NL, U<Ops, "linkDatum", NewLink>>;
+  ): Json<NodeDatum, NL, U<Ops, "linkDatum", NewLink>>;
   /** get the link data hydrator */
   linkDatum(): Ops["linkDatum"];
 
@@ -174,9 +211,9 @@ export interface Hydrate<
   // should have an option that does the assert or raises an error
 }
 
-function buildOperator<N, L, O extends HydrateOps<N, L>>(
-  ops: O & HydrateOps<N, L>
-): Hydrate<N, L, O> {
+function buildOperator<N, L, O extends JsonOps<N, L>>(
+  ops: O & JsonOps<N, L>
+): Json<N, L, O> {
   function graphJson(parsedJson: unknown): MutGraph<N, L> {
     if (typeof parsedJson !== "object" || parsedJson === null) {
       throw err`parsedJson was null or wasn't an object: ${parsedJson}`;
@@ -200,10 +237,10 @@ function buildOperator<N, L, O extends HydrateOps<N, L>>(
   function nodeDatum(): O["nodeDatum"];
   function nodeDatum<NN, NH extends Hydrator<NN>>(
     val: NH
-  ): Hydrate<NN, L, U<O, "nodeDatum", NH>>;
+  ): Json<NN, L, U<O, "nodeDatum", NH>>;
   function nodeDatum<NN, NH extends Hydrator<NN>>(
     val?: NH
-  ): O["nodeDatum"] | Hydrate<NN, L, U<O, "nodeDatum", NH>> {
+  ): O["nodeDatum"] | Json<NN, L, U<O, "nodeDatum", NH>> {
     if (val === undefined) {
       return ops.nodeDatum;
     } else {
@@ -216,10 +253,10 @@ function buildOperator<N, L, O extends HydrateOps<N, L>>(
   function linkDatum(): O["linkDatum"];
   function linkDatum<NL, NH extends Hydrator<NL>>(
     val: NH
-  ): Hydrate<N, NL, U<O, "linkDatum", NH>>;
+  ): Json<N, NL, U<O, "linkDatum", NH>>;
   function linkDatum<NL, NH extends Hydrator<NL>>(
     val?: NH
-  ): O["linkDatum"] | Hydrate<N, NL, U<O, "linkDatum", NH>> {
+  ): O["linkDatum"] | Json<N, NL, U<O, "linkDatum", NH>> {
     if (val === undefined) {
       return ops.linkDatum;
     } else {
@@ -232,11 +269,62 @@ function buildOperator<N, L, O extends HydrateOps<N, L>>(
   return graphJson;
 }
 
-/** The default operator created by {@link graphJson} */
-export type DefaultHydrate = Hydrate<unknown, unknown, HydrateOps>;
+/**
+ * the default {@link Json} operator created by {@link graphJson}
+ *
+ * This operator does no extra type conversion and so will result in unknown
+ * data.
+ */
+export type DefaultJson = Json<unknown, unknown, JsonOps>;
 
-/** create a graph constructor from deserialized json */
-export function graphJson(...args: readonly never[]): DefaultHydrate {
+/**
+ * create a {@link Json} graph constructor with default settings
+ *
+ * If you serialize a graph or node using `JSON.stringify`, this operator can
+ * be used to hydrate them back into a {@link MutGraph}. This is expecially
+ * useful for serializing the graph to do layouts in a separate worker.
+ *
+ * If you serialize a {@link GraphNode} the deserialized graph will be the same
+ * node that was serialized, but the rest of that node's connected component
+ * will be deserialized as well, and still reachable via {@link Graph#nodes}.
+ * The type information will inherently be lost, and will need to be cast.
+ *
+ * Since serialization doesn't inherently imply deserialization,
+ * {@link Json#nodeDatum} and {@link Json#linkDatum} can be used to
+ * provide custom hydration for node and linke data.
+ *
+ * @example
+ *
+ * This example shows how to deserialize a graph while losing type information.
+ *
+ * ```ts
+ * const orig: Graph = ...
+ * const serialized = JSON.stringify(orig);
+ * const builder = graphJson();
+ * const deserialized = builder(JSON.parse(serialized));
+ * ```
+ *
+ * Note, that because no custom hydrators were given, `deserialized` will have
+ * type `MutGraph<unknown, unknown>` which probably isn't desired.
+ *
+ * @example
+ *
+ * This example demonstrates using a simple data hydrator.
+ *
+ * ```ts
+ * const orig: Graph<number, string> = ...
+ * const serialized = JSON.stringify(orig);
+ * const builder = graphJson()
+ *     .nodeDatum(data => data as number)
+ *     .linkDatum(data => data as string);
+ * const deserialized = builder(JSON.parse(serialized));
+ * ```
+ *
+ * Now `deserialized` has the same type as the original grah. In real use,
+ * you'll probably want to use type guards to guarantee the data was
+ * deserialized correctly.
+ */
+export function graphJson(...args: readonly never[]): DefaultJson {
   if (args.length) {
     throw err`got arguments to graphJson(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`graphJson()(...)\``;
   } else {

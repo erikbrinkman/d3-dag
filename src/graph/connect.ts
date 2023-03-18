@@ -1,13 +1,13 @@
 import { graph, MutGraph, MutGraphNode } from ".";
 import { err, U } from "../utils";
-import { IdOperator, verifyId } from "./utils";
+import { Id, verifyId } from "./utils";
 
 /**
  * An operator that creates node data from an id
  *
  * The index passed in is the edge index where the id is first seen.
  */
-export interface IdNodeDatumOperator<out D = unknown> {
+export interface IdNodeDatum<out D = unknown> {
   (id: string, index: number): D;
 }
 
@@ -16,11 +16,11 @@ export interface IdNodeDatumOperator<out D = unknown> {
  */
 export interface ConnectOps<out N = unknown, in L = never> {
   /** the source id operator */
-  sourceId: IdOperator<L>;
+  sourceId: Id<L>;
   /** the target id operator */
-  targetId: IdOperator<L>;
+  targetId: Id<L>;
   /** the node datum operator */
-  nodeDatum: IdNodeDatumOperator<N>;
+  nodeDatum: IdNodeDatum<N>;
 }
 
 /**
@@ -34,98 +34,81 @@ type ConnectLinkDatum<Ops extends ConnectOps> = Ops extends ConnectOps<
   ? L
   : never;
 
+/**
+ * an operator that constructs a {@link MutGraph} from link data.
+ *
+ * Create a default connect operator with {@link graphConnect}. The accessor for the
+ * {@link sourceId | source id string}, {@link targetId | target id string},
+ * and whether to allow {@link single} nodes can all be modified.
+ *
+ * Links in the dag will have the same data as the objects passed in, and nodes
+ * will have the ids referenced as either the source or the target.
+ */
 export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
-  /**
-   * An operator that constructs a {@link graph!Graph} from link data.
-   *
-   * Create a default connect operator with {@link graphConnect}. The accessor for the
-   * {@link sourceId | source id string}, {@link targetId | target id string},
-   * and whether to allow {@link single} nodes can all be modified.
-   *
-   * Links in the dag will have the same data as the objects passed in, and nodes
-   * will have the ids referenced as either the source or the target.
-   *
-   * @example
-   * ```typescript
-   * const data = [ ["parent", "child"] ];
-   * const create = graphConnect();
-   * const dag = create(data);
-   * ```
-   *
-   * @example
-   * ```json
-   * [
-   *   ["Euler", "Lagrange"],
-   *   ["Lagrange", "Fourier"],
-   *   ["Fourier", "Dirichlet"],
-   *   ["Lagrange", "Poisson"],
-   *   ["Laplace", "Poisson"],
-   *   ["Poisson", "Dirichlet"]
-   * ]
-   * ```
-   */
   <L extends ConnectLinkDatum<Ops>>(data: readonly L[]): MutGraph<NodeDatum, L>;
 
   /**
-   * Sets the source accessor to the given {@link graph/utils!IdOperator} and returns this
+   * set the source id accessor
+   *
+   * Sets the source accessor to the given {@link Id} and returns this
    * Connect. This should return the source id of the link
    * data. The default accessor is:
    *
-   * ```js
-   * function sourceAccessor(link) {
-   *   return link[0];
-   * }
+   * ```ts
+   * ([source, ]) => source
    * ```
    */
-  sourceId<NewId extends IdOperator>(
+  sourceId<NewId extends Id>(
     id: NewId
   ): Connect<NodeDatum, U<Ops, "sourceId", NewId>>;
   /** Gets the current sourceId accessor. */
   sourceId(): Ops["sourceId"];
 
   /**
-   * Sets the target accessor to the given {@link graph/utils!IdOperator} and returns this
+   * set the target id accessor
+   *
+   * Sets the target accessor to the given {@link Id} and returns this
    * Connect. This should return the target id of the link
    * data. The default accessor is:
    *
-   * ```js
-   * function sourceAccessor(link) {
-   *   return link[1];
-   * }
+   * ```ts
+   * ([, target]) => target
    * ```
    */
-  targetId<NewId extends IdOperator>(
+  targetId<NewId extends Id>(
     id: NewId
   ): Connect<NodeDatum, U<Ops, "targetId", NewId>>;
   /** Gets the current targetId accessor. */
   targetId(): Ops["targetId"];
 
   /**
-   * Sets the id node datum  accessor to the given {@link IdNodeDatumOperator} and returns this
-   * Connect. This function allows you to decide what data to attach to nodes created via the connect method. The default simple wraps it in an object with an `id` field.
-   * data. The default accessor is:
+   * set the node datum accessor
    *
-   * ```js
-   * function nodeDatumAccessor(id) {
-   *   return { id };
-   * }
+   * Sets the id node datum accessor to the given {@link IdNodeDatum} and
+   * returns this Connect. This function allows you to decide what data to
+   * attach to nodes created via the connect method. The default is just the id
+   * string.
+   *
+   * ```ts
+   * (data) => data
    * ```
    */
-  nodeDatum<
-    NewNodeDatum,
-    NewNodeDatumOp extends IdNodeDatumOperator<NewNodeDatum>
-  >(
-    data: NewNodeDatumOp & IdNodeDatumOperator<NewNodeDatum>
+  nodeDatum<NewNodeDatum, NewNodeDatumOp extends IdNodeDatum<NewNodeDatum>>(
+    data: NewNodeDatumOp & IdNodeDatum<NewNodeDatum>
   ): Connect<NewNodeDatum, U<Ops, "nodeDatum", NewNodeDatumOp>>;
   /** Get the current id node datum operator */
   nodeDatum(): Ops["nodeDatum"];
 
   /**
+   * set the single node allowance
+   *
    * Sets the allowance for single nodes. If enabled and the source id equals
    * the target id, then a single node with no parents will be created.
    * Otherwise a self loop will be created which will result in an error. Note
    * only single nodes without parents or children need to be specified this
-   * way, otherwise any other connection to a node will create it. (default: false)
+   * way, otherwise any other connection to a node will create it.
+   *
+   * (default: `false`)
    */
   single(val: boolean): Connect<NodeDatum, Ops>;
   /** get the current single node setting. */
@@ -163,10 +146,8 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
   }
 
   function sourceId(): Ops["sourceId"];
-  function sourceId<NI extends IdOperator>(
-    id: NI
-  ): Connect<N, U<Ops, "sourceId", NI>>;
-  function sourceId<NI extends IdOperator>(
+  function sourceId<NI extends Id>(id: NI): Connect<N, U<Ops, "sourceId", NI>>;
+  function sourceId<NI extends Id>(
     id?: NI
   ): Ops["sourceId"] | Connect<N, U<Ops, "sourceId", NI>> {
     if (id === undefined) {
@@ -179,10 +160,8 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
   connect.sourceId = sourceId;
 
   function targetId(): Ops["targetId"];
-  function targetId<NI extends IdOperator>(
-    id: NI
-  ): Connect<N, U<Ops, "targetId", NI>>;
-  function targetId<NI extends IdOperator>(
+  function targetId<NI extends Id>(id: NI): Connect<N, U<Ops, "targetId", NI>>;
+  function targetId<NI extends Id>(
     id?: NI
   ): Ops["targetId"] | Connect<N, U<Ops, "targetId", NI>> {
     if (id === undefined) {
@@ -195,10 +174,10 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
   connect.targetId = targetId;
 
   function nodeDatum(): Ops["nodeDatum"];
-  function nodeDatum<NN, ND extends IdNodeDatumOperator<NN>>(
+  function nodeDatum<NN, ND extends IdNodeDatum<NN>>(
     id: ND
   ): Connect<NN, U<Ops, "nodeDatum", ND>>;
-  function nodeDatum<NN, ND extends IdNodeDatumOperator<NN>>(
+  function nodeDatum<NN, ND extends IdNodeDatum<NN>>(
     id?: ND
   ): Ops["nodeDatum"] | Connect<NN, U<Ops, "nodeDatum", ND>> {
     if (id === undefined) {
@@ -225,7 +204,7 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
 }
 
 /** default interface for tuples that start with a string */
-export interface ZeroString {
+export interface HasZeroString {
   /** the zero property */
   readonly 0: string;
 }
@@ -243,7 +222,7 @@ function defaultSourceId(data: unknown): string {
 }
 
 /** default interface for functions whose second element is a string */
-export interface OneString {
+export interface HasOneString {
   /** the one property */
   readonly 1: string;
 }
@@ -264,31 +243,66 @@ function defaultNodeDatum(id: string): string {
   return id;
 }
 
-/** default ops of the default connect operator */
-export interface DefaultConnectOps
-  extends ConnectOps<string, readonly [string, string]> {
-  /** the default source id operator */
-  sourceId: IdOperator<ZeroString>;
-  /** the default target id operator */
-  targetId: IdOperator<OneString>;
-  /** the default node datum operator */
-  nodeDatum: IdNodeDatumOperator<string>;
-}
-
 /** the default connect operator */
-export type DefaultConnect = Connect<string, DefaultConnectOps>;
+export type DefaultConnect = Connect<
+  string,
+  {
+    /** the default source id operator */
+    sourceId: Id<HasZeroString>;
+    /** the default target id operator */
+    targetId: Id<HasOneString>;
+    /** the default node datum operator */
+    nodeDatum: IdNodeDatum<string>;
+  }
+>;
 
 /**
- * Creates a new {@link Connect} with the default settings. This is
- * bundled as {@link graphConnect}
+ * create a new {@link Connect} with default settings
+ *
+ * Connect operators create graphs from link data that contains ids to source
+ * and target nodes. By default it expects link data that are tuples of the
+ * source and target id as strings.
+ *
+ * @example
+ *
+ * If you want to build a graph with the default settings:
+ *
+ * ```ts
+ * const data = [
+ *   ["Euler", "Lagrange"],
+ *   ["Lagrange", "Fourier"],
+ *   ["Lagrange", "Poisson"],
+ *   ["Fourier", "Dirichlet"],
+ *   ["Poisson", "Dirichlet"],
+ * ] as const;
+ *
+ * const builder = graphConnect();
+ * const grf = builder(data);
+ * ```
+ *
+ * @example
+ *
+ * If you want to use custom data:
+ *
+ * ```ts
+ * const data = [
+ *   { source: "Euler", target: "Lagrange" },
+ *   { source: "Lagrange", target: "Fourier" },
+ * ] as const;
+ *
+ * const builder = graphConnect()
+ *   .sourceId(({ source }: { source: string }) => source)
+ *   .targetId(({ target }: { target: string }) => target);
+ * const grf = builder(data);
+ * ```
  */
 export function graphConnect(...args: never[]): DefaultConnect {
   if (args.length) {
     throw err`got arguments to graphConnect(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`graphConnect()(...)\``;
   } else {
-    // NOTE I think because source and target are both IdOperators, typescript
+    // NOTE I think because source and target are both Ids, typescript
     // tries to cache the inference, but in so doing, gets it wrong.
-    return buildConnect<string, ZeroString & OneString, DefaultConnectOps>({
+    return buildConnect({
       sourceId: defaultSourceId,
       targetId: defaultTargetId,
       nodeDatum: defaultNodeDatum,

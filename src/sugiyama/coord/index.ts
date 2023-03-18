@@ -1,24 +1,17 @@
 /**
  * {@link Coord}s assign `x` coordinates to every node, while
- * respecting the {@link sugiyama/sugify!SugiSeparation}.
+ * respecting the {@link SugiSeparation}.
  *
  * @packageDocumentation
  */
 import { SugiNode, SugiSeparation } from "../sugify";
 
 /**
- * An operator that assigns coordinates to layered {@link sugiyama/sugify!SugiNode}s
+ * an operator that assigns coordinates to layered {@link SugiNode}s
  *
  * This function must assign each node an `x` coordinate, and return the width
  * of the layout. The `x` coordinates should satisfy the
- * {@link sugiyama/sugify!SugiSeparation}, and all be between zero and the returned
- * width.
- *
- * There are five built-in coordinate assignment operators:
- * - {@link sugiyama/coord/simplex!CoordSimplex} - positions nodes according to a simplex optimization, striving for vertical edges
- * - {@link sugiyama/coord/quad!CoordQuad} - positions nodes according to quadratic optimization, striving for minimum overall curvature
- * - {@link sugiyama/coord/greedy!CoordGreedy} - positions nodes greedily according to their parent's positions
- * - {@link sugiyama/coord/topological!CoordTopological} - positions nodes using quadratic optimization if they were layered using topological layering
+ * {@link SugiSeparation}, and all be between zero and the returned width.
  *
  * @example
  *
@@ -47,6 +40,7 @@ import { SugiNode, SugiSeparation } from "../sugify";
  *     }
  *     return max - min;
  * }
+ * ```
  */
 export interface Coord<in NodeDatum = never, in LinkDatum = never> {
   <N extends NodeDatum, L extends LinkDatum>(

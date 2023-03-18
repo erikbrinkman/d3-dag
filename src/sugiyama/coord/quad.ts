@@ -20,7 +20,7 @@ import {
 } from "./utils";
 
 /**
- * A strictly callable {@link NodeWeight}
+ * a strictly callable {@link NodeWeight}
  */
 export interface CallableNodeWeight<NodeDatum = never, LinkDatum = never> {
   (node: GraphNode<NodeDatum, LinkDatum>): number;
@@ -28,14 +28,14 @@ export interface CallableNodeWeight<NodeDatum = never, LinkDatum = never> {
 /**
  * an accessor to get the optimization of the weight for a node
  *
- * Currently this is only used to set the {@link CoordQuad.nodeCurve}.
+ * Currently this is only used to set the {@link CoordQuad#nodeCurve}.
  */
 export type NodeWeight<NodeDatum = never, LinkDatum = never> =
   | number
   | CallableNodeWeight<NodeDatum, LinkDatum>;
 
 /**
- * A strictly callable {@link LinkWeight}
+ * a strictly callable {@link LinkWeight}
  */
 export interface CallableLinkWeight<NodeDatum = never, LinkDatum = never> {
   (link: GraphLink<NodeDatum, LinkDatum>): number;
@@ -43,16 +43,16 @@ export interface CallableLinkWeight<NodeDatum = never, LinkDatum = never> {
 /**
  * an accessor to get the optimization of the weight for a link
  *
- * Currently this is only used to set the following accessors:
- * {@link CoordQuad.linkCurve}, {@link CoordQuad.vertWeak},
- * {@link CoordQuad.vertStrong}.
+ * Currently this is used to set the following accessors:
+ * {@link CoordQuad#linkCurve}, {@link CoordQuad#vertWeak},
+ * {@link CoordQuad#vertStrong}.
  */
 export type LinkWeight<NodeDatum = never, LinkDatum = never> =
   | number
   | CallableLinkWeight<NodeDatum, LinkDatum>;
 
 /** the operators for the quad operator */
-export interface Operators<N = never, L = never> {
+export interface CoordQuadOps<N = never, L = never> {
   /** the vert weak accessor */
   vertWeak: LinkWeight<N, L>;
   /** the vert strong accessor */
@@ -64,14 +64,14 @@ export interface Operators<N = never, L = never> {
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends Operators> = O extends Operators<
+export type OpNodeDatum<O extends CoordQuadOps> = O extends CoordQuadOps<
   infer N,
   never
 >
   ? N
   : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends Operators> = O extends Operators<
+export type OpLinkDatum<O extends CoordQuadOps> = O extends CoordQuadOps<
   never,
   infer L
 >
@@ -79,92 +79,99 @@ export type OpLinkDatum<O extends Operators> = O extends Operators<
   : never;
 
 /**
- * A {@link sugiyama/coord!Coord} that places nodes to minimize a quadratic function
+ * a {@link Coord} that places nodes to minimize a quadratic function
  *
  * This operators generally takes the longest of all built-in operators but
- * produces the most pleasing layout.
+ * produces a pleasing layout.
  *
  * Create with {@link coordQuad}.
- *
- * <img alt="quad example" src="media://sugi-simplex-opt-quad.png" width="400">
  */
-export interface CoordQuad<Ops extends Operators>
+export interface CoordQuad<Ops extends CoordQuadOps>
   extends Coord<OpNodeDatum<Ops>, OpLinkDatum<Ops>> {
   /**
-   * Set the weak vertical accessor.
+   * set the weak vertical accessor.
    *
    * The weak vertical accessor adds a penalty to make edges vertical. It's
    * weak in that it applies to all edges equally regardless of length, and
    * while it penalized non vertical edges, it allows curving in the middle of
-   * long edges. (default: () =\> 1)
+   * long edges.
+   *
+   * (default: `1`)
    */
   vertWeak<NewVertWeak extends LinkWeight>(
     val: NewVertWeak
   ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>>;
   /**
-   * Get the current vertWeak accessor
+   * get the current vertWeak accessor
    */
   vertWeak(): Ops["vertWeak"];
 
   /**
-   * Set the strong vertical accessor.
+   * set the strong vertical accessor.
    *
    * The strong vertical accessor adds a penalty to make edges vertical. It
    * penealizes any section of an edge that isn't vertical, making longer edges
-   * contribute more to the overall impact on the objective. (default: () =\> 0)
+   * contribute more to the overall impact on the objective.
+   *
+   * (default: `0`)
    */
   vertStrong<NewVertStrong extends LinkWeight>(
     val: NewVertStrong
   ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>>;
   /**
-   * Get the current vertStrong accessor
+   * get the current vertStrong accessor
    */
   vertStrong(): Ops["vertStrong"];
 
   /**
-   * Set the link curve weight accessor
+   * set the link curve weight accessor
    *
    * The link curve weight penalizes links to reduce their curving, in
    * dependent of their verticality. If using strongVert for an edge, it
-   * probably won't need a strong link curve weight. (default: () =\> 1)
+   * probably won't need a strong link curve weight.
+   *
+   * (default: `1`)
    */
   linkCurve<NewLinkCurve extends LinkWeight>(
     val: NewLinkCurve
   ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>>;
   /**
-   * Get the current link curve weight accessor
+   * get the current link curve weight accessor
    */
   linkCurve(): Ops["linkCurve"];
 
   /**
-   * Set the node curve weight accessor
+   * set the node curve weight accessor
    *
    * The node curve weight penalizes curves through nodes. If a node only has
    * one incoming and one outgoing edge, it will try to make them match in
    * angle. Note that it does it for all possible "through edges" so multiple
    * incoming and multiple outgoing will get counted several times. It's not
    * clear why this would ever be desirable, but it's possible to specify.
-   * (default: () =\> 0)
+   *
+   * (default: `0`)
    */
   nodeCurve<NewNodeCurve extends NodeWeight>(
     val: NewNodeCurve
   ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>>;
   /**
-   * Get the current node curve accessor
+   * get the current node curve accessor
    */
   nodeCurve(): Ops["nodeCurve"];
 
   /**
-   * Set the weight for how close nodes should be to zero.
+   * set the weight for how close nodes should be to zero.
    *
    * This ensures the optimization is sound, and is necessary if there are
    * certain types of disconnected components or zero weights for different
    * curvature constraints. If the graph is connected and the weights are
    * positive this can be set to zero, otherwise it should be positive, but
-   * small. (default: 1e-6)
+   * small.
+   *
+   * (default: `1e-6`)
    */
   compress(val: number): CoordQuad<Ops>;
-  /** Get the current compress weight. */
+  /** get the current compress weight. */
   compress(): number;
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
@@ -242,10 +249,10 @@ function normalizeAccessor<T>(
 function buildOperator<
   ND extends never,
   LD extends never,
-  Ops extends Operators<ND, LD>
+  Ops extends CoordQuadOps<ND, LD>
 >(
   opts: Ops &
-    Operators<ND, LD> & {
+    CoordQuadOps<ND, LD> & {
       comp: number;
     }
 ): CoordQuad<Ops> {
@@ -442,13 +449,17 @@ export type DefaultCoordQuad = CoordQuad<{
 }>;
 
 /**
- * Create a default {@link CoordQuad}
+ * create a default {@link CoordQuad}
  *
- * - {@link CoordQuad#vertWeak | `vertWeak()`}: `1`
- * - {@link CoordQuad#vertStrong | `vertStrong()`}: `0`
- * - {@link CoordQuad#linkCurve | `linkCurve()`}: `1`
- * - {@link CoordQuad#nodeCurve | `nodeCurve()`}: `0`
- * - {@link CoordQuad#compress | `compress()`}: `1e-6`
+ * This coordinate assignment operator tries to minimize the curve of links.
+ * Unlike {@link coordSimplex} it produces layouts with less verticality, which
+ * often look a little worse.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().coord(coordQuad().vertStrong(1));
+ * ```
  */
 export function coordQuad(...args: never[]): DefaultCoordQuad {
   if (args.length) {

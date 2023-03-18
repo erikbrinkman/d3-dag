@@ -8,41 +8,42 @@ import { Twolayer } from ".";
 import { listMultimapPush } from "../../collections";
 import { entries, first, map, reduce, slice } from "../../iters";
 import { OptChecking } from "../../layout";
-import { Constraint, solve, Variable } from "../../simplex";
+import { Constraint, Variable, solve } from "../../simplex";
 import { err } from "../../utils";
 import { SugiNode } from "../sugify";
 
 /**
- * A {@link sugiyama/twolayer!Twolayer} for optimal decrossing of a single target layer
+ * a {@link Twolayer} for optimal decrossing of a single target layer
  *
  * The opt order operator orders the relevant layer to minimize the number of
  * crossings. This is expensive, but not nearly as expensive as optimizing all
  * crossings initially.
  *
  * Create with {@link twolayerOpt}.
- *
- * <img alt="two layer opt example" src="media://sugi-simplex-twolayer-quad.png" width="400">
  */
 export interface TwolayerOpt extends Twolayer<unknown, unknown> {
   /**
-   * Set the large dag handling
+   * set the checking for large dag options
    *
    * Setting to anything but `"fast"` will allow running on larger dags, but
-   * the layout may run forever, or crash the vm. (default: `"fast"`)
+   * the layout may run forever, or crash the vm.
+   *
+   * (default: `"fast"`)
    */
   check(val: OptChecking): TwolayerOpt;
-  /** Return the handling of large graphs. */
+  /** return the checking of large graphs */
   check(): OptChecking;
 
   /**
-   * Set whether to also minimize distance between nodes that share a parent or
-   * child
+   * set whether to also minimize distance between nodes with common ancestors
    *
    * This adds more variables and constraints so will take longer, but will
-   * likely produce a better layout. (default: false)
+   * likely produce a better layout. It is the same as {@link DecrossOpt#dist}.
+   *
+   * (default: `false`)
    */
   dist(val: boolean): TwolayerOpt;
-  /** get whether the current layout minimized distance */
+  /** get whether the current layout minimizes distance */
   dist(): boolean;
 
   /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
@@ -296,10 +297,18 @@ function buildOperator(options: {
 }
 
 /**
- * Create a default {@link TwolayerOpt}
+ * create a default {@link TwolayerOpt}
  *
- * - {@link TwolayerOpt#check | `check()`}: `"fast"`
- * - {@link TwolayerOpt#dist | `dist()`}: `false`
+ * This is a {@link Twolayer} that optimally removes crossings between the two
+ * layers. Because this is local, it might not fully remove link crossings that
+ * {@link decrossOpt} will, but it can run on larger dags and will often be
+ * faster.
+ *
+ * @example
+ *
+ * ```ts
+ * const layout = sugiyama().decross(decrossTwoLayer().order(twolayerOpt()));
+ * ```
  */
 export function twolayerOpt(...args: never[]): TwolayerOpt {
   if (args.length) {
