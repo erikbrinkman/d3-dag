@@ -621,6 +621,10 @@ class FakeNode implements GraphNode<null, null> {
   *childLinks(): IterableIterator<GraphLink<null, null>> {
     // noop
   }
+
+  toJSON(): unknown {
+    return null;
+  }
 }
 
 function acyclic(nodes: Iterable<GraphNode>): boolean {

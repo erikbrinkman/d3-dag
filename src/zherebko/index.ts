@@ -7,7 +7,7 @@ import { Graph, Rank } from "../graph";
 import { bigrams, map } from "../iters";
 import { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
 import { Tweak } from "../tweaks";
-import { err, U } from "../utils";
+import { U, err } from "../utils";
 import { greedy } from "./greedy";
 
 /** all operators for the zherebko layout */

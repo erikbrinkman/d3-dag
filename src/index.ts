@@ -57,6 +57,8 @@ export type {
   DefaultHierarchy,
   Hierarchy,
 } from "./graph/hierarchy";
+export { graphJson } from "./graph/json";
+export type { Hydrate } from "./graph/json";
 export { graphStratify } from "./graph/stratify";
 export type {
   DefaultStratify,

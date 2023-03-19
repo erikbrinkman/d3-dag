@@ -22,6 +22,7 @@ minimizing edge inversions where possible (although not optimally)
 - Mutable directed graphs, and similar creation methods to warm start them from
   data.
 - Tweaks - a set of various tweaks that modify a layout.
+- toJSON method on graphs so they can be serialized.
 
 ### Removed
 

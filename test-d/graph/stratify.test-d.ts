@@ -1,9 +1,9 @@
 import { expectAssignable, expectNotAssignable, expectType } from "tsd";
 import { MutGraph } from "../../src/graph";
 import {
-  graphStratify,
   ParentDataOperator,
   ParentIdsOperator,
+  graphStratify,
 } from "../../src/graph/stratify";
 import { IdOperator } from "../../src/graph/utils";
 

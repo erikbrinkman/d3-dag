@@ -6,11 +6,11 @@
 import { Graph, GraphNode } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
 import { Tweak } from "../tweaks";
-import { err, U } from "../utils";
+import { U, err } from "../utils";
 import { Coord } from "./coord";
-import { coordSimplex, DefaultCoordSimplex } from "./coord/simplex";
+import { DefaultCoordSimplex, coordSimplex } from "./coord/simplex";
 import { Decross } from "./decross";
-import { decrossTwoLayer, DefaultDecrossTwoLayer } from "./decross/two-layer";
+import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
 import {

@@ -17,6 +17,7 @@ import {
 } from "../collections";
 import { chain, filter, map } from "../iters";
 import { dfs, err, ierr } from "../utils";
+import { toJson } from "./json";
 
 // ---------- //
 // Interfaces //
@@ -138,6 +139,11 @@ export interface Graph<out NodeDatum = unknown, out LinkDatum = unknown>
    * Return true if there no cycles in the graph
    */
   acyclic(): boolean;
+
+  /**
+   * Serialize the graph
+   */
+  toJSON(): unknown;
 }
 
 /** A node creation method with optional data */
@@ -722,6 +728,10 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
       if (this.#acyclic === false) this.#acyclic = null;
     }
   };
+
+  toJSON(): unknown {
+    return toJson(this);
+  }
 }
 
 function multimapValuesNext<V>(
@@ -1119,6 +1129,10 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
       this.#graph = null;
       this.#cinfo = null;
     }
+  }
+
+  toJSON(): unknown {
+    return toJson(this);
   }
 }
 

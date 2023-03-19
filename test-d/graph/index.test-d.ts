@@ -1,5 +1,5 @@
 import { expectAssignable, expectError } from "tsd";
-import { graph, MutGraphLink, MutGraphNode } from "../../src/graph";
+import { MutGraphLink, MutGraphNode, graph } from "../../src/graph";
 
 const nullnull = graph<null, null>();
 expectError(nullnull.node());

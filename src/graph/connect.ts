@@ -273,7 +273,8 @@ function defaultNodeDatum(id: string): string {
 }
 
 /** default ops of the default connect operator */
-export interface DefaultConnectOps {
+export interface DefaultConnectOps
+  extends ConnectOps<string, readonly [string, string]> {
   /** the default source id operator */
   sourceId: IdOperator<ZeroString>;
   /** the default target id operator */

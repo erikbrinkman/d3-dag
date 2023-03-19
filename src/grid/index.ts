@@ -6,7 +6,7 @@
 import { Graph, Rank } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
 import { Tweak } from "../tweaks";
-import { err, U } from "../utils";
+import { U, err } from "../utils";
 import { Lane } from "./lane";
 import { LaneGreedy, laneGreedy } from "./lane/greedy";
 import { verifyLanes } from "./lane/utils";
