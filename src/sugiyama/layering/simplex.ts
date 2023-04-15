@@ -7,8 +7,8 @@
 import { Group, Layering } from ".";
 import { Graph, GraphNode, Rank } from "../../graph";
 import { bigrams, map } from "../../iters";
-import { Constraint, solve, Variable } from "../../simplex";
-import { err, ierr, U } from "../../utils";
+import { Constraint, Variable, solve } from "../../simplex";
+import { U, err, ierr } from "../../utils";
 import { Separation } from "../utils";
 
 /** simplex operator operators */
@@ -91,7 +91,9 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
 
-    const ids = new Map(map(dag, (node, i) => [node, i.toString()] as const));
+    const ids = new Map(
+      map(dag.nodes(), (node, i) => [node, i.toString()] as const)
+    );
 
     /** get node id */
     function n(node: GraphNode<N, L>): string {
@@ -141,7 +143,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     const groups = new Map<string, GraphNode<N, L>[]>();
 
     // Add node variables and fetch ranks
-    for (const node of dag) {
+    for (const node of dag.nodes()) {
       const nid = n(node);
       variables[nid] = { opt: 0 };
 
@@ -195,14 +197,14 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
 
       let min = 0;
       let max = 0;
-      for (const node of dag) {
+      for (const node of dag.nodes()) {
         // lp solver doesn't assign some zeros
         const val = assignment[n(node)] ?? 0;
         node.y = val;
         min = Math.min(min, val - sep(undefined, node));
         max = Math.max(max, val + sep(node, undefined));
       }
-      for (const node of dag) {
+      for (const node of dag.nodes()) {
         node.y -= min;
       }
       return max - min;

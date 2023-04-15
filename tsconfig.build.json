@@ -4,8 +4,9 @@
     "target": "es6",
     "lib": ["es6"],
     "module": "es6",
-    "declaration": true,
     "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "outDir": "./dist"
   },
   "exclude": ["**/*.test.ts", "**/test-*.ts"]

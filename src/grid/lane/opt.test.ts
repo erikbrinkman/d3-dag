@@ -169,5 +169,6 @@ test("laneOpt() throws for very large graphs", () => {
 });
 
 test("laneOpt() throws for arguments", () => {
-  expect(() => laneOpt(undefined as never)).toThrow("laneOpt");
+  // @ts-expect-error no args
+  expect(() => laneOpt(null)).toThrow("laneOpt");
 });

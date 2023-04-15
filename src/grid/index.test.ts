@@ -1,9 +1,14 @@
 import { grid } from ".";
-import { graph, GraphNode } from "../graph";
+import { Graph, GraphNode, graph } from "../graph";
 import { filter } from "../iters";
+import { LayoutResult } from "../layout";
 import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs";
 import { tweakSize } from "../tweaks";
 import { laneGreedy } from "./lane/greedy";
+
+interface Grid<N, L> {
+  (inp: Graph<N, L>): LayoutResult;
+}
 
 test("grid() works for empty graph", () => {
   const grf = graph();
@@ -59,7 +64,7 @@ test("greedy() works for cycle", () => {
   }
 });
 
-test("grid() works with rank", () => {
+test("grid() works with custom rank", () => {
   function rank({ data }: { data: string }): number | undefined {
     if (data === "1") {
       return 2;
@@ -72,10 +77,74 @@ test("grid() works with rank", () => {
 
   const orig = en();
   const layout = grid().nodeSize([2, 2]).rank(rank);
+
   expect(layout.rank()).toBe(rank);
   const { width, height } = layout(orig);
   expect(width).toEqual(5);
   expect(height).toEqual(11);
+});
+
+test("grid() allows setting custom operators", () => {
+  function rank({ data }: { data: { rank: number } }): number | undefined {
+    return data.rank;
+  }
+
+  function size({ data }: { data: { size: number } }): [number, number] {
+    return [data.size, data.size];
+  }
+
+  function lane(ordered: readonly GraphNode<unknown, { lane: number }>[]) {
+    for (const [i, node] of ordered.entries()) {
+      node.x = i;
+    }
+  }
+
+  function tweakOne(
+    grf: Graph<{ tweak: null }>,
+    res: LayoutResult
+  ): LayoutResult {
+    grf.nnodes();
+    return res;
+  }
+
+  function tweakTwo(
+    grf: Graph<unknown, { tweak: null }>,
+    res: LayoutResult
+  ): LayoutResult {
+    grf.nnodes();
+    return res;
+  }
+
+  const init = grid() satisfies Grid<unknown, unknown>;
+
+  const ranked = init.rank(rank) satisfies Grid<{ rank: number }, unknown>;
+  // @ts-expect-error old data
+  ranked satisfies Grid<unknown, unknown>;
+
+  const sized = ranked.nodeSize(size);
+  sized satisfies Grid<{ rank: number; size: number }, unknown>;
+  // @ts-expect-error old data
+  sized satisfies Grid<{ rank: number }, unknown>;
+
+  const laned = sized.lane(lane);
+  laned satisfies Grid<{ rank: number; size: number }, { lane: number }>;
+  // @ts-expect-error old data
+  laned satisfies Grid<{ rank: number; size: number }, unknown>;
+
+  const layout = laned.tweaks([tweakOne, tweakTwo]);
+  layout satisfies Grid<
+    { rank: number; size: number; tweak: null },
+    { lane: number; tweak: null }
+  >;
+  // @ts-expect-error old data
+  layout satisfies Grid<{ rank: number; size: number }, { lane: number }>;
+
+  const [first, second] = layout.tweaks();
+  expect(first satisfies typeof tweakOne).toBe(tweakOne);
+  expect(second satisfies typeof tweakTwo).toBe(tweakTwo);
+  expect(layout.rank() satisfies typeof rank).toBe(rank);
+  expect(layout.nodeSize() satisfies typeof size).toBe(size);
+  expect(layout.lane() satisfies typeof lane).toBe(lane);
 });
 
 test("grid() works for multigraph", () => {
@@ -233,5 +302,6 @@ test("grid() throws invalid gap", () => {
 });
 
 test("grid() throws for arguments", () => {
-  expect(() => grid(undefined as never)).toThrow("grid");
+  // @ts-expect-error no args
+  expect(() => grid(null)).toThrow("grid");
 });

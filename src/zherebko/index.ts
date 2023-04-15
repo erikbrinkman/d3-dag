@@ -66,7 +66,7 @@ export interface Zherebko<Ops extends Operators = Operators> {
   /**
    * Set the tweaks to apply after layout
    */
-  tweaks<NewTweaks extends readonly Tweak[]>(
+  tweaks<const NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Zherebko<U<Ops, "tweaks", NewTweaks>>;
   /**

@@ -1,4 +1,4 @@
-import { layerSeparation } from ".";
+import { Layering, layerSeparation } from ".";
 import { doub, eye, multi, oh, square } from "../../test-graphs";
 import { canonical, getLayers } from "../test-utils";
 import { sizedSep } from "./test-utils";
@@ -32,8 +32,15 @@ test("layeringTopological() works for square with sizedSep", () => {
 test("layeringTopological() allows setting rank", () => {
   const dag = square();
   const rank = ({ data }: { data: string }) => -parseInt(data);
-  const layering = layeringTopological().rank(rank);
-  expect(layering.rank()).toBe(rank);
+
+  const init = layeringTopological() satisfies Layering<unknown, unknown>;
+
+  const layering = init.rank(rank) satisfies Layering<string, unknown>;
+  // @ts-expect-error invalid data
+  layering satisfies Layering<unknown, unknown>;
+
+  expect(layering.rank() satisfies typeof rank).toBe(rank);
+
   const num = layering(dag, layerSeparation);
   expect(num).toBe(3);
   const layers = getLayers(dag, num + 1);
@@ -92,7 +99,8 @@ test("layeringTopological() works for cyclic graph", () => {
 });
 
 test("layeringTopological() fails passing an arg to constructor", () => {
-  expect(() => layeringTopological(null as never)).toThrow(
+  // @ts-expect-error no args
+  expect(() => layeringTopological(null)).toThrow(
     "got arguments to layeringTopological"
   );
 });

@@ -38,6 +38,7 @@ minimizing edge inversions where possible (although not optimally)
 - Size funtions on layouts, instead creating a size tweak.
 - coordCenter operator as it doesn't work with compact sugiyama and doesn't
   produce great layouts anyway
+- graphs are no longer iterable instead explicitely call `.nodes()`
 
 ### Changed
 

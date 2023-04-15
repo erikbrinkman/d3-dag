@@ -73,7 +73,7 @@ export interface DecrossTwoLayer<Ops extends TwolayerOps = TwolayerOps>
    * ones. The empty list is treated as a singleton list with a noop operator.
    * (default: [decrossDfs(), decrossDfs().topDown(false)])
    */
-  inits<NewInits extends readonly Decross[]>(
+  inits<const NewInits extends readonly Decross[]>(
     val: NewInits
   ): DecrossTwoLayer<U<Ops, "inits", NewInits>>;
   /**

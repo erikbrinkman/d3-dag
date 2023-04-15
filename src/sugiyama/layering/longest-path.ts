@@ -68,7 +68,7 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
 
     // flip again if we're not top down
     if (!options.topDown) {
-      for (const node of dag) {
+      for (const node of dag.nodes()) {
         node.y = height - node.y;
       }
     }

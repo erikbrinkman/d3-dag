@@ -1,5 +1,5 @@
 import { graph, MutGraph, MutGraphNode } from ".";
-import { map } from "../iters";
+import { isIterable, map } from "../iters";
 import { err } from "../utils";
 
 // NOTE this is typed differently than most operators, and that's because the
@@ -300,14 +300,14 @@ export interface HasChildren {
   readonly children?: Iterable<HasChildren> | undefined;
 }
 
-function hasChildren(d: unknown): d is HasChildren {
-  try {
-    const children = (d as HasChildren).children;
-    return (
-      children === undefined || typeof children[Symbol.iterator] === "function"
-    );
-  } catch {
+function hasChildren(data: unknown): data is HasChildren {
+  if (typeof data !== "object" || data === null) {
     return false;
+  } else if (!("children" in data)) {
+    return true;
+  } else {
+    const { children } = data;
+    return children === undefined || isIterable(children);
   }
 }
 
@@ -315,7 +315,7 @@ function defaultChildren(d: unknown): Iterable<HasChildren> | undefined {
   if (hasChildren(d)) {
     return d.children;
   } else {
-    throw err`datum did not have an array children field, and no custom children accessor was specified; try calling \`graphHierarchy().children(d => ...)\` to set a custom children accessor`;
+    throw err`datum did not have an iterable children field, and no custom children accessor was specified; try calling \`graphHierarchy().children(d => ...)\` to set a custom children accessor`;
   }
 }
 

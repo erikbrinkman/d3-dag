@@ -1,3 +1,5 @@
+import { Coord } from ".";
+import { GraphLink } from "../../graph";
 import { createLayers, nodeSep } from "../test-utils";
 import { coordQuad } from "./quad";
 
@@ -5,20 +7,38 @@ test("coordQuad() modifiers work", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
 
   const comp = 0.5;
-  const vertWeak = () => 2;
-  const vertStrong = () => 3;
-  const linkCurve = () => 4;
-  const nodeCurve = () => 5;
-  const advanced = coordQuad()
-    .vertWeak(vertWeak)
-    .vertStrong(vertStrong)
+  function vertWeak({ source, target }: GraphLink<{ layer: number }>): number {
+    return source.data.layer + target.data.layer + 1;
+  }
+  function vertStrong({
+    source,
+    target,
+  }: GraphLink<{ index: number | string }>): number {
+    return +source.data.index + +target.data.index + 1;
+  }
+  function linkCurve({ data }: { data: undefined }): number {
+    return data ?? 1;
+  }
+  function nodeCurve({ data }: { data: { index: number } }): number {
+    return data.index + 1;
+  }
+
+  const init = coordQuad() satisfies Coord<unknown, unknown>;
+  const vert = init.vertWeak(vertWeak).vertStrong(vertStrong);
+  vert satisfies Coord<{ layer: number; index: number | string }, unknown>;
+  // @ts-expect-error invalid data
+  vert satisfies Coord<unknown, unknown>;
+  const advanced = vert
     .linkCurve(linkCurve)
     .nodeCurve(nodeCurve)
     .compress(comp);
-  expect(advanced.vertWeak()).toBe(vertWeak);
-  expect(advanced.vertStrong()).toBe(vertStrong);
-  expect(advanced.linkCurve()).toBe(linkCurve);
-  expect(advanced.nodeCurve()).toBe(nodeCurve);
+  advanced satisfies Coord<{ index: number; layer: number }, undefined>;
+  // @ts-expect-error invalid data
+  advanced satisfies Coord<{ layer: number; index: number | string }, unknown>;
+  expect(advanced.vertWeak() satisfies typeof vertWeak).toBe(vertWeak);
+  expect(advanced.vertStrong() satisfies typeof vertStrong).toBe(vertStrong);
+  expect(advanced.linkCurve() satisfies typeof linkCurve).toBe(linkCurve);
+  expect(advanced.nodeCurve() satisfies typeof nodeCurve).toBe(nodeCurve);
   expect(advanced.compress()).toEqual(comp);
   advanced(layers, nodeSep);
 });
@@ -165,7 +185,8 @@ test("coordQuad() fails with negative node weight", () => {
 });
 
 test("coordQuad() fails passing an arg to constructor", () => {
-  expect(() => coordQuad(null as never)).toThrow("got arguments to coordQuad");
+  // @ts-expect-error no args
+  expect(() => coordQuad(null)).toThrow("got arguments to coordQuad");
 });
 
 test("coordQuad() throws for zero width", () => {

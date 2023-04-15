@@ -1,5 +1,15 @@
+import { MutGraph } from ".";
 import { map } from "../iters";
 import { graphHierarchy } from "./hierarchy";
+
+// initial types
+interface Init {
+  children?: Iterable<Init> | undefined;
+}
+
+interface Hierarchy<N, L> {
+  (...inp: N[]): MutGraph<N, L>;
+}
 
 interface Datum {
   id: string;
@@ -27,12 +37,21 @@ function typedChildren(datum: Datum): Datum[] | undefined {
 
 test("graphHierarchy() parses minimal graph", () => {
   const single = { id: "a" };
-  const build = graphHierarchy().children(typedChildren);
-  expect(build.children()).toBe(typedChildren);
+
+  const init = graphHierarchy() satisfies Hierarchy<Init, undefined>;
+  // @ts-expect-error invalid types
+  init satisfies Hierarchy<unknown, unknown>;
+
+  const build = init.children(typedChildren);
+  build satisfies Hierarchy<Datum, undefined>;
+  // @ts-expect-error invalid types
+  build satisfies Hierarchy<Init, undefined>;
+
+  expect(build.children() satisfies typeof typedChildren).toBe(typedChildren);
   expect([...(build.childrenData()(single, 0) ?? [])]).toHaveLength(0);
   const graph = build(single);
   expect(graph.nnodes()).toBe(1);
-  const ids = [...map(graph, ({ data }) => data.id)];
+  const ids = [...map(graph.nodes(), ({ data }) => data.id)];
   expect(ids).toEqual(["a"]);
 });
 
@@ -77,9 +96,17 @@ test("graphHierarchy() works with custom operators", () => {
     return c;
   }
 
-  const build = graphHierarchy().childrenData(newChildData);
+  const init = graphHierarchy() satisfies Hierarchy<Init, undefined>;
+  // @ts-expect-error invalid types
+  init satisfies Hierarchy<unknown, unknown>;
+
+  const build = init.childrenData(newChildData);
+  build satisfies Hierarchy<ComplexDatum, string>;
+  // @ts-expect-error invalid types
+  build satisfies Hierarchy<Init, undefined>;
+
   expect(build.children().wrapped).toBe(newChildData);
-  expect(build.childrenData()).toBe(newChildData);
+  expect(build.childrenData() satisfies typeof newChildData).toBe(newChildData);
   expect([...(build.children()(s, 0) ?? [])]).toHaveLength(2);
   expect([...(build.children()(t, 4) ?? [])]).toHaveLength(0);
 
@@ -126,19 +153,19 @@ test("graphHierarchy() fails with self loop", () => {
 
 test("graphHierarchy() throws for nonempty input", () => {
   expect(() => {
-    graphHierarchy(null as never);
+    // @ts-expect-error no args
+    graphHierarchy(null);
   }).toThrow("got arguments to graphHierarchy");
 });
 
-class BadChildren {
-  get children(): undefined {
-    throw new Error("bad children");
-  }
-}
-
 test("graphHierarchy() fails with incorrect children", () => {
   const build = graphHierarchy();
-  expect(() => build(new BadChildren())).toThrow(
-    "datum did not have an array children field, and no custom children accessor was specified"
+  // @ts-expect-error invalid arg
+  expect(() => build(null)).toThrow(
+    "datum did not have an iterable children field, and no custom children accessor was specified"
+  );
+  // @ts-expect-error invalid arg
+  expect(() => build({ children: null })).toThrow(
+    "datum did not have an iterable children field, and no custom children accessor was specified"
   );
 });

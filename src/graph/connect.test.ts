@@ -1,5 +1,17 @@
+import { MutGraph } from ".";
 import { entries, map, slice } from "../iters";
+import { canonical } from "../sugiyama/test-utils";
 import { graphConnect } from "./connect";
+
+// initial type
+interface Init {
+  0: string;
+  1: string;
+}
+
+interface Connect<N, LD> {
+  <L extends LD>(inp: L[]): MutGraph<N, L>;
+}
 
 const zherebko = [
   ["1", "2"],
@@ -30,7 +42,7 @@ test("graphConnect() parses a line", () => {
   expect(graph.multi()).toBe(false);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(true);
-  const ids = [...map(graph, ({ data }) => data)].sort();
+  const ids = [...map(graph.nodes(), ({ data }) => data)].sort();
   expect(ids).toEqual(["a", "b"]);
 });
 
@@ -45,7 +57,7 @@ test("graphConnect() parses a multi line", () => {
   expect(graph.multi()).toBe(true);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(true);
-  const ids = [...map(graph, ({ data }) => data)].sort();
+  const ids = [...map(graph.nodes(), ({ data }) => data)].sort();
   expect(ids).toEqual(["a", "b"]);
 });
 
@@ -71,7 +83,7 @@ test("graphConnect() parses a single node", () => {
 
   const graph = build([["a", "a"]]);
   expect(graph.nnodes()).toBe(1);
-  const ids = [...map(graph, ({ data }) => data)];
+  const ids = [...map(graph.nodes(), ({ data }) => data)];
   expect(ids).toEqual(["a"]);
 });
 
@@ -85,7 +97,7 @@ test("graphConnect() parses disconnected", () => {
   expect(graph.multi()).toBe(false);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(false);
-  const ids = [...map(graph, ({ data }) => data)];
+  const ids = [...map(graph.nodes(), ({ data }) => data)];
   expect(ids).toEqual(["a", "b"]);
 });
 
@@ -101,9 +113,7 @@ test("graphConnect() parses eye", () => {
   expect(graph.multi()).toBe(true);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(true);
-  const [zero, one, two] = [...graph].sort(
-    (a, b) => parseInt(a.data) - parseInt(b.data)
-  );
+  const [zero, one, two] = canonical(graph);
   expect(zero.data).toBe("0");
   expect(zero.nchildren()).toBe(2);
   expect(zero.nparents()).toBe(0);
@@ -126,9 +136,17 @@ test("graphConnect() parses complex data", () => {
     { source: "c", target: "d" },
   ] as const;
 
-  const build = graphConnect().sourceId(newSource).targetId(newTarget);
-  expect(build.sourceId()).toBe(newSource);
-  expect(build.targetId()).toBe(newTarget);
+  const init = graphConnect() satisfies Connect<string, Init>;
+  // @ts-expect-error doesn't take all data
+  init satisfies Connect<string, unknown>;
+
+  const build = init.sourceId(newSource).targetId(newTarget);
+  build satisfies Connect<string, { source: string; target: string }>;
+  // @ts-expect-error modified doesn't take default data
+  build satisfies Connect<string, Init>;
+
+  expect(build.sourceId() satisfies typeof newSource).toBe(newSource);
+  expect(build.targetId() satisfies typeof newTarget).toBe(newTarget);
 
   const graph = build(complex);
   expect(graph.nnodes()).toBe(4);
@@ -141,12 +159,19 @@ test("graphConnect() parses zherebko", () => {
 
 test("graphConnect() allows custom node data", () => {
   const nodeDatum = (id: string) => ({ num: parseInt(id) - 1 });
-  const build = graphConnect().nodeDatum(nodeDatum);
-  expect(build.nodeDatum()).toBe(nodeDatum);
+
+  const init = graphConnect() satisfies Connect<string, Init>;
+
+  const build = init.nodeDatum(nodeDatum);
+  build satisfies Connect<{ num: number }, Init>;
+  // @ts-expect-error init node data invalid
+  build satisfies Connect<string, Init>;
+
+  expect(build.nodeDatum() satisfies typeof nodeDatum).toBe(nodeDatum);
   const graph = build(zherebko);
   expect(graph.nnodes()).toBeCloseTo(11);
   const nums: number[] = [];
-  for (const { data } of graph) {
+  for (const { data } of graph.nodes()) {
     nums.push(data.num);
   }
   nums.sort((a, b) => a - b);
@@ -228,39 +253,28 @@ test("topological() correctly handles complex case", () => {
 });
 
 test("graphConnect() fails passing an arg to connect", () => {
-  expect(() => graphConnect(null as never)).toThrow(
-    "got arguments to graphConnect"
-  );
+  // @ts-expect-error no args
+  expect(() => graphConnect(null)).toThrow("got arguments to graphConnect");
 });
-
-class BadZero {
-  get [0](): string {
-    throw new Error("bad zero");
-  }
-  readonly [1] = "b";
-}
 
 test("graphConnect() fails on non-string source", () => {
-  expect(() => graphConnect()([[null as unknown as string, "a"]])).toThrow(
-    "default source id expected datum[0] to be a string but got datum: "
+  // @ts-expect-error invalid data
+  expect(() => graphConnect()([null])).toThrow(
+    "default source id expected datum[0] to exist but got datum: "
   );
-  expect(() => graphConnect()([new BadZero()])).toThrow(
+  // @ts-expect-error invalid data
+  expect(() => graphConnect()([[null, "a"]])).toThrow(
     "default source id expected datum[0] to be a string but got datum: "
   );
 });
 
-class BadOne {
-  readonly [0] = "a";
-  get [1](): string {
-    throw new Error("bad one");
-  }
-}
-
 test("graphConnect() fails on non-string target", () => {
-  expect(() => graphConnect()([["a", null as unknown as string]])).toThrow(
-    "default target id expected datum[1] to be a string but got datum: "
+  // @ts-expect-error invalid data
+  expect(() => graphConnect()([["a"]])).toThrow(
+    "default target id expected datum[1] to exist but got datum: "
   );
-  expect(() => graphConnect()([new BadOne()])).toThrow(
+  // @ts-expect-error invalid data
+  expect(() => graphConnect()([["a", null]])).toThrow(
     "default target id expected datum[1] to be a string but got datum: "
   );
 });

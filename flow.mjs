@@ -1,6 +1,6 @@
 import { beautify, compiler } from "flowgen";
 import { readFile, stat, writeFile } from "fs/promises";
-import glob from "glob";
+import { glob } from "glob";
 import { performance } from "perf_hooks";
 
 const cacheFilename = ".flow_cache";
@@ -15,18 +15,6 @@ async function getCache() {
 
 async function saveCache(cache) {
   await writeFile(cacheFilename, JSON.stringify(cache));
-}
-
-function getFiles() {
-  return new Promise((resolve, reject) =>
-    glob("dist/**/*.d.ts", (err, files) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(files);
-      }
-    })
-  );
 }
 
 async function isCached(cache, sourceFilename, sourceMtime, destFilename) {
@@ -70,9 +58,10 @@ ${flowdef}`;
 
 const totalStart = performance.now();
 const useCache = process.argv[2] === "--cache";
+
 const [rootCache, files] = await Promise.all([
   useCache ? getCache() : {},
-  getFiles(),
+  glob("dist/**/*.d.ts"),
 ]);
 await Promise.all(files.map((file) => transpile(rootCache, file)));
 await saveCache(rootCache);

@@ -1,4 +1,4 @@
-import { layerSeparation } from ".";
+import { Layering, layerSeparation } from ".";
 import { GraphNode } from "../../graph";
 import { graphConnect } from "../../graph/connect";
 import { doub, ex, eye, multi, oh, square } from "../../test-graphs";
@@ -49,17 +49,38 @@ test("simplex() works for known failure", () => {
 
 test("simplex() respects ranks and gets them", () => {
   const dag = square();
-  function ranker(node: GraphNode<string>): undefined | number {
-    if (node.data === "1") {
+  function ranker({ data }: { data: string }): undefined | number {
+    if (data === "1") {
       return 1;
-    } else if (node.data === "2") {
+    } else if (data === "2") {
       return 2;
     } else {
       return undefined;
     }
   }
-  const layering = simplex().rank(ranker);
-  expect(layering.rank()).toBe(ranker);
+
+  function group(node: GraphNode<unknown, [string, string]>): undefined {
+    for (const _ of node.childLinks()) {
+      // noop
+    }
+    return undefined;
+  }
+
+  const init = simplex() satisfies Layering<unknown, unknown>;
+
+  const grouped = init.group(group);
+  grouped satisfies Layering<unknown, [string, string]>;
+  // @ts-expect-error invalid data
+  grouped satisfies Layering<unknown, unknown>;
+
+  const layering = grouped.rank(ranker);
+  layering satisfies Layering<string, [string, string]>;
+  // @ts-expect-error invalid data
+  layering satisfies Layering<unknown, [string, string]>;
+
+  expect(layering.rank() satisfies typeof ranker).toBe(ranker);
+  expect(layering.group() satisfies typeof group).toBe(group);
+
   const num = layering(dag, layerSeparation);
   expect(num).toBe(3);
   const layers = getLayers(dag, num + 1);
@@ -158,9 +179,8 @@ test("simplex() works for oh with sizedSep", () => {
 });
 
 test("simplex() fails passing an arg to constructor", () => {
-  expect(() => simplex(null as never)).toThrow(
-    "got arguments to layeringSimplex"
-  );
+  // @ts-expect-error no args
+  expect(() => simplex(null)).toThrow("got arguments to layeringSimplex");
 });
 
 test("simplex() fails with ill-defined groups", () => {

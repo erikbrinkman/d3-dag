@@ -83,7 +83,7 @@ export function toJson(grf: Graph): unknown {
   const nodes: SerializedNode[] = [];
   let index;
   const inds = new Map<GraphNode, number>();
-  for (const [ind, node] of entries(grf)) {
+  for (const [ind, node] of entries(grf.nodes())) {
     inds.set(node, ind);
     nodes.push({ x: node.ux, y: node.uy, data: node.data });
     if (node === grf) {
@@ -140,6 +140,7 @@ export interface GraphJsonOptions<NodeDatum, LinkDatum> {
   linkDatum?: Hydrator<LinkDatum>;
 }
 
+/** the operator that define hydration */
 export interface HydrateOps<out N = unknown, out L = unknown> {
   /** the node datum operator */
   nodeDatum: Hydrator<N>;
@@ -147,6 +148,7 @@ export interface HydrateOps<out N = unknown, out L = unknown> {
   linkDatum: Hydrator<L>;
 }
 
+/** An operator that hydrates serialized json into a graph */
 export interface Hydrate<
   NodeDatum,
   LinkDatum,
@@ -154,14 +156,18 @@ export interface Hydrate<
 > {
   (json: unknown): MutGraph<NodeDatum, LinkDatum>;
 
+  /** set custom hydration for node data */
   nodeDatum<NN, NewNode extends Hydrator<NN>>(
     val: NewNode & Hydrator<NN>
   ): Hydrate<NN, LinkDatum, U<Ops, "nodeDatum", NewNode>>;
+  /** get the node data hydrator */
   nodeDatum(): Ops["nodeDatum"];
 
+  /** set custom hydration for link data */
   linkDatum<NL, NewLink extends Hydrator<NL>>(
     val: NewLink & Hydrator<NL>
   ): Hydrate<NodeDatum, NL, U<Ops, "linkDatum", NewLink>>;
+  /** get the link data hydrator */
   linkDatum(): Ops["linkDatum"];
 
   // TODO there's no way to force this to deserialize to a node, but maybe we
@@ -226,11 +232,11 @@ function buildOperator<N, L, O extends HydrateOps<N, L>>(
   return graphJson;
 }
 
-// FIXME make all of defaults interfaces instead of types
+/** The default operator created by {@link graphJson} */
+export type DefaultHydrate = Hydrate<unknown, unknown, HydrateOps>;
 
-export function graphJson(
-  ...args: readonly never[]
-): Hydrate<unknown, unknown, HydrateOps> {
+/** create a graph constructor from deserialized json */
+export function graphJson(...args: readonly never[]): DefaultHydrate {
   if (args.length) {
     throw err`got arguments to graphJson(${args}), but constructor takes no arguments; these were probably meant as data which should be called as \`graphJson()(...)\``;
   } else {

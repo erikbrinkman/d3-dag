@@ -1,15 +1,30 @@
+import { Coord } from ".";
+import { GraphLink } from "../../graph";
 import { flatMap } from "../../iters";
 import { sugiNodeLength } from "../sugify";
 import { createLayers, nodeSep } from "../test-utils";
 import { sizedSeparation } from "../utils";
-import { coordSimplex as simplex } from "./simplex";
+import { coordSimplex } from "./simplex";
 
-test("simplex() modifiers work", () => {
+test("coordSimplex() modifiers work", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
+  function weight({
+    source,
+    target,
+  }: GraphLink<{ index: number }>): [number, number, number] {
+    return [source.data.index == target.data.index ? 1 : 2, 3, 4];
+  }
 
-  const weight = () => [2, 3, 4] as const;
-  const layout = simplex().weight(weight);
-  expect(layout.weight()).toBe(weight);
+  const init = coordSimplex() satisfies Coord<unknown, unknown>;
+
+  const layout = init.weight(weight) satisfies Coord<
+    { index: number },
+    unknown
+  >;
+  // @ts-expect-error new weight
+  layout satisfies Coord<unknown, unknown>;
+
+  expect(layout.weight() satisfies typeof weight).toBe(weight);
   layout(layers, nodeSep);
 
   for (const node of flatMap(layers, (l) => l)) {
@@ -17,10 +32,10 @@ test("simplex() modifiers work", () => {
   }
 });
 
-test("simplex() works for square like layout", () => {
+test("coordSimplex() works for square like layout", () => {
   const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);
   const [[head], [left, right], [tail]] = layers;
-  const layout = simplex();
+  const layout = coordSimplex();
   const width = layout(layers, nodeSep);
 
   expect(width).toBeCloseTo(2);
@@ -32,10 +47,10 @@ test("simplex() works for square like layout", () => {
   expect(tail.x).toBeCloseTo(1.5);
 });
 
-test("simplex() works for triangle", () => {
+test("coordSimplex() works for triangle", () => {
   const layers = createLayers([[[0, 1]], [0, [0]], [[]]]);
   const [[one], [dummy, two], [three]] = layers;
-  const layout = simplex();
+  const layout = coordSimplex();
   const sep = sizedSeparation(
     sugiNodeLength(() => 1),
     0
@@ -50,10 +65,10 @@ test("simplex() works for triangle", () => {
   expect(two.x).toBeCloseTo(1.0);
 });
 
-test("simplex() works for dee", () => {
+test("coordSimplex() works for dee", () => {
   const layers = createLayers([[[0, 1]], [0, [1]], [0, [0]], [[]]]);
   const [[one], [d1, two], [d2, three], [four]] = layers;
-  const layout = simplex();
+  const layout = coordSimplex();
   layout(layers, nodeSep);
 
   // NOTE with dummy node first, we guarantee that that's the straight line
@@ -65,10 +80,10 @@ test("simplex() works for dee", () => {
   expect(three.x).toBeCloseTo(1.5);
 });
 
-test("simplex() works for dee with custom weights", () => {
+test("coordSimplex() works for dee with custom weights", () => {
   const layers = createLayers([[[0, 1]], [0, [1]], [0, [0]], [[]]]);
   const [[one], [d1, two], [d2, three], [four]] = layers;
-  const layout = simplex().weight(() => [2, 3, 4]);
+  const layout = coordSimplex().weight(() => [2, 3, 4]);
   layout(layers, nodeSep);
 
   // NOTE with dummy node first, we guarantee that that's the straight line
@@ -80,10 +95,10 @@ test("simplex() works for dee with custom weights", () => {
   expect(three.x).toBeCloseTo(1.5);
 });
 
-test("simplex() works with flat disconnected component", () => {
+test("coordSimplex() works with flat disconnected component", () => {
   const layers = createLayers([[[], []], [[0]], [[]]]);
   const [[left, right], [high], [low]] = layers;
-  const layout = simplex();
+  const layout = coordSimplex();
   layout(layers, nodeSep);
 
   expect(left.x).toBeCloseTo(0.5);
@@ -92,10 +107,10 @@ test("simplex() works with flat disconnected component", () => {
   expect(low.x).toBeCloseTo(0.5);
 });
 
-test("simplex() works with complex disconnected component", () => {
+test("coordSimplex() works with complex disconnected component", () => {
   const layers = createLayers([[[0], [], [0]], [[], [0]], [[]]]);
   const [[left, middle, right], [vee, above], [below]] = layers;
-  const layout = simplex();
+  const layout = coordSimplex();
   layout(layers, nodeSep);
 
   expect(left.x).toBeCloseTo(0.5);
@@ -106,7 +121,7 @@ test("simplex() works with complex disconnected component", () => {
   expect(below.x).toBeCloseTo(3.5);
 });
 
-test("simplex() works with compact dag", () => {
+test("coordSimplex() works with compact dag", () => {
   //    r
   //   / \
   //  /   #
@@ -126,7 +141,7 @@ test("simplex() works with compact dag", () => {
   ]);
   const [[root], , [topDummy], [left, center, right], , [bottomDummy], [tail]] =
     layers;
-  const layout = simplex();
+  const layout = coordSimplex();
   const width = layout(layers, nodeSep);
 
   expect(width).toBeCloseTo(3);
@@ -139,28 +154,29 @@ test("simplex() works with compact dag", () => {
   expect(tail.x).toBeCloseTo(0.5);
 });
 
-test("simplex() fails with non-positive constant weight", () => {
-  const layout = simplex();
+test("coordSimplex() fails with non-positive constant weight", () => {
+  const layout = coordSimplex();
   expect(() => layout.weight([0, 1, 2])).toThrow(
     "simplex weights must be positive, but got"
   );
 });
 
-test("simplex() fails with non-positive weight", () => {
+test("coordSimplex() fails with non-positive weight", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
-  const layout = simplex().weight(() => [0, 1, 2]);
+  const layout = coordSimplex().weight(() => [0, 1, 2]);
   expect(() => layout(layers, nodeSep)).toThrow(
     "simplex weights must be positive, but got"
   );
 });
 
-test("simplex() fails passing an arg to constructor", () => {
-  expect(() => simplex(null as never)).toThrow("got arguments to coordSimplex");
+test("coordSimplex() fails passing an arg to constructor", () => {
+  // @ts-expect-error no args
+  expect(() => coordSimplex(null)).toThrow("got arguments to coordSimplex");
 });
 
-test("simplex() throws for zero width", () => {
+test("coordSimplex() throws for zero width", () => {
   const layers = createLayers([[[]]]);
-  const layout = simplex();
+  const layout = coordSimplex();
   expect(() => layout(layers, () => 0)).toThrow(
     "must assign nonzero width to at least one node"
   );

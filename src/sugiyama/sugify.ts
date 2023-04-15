@@ -80,16 +80,19 @@ export type MutSugiNode<NodeDatum, LinkDatum> = MutGraphNode<
 
 function addSugiLinks<N, L>(
   sugied: MutGraph<SugiDatum<N, L>, undefined>,
-  nodeMap: Map<GraphNode<N, L>, MutSugiNode<N, L>>,
+  nodeMap: Map<GraphNode<N, L>, MapVal<N, L>>,
   numLayers: number,
   layering: Named
 ): SugiNode<N, L>[][] {
   // create dummy nodes for all child links
-  for (const [node, sugiSource] of nodeMap) {
-    const initLayer = (sugiSource.data as SugiNodeDatum).bottomLayer;
+  for (const [node, [sourceData, sugiSource]] of nodeMap) {
+    // NOTE this casts are regrettably necessary since we need the nodes to
+    // both have the mut nodes and the SugiNodeDatum. We could make a tuple
+    // guaranteeing, but that might be overkill
+    const initLayer = sourceData.bottomLayer;
     for (const link of node.childLinks()) {
-      const sugiTarget = nodeMap.get(link.target)!;
-      const targetLayer = (sugiTarget.data as SugiNodeDatum).topLayer;
+      const [targetData, sugiTarget] = nodeMap.get(link.target)!;
+      const targetLayer = targetData.topLayer;
       if (targetLayer > initLayer) {
         let last = sugiSource;
         for (let layer = initLayer + 1; layer < targetLayer; ++layer) {
@@ -116,7 +119,7 @@ function addSugiLinks<N, L>(
   const layers: SugiNode<N, L>[][] = Array<null>(numLayers)
     .fill(null)
     .map(() => []);
-  for (const sugiNode of sugied) {
+  for (const sugiNode of sugied.nodes()) {
     const { data } = sugiNode;
     if (data.role === "node") {
       const { topLayer, bottomLayer } = data;
@@ -138,6 +141,9 @@ function addSugiLinks<N, L>(
   return layers;
 }
 
+// This type makes it so we have access to the mutable nodes but node data
+type MapVal<N, L> = readonly [SugiNodeDatum<N, L>, MutSugiNode<N, L>];
+
 /**
  * Convert a layered graph in a sugi graph
  *
@@ -156,8 +162,8 @@ export function layerSugify<N, L>(
 
   // map normal nodes to sugi nodes
   const layerBoosts = Array<boolean>(numLayers).fill(false);
-  const nodeMap = new Map<GraphNode<N, L>, MutSugiNode<N, L>>();
-  for (const node of input) {
+  const nodeMap = new Map<GraphNode<N, L>, MapVal<N, L>>();
+  for (const node of input.nodes()) {
     const layer = node.uy;
     if (layer === undefined) {
       throw berr`layering ${layering} didn't assign a layer to a node`;
@@ -171,21 +177,23 @@ export function layerSugify<N, L>(
       ) {
         layerBoosts[layer] = true;
       }
-      nodeMap.set(
+      const data: SugiNodeDatum<N, L> = {
         node,
-        sugied.node({ node, topLayer: layer, bottomLayer: layer, role: "node" })
-      );
+        topLayer: layer,
+        bottomLayer: layer,
+        role: "node",
+      };
+      nodeMap.set(node, [data, sugied.node(data)]);
     }
   }
 
   // boost layers for adjacent multi-links
   let sum = 0;
   const cumBoosts = layerBoosts.map((boost) => (sum += +boost));
-  for (const { data } of nodeMap.values()) {
-    const dat = data as SugiNodeDatum;
-    const boost = cumBoosts[dat.topLayer];
-    dat.topLayer += boost;
-    dat.bottomLayer += boost;
+  for (const [data] of nodeMap.values()) {
+    const boost = cumBoosts[data.topLayer];
+    data.topLayer += boost;
+    data.bottomLayer += boost;
   }
 
   // create dummy nodes for all child links
@@ -227,8 +235,8 @@ export function compactSugify<N, L>(
 
   // map original nodes
   const cuts = [0, height];
-  const nodeMap = new Map<GraphNode<N, L>, MutSugiNode<N, L>>();
-  for (const node of input) {
+  const nodeMap = new Map<GraphNode<N, L>, MapVal<N, L>>();
+  for (const node of input.nodes()) {
     const y = node.uy;
     if (y === undefined) {
       throw berr`layering ${layering} didn't assign a y coordinate to every node`;
@@ -236,13 +244,13 @@ export function compactSugify<N, L>(
       const halfHeight = nodeHeight(node) / 2;
       const topLayer = y - halfHeight;
       const bottomLayer = y + halfHeight;
-      const sugi = sugied.node({
+      const datum: SugiNodeDatum<N, L> = {
         node,
         topLayer,
         bottomLayer,
         role: "node",
-      });
-      nodeMap.set(node, sugi);
+      };
+      nodeMap.set(node, [datum, sugied.node(datum)]);
       cuts.push(topLayer, bottomLayer);
     }
   }
@@ -266,8 +274,7 @@ export function compactSugify<N, L>(
 
   // add cut for multi-edges that are still on adjacent layers
   const boosts = Array<boolean>(layerCuts.length).fill(false);
-  for (const [node, { data }] of nodeMap) {
-    const { topLayer } = data as SugiNodeDatum;
+  for (const [node, [{ topLayer }]] of nodeMap) {
     const layer = cutLayers.get(topLayer)!;
     const target = layer - 1;
     for (const [child, count] of chain(
@@ -275,7 +282,7 @@ export function compactSugify<N, L>(
       node.parentCounts()
     )) {
       if (count > 1) {
-        const { bottomLayer } = nodeMap.get(child)!.data as SugiNodeDatum;
+        const [{ bottomLayer }] = nodeMap.get(child)!;
         if (cutLayers.get(bottomLayer) === target) {
           if (!boosts[layer]) {
             boosts[layer] = true;
@@ -297,8 +304,7 @@ export function compactSugify<N, L>(
   }
 
   // remap to layers
-  for (const sugi of nodeMap.values()) {
-    const data = sugi.data as SugiNodeDatum;
+  for (const [data] of nodeMap.values()) {
     data.topLayer = cutLayers.get(data.topLayer)!;
     data.bottomLayer = cutLayers.get(data.bottomLayer)!;
   }

@@ -23,7 +23,7 @@ export function prepare(grf: Graph<string>): GraphNode<string, unknown>[] {
   const nodes: GraphNode<string, unknown>[] = Array<GraphNode<string, unknown>>(
     grf.nnodes()
   );
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     const y = parseInt(node.data);
     node.y = y;
     nodes[y] = node;

@@ -1,4 +1,3 @@
-import { pnpPlugin } from "@yarnpkg/esbuild-plugin-pnp";
 import chalk from "chalk";
 import { build } from "esbuild";
 import ignorePlugin from "esbuild-plugin-ignore";
@@ -37,8 +36,6 @@ const config = {
       { resourceRegExp: /^fs$/ },
       { resourceRegExp: /^child_process$/ },
     ]),
-    // FIXME remove?
-    pnpPlugin(),
   ],
   banner: {
     js: `// ${pkg.name} Version ${

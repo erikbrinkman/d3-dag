@@ -1,6 +1,10 @@
-import { graph } from ".";
+import { graph, MutGraph } from ".";
 import { assert } from "../test-utils";
 import { graphJson } from "./json";
+
+interface Json<N, L> {
+  (dat: unknown): MutGraph<N, L>;
+}
 
 test("graphJson() works for empty", () => {
   const builder = graphJson();
@@ -90,9 +94,11 @@ function hydrateLink(data: unknown): CustomLinkDatum {
 }
 
 test("graphJson() works with custom hydration", () => {
-  const builder = graphJson().nodeDatum(hydrateNode).linkDatum(hydrateLink);
-  expect(builder.nodeDatum()).toBe(hydrateNode);
-  expect(builder.linkDatum()).toBe(hydrateLink);
+  const init = graphJson() satisfies Json<unknown, unknown>;
+  const builder = init.nodeDatum(hydrateNode).linkDatum(hydrateLink);
+  builder satisfies Json<CustomNodeDatum, CustomLinkDatum>;
+  expect(builder.nodeDatum() satisfies typeof hydrateNode).toBe(hydrateNode);
+  expect(builder.linkDatum() satisfies typeof hydrateLink).toBe(hydrateLink);
 
   const grf = graph<CustomNodeDatum, CustomLinkDatum>();
   const root = grf.node(new CustomNodeDatum(0));
@@ -115,10 +121,9 @@ test("graphJson() works with custom hydration", () => {
   expect(lb.data.str).toBe(linkb.data.str);
 });
 
-// FIXME try removing TSD in favor of type tests in these tests...
-
 test("graphJson() fails passing an arg to graphJson", () => {
-  expect(() => graphJson(null as never)).toThrow("got arguments to graphJson");
+  // @ts-expect-error no arguments to graphJson
+  expect(() => graphJson(null)).toThrow("got arguments to graphJson");
 });
 
 test("graphJson() fails to parse invalid formats", () => {

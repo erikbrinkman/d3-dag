@@ -1,9 +1,14 @@
 import { zherebko } from ".";
-import { graph, GraphNode } from "../graph";
+import { Graph, GraphNode, graph } from "../graph";
 import { graphConnect } from "../graph/connect";
 import { filter, map } from "../iters";
+import { LayoutResult } from "../layout";
 import { doub, line, oh, single } from "../test-graphs";
 import { tweakSize } from "../tweaks";
+
+interface Zhere<N, L> {
+  (inp: Graph<N, L>): LayoutResult;
+}
 
 test("zherebko() works for empty graph", () => {
   const grf = graph();
@@ -11,6 +16,54 @@ test("zherebko() works for empty graph", () => {
   const { width, height } = layout(grf);
   expect(width).toEqual(0);
   expect(height).toEqual(0);
+});
+
+test("zherebko() allows setting custom operators", () => {
+  function rank({ data }: { data: { rank: number } }): number | undefined {
+    return data.rank;
+  }
+
+  function size({ data }: { data: { size: number } }): [number, number] {
+    return [data.size, data.size];
+  }
+
+  function tweakOne(
+    grf: Graph<{ tweak: null }>,
+    res: LayoutResult
+  ): LayoutResult {
+    grf.nnodes();
+    return res;
+  }
+
+  function tweakTwo(
+    grf: Graph<unknown, null>,
+    res: LayoutResult
+  ): LayoutResult {
+    grf.nnodes();
+    return res;
+  }
+
+  const init = zherebko() satisfies Zhere<unknown, unknown>;
+
+  const ranked = init.rank(rank) satisfies Zhere<{ rank: number }, unknown>;
+  // @ts-expect-error old data
+  ranked satisfies Zhere<unknown, unknown>;
+
+  const sized = ranked.nodeSize(size);
+  sized satisfies Zhere<{ rank: number; size: number }, unknown>;
+  // @ts-expect-error old data
+  sized satisfies Zhere<{ rank: number }, unknown>;
+
+  const layout = sized.tweaks([tweakOne, tweakTwo]);
+  layout satisfies Zhere<{ rank: number; size: number; tweak: null }, null>;
+  // @ts-expect-error old data
+  layout satisfies Zhere<{ rank: number; size: number }, unknown>;
+
+  const [first, second] = layout.tweaks();
+  expect(first satisfies typeof tweakOne).toBe(tweakOne);
+  expect(second satisfies typeof tweakTwo).toBe(tweakTwo);
+  expect(layout.rank() satisfies typeof rank).toBe(rank);
+  expect(layout.nodeSize() satisfies typeof size).toBe(size);
 });
 
 test("zherebko() works for a point", () => {
@@ -23,7 +76,7 @@ test("zherebko() works for a point", () => {
   const { width, height } = layout(grf);
   expect(width).toEqual(2);
   expect(height).toEqual(4);
-  const [node] = grf;
+  const [node] = grf.nodes();
   expect(node.x).toBeCloseTo(1);
   expect(node.y).toBeCloseTo(2);
 });
@@ -99,7 +152,7 @@ test("zherebko() works specific case", () => {
   const { width, height } = layout(grf);
   expect(width).toBeCloseTo(4);
   expect(height).toBeCloseTo(14);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toBeCloseTo(2);
     expect(node.y).toBeCloseTo(parseInt(node.data) * 3 + 1);
   }
@@ -156,7 +209,7 @@ test("zherebko() works for four-clique", () => {
   const { width, height } = layout(grf);
   expect(width).toBeCloseTo(4);
   expect(height).toBeCloseTo(11);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toBeCloseTo(2);
     expect(node.y).toBeCloseTo(parseInt(node.data) * 3 + 1);
   }
@@ -199,8 +252,8 @@ test("zherebko() works on disconnected dag", () => {
   const grf = doub();
   const layout = zherebko().nodeSize([2, 2]);
   layout(grf);
-  expect([...map(grf, (node) => node.y)].sort()).toEqual([1, 4]);
-  for (const node of grf) {
+  expect([...map(grf.nodes(), (node) => node.y)].sort()).toEqual([1, 4]);
+  for (const node of grf.nodes()) {
     expect(node.x).toEqual(1);
   }
 });
@@ -216,7 +269,7 @@ test("zherebko() works on sink", () => {
   const { width, height } = layout(grf);
   expect(width).toBeCloseTo(4);
   expect(height).toBeCloseTo(11);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toEqual(2);
     expect(node.data === "3" ? node.y === 10 : node.y < 8).toBe(true);
     const [link] = node.childLinks();
@@ -240,7 +293,7 @@ test("zherebko() works on simple cycle", () => {
   expect(width).toBeCloseTo(3);
   expect(height).toBeCloseTo(8);
 
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toEqual(1);
   }
 
@@ -264,7 +317,7 @@ test("zherebko() works on induced multi cycle", () => {
   expect(width).toBeCloseTo(3);
   expect(height).toBeCloseTo(5);
 
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toEqual(1);
   }
 
@@ -370,5 +423,6 @@ test("zherebko() throws for negative gap", () => {
 });
 
 test("zherebko() fails with args", () => {
-  expect(() => zherebko(null as never)).toThrow("got arguments to zherebko");
+  // @ts-expect-error no args
+  expect(() => zherebko(null)).toThrow("got arguments to zherebko");
 });

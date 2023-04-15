@@ -199,7 +199,6 @@ test("decrossOpt() fails for medium inputs", () => {
 });
 
 test("decrossOpt() fails passing an arg to constructor", () => {
-  expect(() => decrossOpt(null as never)).toThrow(
-    "got arguments to decrossOpt"
-  );
+  // @ts-expect-error no args
+  expect(() => decrossOpt(null)).toThrow("got arguments to decrossOpt");
 });

@@ -1,5 +1,5 @@
 import { graph, MutGraph, MutGraphNode } from ".";
-import { map } from "../iters";
+import { every, isIterable, map } from "../iters";
 import { err, U, Up } from "../utils";
 import { IdOperator, verifyId } from "./utils";
 
@@ -331,45 +331,39 @@ export interface HasId {
   readonly id: string;
 }
 
-function hasId(d: unknown): d is HasId {
-  try {
-    return typeof (d as HasId).id === "string";
-  } catch {
-    return false;
-  }
-}
-
 function defaultId(data: unknown): string {
-  if (hasId(data)) {
-    return data.id;
-  } else {
+  if (typeof data !== "object" || data === null || !("id" in data)) {
     throw err`datum did not have an id field, and no id accessor was specified; try calling \`graphStratify().id(d => d...)\` to set a custom id accessor`;
+  }
+  const { id } = data;
+  if (typeof id === "string") {
+    return id;
+  } else {
+    throw err`datum has an id field that was not a string, and no id accessor was specified; try calling \`graphStratify().id(d => d...)\` to set a custom id accessor`;
   }
 }
 
 /** default interface for data types with parent ids */
 export interface HasParentIds {
   /** the parent ids */
-  readonly parentIds?: readonly string[] | undefined;
+  readonly parentIds?: Iterable<string> | undefined;
 }
 
-function hasParentIds(d: unknown): d is HasParentIds {
-  try {
-    const parentIds = (d as HasParentIds).parentIds;
-    return (
-      parentIds === undefined ||
-      typeof parentIds[Symbol.iterator] === "function"
-    );
-  } catch {
-    return false;
+function defaultParentIds(data: unknown): Iterable<string> | undefined {
+  if (typeof data !== "object" || data === null) {
+    throw err`default parentIds function expected datum to be an object but got: ${data}; try setting a custom accessor for parentIds with \`graphStratify().parentIds(d => ...)\``;
+  } else if (!("parentIds" in data)) {
+    return undefined;
   }
-}
-
-function defaultParentIds(d: unknown): readonly string[] | undefined {
-  if (hasParentIds(d)) {
-    return d.parentIds;
+  const { parentIds } = data;
+  if (
+    parentIds === undefined ||
+    (isIterable(parentIds) &&
+      every(parentIds, (id): id is string => typeof id === "string"))
+  ) {
+    return parentIds;
   } else {
-    throw err`default parentIds function expected datum to have a parentIds field but got: ${d}; try setting a custom accessor for parentIds with \`graphStratify().parentIds(d => ...)\``;
+    throw err`default parentIds function expected parentIds to be an iterable of strings but got: ${parentIds}; try setting a custom accessor for parentIds with \`graphStratify().parentIds(d => ...)\``;
   }
 }
 

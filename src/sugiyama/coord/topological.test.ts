@@ -106,9 +106,8 @@ test("topological() throws for non-topological", () => {
 });
 
 test("topological() fails passing an arg to constructor", () => {
-  expect(() => topological(null as never)).toThrow(
-    "got arguments to coordTopological"
-  );
+  // @ts-expect-error no args
+  expect(() => topological(null)).toThrow("got arguments to coordTopological");
 });
 
 test("topological() throws for zero width", () => {

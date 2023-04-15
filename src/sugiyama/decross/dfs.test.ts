@@ -50,7 +50,6 @@ test("decrossDfs() works on trivial case bottom up", () => {
 });
 
 test("decrossDfs() fails passing an arg to constructor", () => {
-  expect(() => decrossDfs(null as never)).toThrow(
-    "got arguments to decrossDfs"
-  );
+  // @ts-expect-error no args
+  expect(() => decrossDfs(null)).toThrow("got arguments to decrossDfs");
 });

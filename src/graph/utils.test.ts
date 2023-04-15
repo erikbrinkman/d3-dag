@@ -1,7 +1,8 @@
 import { verifyId } from "./utils";
 
 test("verifyId() throws", () => {
-  expect(() => verifyId(0 as never)).toThrow(
+  // @ts-expect-error wrong type
+  expect(() => verifyId(0)).toThrow(
     `supposed to be type string but got type "number"`
   );
 });

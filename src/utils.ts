@@ -70,7 +70,7 @@ function wrapInternalMsg(msg: string): string {
 /** generic internal error */
 export function ierr(
   strings: readonly string[],
-  ...info: (string | number | bigint)[]
+  ...info: (string | number | bigint | boolean)[]
 ): Error {
   const stringified = map(info, (val) => val.toString());
   return new Error(wrapInternalMsg(interleave(strings, stringified)));

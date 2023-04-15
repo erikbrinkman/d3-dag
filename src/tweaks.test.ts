@@ -20,7 +20,7 @@ test("tweakSize()", () => {
   const res = tweak(grf, old);
 
   expect(res).toEqual({ width: 2, height: 3 });
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toBeGreaterThanOrEqual(0);
     expect(node.x).toBeLessThanOrEqual(2);
     expect(node.y).toBeGreaterThanOrEqual(0);
@@ -79,13 +79,13 @@ test("tweakFlip()", () => {
   const grf = zhere();
   const old = layout(grf);
 
-  const xs = new Map([...map(grf, (node) => [node, node.x] as const)]);
-  const ys = new Map([...map(grf, (node) => [node, node.y] as const)]);
+  const xs = new Map([...map(grf.nodes(), (node) => [node, node.x] as const)]);
+  const ys = new Map([...map(grf.nodes(), (node) => [node, node.y] as const)]);
 
   const diag = tweakFlip();
   const res = diag(grf, old);
   expect(res).toEqual({ width: old.height, height: old.width });
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toBe(ys.get(node));
     expect(node.y).toBe(xs.get(node));
   }
@@ -93,7 +93,7 @@ test("tweakFlip()", () => {
   const horiz = tweakFlip("horizontal");
   const hres = horiz(grf, res);
   expect(hres).toEqual(res);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toBe(res.width - ys.get(node)!);
     expect(node.y).toBe(xs.get(node));
   }
@@ -101,12 +101,13 @@ test("tweakFlip()", () => {
   const vert = tweakFlip("vertical");
   const vres = vert(grf, hres);
   expect(vres).toEqual(res);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     expect(node.x).toBe(res.width - ys.get(node)!);
     expect(node.y).toBe(res.height - xs.get(node)!);
   }
 
-  expect(() => tweakFlip("unknown" as never)).toThrow(
+  // @ts-expect-error invalid option
+  expect(() => tweakFlip("unknown")).toThrow(
     `invalid tweakFlip style: "unknown"`
   );
 });
@@ -119,7 +120,7 @@ test("tweakShape()", () => {
   const ellipse = tweakShape([2, 2], shapeEllipse);
   const eres = ellipse(grf, old);
   expect(eres).toEqual(old);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     const ref = [node.x, node.y];
     for (const { points } of node.parentLinks()) {
       const fin = points[points.length - 1];
@@ -134,7 +135,7 @@ test("tweakShape()", () => {
   const rect = tweakShape(() => [2, 2]);
   const rres = rect(grf, old);
   expect(rres).toEqual(old);
-  for (const node of grf) {
+  for (const node of grf.nodes()) {
     const ref = [node.x, node.y];
     for (const { points } of node.parentLinks()) {
       const fin = points[points.length - 1];

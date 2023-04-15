@@ -148,5 +148,6 @@ test("greedy() has crossings for hard case", () => {
 });
 
 test("greedy() throws for arguments", () => {
-  expect(() => greedy(undefined as never)).toThrow("laneGreedy()");
+  // @ts-expect-error no args
+  expect(() => greedy(null)).toThrow("laneGreedy()");
 });

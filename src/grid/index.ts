@@ -85,7 +85,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
   /**
    * Set the tweaks to apply after layout
    */
-  tweaks<NewTweaks extends readonly Tweak[]>(
+  tweaks<const NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Grid<U<Ops, "tweaks", NewTweaks>>;
   /**

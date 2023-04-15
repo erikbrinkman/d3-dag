@@ -11,6 +11,11 @@ export interface MapCallback<in T, out S> {
   (element: T, index: number): S;
 }
 
+/** iterable callback that maps a value into another */
+export interface GuardCallback<in T, R extends T> {
+  (element: T, index: number): element is R;
+}
+
 /** reduce callback */
 export interface ReduceCallback<in T, in out S> {
   (accumulator: S, currentValue: T, index: number): S;
@@ -97,6 +102,14 @@ export function some<T>(
 }
 
 /** iterable every */
+export function every<T, R extends T>(
+  iter: Iterable<T>,
+  callback: GuardCallback<T, R>
+): iter is Iterable<R>;
+export function every<T>(
+  iter: Iterable<T>,
+  callback: MapCallback<T, boolean>
+): boolean;
 export function every<T>(
   iter: Iterable<T>,
   callback: MapCallback<T, boolean>
@@ -165,12 +178,15 @@ export function* chain<T>(...iters: Iterable<T>[]): IterableIterator<T> {
 
 /** iterate over bigrams of an iterable */
 export function* bigrams<T>(iterable: Iterable<T>): IterableIterator<[T, T]> {
-  const iter = iterable[Symbol.iterator]() as Iterator<T, T>;
-  let { value: last } = iter.next();
-  let value;
-  while (!({ value } = iter.next()).done) {
-    yield [last, value];
-    last = value;
+  const iter: Iterator<T, unknown> = iterable[Symbol.iterator]();
+  const first = iter.next();
+  if (!first.done) {
+    let last = first.value;
+    let next;
+    while (!(next = iter.next()).done) {
+      yield [last, next.value];
+      last = next.value;
+    }
   }
 }
 
@@ -179,4 +195,14 @@ export function first<T>(iterable: Iterable<T>): T | undefined {
   for (const item of iterable) {
     return item;
   }
+}
+
+/** return if something is iterable */
+export function isIterable(obj: unknown): obj is Iterable<unknown> {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    Symbol.iterator in obj &&
+    typeof obj[Symbol.iterator] === "function"
+  );
 }

@@ -189,7 +189,6 @@ test("twolayerOpt() fails for medium inputs", () => {
 });
 
 test("twolayerOpt() fails passing an arg to constructor", () => {
-  expect(() => twolayerOpt(null as never)).toThrow(
-    "got arguments to twolayerOpt"
-  );
+  // @ts-expect-error no args
+  expect(() => twolayerOpt(null)).toThrow("got arguments to twolayerOpt");
 });

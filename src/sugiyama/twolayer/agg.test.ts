@@ -244,7 +244,6 @@ test("twolayerAgg() preserves order of unconstrained nodes to back", () => {
 });
 
 test("twolayerAgg() fails passing an arg to constructor", () => {
-  expect(() => twolayerAgg(null as never)).toThrow(
-    "got arguments to twolayerAgg"
-  );
+  // @ts-expect-error no args
+  expect(() => twolayerAgg(null)).toThrow("got arguments to twolayerAgg");
 });

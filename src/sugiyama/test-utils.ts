@@ -30,7 +30,7 @@ export function getLayers(dag: Graph<string>, numLayers: number): number[][] {
   const layers: number[][] = Array<null>(numLayers)
     .fill(null)
     .map(() => []);
-  for (const node of dag) {
+  for (const node of dag.nodes()) {
     layers[node.y].push(parseInt(node.data));
   }
   for (const layer of layers) {
@@ -105,7 +105,7 @@ export function createLayers(
 
   // create dummy nodes
   // NOTE copy nodes because order will change as links are added
-  for (const node of [...orig]) {
+  for (const node of [...orig.nodes()]) {
     const { layer, index } = node.data;
     const sugiSource = layers[layer][index];
     const inds = children[layer][index];
@@ -183,10 +183,8 @@ export function compactCrossings(
 export const nodeSep = (a: unknown, b: unknown) => (+!!a + +!!b) / 2;
 
 /** canonical order for test nodes */
-export function canonical<L>(
-  nodes: Iterable<GraphNode<string, L>>
-): GraphNode<string, L>[] {
-  const arr = [...nodes];
+export function canonical<L>(grf: Graph<string, L>): GraphNode<string, L>[] {
+  const arr = [...grf.nodes()];
   arr.sort((a, b) => parseInt(a.data) - parseInt(b.data));
   return arr;
 }

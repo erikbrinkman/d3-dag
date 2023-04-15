@@ -83,8 +83,7 @@ export interface MutGraphLink<in out NodeDatum, in out LinkDatum>
  * Methods names preceeded by an `n` will return a number, often the length of
  * the iterable produces by the method sans-prefix.
  */
-export interface Graph<out NodeDatum = unknown, out LinkDatum = unknown>
-  extends Iterable<GraphNode<NodeDatum, LinkDatum>> {
+export interface Graph<out NodeDatum = unknown, out LinkDatum = unknown> {
   /**
    * Returns an iterator over every {@link GraphNode}
    *
@@ -177,9 +176,6 @@ export interface RequiredLink<NodeDatum, LinkDatum> {
  */
 export interface MutGraph<in out NodeDatum, in out LinkDatum>
   extends Graph<NodeDatum, LinkDatum> {
-  /** iterating on a graph returns every node */
-  [Symbol.iterator](): Iterator<MutGraphNode<NodeDatum, LinkDatum>>;
-
   /**
    * Returns an iterator over every {@link GraphNode}
    */
@@ -615,22 +611,18 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
   /** nodes for possible connected components that need to be recomputed */
   readonly #extra: Set<DirectedNode<N, L>> = new Set();
 
-  [Symbol.iterator]() {
-    return this.nodes();
-  }
-
   *nodes(): IterableIterator<MutGraphNode<N, L>> {
     for (const comp of this.split()) {
-      yield* comp;
+      yield* comp.nodes();
     }
   }
 
   topological(rank?: Rank<N, L>): GraphNode<N, L>[] {
-    return topological(this, rank);
+    return topological(this.nodes(), rank);
   }
 
   *links(): IterableIterator<MutGraphLink<N, L>> {
-    for (const node of this) {
+    for (const node of this.nodes()) {
       yield* node.childLinks();
     }
   }
@@ -898,10 +890,6 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
     target.#nplinks -= 1;
   };
 
-  [Symbol.iterator]() {
-    return this.nodes();
-  }
-
   nodes(): IterableIterator<DirectedNode<N, L>> {
     return dfs(
       (n: DirectedNode<N, L>) => chain(n.children(), n.parents()),
@@ -914,7 +902,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   }
 
   *links(): IterableIterator<MutGraphLink<N, L>> {
-    for (const node of this) {
+    for (const node of this.nodes()) {
       yield* node.childLinks();
     }
   }
@@ -947,7 +935,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   acyclic(): boolean {
     const info = this.#info();
     return info.acyclic === null
-      ? (info.acyclic = acyclic(this))
+      ? (info.acyclic = acyclic(this.nodes()))
       : info.acyclic;
   }
 

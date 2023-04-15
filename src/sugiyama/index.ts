@@ -146,7 +146,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   /**
    * Set the tweaks to apply after layout
    */
-  tweaks<NewTweaks extends readonly Tweak[]>(
+  tweaks<const NewTweaks extends readonly Tweak[]>(
     val: NewTweaks
   ): Sugiyama<U<Ops, "tweaks", NewTweaks>>;
   /**

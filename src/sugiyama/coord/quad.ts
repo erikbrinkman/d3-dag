@@ -314,9 +314,11 @@ function buildOperator<
       width = layout(layers, sep, inds, solution);
     } catch (ex) {
       /* istanbul ignore next */
-      const msg = (ex as object)?.toString() ?? "unknown error message";
-      /* istanbul ignore next */
-      throw ierr`${msg}`;
+      if (typeof ex === "string") {
+        throw ierr`${ex}`;
+      } else {
+        throw ierr`undefined quadprog exception`;
+      }
     }
     if (width <= 0) {
       throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;

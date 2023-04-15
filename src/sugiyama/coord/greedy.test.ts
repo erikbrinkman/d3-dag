@@ -90,9 +90,8 @@ test("coordGreedy() works with compact dag", () => {
 });
 
 test("coordGreedy() fails passing an arg to constructor", () => {
-  expect(() => coordGreedy(null as never)).toThrow(
-    "got arguments to coordGreedy"
-  );
+  // @ts-expect-error no args
+  expect(() => coordGreedy(null)).toThrow("got arguments to coordGreedy");
 });
 
 test("coordGreedy() throws for zero width", () => {

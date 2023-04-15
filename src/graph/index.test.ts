@@ -4,7 +4,6 @@ import { length, map, reduce, some } from "../iters";
 test("empty graph", () => {
   const grf = graph<never, never>();
 
-  expect([...grf]).toEqual([]);
   expect([...grf.nodes()]).toEqual([]);
   expect([...grf.links()]).toEqual([]);
   expect(grf.nnodes()).toBe(0);
@@ -19,7 +18,6 @@ test("singleton graph", () => {
   const grf = graph<undefined, never>();
   const node = grf.node();
 
-  expect([...grf]).toEqual([node]);
   expect([...grf.nodes()]).toEqual([node]);
   expect([...grf.links()]).toEqual([]);
   expect(grf.nnodes()).toBe(1);
@@ -29,7 +27,6 @@ test("singleton graph", () => {
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(true);
 
-  expect([...node]).toEqual([node]);
   expect([...node.nodes()]).toEqual([node]);
   expect([...node.links()]).toEqual([]);
   expect(node.nnodes()).toBe(1);
@@ -60,7 +57,6 @@ test("line graph", () => {
   const down = up.node("down");
   const link = up.child(down);
 
-  expect([...grf]).toEqual([down, up]);
   expect([...grf.nodes()]).toEqual([down, up]);
   expect([...grf.links()]).toEqual([link]);
   expect(grf.nnodes()).toBe(2);
@@ -70,7 +66,6 @@ test("line graph", () => {
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(true);
 
-  expect([...up]).toEqual([up, down]);
   expect([...up.nodes()]).toEqual([up, down]);
   expect([...up.links()]).toEqual([link]);
   expect(up.nnodes()).toBe(2);
@@ -132,7 +127,6 @@ test("multi graph", () => {
   expect(up.nchildLinksTo(down)).toBe(2);
   expect(down.nparentLinksTo(up)).toBe(2);
 
-  expect([...grf]).toEqual([down, up]);
   expect([...grf.nodes()]).toEqual([down, up]);
   expect([...grf.links()]).toEqual([first, second]);
   expect(grf.nnodes()).toBe(2);
@@ -168,7 +162,6 @@ test("cycle graph", () => {
   const down = above.child(below, true);
   const up = above.parent(below, false);
 
-  expect([...grf]).toEqual([below, above]);
   expect([...grf.nodes()]).toEqual([below, above]);
   expect([...grf.links()]).toEqual([up, down]);
   expect(grf.nnodes()).toBe(2);
@@ -200,7 +193,7 @@ test("disconnected graph", () => {
   const above = grf.node(true);
   const below = grf.node(false);
 
-  expect([...grf].sort()).toEqual([above, below]);
+  expect([...grf.nodes()].sort()).toEqual([above, below]);
   expect([...grf.nodes()].sort()).toEqual([above, below]);
   expect([...grf.links()]).toEqual([]);
   expect(grf.nnodes()).toBe(2);
@@ -210,7 +203,6 @@ test("disconnected graph", () => {
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(true);
 
-  expect([...above]).toEqual([above]);
   expect([...above.nodes()]).toEqual([above]);
   expect([...above.links()]).toEqual([]);
   expect(above.nnodes()).toBe(1);
@@ -235,7 +227,6 @@ test("disconnected graph", () => {
   expect([...above.childLinks()]).toEqual([]);
   expect([...above.childLinksTo(below)]).toEqual([]);
 
-  expect([...below]).toEqual([below]);
   expect([...below.nodes()]).toEqual([below]);
   expect([...below.links()]).toEqual([]);
   expect(below.nnodes()).toBe(1);
@@ -498,6 +489,25 @@ test("positioning works", () => {
   expect(node.y).toBe(1);
 });
 
+test("typescript errors", () => {
+  const grf = graph<null, null>();
+  const node = grf.node(null);
+  // @ts-expect-error wrong data
+  const other = grf.node();
+  grf.link(node, other, null);
+  // @ts-expect-error wrong data
+  grf.link(node, other);
+  // @ts-expect-error wrong data
+  node.link(node, other, 4);
+  // @ts-expect-error wrong data
+  node.child(other, "");
+  // @ts-expect-error wrong data
+  other.parent(node, 0n);
+
+  expect(grf.nnodes()).toBe(2);
+  expect(grf.nlinks()).toBe(5);
+});
+
 test("link() throws on self loops", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
@@ -667,24 +677,20 @@ test("random modifications", () => {
     // test graph invariants
     expect(grf.nnodes()).toBe(nodes.length);
     expect(grf.nlinks()).toBe(links.length);
-    expect(grf.nnodes()).toBe(length(grf));
-    expect(grf.nlinks()).toBe(reduce(grf, (t, n) => t + n.nchildLinks(), 0));
-    expect(grf.nlinks()).toBe(reduce(grf, (t, n) => t + n.nparentLinks(), 0));
-    expect(grf.connected()).toBe(
-      length(
-        (
-          grf.nodes() as Iterator<
-            GraphNode<number, number>,
-            GraphNode<number, number>
-          >
-        ).next().value ?? []
-      ) === grf.nnodes()
+    expect(grf.nnodes()).toBe(length(grf.nodes()));
+    expect(grf.nlinks()).toBe(
+      reduce(grf.nodes(), (t, n) => t + n.nchildLinks(), 0)
+    );
+    expect(grf.nlinks()).toBe(
+      reduce(grf.nodes(), (t, n) => t + n.nparentLinks(), 0)
+    );
+    const [first] = grf.nodes();
+    expect(grf.connected()).toBe((first?.nnodes() ?? 0) === grf.nnodes());
+    expect(grf.multi()).toBe(
+      some(grf.nodes(), (n) => some(n.childCounts(), ([, c]) => c > 1))
     );
     expect(grf.multi()).toBe(
-      some(grf, (n) => some(n.childCounts(), ([, c]) => c > 1))
-    );
-    expect(grf.multi()).toBe(
-      some(grf, (n) => some(n.parentCounts(), ([, c]) => c > 1))
+      some(grf.nodes(), (n) => some(n.parentCounts(), ([, c]) => c > 1))
     );
     const expected = acyclic(grf.topological());
     expect(grf.acyclic()).toBe(expected);
@@ -694,18 +700,18 @@ test("random modifications", () => {
     let tnodes = 0;
     let tlinks = 0;
     for (const comp of grf.split()) {
-      expect(comp.nnodes()).toBe(length(comp));
+      expect(comp.nnodes()).toBe(length(comp.nodes()));
       expect(comp.nlinks()).toBe(
-        reduce(comp, (t, n) => t + n.nchildLinks(), 0)
+        reduce(comp.nodes(), (t, n) => t + n.nchildLinks(), 0)
       );
       expect(comp.nlinks()).toBe(
-        reduce(comp, (t, n) => t + n.nparentLinks(), 0)
+        reduce(comp.nodes(), (t, n) => t + n.nparentLinks(), 0)
       );
       expect(comp.multi()).toBe(
-        some(comp, (n) => some(n.childCounts(), ([, c]) => c > 1))
+        some(comp.nodes(), (n) => some(n.childCounts(), ([, c]) => c > 1))
       );
       expect(comp.multi()).toBe(
-        some(comp, (n) => some(n.parentCounts(), ([, c]) => c > 1))
+        some(comp.nodes(), (n) => some(n.parentCounts(), ([, c]) => c > 1))
       );
       expect(comp.acyclic()).toBe(acyclic(comp.topological()));
       tnodes += comp.nnodes();

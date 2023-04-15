@@ -24,7 +24,7 @@ export function tweakSize(
     const xscale = nw / ow;
     const yscale = nh / oh;
 
-    for (const node of graph) {
+    for (const node of graph.nodes()) {
       node.x *= xscale;
       node.y *= yscale;
     }
@@ -83,7 +83,7 @@ function tweakFlipDiag(
   graph: Graph<unknown, unknown>,
   res: Readonly<LayoutResult>
 ): LayoutResult {
-  for (const node of graph) {
+  for (const node of graph.nodes()) {
     const temp = node.x;
     node.x = node.y;
     node.y = temp;
@@ -105,7 +105,7 @@ function tweakFlipVert(
   res: Readonly<LayoutResult>
 ): LayoutResult {
   const { height } = res;
-  for (const node of graph) {
+  for (const node of graph.nodes()) {
     node.y = height - node.y;
   }
 
@@ -122,7 +122,7 @@ function tweakFlipHoriz(
   res: Readonly<LayoutResult>
 ): LayoutResult {
   const { width } = res;
-  for (const node of graph) {
+  for (const node of graph.nodes()) {
     node.x = width - node.x;
   }
 
@@ -332,7 +332,7 @@ export function tweakShape<N, L>(
     graph: Graph<N, L>,
     res: Readonly<LayoutResult>
   ): LayoutResult {
-    for (const node of graph) {
+    for (const node of graph.nodes()) {
       const center = [node.x, node.y] as const;
       const size = typeof nodeSize === "function" ? nodeSize(node) : nodeSize;
       for (const { points } of node.parentLinks()) {

@@ -1,6 +1,6 @@
 import { sugiyama } from ".";
 import { Graph, graph, GraphNode } from "../graph";
-import { NodeSize } from "../layout";
+import { LayoutResult, NodeSize } from "../layout";
 import {
   doub,
   dummy,
@@ -11,13 +11,17 @@ import {
   three,
   trip,
 } from "../test-graphs";
-import { tweakSize } from "../tweaks";
+import { Tweak, tweakSize } from "../tweaks";
 import { Coord } from "./coord";
 import { Decross } from "./decross";
 import { Layering } from "./layering";
 import { layeringTopological } from "./layering/topological";
 import { SugiNode } from "./sugify";
 import { canonical } from "./test-utils";
+
+interface Sugiyama<N, L> {
+  (inp: Graph<N, L>): LayoutResult;
+}
 
 test("sugiyama() works on empty graph", () => {
   const dag = graph<undefined, undefined>();
@@ -34,7 +38,7 @@ test("sugiyama() works for single node", () => {
   expect(width).toBeCloseTo(1);
   expect(height).toBeCloseTo(1);
 
-  const [node] = dag;
+  const [node] = dag.nodes();
   expect(node.x).toBeCloseTo(0.5);
   expect(node.y).toBeCloseTo(0.5);
 });
@@ -89,9 +93,7 @@ test("sugiyama() works with a dummy node", () => {
   const dag = dummy();
   const layout = sugiyama();
   const { width, height } = layout(dag);
-  const [first, second, third] = [...dag].sort(
-    (a, b) => parseInt(a.data) - parseInt(b.data)
-  );
+  const [first, second, third] = canonical(dag);
 
   expect(width).toBeCloseTo(2.5);
   expect(height).toBeCloseTo(5);
@@ -174,9 +176,7 @@ test("sugiyama() allows changing nodeSize and gap", () => {
   const { width, height } = layout(dag);
   expect(width).toBeCloseTo(26);
   expect(height).toBeCloseTo(28);
-  const [head, ...rest] = [...dag].sort(
-    (a, b) => parseInt(a.data) - parseInt(b.data)
-  );
+  const [head, ...rest] = canonical(dag);
   const [tail, ...mids] = rest.reverse();
 
   for (const node of mids) {
@@ -196,16 +196,14 @@ test("sugiyama() allows changing operators", () => {
   const layering: Layering<string, unknown> = <N extends string, L>(
     dag: Graph<N, L>
   ): number => {
-    const ordered = [...dag].sort(
-      (a, b) => parseInt(a.data) - parseInt(b.data)
-    );
+    const ordered = canonical(dag);
     for (const [i, node] of ordered.entries()) {
       node.y = i;
     }
     return dag.nnodes() - 1;
   };
-  const decross: Decross<string, unknown> = () => undefined;
-  const coord: Coord<string, unknown> = (layers, sep): number => {
+  const decross: Decross<string | number | boolean, unknown> = () => undefined;
+  const coord: Coord<string | number, unknown> = (layers, sep): number => {
     let width = 0;
     for (const layer of layers) {
       let x = 0;
@@ -218,17 +216,36 @@ test("sugiyama() allows changing operators", () => {
     }
     return width;
   };
-  const nodeSize: NodeSize<string, unknown> = () => [1, 2];
-  const layout = sugiyama()
-    .layering(layering)
-    .decross(decross)
-    .coord(coord)
-    .nodeSize(nodeSize)
-    .gap([1, 1]);
-  expect(layout.layering()).toBe(layering);
-  expect(layout.decross()).toBe(decross);
-  expect(layout.coord()).toBe(coord);
-  expect(layout.nodeSize()).toBe(nodeSize);
+  const nodeSize: NodeSize<unknown, { 0: string }> = () => [1, 2];
+  const tweak: Tweak<unknown, { 1: string }> = (_, res) => res;
+
+  const init = sugiyama().gap([2, 2]) satisfies Sugiyama<unknown, unknown>;
+  const decrossed = init.decross(decross);
+  decrossed satisfies Sugiyama<string | number | boolean, unknown>;
+  // @ts-expect-error invalid data
+  decrossed satisfies sugiyama<unknown, unknown>;
+  const coorded = decrossed.coord(coord);
+  coorded satisfies Sugiyama<string | number, unknown>;
+  // @ts-expect-error invalid data
+  coorded satisfies Sugiyama<string | number | boolean, unknown>;
+  const layered = coorded.layering(layering);
+  layered satisfies Sugiyama<string, unknown>;
+  // @ts-expect-error invalid data
+  layered satisfies Sugiyama<string | number, unknown>;
+  const sized = layered.nodeSize(nodeSize) satisfies Sugiyama<string, [string]>;
+  // @ts-expect-error invalid data
+  sized satisfies Sugiyama<string, unknown>;
+  const layout = sized.tweaks([tweak]);
+  layout satisfies Sugiyama<string, [string, string]>;
+  // @ts-expect-error invalid data
+  layout satisfies Sugiyama<string, [string]>;
+
+  const [first] = layout.tweaks();
+  expect(first satisfies typeof tweak).toBe(tweak);
+  expect(layout.layering() satisfies typeof layering).toBe(layering);
+  expect(layout.decross() satisfies typeof decross).toBe(decross);
+  expect(layout.coord() satisfies typeof coord).toBe(coord);
+  expect(layout.nodeSize() satisfies typeof nodeSize).toBe(nodeSize);
   // still runs
   layout(dag);
 });
@@ -274,7 +291,7 @@ test("sugiyama() throws with invalid layers", () => {
   const dag = single();
 
   function layering<N, L>(dag: Graph<N, L>): number {
-    for (const node of dag) {
+    for (const node of dag.nodes()) {
       node.y = -1;
     }
     return 1;
@@ -291,7 +308,7 @@ test("sugiyama() throws with flat layering", () => {
   const dag = dummy();
 
   function layering<N, L>(dag: Graph<N, L>): number {
-    for (const node of dag) {
+    for (const node of dag.nodes()) {
       node.y = 0;
     }
     return 1;
@@ -305,9 +322,10 @@ test("sugiyama() throws with flat layering", () => {
 
 test("sugiyama() throws with noop coord", () => {
   const dag = dummy();
-  const layout = sugiyama().coord((() => 1) as Coord<unknown, unknown>);
+  const coord: Coord<unknown, unknown> = () => 1;
+  const layout = sugiyama().coord(coord);
   expect(() => layout(dag)).toThrow(
-    "custom coord 'anonymous' didn't assign an x to every node"
+    "custom coord 'coord' didn't assign an x to every node"
   );
 });
 
@@ -375,5 +393,6 @@ test("sugiyama() throws with negative gap width", () => {
 });
 
 test("sugiyama() fails passing an arg to constructor", () => {
-  expect(() => sugiyama(null as never)).toThrow("got arguments to sugiyama");
+  // @ts-expect-error no args
+  expect(() => sugiyama(null)).toThrow("got arguments to sugiyama");
 });

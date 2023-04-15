@@ -1,5 +1,16 @@
+import { MutGraph } from ".";
 import { filter, map } from "../iters";
 import { graphStratify } from "./stratify";
+
+// initial types
+interface Init {
+  id: string;
+  parentIds: string[];
+}
+
+interface Stratify<ND, L> {
+  <N extends ND>(inp: N[]): MutGraph<N, L>;
+}
 
 interface Datum {
   id: string;
@@ -29,14 +40,10 @@ function alter(id: string): string {
 }
 
 test("graphStratify() parses minimal graph", () => {
-  const single = [
-    {
-      id: "0",
-    },
-  ] as const;
+  const single = [{ id: "0" }] as const;
   const build = graphStratify();
   const graph = build(single);
-  const [node] = graph;
+  const [node] = graph.nodes();
   expect(node.data.id).toBe("0");
   expect([...node.children()]).toHaveLength(0);
 });
@@ -53,7 +60,7 @@ test("graphStratify() parses multi-root graph", () => {
   const build = graphStratify();
   const graph = build(doub);
   expect(graph.nnodes()).toBe(2);
-  const ids = [...map(graph, ({ data }) => data.id)].sort();
+  const ids = [...map(graph.nodes(), ({ data }) => data.id)].sort();
   expect(ids).toEqual(["0", "1"]);
 });
 
@@ -69,7 +76,7 @@ test("graphStratify() parses ids with spaces", () => {
   ] as const;
   const build = graphStratify();
   const graph = build(spaces);
-  const ids = [...map(graph, ({ data }) => data.id)].sort();
+  const ids = [...map(graph.nodes(), ({ data }) => data.id)].sort();
   expect(ids).toEqual(["0 0", "1 1"]);
 });
 
@@ -86,9 +93,16 @@ test("graphStratify() parses a square with altered ids", () => {
   function newParentIds(d: Datum): readonly string[] {
     return (d.parentIds ?? []).map(alter);
   }
-  const build = graphStratify().id(newId).parentIds(newParentIds);
-  expect(build.id()).toBe(newId);
-  expect(build.parentIds()).toBe(newParentIds);
+
+  const init = graphStratify() satisfies Stratify<Init, undefined>;
+  // @ts-expect-error invalid data
+  init satisfies Stratify<unknown, undefined>;
+
+  const build = init.id(newId).parentIds(newParentIds);
+  build satisfies Stratify<Datum, undefined>;
+
+  expect(build.id() satisfies typeof newId).toBe(newId);
+  expect(build.parentIds() satisfies typeof newParentIds).toBe(newParentIds);
   expect(build.parentData().wrapped).toBe(newParentIds);
   const graph = build(square);
   expect(graph.nnodes()).toBe(4);
@@ -118,8 +132,15 @@ test("graphStratify() works with data accessor", () => {
   }
 
   const build = graphStratify().id(newId).parentData(newParentData);
-  expect(build.id()).toBe(newId);
-  expect(build.parentData()).toBe(newParentData);
+  build satisfies Stratify<
+    { i: string; pd?: readonly (readonly [string, string])[] | undefined },
+    string
+  >;
+  // @ts-expect-error wrong data
+  build satisfies Stratify<Init, undefined>;
+
+  expect(build.id() satisfies typeof newId).toBe(newId);
+  expect(build.parentData() satisfies typeof newParentData).toBe(newParentData);
   expect(build.parentIds().wrapped).toBe(newParentData);
 
   // check that wrapper works
@@ -131,7 +152,7 @@ test("graphStratify() works with data accessor", () => {
   }
 
   const graph = build(complexSquare);
-  const [root] = filter(graph, ({ data }) => data.i === "a");
+  const [root] = filter(graph.nodes(), ({ data }) => data.i === "a");
   expect(root.data.i).toBe("a");
   expect(root.nchildren()).toBe(2);
   const [left, right] = root.children();
@@ -177,24 +198,20 @@ test("graphStratify() works for multi-graph", () => {
 });
 
 test("graphStratify() fails with arguments", () => {
-  expect(() => graphStratify(undefined as never)).toThrow(
-    "got arguments to graphStratify"
-  );
+  // @ts-expect-error no args
+  expect(() => graphStratify(null)).toThrow("got arguments to graphStratify");
 });
 
-class BadId {
-  get id(): string {
-    throw new Error("bad id");
-  }
-}
 test("graphStratify() fails at undefined id", () => {
   expect(() => {
-    graphStratify()([{ id: null as unknown as string }]);
+    // @ts-expect-error null id
+    graphStratify()([{ id: null }]);
   }).toThrow(
-    "datum did not have an id field, and no id accessor was specified"
+    "datum has an id field that was not a string, and no id accessor was specified"
   );
   expect(() => {
-    graphStratify()([new BadId()]);
+    // @ts-expect-error no id
+    graphStratify()([{}]);
   }).toThrow(
     "datum did not have an id field, and no id accessor was specified"
   );
@@ -269,31 +286,22 @@ test("graphStratify() works with a hard cycle", () => {
 });
 
 test("graphStratify() fails with invalid id type", () => {
-  const id = () => null as never;
+  // @ts-expect-error invalid id type
+  const id: () => string = () => null;
   const build = graphStratify().id(id);
   expect(() => build([{ parentIds: [] }])).toThrow(
     `id is supposed to be type string but got type "object"`
   );
 });
 
-class BadParentIds {
-  id = "";
-  get parentIds(): undefined {
-    throw new Error("bad parent ids");
-  }
-}
-
 test("graphStratify() fails with incorrect parentIds", () => {
-  const data = [
-    {
-      id: "1",
-      parentIds: null as unknown as undefined,
-    },
-  ];
-  expect(() => graphStratify()(data)).toThrow(
-    "default parentIds function expected datum to have a parentIds field but got: "
+  const builder = graphStratify();
+  // @ts-expect-error invalid datum
+  expect(() => builder.id(() => "")([null])).toThrow(
+    "default parentIds function expected datum to be an object but got: "
   );
-  expect(() => graphStratify()([new BadParentIds()])).toThrow(
-    "default parentIds function expected datum to have a parentIds field but got: "
+  // @ts-expect-error invalid datum
+  expect(() => builder([{ id: "1", parentIds: null }])).toThrow(
+    "default parentIds function expected parentIds to be an iterable of strings but got: "
   );
 });
