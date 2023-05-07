@@ -9,10 +9,11 @@ test("coordGreedy() works for N", () => {
     [[], []],
   ]);
   const [[topLeft, topRight], [bottomLeft, bottomRight]] = layers;
-  coordGreedy()(layers, nodeSep);
+  const coord = coordGreedy();
+  coord(layers, nodeSep);
 
-  expect(topLeft.x).toBeCloseTo(1.0);
-  expect(topRight.x).toBeCloseTo(2.0);
+  expect(topLeft.x).toBeCloseTo(0.75);
+  expect(topRight.x).toBeCloseTo(1.75);
   expect(bottomLeft.x).toBeCloseTo(0.5);
   expect(bottomRight.x).toBeCloseTo(1.5);
 });
@@ -30,7 +31,6 @@ test("coordGreedy() works for carat", () => {
 });
 
 test("coordGreedy() works for triangle", () => {
-  // dummy gets lowest priority
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const [[one], [two, dummy], [three]] = layers;
   const coord = coordGreedy();
@@ -38,8 +38,22 @@ test("coordGreedy() works for triangle", () => {
 
   expect(one.x).toBeCloseTo(1);
   expect(two.x).toBeCloseTo(0.5);
-  expect(three.x).toBeCloseTo(0.5);
   expect(dummy.x).toBeCloseTo(1.5);
+  expect(three.x).toBeCloseTo(1);
+});
+
+test("coordGreedy() straightens long edge", () => {
+  const layers = createLayers([[[0, 1]], [[0], 1], [[0], 0], [[]]]);
+  const [[one], [two, topDummy], [three, bottomDummy], [four]] = layers;
+  const coord = coordGreedy();
+  coord(layers, nodeSep);
+
+  expect(one.x).toBeCloseTo(1);
+  expect(two.x).toBeCloseTo(0.5);
+  expect(topDummy.x).toBeCloseTo(1.5);
+  expect(three.x).toBeCloseTo(0.5);
+  expect(bottomDummy.x).toBeCloseTo(1.5);
+  expect(four.x).toBeCloseTo(1);
 });
 
 test("coordGreedy() works with simple compact dag", () => {
@@ -50,7 +64,7 @@ test("coordGreedy() works with simple compact dag", () => {
   const layout = coordGreedy();
   const width = layout(layers, nodeSep);
 
-  expect(width).toBeCloseTo(5);
+  expect(width).toBeCloseTo(4.75);
   for (const layer of layers) {
     for (const [left, right] of bigrams(layer)) {
       const gap = nodeSep(left, right) - 1e-3;
@@ -80,7 +94,7 @@ test("coordGreedy() works with compact dag", () => {
   const layout = coordGreedy();
   const width = layout(layers, nodeSep);
 
-  expect(width).toBeCloseTo(3);
+  expect(width).toBeCloseTo(3.0625);
   for (const layer of layers) {
     for (const [left, right] of bigrams(layer)) {
       const gap = nodeSep(left, right) - 1e-3;

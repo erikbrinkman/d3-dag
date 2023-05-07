@@ -4,10 +4,24 @@
  * @packageDocumentation
  */
 import { Layering } from ".";
-import { Graph } from "../../graph";
-import { map } from "../../iters";
-import { err } from "../../utils";
+import { Graph, Rank } from "../../graph";
+import { chain, filter, map } from "../../iters";
+import { U, err } from "../../utils";
 import { Separation } from "../utils";
+
+/** longest path operators */
+export interface LayeringLongestPathOps<in N = never, in L = never> {
+  /** rank operator */
+  rank: Rank<N, L>;
+}
+
+/** the node datum of a set of operators */
+type OpsNodeDatum<Ops extends LayeringLongestPathOps> =
+  Ops extends LayeringLongestPathOps<infer N, never> ? N : never;
+
+/** the link datum of a set of operators */
+type OpsLinkDatum<Ops extends LayeringLongestPathOps> =
+  Ops extends LayeringLongestPathOps<never, infer L> ? L : never;
 
 /**
  * a {@link Layering} that minimizes the height of the final layout.
@@ -18,8 +32,23 @@ import { Separation } from "../utils";
  *
  * Create with {@link layeringLongestPath}.
  */
-export interface LayeringLongestPath extends Layering<unknown, unknown> {
-  // FIXME this should also take a rank operator
+export interface LayeringLongestPath<
+  Ops extends LayeringLongestPathOps = LayeringLongestPathOps
+> extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
+  /**
+   * set the {@link Rank}
+   *
+   * The rank will override the default ordering of nodes for rending top to
+   * bottom. Note that unlike {@link layeringSimplex} nodes with the same rank
+   * are *not* guaranteed to be on the same layer.
+   */
+  rank<NewRank extends Rank>(
+    newRank: NewRank
+  ): LayeringLongestPath<U<Ops, "rank", NewRank>>;
+  /**
+   * get the current {@link Rank}.
+   */
+  rank(): Ops["rank"];
 
   /**
    * set whether longest path should go top down
@@ -29,7 +58,7 @@ export interface LayeringLongestPath extends Layering<unknown, unknown> {
    *
    * (default: `true`)
    */
-  topDown(val: boolean): LayeringLongestPath;
+  topDown(val: boolean): LayeringLongestPath<Ops>;
   /** get whether or not this is using topDown. */
   topDown(): boolean;
 
@@ -37,21 +66,24 @@ export interface LayeringLongestPath extends Layering<unknown, unknown> {
   readonly d3dagBuiltin: true;
 }
 
-function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
-  function layeringLongestPath<N, L>(
+function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
+  ops: O & LayeringLongestPathOps<ND, LD>,
+  options: { topDown: boolean }
+): LayeringLongestPath<O> {
+  function layeringLongestPath<N extends ND, L extends LD>(
     dag: Graph<N, L>,
     sep: Separation<N, L>
   ): number {
     let height = 0;
-    const nodes = dag.topological();
+    const nodes = dag.topological(ops.rank);
 
     // clear ys to indicate previously assigned nodes
     for (const node of nodes) {
       node.uy = undefined;
     }
 
-    // flip if we're not top down
-    if (!options.topDown) {
+    // flip if we're top down
+    if (options.topDown) {
       nodes.reverse();
     }
 
@@ -59,21 +91,33 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
     for (const node of nodes) {
       const val = Math.max(
         sep(undefined, node),
-        ...map(node.parents(), (par) => (par.uy ?? -Infinity) + sep(par, node)),
         ...map(
-          node.children(),
-          (child) => (child.uy ?? -Infinity) + sep(node, child)
+          chain(node.parents(), node.children()),
+          (c) => (c.uy ?? -Infinity) + sep(c, node)
         )
       );
       height = Math.max(height, val + sep(node, undefined));
       node.y = val;
     }
 
-    // FIXME go both way to condense
+    // go in reverse an update y in case we can shrink long edges
+    for (const node of nodes.reverse()) {
+      const val = Math.min(
+        ...map(
+          filter(chain(node.parents(), node.children()), (c) => node.y < c.y),
+          (c) => c.y - sep(c, node)
+        )
+      );
 
-    // flip again if we're not top down
-    if (!options.topDown) {
-      for (const node of dag.nodes()) {
+      // don't update position if node has no "children" on this pass
+      if (val !== Infinity) {
+        node.y = val;
+      }
+    }
+
+    // flip again if we're top down
+    if (options.topDown) {
+      for (const node of nodes) {
         node.y = height - node.y;
       }
     }
@@ -81,13 +125,32 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
     return height;
   }
 
+  function rank<NR extends Rank>(
+    newRank: NR
+  ): LayeringLongestPath<U<O, "rank", NR>>;
+  function rank(): O["rank"];
+  function rank<NR extends Rank>(
+    newRank?: NR
+  ): LayeringLongestPath<U<O, "rank", NR>> | O["rank"] {
+    if (newRank === undefined) {
+      return ops.rank;
+    } else {
+      const { rank: _, ...rest } = ops;
+      return buildOperator({ ...rest, rank: newRank }, options);
+    }
+  }
+  layeringLongestPath.rank = rank;
+
   function topDown(): boolean;
-  function topDown(val: boolean): LayeringLongestPath;
-  function topDown(val?: boolean): boolean | LayeringLongestPath {
+  function topDown(val: boolean): LayeringLongestPath<O>;
+  function topDown(val?: boolean): boolean | LayeringLongestPath<O> {
     if (val === undefined) {
       return options.topDown;
     } else {
-      return buildOperator({ ...options, topDown: val });
+      return buildOperator(ops, {
+        ...options,
+        topDown: val,
+      });
     }
   }
   layeringLongestPath.topDown = topDown;
@@ -96,6 +159,16 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
 
   return layeringLongestPath;
 }
+
+function defaultAccessor(): undefined {
+  return undefined;
+}
+
+/** default longest path operator */
+export type DefaultLayeringLongestPath = LayeringLongestPath<{
+  /** unconstrained rank */
+  rank: Rank<unknown, unknown>;
+}>;
 
 /**
  * create a default {@link LayeringLongestPath}
@@ -110,9 +183,11 @@ function buildOperator(options: { topDown: boolean }): LayeringLongestPath {
  * const layout = sugiyama().layering(layeringLongestPath().topDown(false));
  * ```
  */
-export function layeringLongestPath(...args: never[]): LayeringLongestPath {
+export function layeringLongestPath(
+  ...args: never[]
+): DefaultLayeringLongestPath {
   if (args.length) {
     throw err`got arguments to layeringLongestPath(${args}); you probably forgot to construct layeringLongestPath before passing to layering: \`sugiyama().layering(layeringLongestPath())\`, note the trailing "()"`;
   }
-  return buildOperator({ topDown: true });
+  return buildOperator({ rank: defaultAccessor }, { topDown: true });
 }

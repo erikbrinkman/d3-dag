@@ -1,4 +1,4 @@
-import { layerSeparation } from ".";
+import { Layering, layerSeparation } from ".";
 import { graphConnect } from "../../graph/connect";
 import { ccoz, eye, multi, oh, square } from "../../test-graphs";
 import { canonical, getLayers } from "../test-utils";
@@ -69,6 +69,24 @@ test("layeringLongestPath() works for cyclic graph", () => {
   ]).toContainEqual(layers);
 });
 
+test("layeringLongestPath() works for rank", () => {
+  function rank({ data }: { data: string }): number {
+    return -parseInt(data);
+  }
+
+  const dag = square();
+  const base = layeringLongestPath() satisfies Layering<unknown, unknown>;
+  const layering = base.rank(rank) satisfies Layering<string, unknown>;
+  // @ts-expect-error no longer general
+  layering satisfies Layering<unknown, unknown>;
+  expect(layering.rank() satisfies typeof rank).toBe(rank);
+
+  const num = layering(dag, layerSeparation);
+  expect(num).toBe(2);
+  const layers = getLayers(dag, num + 1);
+  expect([[3], [1, 2], [0]]).toEqual(layers);
+});
+
 test("layeringLongestPath() works for topDown", () => {
   const create = graphConnect().single(true);
   const dag = create(changes);
@@ -77,7 +95,7 @@ test("layeringLongestPath() works for topDown", () => {
   const num = layering(dag, layerSeparation);
   expect(num).toBe(1);
   const layers = getLayers(dag, num + 1);
-  expect([[0, 1], [2]]).toEqual(layers);
+  expect([[1], [0, 2]]).toEqual(layers);
 });
 
 test("layeringLongestPath() works for bottomUp", () => {
@@ -88,7 +106,40 @@ test("layeringLongestPath() works for bottomUp", () => {
   const num = layering(dag, layerSeparation);
   expect(num).toBe(1);
   const layers = getLayers(dag, num + 1);
-  expect([[1], [0, 2]]).toEqual(layers);
+  expect([[0, 1], [2]]).toEqual(layers);
+});
+
+test("layeringLongestPath() compacts long edges", () => {
+  const builder = graphConnect();
+  const dag = builder([
+    ["0", "1"],
+    ["0", "2"],
+    ["2", "3"],
+    ["4", "3"],
+  ]);
+  const layering = layeringLongestPath();
+  const num = layering(dag, layerSeparation);
+  expect(num).toBe(2);
+  const layers = getLayers(dag, num + 1);
+  expect([[0], [1, 2, 4], [3]]).toEqual(layers);
+});
+
+test("layeringLongestPath() compacts multiple long edges", () => {
+  const builder = graphConnect();
+  const dag = builder([
+    ["0", "1"],
+    ["1", "2"],
+    ["0", "3"],
+    ["3", "4"],
+    ["4", "5"],
+    ["6", "5"],
+    ["7", "6"],
+  ]);
+  const layering = layeringLongestPath();
+  const num = layering(dag, layerSeparation);
+  expect(num).toBe(3);
+  const layers = getLayers(dag, num + 1);
+  expect([[0], [1, 3, 7], [2, 4, 6], [5]]).toEqual(layers);
 });
 
 test("layeringLongestPath() works for multi dag", () => {

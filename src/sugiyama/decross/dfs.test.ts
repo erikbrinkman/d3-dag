@@ -20,15 +20,15 @@ test("decrossDfs() works on trivial case", () => {
 
 test("decrossDfs() works on compact trivial case", () => {
   // o
-  //  \
-  // o |
-  //  /
+  // |
+  // | o
+  // |
   // o
-  const layers = createLayers([[0n], [[1]], [0n, 1], [[], 0], [0n], [[]]]);
+  const layers = createLayers([[0n], [[0]], [0, 1n], [0, []], [0n], [[]]]);
   const decross = decrossDfs();
   decross(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
-  expect(inds).toEqual([[0], [0], [null, 0], [null, 0], [0], [0]]);
+  expect(inds).toEqual([[0], [0], [1, null], [1, null], [0], [0]]);
 });
 
 test("decrossDfs() works on trivial case bottom up", () => {

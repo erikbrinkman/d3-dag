@@ -8,18 +8,18 @@ import { Graph, Rank } from "../../graph";
 import { U, err } from "../../utils";
 import { Separation } from "../utils";
 
-/** topological operator operators */
+/** topological operators */
 export interface LayeringTopologicalOps<in N = never, in L = never> {
   /** rank operator */
   rank: Rank<N, L>;
 }
 
 /** the node datum of a set of operators */
-export type OpsNodeDatum<Ops extends LayeringTopologicalOps> =
+type OpsNodeDatum<Ops extends LayeringTopologicalOps> =
   Ops extends LayeringTopologicalOps<infer N, never> ? N : never;
 
 /** the link datum of a set of operators */
-export type OpsLinkDatum<Ops extends LayeringTopologicalOps> =
+type OpsLinkDatum<Ops extends LayeringTopologicalOps> =
   Ops extends LayeringTopologicalOps<never, infer L> ? L : never;
 
 /**
@@ -99,7 +99,7 @@ function defaultAccessor(): undefined {
   return undefined;
 }
 
-/** default simplex operator */
+/** default topological operator */
 export type DefaultLayeringTopological = LayeringTopological<{
   /** unconstrained rank */
   rank: Rank<unknown, unknown>;

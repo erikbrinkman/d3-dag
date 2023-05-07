@@ -8,7 +8,7 @@
 // better behavior
 import { median } from "d3-array";
 import { Coord } from ".";
-import { bigrams, entries, map, slice } from "../../iters";
+import { entries, map, slice } from "../../iters";
 import { err } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
 
@@ -25,12 +25,7 @@ export interface CoordGreedy extends Coord<unknown, unknown> {
   readonly d3dagBuiltin: true;
 }
 
-// FIXME this does not work in compact mode, need to figure out why
-
-function degree(node: SugiNode): number {
-  return node.data.role === "node" ? node.nparents() + node.nchildren() : -1;
-}
-
+/** assign nodes based on the median of their ancestor exes */
 function assign(
   layer: readonly SugiNode[],
   ancestors: (node: SugiNode) => Iterable<SugiNode>
@@ -43,46 +38,52 @@ function assign(
   }
 }
 
-function heur<N, L>(
-  layer: readonly SugiNode<N, L>[],
-  sep: SugiSeparation<N, L>,
-  inds: readonly number[]
+/** same as assign, but only for links between two dummy nodes */
+function straighten(
+  layer: readonly SugiNode[],
+  ancestors: (node: SugiNode) => Iterable<SugiNode>
 ): void {
-  // iterate over nodes in degree order
-  for (const ind of inds) {
-    // space apart in neighborhood
-    for (const [last, next] of bigrams(slice(layer, ind))) {
-      const x = last.x + sep(last, next);
-      if (x > next.x) {
-        next.x = x;
-      } else {
-        break;
-      }
-    }
-    for (const [last, next] of bigrams(slice(layer, ind, -1, -1))) {
-      const x = last.x - sep(next, last);
-      if (x < next.x) {
-        next.x = x;
-      } else {
-        break;
-      }
+  for (const node of layer) {
+    const [ancestor] = ancestors(node);
+    if (node.data.role === "link" && ancestor.data.role === "link") {
+      node.x = ancestor.x;
     }
   }
 }
 
+/**
+ * space apart nodes
+ *
+ * This spaces apart nodes using the separation function. It goes forward and
+ * backward and then sets the x coordinate to be the midway point.
+ */
 function space<N, L>(
   layer: readonly SugiNode<N, L>[],
   sep: SugiSeparation<N, L>
 ): void {
-  const ind = Math.floor(layer.length / 2);
-  for (const [last, next] of bigrams(slice(layer, ind))) {
-    next.x = Math.max(next.x, last.x + sep(last, next));
+  let last = layer[layer.length - 1];
+  let lastx = last.x;
+  const after = [lastx];
+  for (const sugi of slice(layer, layer.length - 2, -1, -1)) {
+    const next = Math.min(sugi.x, lastx - sep(last, sugi));
+    after.push(next);
+    last = sugi;
+    lastx = next;
   }
-  for (const [last, next] of bigrams(slice(layer, ind, -1, -1))) {
-    next.x = Math.min(next.x, last.x - sep(next, last));
+
+  after.reverse();
+  last = layer[0];
+  lastx = last.x;
+  last.x = (lastx + after[0]) / 2;
+  for (const [i, sugi] of entries(slice(layer, 1))) {
+    const next = Math.max(sugi.x, lastx + sep(last, sugi));
+    sugi.x = (next + after[i + 1]) / 2;
+    last = sugi;
+    lastx = next;
   }
 }
 
+/** detect if the nodes are unchanged from the snapshot */
 function unchanged(layers: SugiNode[][], snapshot: number[][]): boolean {
   for (const [i, layer] of layers.entries()) {
     const snap = snapshot[i];
@@ -118,36 +119,22 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     sep: SugiSeparation<N, L>
   ): number {
     // get statistics on layers
-    let numPasses = 1;
     let xmean = 0;
     let xcount = 0;
     const nodes = new Set<SugiNode<N, L>>();
     for (const layer of layers) {
       for (const node of layer) {
-        nodes.add(node);
-        if (node.ux !== undefined) {
-          xmean += (node.ux - xmean) / ++xcount;
-        }
-        if (node.data.role === "node") {
-          const span = node.data.bottomLayer - node.data.topLayer + 1;
-          numPasses = Math.max(numPasses, span);
+        if (!nodes.has(node)) {
+          nodes.add(node);
+          if (node.ux !== undefined) {
+            xmean += (node.ux - xmean) / ++xcount;
+          }
         }
       }
     }
 
-    // compute order for spacing heuristic
-    const degInds = layers.map((layer) => {
-      const ordered = [...layer.entries()];
-      ordered.sort(([aj, anode], [bj, bnode]) => {
-        const adeg = degree(anode);
-        const bdeg = degree(bnode);
-        return adeg === bdeg ? aj - bj : bdeg - adeg;
-      });
-      return ordered.map(([ind]) => ind);
-    });
-
     // initialize xes on all layers
-    for (const [i, layer] of layers.entries()) {
+    for (const layer of layers) {
       let mean = 0;
       let count = 0;
       for (const node of layer) {
@@ -161,30 +148,30 @@ export function coordGreedy(...args: never[]): CoordGreedy {
           node.ux = def;
         }
       }
-      heur(layer, sep, degInds[i]);
+      space(layer, sep);
     }
 
     // do an up and down pass using the assignment operator
     // down pass
-    for (const [i, layer] of entries(slice(layers, 1))) {
+    for (const layer of slice(layers, 1)) {
       assign(layer, (node) => node.parents());
-      heur(layer, sep, degInds[i + 1]);
+      space(layer, sep);
     }
     // up pass
-    for (const [i, layer] of entries(
-      slice(layers, layers.length - 2, -1, -1)
-    )) {
+    for (const layer of slice(layers, layers.length - 2, -1, -1)) {
       assign(layer, (node) => node.children());
-      heur(layer, sep, degInds[layers.length - i - 2]);
+      space(layer, sep);
     }
 
-    // another set of passes to guarantee nodes spaced apart enough
-    for (let i = 0; i < numPasses; ++i) {
+    // another set of passes to guarantee nodes spaced apart enough and long edges are straight
+    for (let i = 0; i < layers.length; ++i) {
       const snapshot = layers.map((layer) => layer.map(({ x }) => x));
       for (const layer of slice(layers, 1)) {
+        straighten(layer, (node) => node.parents());
         space(layer, sep);
       }
       for (const layer of slice(layers, layers.length - 2, -1, -1)) {
+        straighten(layer, (node) => node.children());
         space(layer, sep);
       }
       if (unchanged(layers, snapshot)) {

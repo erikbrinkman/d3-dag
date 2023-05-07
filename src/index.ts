@@ -250,7 +250,9 @@ export {
 } from "./sugiyama/layering";
 export {
   layeringLongestPath,
+  type DefaultLayeringLongestPath,
   type LayeringLongestPath,
+  type LayeringLongestPathOps,
 } from "./sugiyama/layering/longest-path";
 export {
   layeringSimplex,
