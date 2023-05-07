@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- change src to test any of the examples -->
+    <script
+      type="text/babel"
+      data-type="module"
+      data-presets="typescript"
+      src="./dynamic.ts"
+    ></script>
+  </head>
+  <body>
+    <svg id="svg">
+      <g transform="translate(2, 2)">
+        <defs id="defs" />
+        <g id="links" />
+        <g id="nodes" />
+        <g id="arrows" />
+      </g>
+    </svg>
+  </body>
+</html>

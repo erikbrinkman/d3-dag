@@ -75,7 +75,7 @@ export function tweakSize(
  * control points to edges so that `d3.curveBasis` curves produce nice rounded
  * edges.
  *
- * rounding should be set somewhere between 0 and nodeSize.
+ * rounding should be set somewhere between 0 and nodeSize / 2.
  */
 export function tweakGrid(
   rounding: readonly [number, number]

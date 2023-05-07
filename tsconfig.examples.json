@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "http://localhost:4507/bundle/d3-dag.esm.min.js": ["."]
+    }
+  },
+  "include": ["examples"]
+}
