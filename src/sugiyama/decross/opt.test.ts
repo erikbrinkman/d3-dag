@@ -138,6 +138,36 @@ test("decrossOpt() works for compact layers", () => {
   ]);
 });
 
+test("decrossOpt() works for hard compact case", () => {
+  // this case doesn't work for any known greedy methods
+  //   #
+  //   |\
+  //   # #
+  //   # |
+  //  /| #
+  // # # #
+  // | # #
+  // # |/
+  //   #
+  const layers = createLayers([
+    [0n],
+    [[0, 1]],
+    [0n, 1n],
+    [0n, [1]],
+    [[0, 1], 2n],
+    [0n, 1n, 2n],
+    [[0], 1n, 2n],
+    [0n, [1], [1]],
+    [[], 0n],
+    [[]],
+  ]);
+  const layout = decrossOpt();
+  const inits = layers.map((layer) => layer.map(getIndex));
+  layout(layers);
+  const inds = layers.map((layer) => layer.map(getIndex));
+  expect(inds).toEqual(inits);
+});
+
 test("decrossOpt() does not optimize distance", () => {
   const layers = createLayers([[[0, 2]], [[], [], []]]);
   decrossOpt()(layers);

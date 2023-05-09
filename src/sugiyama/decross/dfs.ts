@@ -5,9 +5,8 @@
  * @packageDocumentation
  */
 import { Decross } from ".";
-import { filter, flatMap, slice } from "../../iters";
-import { dfs as depthFirstSearch, err } from "../../utils";
-import { SugiNode } from "../sugify";
+import { err } from "../../utils";
+import { SugiNode, layerDfs } from "../sugify";
 
 /**
  * a depth first search operator
@@ -38,46 +37,7 @@ export interface DecrossDfs extends Decross<unknown, unknown> {
 /** @internal */
 function buildOperator(options: { topDown: boolean }): DecrossDfs {
   function decrossDfs(layers: SugiNode[][]): void {
-    // get iteration over nodes in dfs order
-    // we heuristically prioritize nodes with a fewer number of children
-    // NOTE with dfs, the priority is for the last element
-    let iter: Iterable<SugiNode>;
-    if (options.topDown) {
-      iter = depthFirstSearch(
-        (n) => [...n.children()].sort((a, b) => b.nchildren() - a.nchildren()),
-        ...flatMap(layers, (layer) =>
-          [...filter(layer, (n) => !n.nparents())].sort(
-            (a, b) => b.nchildren() - a.nchildren()
-          )
-        )
-      );
-    } else {
-      iter = depthFirstSearch(
-        (n) => [...n.parents()].sort((a, b) => b.nparents() - a.nparents()),
-        ...flatMap(slice(layers, layers.length - 1, -1, -1), (layer) =>
-          [...filter(layer, (n) => !n.nchildren())].sort(
-            (a, b) => b.nparents() - a.nparents()
-          )
-        )
-      );
-    }
-
-    // since we know we'll hit every node in iteration, we can clear the layers
-    for (const layer of layers) {
-      layer.splice(0);
-    }
-
-    // re-add in the order seen
-    for (const node of iter) {
-      const { data } = node;
-      if (data.role === "node") {
-        for (let layer = data.topLayer; layer <= data.bottomLayer; ++layer) {
-          layers[layer].push(node);
-        }
-      } else {
-        layers[data.layer].push(node);
-      }
-    }
+    layerDfs(layers, options.topDown);
   }
 
   function topDown(val: boolean): DecrossDfs;

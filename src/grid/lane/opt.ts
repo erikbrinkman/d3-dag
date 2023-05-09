@@ -6,7 +6,7 @@
 import { Lane } from ".";
 import { GraphNode } from "../../graph";
 import { map } from "../../iters";
-import { OptChecking } from "../../layout";
+import { nameSymbol, OptChecking } from "../../layout";
 import { Constraint, solve, Variable } from "../../simplex";
 import { err } from "../../utils";
 import { gridChildren } from "./utils";
@@ -54,7 +54,7 @@ export interface LaneOpt extends Lane<unknown, unknown> {
   check(): OptChecking;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "laneOpt";
 }
 
 function getCompressedWidth(ordered: readonly GraphNode[]): number {
@@ -249,7 +249,7 @@ function buildOperator(options: {
   }
   laneOpt.check = check;
 
-  laneOpt.d3dagBuiltin = true as const;
+  laneOpt[nameSymbol] = "laneOpt" as const;
 
   return laneOpt;
 }

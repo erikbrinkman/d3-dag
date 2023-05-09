@@ -4,6 +4,7 @@
  *
  * @packageDocumentation
  */
+import { nameSymbol } from "../../layout";
 import { SugiNode } from "../sugify";
 
 /**
@@ -70,4 +71,7 @@ export interface Decross<in NodeDatum = never, in LinkDatum = never> {
    * @param layers - the layers of nodes that this should rearrange.
    */
   (layers: SugiNode<NodeDatum, LinkDatum>[][]): void;
+
+  /** @internal */
+  readonly [nameSymbol]?: `decross${"TwoLayer" | "Opt" | "Dfs"}` | undefined;
 }

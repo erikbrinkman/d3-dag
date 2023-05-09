@@ -6,6 +6,7 @@
 import { Layering } from ".";
 import { Graph, Rank } from "../../graph";
 import { chain, filter, map } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { U, err } from "../../utils";
 import { Separation } from "../utils";
 
@@ -62,8 +63,8 @@ export interface LayeringLongestPath<
   /** get whether or not this is using topDown. */
   topDown(): boolean;
 
-  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  /** @internal */
+  readonly [nameSymbol]: "layeringLongestPath";
 }
 
 function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
@@ -155,7 +156,7 @@ function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
   }
   layeringLongestPath.topDown = topDown;
 
-  layeringLongestPath.d3dagBuiltin = true as const;
+  layeringLongestPath[nameSymbol] = "layeringLongestPath" as const;
 
   return layeringLongestPath;
 }

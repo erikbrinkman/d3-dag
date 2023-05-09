@@ -6,6 +6,7 @@
  */
 import { Coord } from ".";
 import { bigrams } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { Constraint, solve as solveSimp, Variable } from "../../simplex";
 import { err } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
@@ -34,7 +35,7 @@ export interface CoordTopological extends Coord<unknown, unknown> {
   straight(): boolean;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "coordTopological";
 }
 
 function buildOperator(opts: { simp: boolean }): CoordTopological {
@@ -215,7 +216,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
   }
   coordTopological.straight = straight;
 
-  coordTopological.d3dagBuiltin = true as const;
+  coordTopological[nameSymbol] = "coordTopological" as const;
 
   return coordTopological;
 }

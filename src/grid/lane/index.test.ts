@@ -31,7 +31,7 @@ for (const dat of [doub, ex, square, ccoz, multi, oh, zhere]) {
         node.y = y;
       }
       lane(nodes);
-      const uniq = verifyLanes(nodes, lane);
+      const uniq = verifyLanes(nodes);
       expect(uniq).toBeGreaterThan(0);
     });
   }

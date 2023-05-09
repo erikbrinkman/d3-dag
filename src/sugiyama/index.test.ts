@@ -1,10 +1,21 @@
 import { sugiyama } from ".";
 import { Graph, graph, GraphNode } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
-import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs";
+import {
+  doub,
+  dummy,
+  grafo,
+  multi,
+  oh,
+  single,
+  square,
+  three,
+  trip,
+} from "../test-graphs";
 import { Tweak, tweakSize } from "../tweaks";
 import { Coord } from "./coord";
 import { Decross } from "./decross";
+import { decrossOpt } from "./decross/opt";
 import { Layering } from "./layering";
 import { layeringTopological } from "./layering/topological";
 import { SugiNode } from "./sugify";
@@ -241,13 +252,57 @@ test("sugiyama() allows changing operators", () => {
   layout(dag);
 });
 
+test("sugiyama() works for compact layouts", () => {
+  const dag = square();
+
+  function nodeSize(node: GraphNode<string>): [number, number] {
+    const size = (parseInt(node.data) % 3) + 1;
+    return [size, size];
+  }
+
+  const layout = sugiyama().nodeSize(nodeSize).compact(true);
+  expect(layout.compact()).toBe(true);
+  const { width, height } = layout(dag);
+  expect(width).toBeCloseTo(6);
+  expect(height).toBeCloseTo(7);
+  const [zero, one, two, three] = canonical(dag);
+
+  // NOTE this is very implementation dependent
+  expect(zero.x).toBeCloseTo(5);
+  expect(zero.y).toBeCloseTo(0.5);
+  expect(one.x).toBeCloseTo(5);
+  expect(one.y).toBeCloseTo(3);
+  expect(two.x).toBeCloseTo(1.5);
+  expect(two.y).toBeCloseTo(3.5);
+  expect(three.x).toBeCloseTo(5);
+  expect(three.y).toBeCloseTo(6.5);
+});
+
+test("sugiyama() works for complex compact layouts", () => {
+  const dag = grafo();
+
+  function nodeSize(node: GraphNode<{ id: string }>): [number, number] {
+    const size = (parseInt(node.data.id) % 3) + 1;
+    return [size, size];
+  }
+
+  const layout = sugiyama()
+    .nodeSize(nodeSize)
+    .decross(decrossOpt())
+    .compact(true);
+  const { width, height } = layout(dag);
+  // FIXME implement
+  expect(width).toBeGreaterThan(0);
+  expect(height).toBeGreaterThan(0);
+});
+
 const noop = (): number => 1;
 
 test("sugiyama() throws with noop layering", () => {
   const dag = dummy();
   const layout = sugiyama().layering(noop);
   expect(() => layout(dag)).toThrow(
-    "custom layering 'noop' didn't assign a layer to a node"
+    "custom layering didn't assign a layer to a node"
   );
 });
 
@@ -264,7 +319,7 @@ test("sugiyama() throws with invalid layers", () => {
 
   const layout = sugiyama().layering(layering);
   expect(() => layout(dag)).toThrow(
-    `custom layering 'layering' assigned node an invalid layer: -1`
+    `custom layering assigned node an invalid layer: -1`
   );
 });
 
@@ -281,7 +336,7 @@ test("sugiyama() throws with flat layering", () => {
 
   const layout = sugiyama().layering(layering);
   expect(() => layout(dag)).toThrow(
-    "custom layering 'layering' assigned nodes with an edge to the same layer"
+    "custom layering assigned nodes with an edge to the same layer"
   );
 });
 
@@ -290,7 +345,7 @@ test("sugiyama() throws with noop coord", () => {
   const coord: Coord<unknown, unknown> = () => 1;
   const layout = sugiyama().coord(coord);
   expect(() => layout(dag)).toThrow(
-    "custom coord 'coord' didn't assign an x to every node"
+    "custom coord didn't assign an x to every node"
   );
 });
 
@@ -305,7 +360,7 @@ test("sugiyama() throws with large coord width", () => {
     return 1; // 1 < 2
   });
   expect(() => layout(dag)).toThrow(
-    "custom coord 'anonymous' assigned nodes too close for separation"
+    "custom coord assigned nodes too close for separation"
   );
 });
 
@@ -320,7 +375,7 @@ test("sugiyama() throws with negative width", () => {
     return 1;
   });
   expect(() => layout(dag)).toThrow(
-    "custom coord 'anonymous' assigned nodes too close for separation"
+    "custom coord assigned nodes too close for separation"
   );
 });
 

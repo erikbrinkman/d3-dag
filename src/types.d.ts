@@ -1,12 +1,19 @@
 // TODO when types are published as part of package, use those instead
 declare module "javascript-lp-solver" {
   /** a constraint definition */
-  export interface Constraint {
-    /** the minimum value of the constraint */
-    min?: number;
-    /** the max value of the constraint */
-    max?: number;
-  }
+  export type Constraint =
+    | {
+        /** the minimum value of the constraint */
+        min: number;
+      }
+    | {
+        /** the max value of the constraint */
+        max: number;
+      }
+    | {
+        /** the value of the constraint */
+        equal: number;
+      };
 
   /**
    * a variable definition

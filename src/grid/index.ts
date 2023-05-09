@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import { Graph, Rank } from "../graph";
-import { LayoutResult, NodeSize } from "../layout";
+import { LayoutResult, NodeSize, nameSymbol } from "../layout";
 import { Tweak } from "../tweaks";
 import { U, err } from "../utils";
 import { Lane } from "./lane";
@@ -146,7 +146,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
 
       // get lanes
       options.lane(ordered);
-      const numLanes = verifyLanes(ordered, options.lane);
+      const numLanes = verifyLanes(ordered, options.lane[nameSymbol]);
 
       // adjust x and y by nodeSize
       const { xgap, ygap } = sizes;

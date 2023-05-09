@@ -4,6 +4,7 @@
  *
  * @packageDocumentation
  */
+import { nameSymbol } from "../../layout";
 import { SugiNode } from "../sugify";
 
 /**
@@ -53,4 +54,7 @@ export interface Twolayer<in NodeDatum = never, in LinkDatum = never> {
     bottomLayer: SugiNode<NodeDatum, LinkDatum>[],
     topDown: boolean
   ): void;
+
+  /** @internal */
+  readonly [nameSymbol]?: `twolayer${"Agg" | "Greedy" | "Opt"}` | undefined;
 }

@@ -1,5 +1,5 @@
 import { MutGraph } from ".";
-import { entries, map, slice } from "../iters";
+import { entries, map, reverse } from "../iters";
 import { canonical } from "../sugiyama/test-utils";
 import { graphConnect } from "./connect";
 
@@ -199,7 +199,7 @@ test("topological() reverses the correct edge", () => {
   const grf = create(cycle);
   const [a, ...rest] = grf.topological();
   expect(a.data).toBe("a");
-  const [c] = slice(rest, rest.length - 1, -1, -1);
+  const [c] = reverse(rest);
   expect(c.data).toBe("c");
 });
 
@@ -239,15 +239,12 @@ test("topological() correctly handles complex case", () => {
   const [a, b, ...rest] = grf.topological();
   expect(a.data).toBe("a");
   expect(b.data).toBe("b");
-  const [h, g, ...rem] = slice(rest, rest.length - 1, -1, -1);
+  const [h, g, ...rem] = reverse(rest);
   expect(h.data).toBe("h");
   expect(g.data).toBe("g");
 
   const inds = new Map(
-    map(entries(slice(rem, rem.length - 1, -1, -1)), ([i, { data }]) => [
-      data,
-      i,
-    ])
+    map(entries(reverse(rem)), ([i, { data }]) => [data, i])
   );
   expect(inds.get("d")! < inds.get("e")!).toBe(true);
 });

@@ -4,11 +4,10 @@
  *
  * @packageDocumentation
  */
-// TODO add assignment like mean that skips dummy nodes as that seems like
-// better behavior
 import { median } from "d3-array";
 import { Coord } from ".";
 import { entries, map, slice } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { err } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
 
@@ -21,8 +20,8 @@ import { SugiNode, SugiSeparation } from "../sugify";
  * Create with {@link coordGreedy}.
  */
 export interface CoordGreedy extends Coord<unknown, unknown> {
-  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  /** @internal */
+  readonly [nameSymbol]: "coordGreedy";
 }
 
 /** assign nodes based on the median of their ancestor exes */
@@ -201,7 +200,10 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     return width;
   }
 
-  coordGreedy.d3dagBuiltin = true as const;
+  // https://github.com/microsoft/TypeScript/issues/54220
+  // @ts-expect-error this is weird side effect of the only property being a symbol
+  coordGreedy[nameSymbol] = "coordGreedy" as const;
 
+  // @ts-expect-error which then prevents this from working
   return coordGreedy;
 }

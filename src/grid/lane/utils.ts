@@ -2,7 +2,6 @@ import { setEqual } from "../../collections";
 import { GraphNode } from "../../graph";
 import { chain, filter, map, slice } from "../../iters";
 import { berr } from "../../utils";
-import { Lane } from "./index";
 
 /** the effective children for grid layouts */
 export function gridChildren(node: GraphNode): Set<GraphNode> {
@@ -14,7 +13,10 @@ export function gridChildren(node: GraphNode): Set<GraphNode> {
 /**
  * Verify that nodes were assigned valid lanes
  */
-export function verifyLanes(ordered: GraphNode[], lane: Lane): number {
+export function verifyLanes(
+  ordered: GraphNode[],
+  lane?: string | undefined
+): number {
   for (const node of ordered) {
     if (node.ux === undefined) {
       throw berr`lane ${lane} didn't assign an x to every node`;

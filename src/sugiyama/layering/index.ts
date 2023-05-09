@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 import { Graph, GraphNode } from "../../graph";
+import { nameSymbol, sentinel } from "../../layout";
 import { Separation } from "../utils";
 
 /**
@@ -91,6 +92,11 @@ export interface Layering<in NodeDatum = never, in LinkDatum = never> {
     sep: Separation<N, L>
   ): number;
 
+  /** @internal */
+  readonly [nameSymbol]?:
+    | `layering${"LongestPath" | "Simplex" | "Topological"}`
+    | undefined;
+
   /**
    * This sentinel field is so that typescript can infer the types of NodeDatum
    * and LinkDatum, because the extra generics make it otherwise hard to infer.
@@ -98,5 +104,5 @@ export interface Layering<in NodeDatum = never, in LinkDatum = never> {
    *
    * @internal
    */
-  __sentinel__?: (_: NodeDatum, __: LinkDatum) => void;
+  [sentinel]?: (_: NodeDatum, __: LinkDatum) => void;
 }

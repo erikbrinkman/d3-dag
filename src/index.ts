@@ -307,7 +307,7 @@ export {
   type Shape,
   type Tweak,
 } from "./tweaks";
-export { type Named, type U } from "./utils";
+export { type U } from "./utils";
 export {
   zherebko,
   type DefaultZherebko,

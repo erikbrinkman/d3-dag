@@ -310,13 +310,7 @@ test("manual sugiyama() layered", () => {
 
   const [xLen, yLen] = splitNodeSize(cachedNodeSize(nodeSize));
   const numLayers = layering(dag, layerSeparation);
-  const [layers, height] = sugifyLayer(
-    dag,
-    yLen,
-    yGap,
-    numLayers + 1,
-    layering
-  );
+  const [layers, height] = sugifyLayer(dag, yLen, yGap, numLayers + 1);
   decross(layers);
   const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
   const width = coord(layers, xSep);
@@ -340,7 +334,7 @@ test("manual sugiyama() compact", () => {
   const [xLen, yLen] = splitNodeSize(cachedNodeSize(nodeSize));
   const ySep = sizedSeparation(yLen, yGap);
   const height = layering(dag, ySep);
-  const layers = sugifyCompact(dag, yLen, height, layering);
+  const layers = sugifyCompact(dag, yLen, height);
   decross(layers);
   const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
   const width = coord(layers, xSep);

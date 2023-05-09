@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { Twolayer } from ".";
+import { nameSymbol } from "../../layout";
 import { err } from "../../utils";
 import { SugiNode } from "../sugify";
 
@@ -48,7 +49,7 @@ export interface TwolayerGreedy<Op extends Twolayer = Twolayer>
   scan(): boolean;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "twolayerGreedy";
 }
 
 interface SwapChange<N, L> {
@@ -222,7 +223,7 @@ function buildOperator<N, L, Op extends Twolayer<N, L>>({
   }
   twolayerGreedy.scan = scan;
 
-  twolayerGreedy.d3dagBuiltin = true as const;
+  twolayerGreedy[nameSymbol] = "twolayerGreedy" as const;
 
   return twolayerGreedy;
 }

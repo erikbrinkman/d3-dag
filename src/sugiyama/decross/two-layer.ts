@@ -6,6 +6,7 @@
  */
 import { Decross } from ".";
 import { bigrams } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { err, U } from "../../utils";
 import { SugiNode } from "../sugify";
 import { Twolayer } from "../twolayer";
@@ -95,8 +96,8 @@ export interface DecrossTwoLayer<
    */
   passes(): number;
 
-  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  /** @internal */
+  readonly [nameSymbol]: "decrossTwoLayer";
 }
 
 /** @internal */
@@ -107,6 +108,10 @@ function buildOperator<N, L, O extends DecrossTwoLayerOps<N, L>>(
     }
 ): DecrossTwoLayer<O> {
   function decrossTwoLayer(layers: SugiNode<N, L>[][]): void {
+    // FIXME this won't necessarily work with compact depending on how one
+    // layer gets ordered, it might affect a crossing on another layer. We
+    // might be able to get around it by mapping some constraints of possible
+    // move based on lower crossings
     const reversed = layers.slice().reverse();
 
     // save optimal ordering
@@ -201,7 +206,7 @@ function buildOperator<N, L, O extends DecrossTwoLayerOps<N, L>>(
   }
   decrossTwoLayer.passes = passes;
 
-  decrossTwoLayer.d3dagBuiltin = true as const;
+  decrossTwoLayer[nameSymbol] = "decrossTwoLayer" as const;
 
   return decrossTwoLayer;
 }

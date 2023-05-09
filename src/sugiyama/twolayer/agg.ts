@@ -8,6 +8,7 @@ import { median } from "d3-array";
 import { Twolayer } from ".";
 import { listMultimapPush } from "../../collections";
 import { map } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { err } from "../../utils";
 import { SugiNode } from "../sugify";
 
@@ -27,6 +28,11 @@ export interface Aggregator {
    *   is empty
    */
   (indices: Iterable<number>): number | undefined;
+
+  /** @internal */
+  readonly [nameSymbol]?:
+    | `agg${"Mean" | "Median" | "WeightedMedian"}`
+    | undefined;
 }
 
 /** a simple efficient mean aggregator */
@@ -39,6 +45,8 @@ export function aggMean(indices: Iterable<number>): number | undefined {
   }
   return count ? mean : undefined;
 }
+/** @internal */
+aggMean[nameSymbol] = "aggMean" as const;
 
 /**
  * a median aggregator
@@ -48,6 +56,8 @@ export function aggMean(indices: Iterable<number>): number | undefined {
 export function aggMedian(indices: Iterable<number>): number | undefined {
   return median([...indices]);
 }
+/** @internal */
+aggMedian[nameSymbol] = "aggMedian" as const;
 
 /**
  * a weighted median aggregator
@@ -81,6 +91,8 @@ export function aggWeightedMedian(
     return vals[(vals.length - 1) / 2];
   }
 }
+/** @internal */
+aggWeightedMedian[nameSymbol] = "aggWeightedMedian" as const;
 
 /**
  * a {@link Twolayer} that orders nodes based off aggregated ancestor indices
@@ -123,7 +135,7 @@ export interface TwolayerAgg<Agg extends Aggregator = Aggregator>
   aggregator(): Agg;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "twolayerAgg";
 }
 
 /**
@@ -249,7 +261,7 @@ function buildOperator<Agg extends Aggregator>({
   }
   twolayerAgg.aggregator = aggregator;
 
-  twolayerAgg.d3dagBuiltin = true as const;
+  twolayerAgg[nameSymbol] = "twolayerAgg" as const;
 
   return twolayerAgg;
 }

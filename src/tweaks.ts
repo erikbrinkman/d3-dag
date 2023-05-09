@@ -1,5 +1,5 @@
 import { Graph } from "./graph";
-import { LayoutResult, NodeSize, cachedNodeSize } from "./layout";
+import { LayoutResult, NodeSize, cachedNodeSize, nameSymbol } from "./layout";
 import { err } from "./utils";
 
 /**
@@ -33,6 +33,11 @@ export interface Tweak<in N = never, in L = never> {
    * @returns the new dimensions
    */
   (graph: Graph<N, L>, res: Readonly<LayoutResult>): LayoutResult;
+
+  /** @internal */
+  readonly [nameSymbol]?:
+    | `tweak${"Size" | "Grid" | "Flip" | "Shape"}`
+    | undefined;
 }
 
 /**
@@ -65,6 +70,10 @@ export function tweakSize(
     }
     return size;
   }
+
+  // @ts-expect-error problem with single symbol
+  tweakSize[nameSymbol] = "tweakSize" as const;
+
   return tweakSize;
 }
 
@@ -104,8 +113,15 @@ export function tweakGrid(
     }
     return res;
   }
+
+  // @ts-expect-error problem with single symbol
+  tweakGrid[nameSymbol] = "tweakGrid" as const;
+
   return tweakGrid;
 }
+
+// FIXME add tweak for sugiyama that adds a control point at the top of the
+// bounding box to ensure there's no overlap
 
 function tweakFlipDiag(
   graph: Graph<unknown, unknown>,
@@ -127,6 +143,8 @@ function tweakFlipDiag(
   const { width, height } = res;
   return { width: height, height: width };
 }
+/** @internal */
+tweakFlipDiag[nameSymbol] = "tweakFlip" as const;
 
 function tweakFlipVert(
   graph: Graph<unknown, unknown>,
@@ -144,6 +162,8 @@ function tweakFlipVert(
   }
   return res;
 }
+/** @internal */
+tweakFlipVert[nameSymbol] = "tweakFlip" as const;
 
 function tweakFlipHoriz(
   graph: Graph<unknown, unknown>,
@@ -161,6 +181,8 @@ function tweakFlipHoriz(
   }
   return res;
 }
+/** @internal */
+tweakFlipHoriz[nameSymbol] = "tweakFlip" as const;
 
 /**
  * Tweak to flip the layout in several ways
@@ -211,6 +233,9 @@ export interface Shape {
     start: readonly [number, number],
     end: readonly [number, number]
   ): [number, number];
+
+  /** @internal */
+  readonly [nameSymbol]?: `shape${"Rect" | "Ellipse"}` | undefined;
 }
 
 const enum Direction {
@@ -289,6 +314,8 @@ export function shapeRect(
     ecode = outCode(ex, ey);
   }
 }
+/** @internal */
+shapeRect[nameSymbol] = "shapeRect" as const;
 
 /**
  * a bounding box shape for an ellipse
@@ -341,6 +368,8 @@ export function shapeEllipse(
     return [sx, sy];
   }
 }
+/** @internal */
+shapeEllipse[nameSymbol] = "shapeEllipse" as const;
 
 /**
  * tweak the layout by truncating edges early
@@ -377,6 +406,10 @@ export function tweakShape<N, L>(
     }
     return res;
   }
+
+  // @ts-expect-error problem with single symbol
+  tweakShape[nameSymbol] = "tweakShape" as const;
+
   return tweakShape;
 }
 

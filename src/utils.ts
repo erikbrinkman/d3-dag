@@ -29,6 +29,16 @@ export function* dfs<T>(
   }
 }
 
+/** chain multiple comparisons together, returning the first non-zero one */
+export function multiCompare(...comps: readonly number[]): number {
+  for (const comp of comps) {
+    if (comp !== 0) {
+      return comp;
+    }
+  }
+  return 0;
+}
+
 /**
  * Interleave a larger array with a smaller iterable
  *
@@ -73,28 +83,19 @@ export function ierr(
   return new Error(wrapInternalMsg(interleave(strings, stringified)));
 }
 
-/** something with a name, e.g. a function */
-export interface Named {
-  /** the function name */
-  name: string;
-  /** an optional tag we use to identify builtin methods */
-  d3dagBuiltin?: true;
-}
-
 /** customized error when we detect call back was internal */
 export function berr(
   strings: readonly string[],
-  named: Named,
+  name?: string | undefined,
   ...info: (string | number | bigint)[]
 ): Error {
   const [typ, ...rest] = strings;
   const stringified = map(info, (val) => val.toString());
   const msg = interleave(rest, stringified);
-  const name = named.name || "anonymous";
   /* istanbul ignore next */
   return new Error(
-    "d3dagBuiltin" in named
+    name
       ? wrapInternalMsg(`builtin ${typ}'${name}'${msg}`)
-      : `custom ${typ}'${name}'${msg}`
+      : `custom ${typ}${msg.slice(1)}`
   );
 }

@@ -5,11 +5,14 @@
  */
 import { Decross } from ".";
 import { listMultimapPush } from "../../collections";
-import { bigrams, entries, slice } from "../../iters";
+import { bigrams, entries, filter, map, slice } from "../../iters";
 import { OptChecking } from "../../layout";
 import { Constraint, Variable, solve } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode } from "../sugify";
+
+// FIXME add option that remove the crossing minimization, so it's just, make
+// valid keeping the order as close as possible
 
 /**
  * a {@link Decross} that minimizes the number of crossings
@@ -39,7 +42,6 @@ export interface DecrossOpt extends Decross<unknown, unknown> {
   check(val: OptChecking): DecrossOpt;
   /** get the current check for large graphs */
   check(): OptChecking;
-
   /**
    * set whether to also minimize distance between nodes that share an ancestor
    *
@@ -61,6 +63,26 @@ export interface DecrossOpt extends Decross<unknown, unknown> {
 }
 
 /**
+ * pop the minimum node from counts
+ *
+ * there are pathological cases where the queue will be empty, but more nodes exist. This only happens when solid nodes cross, and in order to preserve the invariant we need to permute the nodes. We solve this by taking an arbitrary small count node, and finally permuting the layers to be consistent.
+ */
+function popMin(counts: Map<SugiNode, number>): SugiNode | undefined {
+  let min;
+  let mcount = Infinity;
+  for (const [node, count] of counts) {
+    if (count < mcount) {
+      mcount = count;
+      min = node;
+    }
+  }
+  if (min !== undefined) {
+    counts.delete(min);
+  }
+  return min;
+}
+
+/**
  * compute unique indices for sugi nodes
  *
  * indices are computed such that for two nodes in the same layer, the left most
@@ -69,43 +91,45 @@ export interface DecrossOpt extends Decross<unknown, unknown> {
 function computeInds(layers: SugiNode[][]): Map<SugiNode, number> {
   // this implementation treats the layers like their own dag and does a before
   // order traversal to set ids
-  const queue: SugiNode[] = [];
   const following = new Map<SugiNode, SugiNode[]>();
   const counts = new Map<SugiNode, number>();
   for (const layer of layers) {
-    // initial queue
-    const [node] = layer;
-    if (node !== queue[queue.length - 1]) {
-      queue.push(node);
-    }
-    // counts before available
-    for (const node of slice(layer, 1)) {
-      const count = counts.get(node) ?? 0;
-      counts.set(node, count + 1);
-    }
-    // nodes freed
     for (const [first, second] of bigrams(layer)) {
+      const count = counts.get(second) ?? 0;
+      counts.set(second, count + 1);
       listMultimapPush(following, first, second);
     }
   }
 
+  const starts = new Set<SugiNode>(map(layers, ([node]) => node));
+  const queue: SugiNode[] = [...filter(starts, (node) => !counts.get(node))];
   const inds = new Map<SugiNode, number>();
   let i = 0;
+  let needSort = false;
   let node;
-  while ((node = queue.pop())) {
+  while ((node = queue.pop() ?? ((needSort = true), popMin(counts)))) {
     inds.set(node, i++);
     for (const next of following.get(node) ?? []) {
       const rem = counts.get(next)! - 1;
-      counts.set(next, rem);
-      if (!rem) {
+      if (rem) {
+        counts.set(next, rem);
+      } else {
         queue.push(next);
+        counts.delete(next);
       }
     }
   }
+
+  // we need a sort to correct for pathological inputs
+  if (needSort) {
+    for (const layer of layers) {
+      layer.sort((a, b) => inds.get(a)! - inds.get(b)!);
+    }
+  }
+
   return inds;
 }
 
-/** @internal */
 function buildOperator(options: {
   check: OptChecking;
   dist: boolean;
@@ -120,15 +144,38 @@ function buildOperator(options: {
     );
 
     // compute extra constraints for minimizing distance
+    // NOTE we do this here so that we can compute the necessary cost for
+    // preserving the ordering such that it's less than the cost to minimize
+    // distances
     const distanceConstraints: [SugiNode[], SugiNode[][]][] = [];
     if (options.dist) {
-      for (const [topLayer, bottomLayer] of bigrams(layers)) {
-        const topUnconstrained = bottomLayer.filter((node) => !node.nparents());
-        const topGroups = topLayer.map((node) => [...node.children()]);
+      for (const [ti, [topLayer, bottomLayer]] of entries(bigrams(layers))) {
+        const bi = ti + 1;
+
+        const topUnconstrained = bottomLayer.filter(
+          (node) =>
+            node.data.role === "node" &&
+            node.data.topLayer === bi &&
+            !node.nparents()
+        );
+        const topGroups = topLayer.map((node) =>
+          node.data.role === "node" && node.data.bottomLayer === ti
+            ? [...node.children()]
+            : []
+        );
         distanceConstraints.push([topUnconstrained, topGroups]);
 
-        const bottomUnconstrained = topLayer.filter((n) => !n.nchildren());
-        const bottomGroups = bottomLayer.map((node) => [...node.parents()]);
+        const bottomUnconstrained = topLayer.filter(
+          (node) =>
+            node.data.role === "node" &&
+            node.data.bottomLayer === ti &&
+            !node.nchildren()
+        );
+        const bottomGroups = bottomLayer.map((node) =>
+          node.data.role === "node" && node.data.topLayer === bi
+            ? [...node.parents()]
+            : []
+        );
         distanceConstraints.push([bottomUnconstrained, bottomGroups]);
       }
     }
@@ -137,65 +184,9 @@ function buildOperator(options: {
     // another on the same layer, it must come before it on that layer
     const inds = computeInds(layers);
 
-    // some keys must have the same value due to not crossing "long" nodes,
-    // this is implemented by remapping several keys to the same one
-    const remapped = new Map<string, string>();
-
     // variable name for the relative order of two nodes in a layer
     function pair(find: number, sind: number): string {
-      const base = `${find} => ${sind}`;
-      return remapped.get(base) ?? base;
-    }
-
-    // compute "representatives" for variables that must be the same
-    // NOTE this would be slightly more efficient with a full union find here
-    const reps = new Map<string, string>();
-    for (const [ind, layer] of entries(slice(layers, 0, layers.length - 1))) {
-      for (const mult of layer) {
-        if (mult.data.role !== "node" || mult.data.bottomLayer === ind) {
-          continue; // only use non-bottom layer for no-crossings
-        }
-        const mi = inds.get(mult)!;
-        let flip = true;
-        for (const par of layer) {
-          if (par === mult) {
-            flip = false;
-          } else if (par.data.role !== "node" || par.data.bottomLayer === ind) {
-            // impossible to cross if p2 is also multi-layer
-            const pi = inds.get(par)!;
-            const pkey = flip ? pair(pi, mi) : pair(mi, pi);
-            for (const child of par.children()) {
-              const ci = inds.get(child)!;
-              const ckey = flip ? pair(ci, mi) : pair(mi, ci);
-              reps.set(ckey, pkey);
-            }
-          }
-        }
-      }
-    }
-
-    // merge representatives
-    const sets = new Map<string, string[]>();
-    for (const [init, rep] of reps) {
-      let fin = rep;
-      let next;
-      while ((next = reps.get(fin))) {
-        fin = next;
-      }
-      const keys = sets.get(fin);
-      if (keys) {
-        keys.push(init);
-      } else {
-        sets.set(fin, [fin, init]);
-      }
-    }
-
-    // set remapped keys
-    for (const ident of sets.values()) {
-      const key = `{ ${ident.join(" & ")} }`;
-      for (const orig of ident) {
-        remapped.set(orig, key);
-      }
+      return `${find} => ${sind}`;
     }
 
     // NOTE distance cost for an unconstrained node ina group can't violate
@@ -256,6 +247,46 @@ function buildOperator(options: {
             variables[pair1][triangleDown] = 1;
             variables[pair2][triangleDown] = -1;
             variables[pair3][triangleDown] = 1;
+          }
+        }
+      }
+    }
+
+    // FIXME set timeout for lp solver
+
+    // add constraints so final ordering is valid
+    for (const [ind, layer] of entries(slice(layers, 0, layers.length - 1))) {
+      for (const mult of layer) {
+        if (mult.data.role !== "node" || mult.data.bottomLayer === ind) {
+          continue; // only use non-bottom layer for no-crossings
+        }
+        const mi = inds.get(mult)!;
+        let pflip = true;
+        for (const par of layer) {
+          if (par === mult) {
+            pflip = false;
+          } else if (par.data.role !== "node" || par.data.bottomLayer === ind) {
+            // impossible to cross if p2 is also multi-layer
+            const pi = inds.get(par)!;
+            const pkey = pflip ? pair(pi, mi) : pair(mi, pi);
+            for (const child of par.children()) {
+              const ci = inds.get(child)!;
+              const cflip = ci < mi;
+              const ckey = cflip ? pair(ci, mi) : pair(mi, ci);
+
+              const cons = `${mi} : ${pi} -> ${ci}`;
+              if (pflip === cflip) {
+                // same direction, so parent === child
+                constraints[cons] = { equal: 0 };
+                variables[pkey][cons] = 1;
+                variables[ckey][cons] = -1;
+              } else {
+                // opposite direction, so prent + child === 1
+                constraints[cons] = { equal: 1 };
+                variables[pkey][cons] = 1;
+                variables[ckey][cons] = 1;
+              }
+            }
           }
         }
       }
@@ -330,7 +361,7 @@ function buildOperator(options: {
       }
     }
 
-    // add distance minimization
+    // add distance minimization : only set if distance is on
     for (const [unconstrained, groups] of distanceConstraints) {
       for (const node of unconstrained) {
         const ni = inds.get(node)!;

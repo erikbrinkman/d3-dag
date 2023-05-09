@@ -6,7 +6,8 @@
 import { least, median } from "d3-array";
 import { Lane } from ".";
 import { GraphNode } from "../../graph";
-import { map, slice } from "../../iters";
+import { map, reverse } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { err } from "../../utils";
 import { gridChildren } from "./utils";
 
@@ -56,7 +57,7 @@ export interface LaneGreedy extends Lane<unknown, unknown> {
   bidirectional(): boolean;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "laneGreedy";
 }
 
 /**
@@ -237,7 +238,7 @@ function bottomUpOp(nodes: readonly GraphNode[], inds: Indexer): void {
     }
   }
 
-  for (const node of slice(nodes, nodes.length - 1, -1, -1)) {
+  for (const node of reverse(nodes)) {
     // if node wasn't a highest parent, find it a lane
     if (node.ux === undefined) {
       const target = median(map(gridChildren(node), (node) => node.x));
@@ -313,7 +314,7 @@ function buildOperator(
   }
   laneGreedy.bidirectional = bidirectional;
 
-  laneGreedy.d3dagBuiltin = true as const;
+  laneGreedy[nameSymbol] = "laneGreedy" as const;
 
   return laneGreedy;
 }

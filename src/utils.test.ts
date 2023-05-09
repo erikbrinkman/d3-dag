@@ -19,12 +19,8 @@ test("i err()", () => {
   );
 });
 
-function foo() {
-  // noop
-}
-
 test("b err()", () => {
-  expect(berr`type ${foo} extra info ${5}`).toEqual(
-    Error("custom type 'foo' extra info 5")
+  expect(berr`type ${undefined} extra info ${5}`).toEqual(
+    Error("custom type extra info 5")
   );
 });

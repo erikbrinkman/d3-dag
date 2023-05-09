@@ -8,6 +8,7 @@ import {
   LayoutResult,
   NodeSize,
   cachedNodeSize,
+  nameSymbol,
   splitNodeSize,
 } from "../layout";
 import { Tweak } from "../tweaks";
@@ -18,7 +19,14 @@ import { Decross } from "./decross";
 import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
-import { sugiNodeLength, sugifyLayer, unsugify, validateCoord } from "./sugify";
+import {
+  sugiNodeLength,
+  sugifyCompact,
+  sugifyLayer,
+  unsugify,
+  validateCoord,
+  validateDecross,
+} from "./sugify";
 import { sizedSeparation } from "./utils";
 
 /** sugiyama operators */
@@ -220,12 +228,27 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   gap(val: readonly [number, number]): Sugiyama<Ops>;
   /** get the current gap size */
   gap(): readonly [number, number];
+
+  /**
+   * set whether to use compact rendering
+   *
+   * In compact rendering, variable height nodes will be positioned closer
+   * together. This can be significantly more expensive than the non-compact
+   * layouts and can make coordinate assignment more difficult, so it's only
+   * worth using when necessary.
+   *
+   * (default: `false`)
+   */
+  compact(val: boolean): Sugiyama<Ops>;
+  /** get the current compact setting */
+  compact(): boolean;
 }
 
 function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   options: Ops & SugiyamaOps<ON, OL>,
   sizes: {
     gap: readonly [number, number];
+    compact: boolean;
   }
 ): Sugiyama<Ops> {
   function sugiyama<N extends ON, L extends OL>(
@@ -243,22 +266,30 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
       const [xGap, yGap] = sizes.gap;
 
       // create layers
-      const numLayers = options.layering(dag, layerSeparation) + 1;
-      const [layers, height] = sugifyLayer(
-        dag,
-        yLen,
-        yGap,
-        numLayers,
-        options.layering
-      );
+      let layers, height;
+      if (sizes.compact) {
+        const ySep = sizedSeparation(yLen, yGap);
+        height = options.layering(dag, ySep);
+        layers = sugifyCompact(dag, yLen, height, options.layering[nameSymbol]);
+      } else {
+        const numLayers = options.layering(dag, layerSeparation) + 1;
+        [layers, height] = sugifyLayer(
+          dag,
+          yLen,
+          yGap,
+          numLayers,
+          options.layering[nameSymbol]
+        );
+      }
 
       // minimize edge crossings
       options.decross(layers);
+      validateDecross(layers, options.decross[nameSymbol]);
 
       // assign coordinates
       const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
       const width = options.coord(layers, xSep);
-      validateCoord(layers, xSep, width, options.coord);
+      validateCoord(layers, xSep, width, options.coord[nameSymbol]);
 
       // assign data back to original graph
       unsugify(layers);
@@ -402,6 +433,17 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   }
   sugiyama.gap = gap;
 
+  function compact(): boolean;
+  function compact(val: boolean): Sugiyama<Ops>;
+  function compact(val?: boolean): Sugiyama<Ops> | boolean {
+    if (val !== undefined) {
+      return buildOperator(options, { ...sizes, compact: val });
+    } else {
+      return sizes.compact;
+    }
+  }
+  sugiyama.compact = compact;
+
   return sugiyama;
 }
 
@@ -475,6 +517,7 @@ export function sugiyama(...args: never[]): DefaultSugiyama {
       },
       {
         gap: [1, 1],
+        compact: false,
       }
     );
   }

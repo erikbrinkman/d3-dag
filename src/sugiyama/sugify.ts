@@ -14,9 +14,9 @@ import {
   MutGraph,
   MutGraphNode,
 } from "../graph";
-import { bigrams, chain, map, some } from "../iters";
+import { bigrams, chain, flatMap, map, reverse, slice, some } from "../iters";
 import { NodeLength } from "../layout";
-import { berr, Named } from "../utils";
+import { berr, dfs, multiCompare } from "../utils";
 import { Separation } from "./utils";
 
 /** data for a sugi node that maps to a real node */
@@ -75,11 +75,29 @@ export type MutSugiNode<NodeDatum, LinkDatum> = MutGraphNode<
   undefined
 >;
 
+/** get the lowest (top-most) layer of a sugi datum */
+export function sugiTopLayer(data: SugiDatum): number {
+  if (data.role === "node") {
+    return data.topLayer;
+  } else {
+    return data.layer;
+  }
+}
+
+/** get the highest (bottom-most) layer of a sugi datum */
+export function sugiBottomLayer(data: SugiDatum): number {
+  if (data.role === "node") {
+    return data.bottomLayer;
+  } else {
+    return data.layer;
+  }
+}
+
 function addSugiLinks<N, L>(
   sugied: MutGraph<SugiDatum<N, L>, undefined>,
   nodeMap: Map<GraphNode<N, L>, MapVal<N, L>>,
   numLayers: number,
-  layering: Named
+  layering?: string | undefined
 ): SugiNode<N, L>[][] {
   // create dummy nodes for all child links
   for (const [node, [sourceData, sugiSource]] of nodeMap) {
@@ -146,13 +164,16 @@ type MapVal<N, L> = readonly [SugiNodeDatum<N, L>, MutSugiNode<N, L>];
  *
  * A sugi-graph is a non-multi dag that is layered, where each node is assigned
  * to a layer, and links only span a single layer.
+ *
+ * @param layering - the name of the built-in layering function used; this
+ * alters error messages
  */
 export function sugifyLayer<N, L>(
   input: Graph<N, L>,
   nodeHeight: NodeLength<N, L>,
   gap: number,
   numLayers: number,
-  layering: Named
+  layering?: string | undefined
 ): readonly [SugiNode<N, L>[][], number] {
   // create sugi graph
   const sugied = graph<SugiDatum<N, L>, undefined>();
@@ -220,12 +241,15 @@ export function sugifyLayer<N, L>(
  *
  * A sugi-graph is a non-multi dag that is layered, where each node is assigned
  * to a layer, and links only span a single layer.
+ *
+ * @param layering - the name of the built-in layering function used; this
+ * alters error messages
  */
 export function sugifyCompact<N, L>(
   input: Graph<N, L>,
   nodeHeight: NodeLength<N, L>,
   height: number,
-  layering: Named
+  layering?: string | undefined
 ): SugiNode<N, L>[][] {
   // create sugi graph
   const sugied = graph<SugiDatum<N, L>, undefined>();
@@ -320,7 +344,60 @@ export function sugifyCompact<N, L>(
     }
   }
 
+  // use dfs to make sure layers don't have crossings across long nodes
+  layerDfs(layers, true);
+  validateDecross(layers, "initial");
+
   return layers;
+}
+
+function topDownComp(left: SugiNode, right: SugiNode): number {
+  return multiCompare(
+    sugiBottomLayer(left.data) - sugiBottomLayer(right.data),
+    right.nchildren() - left.nchildren()
+  );
+}
+
+function bottomUpComp(left: SugiNode, right: SugiNode): number {
+  return multiCompare(
+    sugiTopLayer(right.data) - sugiTopLayer(left.data),
+    right.nchildren() - left.nchildren()
+  );
+}
+
+export function layerDfs(layers: SugiNode[][], topDown: boolean): void {
+  // get iteration over nodes in dfs order
+  // we heuristically prioritize nodes with a fewer number of children
+  // NOTE with dfs, the priority is for the last element
+  let iter: Iterable<SugiNode>;
+  if (topDown) {
+    iter = dfs(
+      (n) => [...n.children()].sort(topDownComp),
+      ...flatMap(reverse(layers), (layer) => layer.sort(topDownComp))
+    );
+  } else {
+    iter = dfs(
+      (n) => [...n.parents()].sort(bottomUpComp),
+      ...flatMap(layers, (layer) => layer.sort(bottomUpComp))
+    );
+  }
+
+  // since we know we'll hit every node in iteration, we can clear the layers
+  for (const layer of layers) {
+    layer.length = 0;
+  }
+
+  // re-add in the order seen
+  for (const node of iter) {
+    const { data } = node;
+    if (data.role === "node") {
+      for (let layer = data.topLayer; layer <= data.bottomLayer; ++layer) {
+        layers[layer].push(node);
+      }
+    } else {
+      layers[data.layer].push(node);
+    }
+  }
 }
 
 /**
@@ -396,13 +473,71 @@ export function sugiNodeLength<N, L>(
 }
 
 /** validate accurate coordinate assignment */
+export function validateDecross(
+  layers: SugiNode[][],
+  decross?: string | undefined
+): void {
+  // FIXME implement
+  for (const [topLayer, bottomLayer] of bigrams(layers)) {
+    const bottomInd = new Map<SugiNode, number>(
+      map(bottomLayer, (node, i) => [node, i])
+    );
+
+    let tstart = -1;
+    let tend = -1;
+    let bstart = -1;
+    let bend = -1;
+    while (tend < topLayer.length) {
+      tstart = tend;
+      bstart = bend;
+
+      // set ends to net occurrence of a layer spanning node
+      for (
+        ++tend;
+        tend < topLayer.length &&
+        (bend = bottomInd.get(topLayer[tend]) ?? bottomLayer.length) ===
+          bottomLayer.length;
+        ++tend
+      ) {
+        // noop
+      }
+
+      if (
+        tstart === -1 &&
+        tend === topLayer.length &&
+        bstart === -1 &&
+        bend === bottomLayer.length
+      ) {
+        // no layer spanning nodes
+        break;
+      }
+
+      // check that bottom start < bottom end
+      if (!(bstart < bend)) {
+        throw berr`decross ${decross} had multi-layer nodes that crossed`;
+      }
+
+      // scan through nodes and make sure all children are within bounds
+      for (const node of slice(topLayer, tstart + 1, tend)) {
+        for (const child of node.children()) {
+          const bind = bottomInd.get(child)!;
+          if (!(bstart < bind && bind < bend)) {
+            throw berr`decross ${decross} resulted in an edge crossing a multi-layer node`;
+          }
+        }
+      }
+    }
+  }
+}
+
+/** validate accurate coordinate assignment */
 export function validateCoord<N, L>(
   layers: SugiNode<N, L>[][],
   xSep: SugiSeparation<N, L>,
   width: number,
-  coord: Named,
+  coord?: string | undefined,
   tol: number = 0.001
-) {
+): void {
   for (const layer of layers) {
     for (const node of layer) {
       if (node.ux === undefined) {

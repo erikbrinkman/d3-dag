@@ -7,6 +7,7 @@
 import { Coord } from ".";
 import { GraphLink, GraphNode } from "../../graph";
 import { bigrams, flatMap } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { Constraint, Variable, solve } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
@@ -92,7 +93,7 @@ export interface CoordSimplex<Ops extends CoordSimplexOps>
   weight(): Ops["weight"];
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "coordSimplex";
 }
 
 function validateWeights([two, one, zero]: readonly [number, number, number]) {
@@ -302,7 +303,7 @@ function buildOperator<
   }
   coordSimplex.weight = weight;
 
-  coordSimplex.d3dagBuiltin = true as const;
+  coordSimplex[nameSymbol] = "coordSimplex" as const;
 
   return coordSimplex;
 }

@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import { GraphNode } from "../../graph";
+import { nameSymbol } from "../../layout";
 
 /**
  * An operator for assigning nodes to a lane.
@@ -36,4 +37,7 @@ export interface Lane<in NodeDatum = never, in LinkDatum = never> {
    *   bottom
    */
   (ordered: readonly GraphNode<NodeDatum, LinkDatum>[]): void;
+
+  /** @internal */
+  readonly [nameSymbol]?: `lane${"Greedy" | "Opt"}` | undefined;
 }

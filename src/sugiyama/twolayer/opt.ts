@@ -7,7 +7,7 @@
 import { Twolayer } from ".";
 import { listMultimapPush } from "../../collections";
 import { entries, first, map, reduce, slice } from "../../iters";
-import { OptChecking } from "../../layout";
+import { OptChecking, nameSymbol } from "../../layout";
 import { Constraint, Variable, solve } from "../../simplex";
 import { err } from "../../utils";
 import { SugiNode } from "../sugify";
@@ -47,7 +47,7 @@ export interface TwolayerOpt extends Twolayer<unknown, unknown> {
   dist(): boolean;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "twolayerOpt";
 }
 
 /** variable for comparison between nodes in final ordering */
@@ -291,7 +291,7 @@ function buildOperator(options: {
   }
   twolayerOpt.dist = dist;
 
-  twolayerOpt.d3dagBuiltin = true as const;
+  twolayerOpt[nameSymbol] = "twolayerOpt" as const;
 
   return twolayerOpt;
 }

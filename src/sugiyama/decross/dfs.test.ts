@@ -28,7 +28,7 @@ test("decrossDfs() works on compact trivial case", () => {
   const decross = decrossDfs();
   decross(layers);
   const inds = layers.map((layer) => layer.map(getIndex));
-  expect(inds).toEqual([[0], [0], [1, null], [1, null], [0], [0]]);
+  expect(inds).toEqual([[0], [0], [null, 1], [null, 1], [0], [0]]);
 });
 
 test("decrossDfs() works on trivial case bottom up", () => {

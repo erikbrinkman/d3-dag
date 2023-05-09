@@ -4,7 +4,11 @@
  *
  * @packageDocumentation
  */
+import { nameSymbol, sentinel } from "../../layout";
 import { SugiNode, SugiSeparation } from "../sugify";
+
+// FIXME create a center operator. This could be done efficiently by picking a
+// node for the center of each layer, and then working out from there (I think)
 
 /**
  * an operator that assigns coordinates to layered {@link SugiNode}s
@@ -55,6 +59,11 @@ export interface Coord<in NodeDatum = never, in LinkDatum = never> {
     sep: SugiSeparation<N, L>
   ): number;
 
+  /** @internal */
+  readonly [nameSymbol]?:
+    | `coord${"Greedy" | "Quad" | "Simplex" | "Topological"}`
+    | undefined;
+
   /**
    * This sentinel field is so that typescript can infer the types of NodeDatum
    * and LinkDatum, because the extra generics make it otherwise hard to infer.
@@ -62,5 +71,5 @@ export interface Coord<in NodeDatum = never, in LinkDatum = never> {
    *
    * @internal
    */
-  __sentinel__?: (_: NodeDatum, __: LinkDatum) => void;
+  [sentinel]?: (_: NodeDatum, __: LinkDatum) => void;
 }

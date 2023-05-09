@@ -8,10 +8,6 @@ import {
   unsugify,
 } from "./sugify";
 
-function noopLayering(): void {
-  // noop
-}
-
 function nodeHeight(): number {
   return 2;
 }
@@ -76,7 +72,7 @@ test("sugifyLayer() / unsugify() works for single node", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
   node.y = 0;
-  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 1, noopLayering);
+  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 1);
   expect(height).toBeCloseTo(2);
   expectLayersToSatisfyInvariants(layers, height);
 
@@ -100,7 +96,7 @@ test("sugifyLayer() / unsugify() works for single edge", () => {
   const link = grf.link(above, below);
   above.y = 0;
   below.y = 1;
-  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2, noopLayering);
+  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2);
   expect(height).toBeCloseTo(5);
   expectLayersToSatisfyInvariants(layers, height);
 
@@ -135,7 +131,7 @@ test("sugifyLayer() / unsugify() works for extended edges", () => {
   const link2 = grf.link(above, below);
   above.y = 0;
   below.y = 1;
-  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2, noopLayering);
+  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2);
   expect(height).toBeCloseTo(5);
   expectLayersToSatisfyInvariants(layers, height);
 
@@ -185,7 +181,7 @@ test("sugifyLayer() works for extended inverted edges", () => {
   const link2 = grf.link(below, above);
   above.y = 0;
   below.y = 1;
-  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2, noopLayering);
+  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2);
   expect(height).toBeCloseTo(5);
   expectLayersToSatisfyInvariants(layers, height);
 
@@ -231,8 +227,8 @@ test("sugifyLayer() works for extended inverted edges", () => {
 test("sugifyLayer() throws for missing layer", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
-  expect(() => sugifyLayer(grf, nodeHeight, 1, 0, noopLayering)).toThrow(
-    "custom layering 'noopLayering' didn't assign a layer to a node"
+  expect(() => sugifyLayer(grf, nodeHeight, 1, 0)).toThrow(
+    "custom layering didn't assign a layer to a node"
   );
 });
 
@@ -243,8 +239,8 @@ test("sugifyLayer() throws for edge in the same layer", () => {
   grf.link(left, right);
   left.y = 0;
   right.y = 0;
-  expect(() => sugifyLayer(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' assigned nodes with an edge to the same layer"
+  expect(() => sugifyLayer(grf, nodeHeight, 1, 1)).toThrow(
+    "custom layering assigned nodes with an edge to the same layer"
   );
 });
 
@@ -252,12 +248,12 @@ test("sugifyLayer() throws for invalid layers", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
   node.y = -1;
-  expect(() => sugifyLayer(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' assigned node an invalid layer: -1"
+  expect(() => sugifyLayer(grf, nodeHeight, 1, 1)).toThrow(
+    "custom layering assigned node an invalid layer: -1"
   );
   node.y = 1;
-  expect(() => sugifyLayer(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' assigned node an invalid layer: 1"
+  expect(() => sugifyLayer(grf, nodeHeight, 1, 1)).toThrow(
+    "custom layering assigned node an invalid layer: 1"
   );
 });
 
@@ -265,8 +261,8 @@ test("sugifyLayer() throws for empty layers", () => {
   const grf = graph<undefined, undefined>();
   const node = grf.node();
   node.y = 0;
-  expect(() => sugifyLayer(grf, nodeHeight, 1, 2, noopLayering)).toThrow(
-    "custom layering 'noopLayering' didn't assign a node to every layer"
+  expect(() => sugifyLayer(grf, nodeHeight, 1, 2)).toThrow(
+    "custom layering didn't assign a node to every layer"
   );
 });
 
@@ -275,7 +271,7 @@ test("sugifyCompact() / unsugify() works for single node", () => {
   const node = grf.node(2);
   node.y = 1;
   const height = 2;
-  const layers = sugifyCompact(grf, dataHeight, height, noopLayering);
+  const layers = sugifyCompact(grf, dataHeight, height);
   expectLayersToSatisfyInvariants(layers, height);
 
   const [[sugi], [bottom]] = layers;
@@ -301,7 +297,7 @@ test("sugifyCompact() / unsugify() works for single edge", () => {
   above.y = 1;
   below.y = 5;
   const height = 7;
-  const layers = sugifyCompact(grf, dataHeight, height, noopLayering);
+  const layers = sugifyCompact(grf, dataHeight, height);
   expectLayersToSatisfyInvariants(layers, height);
 
   const [[topSugi], [topBottom], [bottomSugi], [bottomBottom]] = layers;
@@ -341,7 +337,7 @@ test("sugifyCompact() / unsugify() works for extended edges", () => {
   above.y = 1;
   below.y = 6;
   const height = 8;
-  const layers = sugifyCompact(grf, dataHeight, height, noopLayering);
+  const layers = sugifyCompact(grf, dataHeight, height);
   expectLayersToSatisfyInvariants(layers, height);
 
   const [
@@ -383,12 +379,12 @@ test("sugifyCompact() / unsugify() works for extended edges", () => {
   // NOTE order is brittle
   expect(link1.points).toEqual([
     [1, 1],
-    [0, 3],
+    [2, 3],
     [1, 6],
   ]);
   expect(link2.points).toEqual([
     [1, 1],
-    [2, 3],
+    [0, 3],
     [1, 6],
   ]);
 });
@@ -408,7 +404,7 @@ test("sugifyCompact() / unsugify() works for extended duplicate edges", () => {
   above2.y = 1;
   below2.y = 4;
   const height = 5;
-  const layers = sugifyCompact(grf, nodeHeight, height, noopLayering);
+  const layers = sugifyCompact(grf, nodeHeight, height);
   expectLayersToSatisfyInvariants(layers, height);
   // only one dummy layer
   expect(layers).toHaveLength(5);
@@ -425,7 +421,7 @@ test("sugifyCompact() / unsugify() works with predefined cuts", () => {
   extra.y = 1.5;
   below.y = 7;
   const height = 9;
-  const layers = sugifyCompact(grf, dataHeight, height, noopLayering);
+  const layers = sugifyCompact(grf, dataHeight, height);
   expectLayersToSatisfyInvariants(layers, height);
 
   // NOTE unpacking order not guaranteed
@@ -477,20 +473,65 @@ test("sugifyCompact() / unsugify() works with predefined cuts", () => {
   // NOTE order is brittle
   expect(link1.points).toEqual([
     [1, 1],
-    [0, 3],
+    [2, 3],
     [1, 7],
   ]);
   expect(link2.points).toEqual([
     [1, 1],
-    [2, 3],
+    [0, 3],
     [1, 7],
   ]);
+});
+
+test("sugifyCompact() appropriately layers with heuristic edge case", () => {
+  // This graph breaks dfs heuristics, but is still feasible
+  //   a
+  //   |\
+  //   b c
+  //   b |
+  //  /| d
+  // e f d
+  // | f d
+  // g |/
+  //   h
+  const grf = graph<number, undefined>();
+  const a = grf.node(1);
+  const b = grf.node(2);
+  const c = grf.node(1);
+  const d = grf.node(3);
+  const e = grf.node(1);
+  const f = grf.node(2);
+  const g = grf.node(1);
+  const h = grf.node(1);
+
+  grf.link(a, b);
+  grf.link(a, c);
+  grf.link(c, d);
+  grf.link(b, e);
+  grf.link(b, f);
+  grf.link(e, g);
+  grf.link(f, h);
+  grf.link(d, h);
+
+  a.y = 0.5;
+  b.y = 3;
+  c.y = 2.5;
+  d.y = 5.5;
+  e.y = 5.5;
+  f.y = 6;
+  g.y = 7.5;
+  h.y = 8.5;
+  const height = 9;
+
+  const layers = sugifyCompact(grf, dataHeight, height);
+  expectLayersToSatisfyInvariants(layers, height);
+  expect(layers).toHaveLength(10);
 });
 
 test("sugifyCompact() throws for missing coordinate", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
-  expect(() => sugifyCompact(grf, nodeHeight, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' didn't assign a y coordinate to every node"
+  expect(() => sugifyCompact(grf, nodeHeight, 1)).toThrow(
+    "custom layering didn't assign a y coordinate to every node"
   );
 });

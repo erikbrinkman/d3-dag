@@ -7,6 +7,7 @@
 import { Coord } from ".";
 import { GraphLink, GraphNode } from "../../graph";
 import { flatMap } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { U, err, ierr } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
 import {
@@ -187,7 +188,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
   compress(): number;
 
   /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  readonly [nameSymbol]: "coordQuad";
 }
 
 /**
@@ -443,7 +444,7 @@ function buildOperator<
   }
   coordQuad.compress = compress;
 
-  coordQuad.d3dagBuiltin = true as const;
+  coordQuad[nameSymbol] = "coordQuad" as const;
 
   return coordQuad;
 }

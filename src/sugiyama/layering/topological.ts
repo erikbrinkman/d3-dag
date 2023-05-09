@@ -5,6 +5,7 @@
  */
 import { Layering } from ".";
 import { Graph, Rank } from "../../graph";
+import { nameSymbol } from "../../layout";
 import { U, err } from "../../utils";
 import { Separation } from "../utils";
 
@@ -49,8 +50,8 @@ export interface LayeringTopological<
    */
   rank(): Ops["rank"];
 
-  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  /** @internal */
+  readonly [nameSymbol]: "layeringTopological";
 }
 
 /**
@@ -90,7 +91,7 @@ function buildOperator<ND, LD, Ops extends LayeringTopologicalOps<ND, LD>>(
   }
   layeringTopological.rank = rank;
 
-  layeringTopological.d3dagBuiltin = true as const;
+  layeringTopological[nameSymbol] = "layeringTopological" as const;
 
   return layeringTopological;
 }

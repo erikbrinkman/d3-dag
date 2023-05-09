@@ -246,9 +246,7 @@ test("grid() throws for invalid lane operators", () => {
     }
   }
   const neg = grid().lane(negOp);
-  expect(() => neg(orig)).toThrow(
-    "custom lane 'negOp' assigned an x less than 0: -1"
-  );
+  expect(() => neg(orig)).toThrow("custom lane assigned an x less than 0: -1");
 
   function skipOp(ordered: readonly GraphNode[]) {
     for (const [i, node] of ordered.entries()) {
@@ -265,7 +263,7 @@ test("grid() throws for invalid lane operators", () => {
   }
   const invalid = grid().lane(invalidOp);
   expect(() => invalid(orig)).toThrow(
-    "custom lane 'invalidOp' assigned nodes to an overlapping lane: 0"
+    "custom lane assigned nodes to an overlapping lane: 0"
   );
 });
 

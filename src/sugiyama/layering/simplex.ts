@@ -7,6 +7,7 @@
 import { Group, Layering } from ".";
 import { Graph, GraphNode, Rank } from "../../graph";
 import { bigrams, map } from "../../iters";
+import { nameSymbol } from "../../layout";
 import { Constraint, Variable, solve } from "../../simplex";
 import { U, err, ierr } from "../../utils";
 import { Separation } from "../utils";
@@ -79,8 +80,8 @@ export interface LayeringSimplex<
    */
   group(): Ops["group"];
 
-  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
-  readonly d3dagBuiltin: true;
+  /** @internal */
+  readonly [nameSymbol]: "layeringSimplex";
 }
 
 function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
@@ -252,7 +253,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
   }
   layeringSimplex.group = group;
 
-  layeringSimplex.d3dagBuiltin = true as const;
+  layeringSimplex[nameSymbol] = "layeringSimplex" as const;
 
   return layeringSimplex;
 }

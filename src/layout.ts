@@ -126,3 +126,18 @@ export interface LayoutResult {
  * - `"oom"` - never raise an exception, use at your own risk
  */
 export type OptChecking = "fast" | "slow" | "oom";
+
+/**
+ * a unique symbol for operators to identify their name
+ *
+ * This serves two purposes:
+ * 1. its attached to operator objects so that if an invariant is violated, we
+ *    know it came from a built-in rather than from user supplied code.
+ * 2. internal function names are minimized, so they can't be used to return
+ *    what function it was (although simple deduction should be possible), so
+ *    this allows returning a helpful name.
+ */
+export const nameSymbol = Symbol("d3-dag built-in name");
+
+/** a sentinel symbol used so typescript can infer types appropriately */
+export const sentinel = Symbol("d3-dag built-in name");
