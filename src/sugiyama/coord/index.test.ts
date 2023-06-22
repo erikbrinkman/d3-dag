@@ -3,6 +3,7 @@ import { bigrams } from "../../iters";
 import { sugiNodeLength } from "../sugify";
 import { createLayers, nodeSep } from "../test-utils";
 import { sizedSeparation } from "../utils";
+import { coordCenter } from "./center";
 import { coordGreedy } from "./greedy";
 import { coordQuad } from "./quad";
 import { coordSimplex } from "./simplex";
@@ -31,6 +32,7 @@ for (const [name, method] of [
   ["greedy", coordGreedy()],
   ["quad", coordQuad()],
   ["simplex", coordSimplex()],
+  ["center", coordCenter()],
 ] as const) {
   for (const dat of [square, ccoz, dtopo, doub, vee, ex, compact]) {
     test(`invariants apply to ${dat.name} assigned by ${name}`, () => {

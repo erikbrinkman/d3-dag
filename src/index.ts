@@ -211,6 +211,7 @@ export {
   type SugiyamaOps,
 } from "./sugiyama";
 export { type Coord } from "./sugiyama/coord";
+export { coordCenter, type CoordCenter } from "./sugiyama/coord/center";
 export { coordGreedy, type CoordGreedy } from "./sugiyama/coord/greedy";
 export {
   coordQuad,

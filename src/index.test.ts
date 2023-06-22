@@ -32,6 +32,7 @@ import {
   aggMedian,
   aggWeightedMedian,
   cachedNodeSize,
+  coordCenter,
   coordGreedy,
   coordQuad,
   coordSimplex,
@@ -267,6 +268,7 @@ test("sugiyama.coord()", () => {
     .coord(coord)
     .coord(coordTopological())
     .coord(coordGreedy())
+    .coord(coordCenter())
     .coord(coordQuad().linkCurve(linkWeight).nodeCurve(nodeWeight))
     .coord(coordSimplex().weight(simplexWeight));
   const { width, height } = layout(dag);

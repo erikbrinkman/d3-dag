@@ -39,8 +39,6 @@ too difficult.
   flowgen's support
 - `layeringCoffmanGraham` - This method was rarely used,
   and is relatively expensive and hard to maintain.
-- `coordCenter` - it doesn't work with compact sugiyama and doesn't produce
-  great layouts anyway
 - `.size()` funtion on layouts - instead creating a size tweak.
 - graphs are no longer iterable instead explicitely call `.nodes()`
 - Experimental es6 imports for a simplified interface and documentation.
