@@ -13,13 +13,7 @@ import { Decross } from "./decross";
 import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
-import {
-  sugiNodeLength,
-  sugifyCompact,
-  sugifyLayer,
-  unsugify,
-  validateCoord,
-} from "./sugify";
+import { sugiNodeLength, sugifyLayer, unsugify, validateCoord } from "./sugify";
 import { NodeLength, sizedSeparation } from "./utils";
 
 /** sugiyama operators */
@@ -215,20 +209,6 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   gap(val: readonly [number, number]): Sugiyama<Ops>;
   /** get the current gap size */
   gap(): readonly [number, number];
-
-  /**
-   * set whether to use compact rendering
-   *
-   * In compact rendering, variable height nodes will be positioned closer
-   * together. This can be significantly more expensive than the non-compact
-   * layouts and can make coordinate assignment more difficult, so it's only
-   * worth using when necessary.
-   *
-   * (default: `false`)
-   */
-  compact(val: boolean): Sugiyama<Ops>;
-  /** get the current compact setting */
-  compact(): boolean;
 }
 
 /**
@@ -271,7 +251,6 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   options: Ops & SugiyamaOps<ON, OL>,
   sizes: {
     gap: readonly [number, number];
-    compact: boolean;
   }
 ): Sugiyama<Ops> {
   function sugiyama<N extends ON, L extends OL>(
@@ -289,21 +268,14 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
       const [xGap, yGap] = sizes.gap;
 
       // create layers
-      let layers, height;
-      if (sizes.compact) {
-        const ySep = sizedSeparation(yLen, yGap);
-        height = options.layering(dag, ySep);
-        layers = sugifyCompact(dag, yLen, height, options.layering);
-      } else {
-        const numLayers = options.layering(dag, layerSeparation) + 1;
-        [layers, height] = sugifyLayer(
-          dag,
-          yLen,
-          yGap,
-          numLayers,
-          options.layering
-        );
-      }
+      const numLayers = options.layering(dag, layerSeparation) + 1;
+      const [layers, height] = sugifyLayer(
+        dag,
+        yLen,
+        yGap,
+        numLayers,
+        options.layering
+      );
 
       // minimize edge crossings
       options.decross(layers);
@@ -455,17 +427,6 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   }
   sugiyama.gap = gap;
 
-  function compact(): boolean;
-  function compact(val: boolean): Sugiyama<Ops>;
-  function compact(val?: boolean): Sugiyama<Ops> | boolean {
-    if (val !== undefined) {
-      return buildOperator(options, { ...sizes, compact: val });
-    } else {
-      return sizes.compact;
-    }
-  }
-  sugiyama.compact = compact;
-
   return sugiyama;
 }
 
@@ -491,9 +452,6 @@ export type DefaultSugiyama = Sugiyama<{
  * {@link Sugiyama#decross} to arrange nodes in each layer to minimize edge
  * crossings. Finally it calls {@link Sugiyama#coord} to assign actual
  * coordinates given the ordering.
- *
- * You can also set {@link Sugiyama#compact} which runs a more expensive
- * layout, but produces a more compact layout when nodes have varying heights.
  *
  * Finally, you can also tweak the standard settings of
  * {@link Sugiyama#nodeSize}, {@link Sugiyama#gap}, and
@@ -542,7 +500,6 @@ export function sugiyama(...args: never[]): DefaultSugiyama {
       },
       {
         gap: [1, 1],
-        compact: false,
       }
     );
   }

@@ -1,16 +1,7 @@
 import { sugiyama } from ".";
 import { Graph, graph, GraphNode } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
-import {
-  doub,
-  dummy,
-  multi,
-  oh,
-  single,
-  square,
-  three,
-  trip,
-} from "../test-graphs";
+import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs";
 import { Tweak, tweakSize } from "../tweaks";
 import { Coord } from "./coord";
 import { Decross } from "./decross";
@@ -248,32 +239,6 @@ test("sugiyama() allows changing operators", () => {
   expect(layout.nodeSize() satisfies typeof nodeSize).toBe(nodeSize);
   // still runs
   layout(dag);
-});
-
-test("sugiyama() works for compact layouts", () => {
-  const dag = square();
-
-  function nodeSize(node: GraphNode<string>): [number, number] {
-    const size = (parseInt(node.data) % 3) + 1;
-    return [size, size];
-  }
-
-  const layout = sugiyama().nodeSize(nodeSize).compact(true);
-  expect(layout.compact()).toBe(true);
-  const { width, height } = layout(dag);
-  expect(width).toBeCloseTo(6);
-  expect(height).toBeCloseTo(7);
-  const [zero, one, two, three] = canonical(dag);
-
-  // NOTE the square xs can be 1 or 4.5 based in implementation
-  expect(zero.x).toBeCloseTo(1);
-  expect(zero.y).toBeCloseTo(0.5);
-  expect(one.x).toBeCloseTo(1);
-  expect(one.y).toBeCloseTo(3);
-  expect(two.x).toBeCloseTo(4.5);
-  expect(two.y).toBeCloseTo(3.5);
-  expect(three.x).toBeCloseTo(1);
-  expect(three.y).toBeCloseTo(6.5);
 });
 
 const noop = (): number => 1;
