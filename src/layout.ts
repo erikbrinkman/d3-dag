@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 import { GraphNode } from "./graph";
+import { err } from "./utils";
 
 /**
  * A strictly callable {@link NodeSize}
@@ -39,6 +40,63 @@ export interface CallableNodeSize<NodeDatum = never, LinkDatum = never> {
 export type NodeSize<NodeDatum = never, LinkDatum = never> =
   | readonly [number, number]
   | CallableNodeSize<NodeDatum, LinkDatum>;
+
+/** An accessor for computing the length of a node */
+export interface NodeLength<in NodeDatum = never, in LinkDatum = never> {
+  (node: GraphNode<NodeDatum, LinkDatum>): number;
+}
+
+/**
+ * cache a {@link NodeSize} so it is called at most once for every node
+ */
+export function cachedNodeSize<N, L>(
+  nodeSize: NodeSize<N, L>
+): CallableNodeSize<N, L> {
+  if (typeof nodeSize !== "function") {
+    const [x, y] = nodeSize;
+    if (x <= 0 || y <= 0) {
+      throw err`all node sizes must be positive, but got width ${x} and height ${y}`;
+    }
+    return () => [x, y];
+  } else {
+    const cache = new Map<GraphNode<N, L>, readonly [number, number]>();
+
+    const cached = (node: GraphNode<N, L>): readonly [number, number] => {
+      let val = cache.get(node);
+      if (val === undefined) {
+        val = nodeSize(node);
+        const [width, height] = val;
+        if (width <= 0 || height <= 0) {
+          throw err`all node sizes must be positive, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the callback passed to \`sugiyama().nodeSize(...)\` is doing that`;
+        }
+        cache.set(node, val);
+      }
+      return val;
+    };
+
+    return cached;
+  }
+}
+
+/**
+ * split a {@link NodeSize} into x and y {@link NodeLength}s
+ *
+ * This allows you to split a NodeSize into independent x and y accessors.
+ *
+ * The only real reason to use this would be to run the steps of
+ * {@link sugiyama} independently.
+ */
+export function splitNodeSize<N, L>(
+  nodeSize: NodeSize<N, L>
+): readonly [NodeLength<N, L>, NodeLength<N, L>] {
+  if (typeof nodeSize !== "function") {
+    const [x, y] = nodeSize;
+    return [() => x, () => y];
+  } else {
+    const callable = nodeSize;
+    return [(node) => callable(node)[0], (node) => callable(node)[1]];
+  }
+}
 
 /** the height and width returned after laying out a graph */
 export interface LayoutResult {

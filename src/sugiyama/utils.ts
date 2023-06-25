@@ -1,10 +1,6 @@
 import { GraphNode } from "../graph";
 import { bigrams } from "../iters";
-
-/** An accessor for computing the length of a node */
-export interface NodeLength<in NodeDatum = never, in LinkDatum = never> {
-  (node: GraphNode<NodeDatum, LinkDatum>): number;
-}
+import { NodeLength } from "../layout";
 
 /**
  * A separation function that indicates how far apart nodes should be the layering / height assignment.

@@ -51,6 +51,7 @@ import {
   layeringSimplex,
   layeringTopological,
   sizedSeparation,
+  splitNodeSize,
   sugiNodeLength,
   sugifyCompact,
   sugifyLayer,
@@ -307,7 +308,7 @@ test("manual sugiyama() layered", () => {
   const xGap = 1;
   const yGap = 1;
 
-  const [xLen, yLen] = cachedNodeSize(nodeSize);
+  const [xLen, yLen] = splitNodeSize(cachedNodeSize(nodeSize));
   const numLayers = layering(dag, layerSeparation);
   const [layers, height] = sugifyLayer(
     dag,
@@ -336,7 +337,7 @@ test("manual sugiyama() compact", () => {
   const xGap = 1;
   const yGap = 1;
 
-  const [xLen, yLen] = cachedNodeSize(nodeSize);
+  const [xLen, yLen] = splitNodeSize(cachedNodeSize(nodeSize));
   const ySep = sizedSeparation(yLen, yGap);
   const height = layering(dag, ySep);
   const layers = sugifyCompact(dag, yLen, height, layering);

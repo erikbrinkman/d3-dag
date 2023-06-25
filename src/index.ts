@@ -198,13 +198,15 @@ export { type Lane } from "./grid/lane";
 export { laneGreedy, type LaneGreedy } from "./grid/lane/greedy";
 export { laneOpt, type LaneOpt } from "./grid/lane/opt";
 export {
+  cachedNodeSize,
+  splitNodeSize,
   type CallableNodeSize,
   type LayoutResult,
+  type NodeLength,
   type NodeSize,
   type OptChecking,
 } from "./layout";
 export {
-  cachedNodeSize,
   sugiyama,
   type DefaultSugiyama,
   type Sugiyama,
@@ -294,11 +296,7 @@ export {
   type TwolayerGreedy,
 } from "./sugiyama/twolayer/greedy";
 export { twolayerOpt, type TwolayerOpt } from "./sugiyama/twolayer/opt";
-export {
-  sizedSeparation,
-  type NodeLength,
-  type Separation,
-} from "./sugiyama/utils";
+export { sizedSeparation, type Separation } from "./sugiyama/utils";
 export {
   shapeEllipse,
   shapeRect,

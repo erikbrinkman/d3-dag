@@ -1,3 +1,4 @@
+import { graph } from "./graph";
 import { graphConnect } from "./graph/connect";
 import { grid } from "./grid";
 import { map } from "./iters";
@@ -10,6 +11,7 @@ import {
   tweakGrid,
   tweakShape,
   tweakSize,
+  tweakSugiyama,
 } from "./tweaks";
 
 test("tweakSize()", () => {
@@ -249,4 +251,146 @@ test("shapeEllipse()", () => {
   expect(() => shapeEllipse([0, 0], [2, 2], [2, 0], [0, 0])).toThrow(
     "ended inside ellipse"
   );
+});
+
+test("tweakSugiyama() simple", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 1;
+  b.x = 1;
+  b.y = 4;
+  link.points = [
+    [1, 1],
+    [1, 4],
+  ];
+
+  const tweak = tweakSugiyama([2, 2]);
+  const { width, height } = tweak(grf, { width: 2, height: 5 });
+  expect(width).toBe(2);
+  expect(height).toBe(5);
+
+  expect(link.points).toEqual([
+    [1, 1],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+  ]);
+});
+
+test("tweakSugiyama() simple reverse", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 4;
+  b.x = 1;
+  b.y = 1;
+  link.points = [
+    [1, 4],
+    [1, 1],
+  ];
+
+  const tweak = tweakSugiyama([2, 2]);
+  const { width, height } = tweak(grf, { width: 2, height: 5 });
+  expect(width).toBe(2);
+  expect(height).toBe(5);
+
+  expect(link.points).toEqual([
+    [1, 4],
+    [1, 3],
+    [1, 2],
+    [1, 1],
+  ]);
+});
+
+test("tweakSugiyama() clipped", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 1;
+  b.x = 5;
+  b.y = 4;
+  link.points = [
+    [1, 1],
+    [5, 4],
+  ];
+
+  const tweak = tweakSugiyama([2, 2]);
+  const { width, height } = tweak(grf, { width: 6, height: 5 });
+  expect(width).toBe(6);
+  expect(height).toBe(5);
+
+  expect(link.points).toEqual([
+    [1, 1],
+    [2, 2],
+    [4, 3],
+    [5, 4],
+  ]);
+});
+
+test("tweakSugiyama() clipped single", () => {
+  // This tests that we set the clip based on the original edge, not by
+  // clipping one then the other.
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 1;
+  b.x = 7;
+  b.y = 4;
+  link.points = [
+    [1, 1],
+    [7, 4],
+  ];
+
+  const tweak = tweakSugiyama(({ data }) => (data ? [2, 2] : [6, 2]));
+  const { width, height } = tweak(grf, { width: 10, height: 5 });
+  expect(width).toBe(10);
+  expect(height).toBe(5);
+
+  expect(link.points).toEqual([
+    [1, 1],
+    [2, 2],
+    [5, 3],
+    [7, 4],
+  ]);
+});
+
+test("tweakSugiyama() edge case", () => {
+  // this tests a really bizarre horizontal edge edge case
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 1;
+  b.x = 4;
+  b.y = 4;
+  link.points = [
+    [1, 2],
+    [4, 2],
+  ];
+
+  const tweak = tweakSugiyama([2, 2]);
+  const { width, height } = tweak(grf, { width: 5, height: 5 });
+  expect(width).toBe(5);
+  expect(height).toBe(5);
+
+  expect(link.points).toEqual([
+    [1, 2],
+    [1, 2],
+    [4, 2],
+  ]);
 });

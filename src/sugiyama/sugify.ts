@@ -15,8 +15,9 @@ import {
   MutGraphNode,
 } from "../graph";
 import { bigrams, chain, map, some } from "../iters";
+import { NodeLength } from "../layout";
 import { berr, Named } from "../utils";
-import { NodeLength, Separation } from "./utils";
+import { Separation } from "./utils";
 
 /** data for a sugi node that maps to a real node */
 export interface SugiNodeDatum<

@@ -1,5 +1,5 @@
 import { Graph } from "./graph";
-import { LayoutResult, NodeSize } from "./layout";
+import { LayoutResult, NodeSize, cachedNodeSize } from "./layout";
 import { err } from "./utils";
 
 /**
@@ -353,14 +353,95 @@ export function tweakShape<N, L>(
       const center = [node.x, node.y] as const;
       const size = typeof nodeSize === "function" ? nodeSize(node) : nodeSize;
       for (const { points } of node.parentLinks()) {
-        const len = points.length;
-        points[len - 1] = shape(center, size, points[len - 1], points[len - 2]);
+        const [second, first] = points.slice(-2);
+        const trimmed = shape(center, size, first, second);
+        points.splice(-1, 1, trimmed);
       }
       for (const { points } of node.childLinks()) {
-        points[0] = shape(center, size, points[0], points[1]);
+        const [first, second] = points;
+        const trimmed = shape(center, size, first, second);
+        points.splice(0, 1, trimmed);
       }
     }
     return res;
   }
   return tweakShape;
+}
+
+/**
+ * clip the x coordinate along a line to within x range
+ */
+function clipPoint(
+  [sx, sy]: readonly [number, number],
+  [ex, ey]: readonly [number, number],
+  y: number,
+  [sr, er]: readonly [number, number]
+): number {
+  const dy = ey - sy;
+  const mx = (dy === 0 ? 0 : ((y - sy) / dy) * (ex - sx)) + sx;
+  return Math.min(Math.max(sr, mx), er);
+}
+
+function findClip(
+  p1: readonly [number, number],
+  p2: readonly [number, number],
+  ys: readonly number[],
+  xrange: readonly [number, number]
+): undefined | [number, number] {
+  // ensure p2 has higher y
+  if (p1[1] > p2[1]) {
+    [p1, p2] = [p2, p1];
+  }
+
+  for (const y of ys) {
+    if (p1[1] <= y && y <= p2[1]) {
+      return [clipPoint(p1, p2, y, xrange), y];
+    }
+  }
+}
+
+/**
+ * tweak the sugiyama layout by add a control point inside the bounding box
+ *
+ * This tweak adds a control point to the edge (top / bottom) of the bounding
+ * box. This prevents edges from crossing over nodes when nodes are very far
+ * apart horizontally.
+ *
+ * @remarks
+ *
+ * If using in conjunction with {@link tweakShape}, this should occur first,
+ * although it shouldn't be strictly necessary.
+ */
+export function tweakSugiyama<N, L>(nodeSize: NodeSize<N, L>): Tweak<N, L> {
+  const cachedSize = cachedNodeSize(nodeSize);
+
+  function tweakSugiyama(
+    graph: Graph<N, L>,
+    res: Readonly<LayoutResult>
+  ): LayoutResult {
+    // NOTE we compute this per link instead of per node so that the first
+    // modification doesn't affect the second for two-point nodes
+    for (const { source, target, points } of graph.links()) {
+      const additions: [number, [number, number]][] = [];
+      for (const [ind, node] of [
+        [1, source],
+        [-1, target],
+      ] as const) {
+        const [width, height] = cachedSize(node);
+        const xrange = [node.x - width / 2, node.x + width / 2] as const;
+        const ys = [node.y - height / 2, node.y + height / 2];
+        const [p1, p2] = points.slice(-2);
+        const added = findClip(p1, p2, ys, xrange);
+        if (added) {
+          additions.push([ind, added]);
+        }
+      }
+      for (const [ind, add] of additions) {
+        points.splice(ind, 0, add);
+      }
+    }
+    return res;
+  }
+
+  return tweakSugiyama;
 }

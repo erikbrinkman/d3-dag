@@ -3,8 +3,13 @@
  *
  * @packageDocumentation
  */
-import { Graph, GraphNode } from "../graph";
-import { LayoutResult, NodeSize } from "../layout";
+import { Graph } from "../graph";
+import {
+  LayoutResult,
+  NodeSize,
+  cachedNodeSize,
+  splitNodeSize,
+} from "../layout";
 import { Tweak } from "../tweaks";
 import { U, err } from "../utils";
 import { Coord } from "./coord";
@@ -14,7 +19,7 @@ import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
 import { sugiNodeLength, sugifyLayer, unsugify, validateCoord } from "./sugify";
-import { NodeLength, sizedSeparation } from "./utils";
+import { sizedSeparation } from "./utils";
 
 /** sugiyama operators */
 export interface SugiyamaOps<in N = never, in L = never> {
@@ -211,42 +216,6 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   gap(): readonly [number, number];
 }
 
-/**
- * split a {@link NodeSize} into x and y {@link NodeLength}s
- *
- * This allows you to split a NodeSize into independent x and y accessors,
- * while also caching the result to prevent potentially expensive computation
- * from being duplicated.
- *
- * The only real reason to use this would be to run the steps of
- * {@link sugiyama} independently.
- */
-export function cachedNodeSize<N, L>(
-  nodeSize: NodeSize<N, L>
-): readonly [NodeLength<N, L>, NodeLength<N, L>] {
-  if (typeof nodeSize !== "function") {
-    const [x, y] = nodeSize;
-    return [() => x, () => y];
-  } else {
-    const cache = new Map<GraphNode<N, L>, readonly [number, number]>();
-
-    const cached = (node: GraphNode<N, L>): readonly [number, number] => {
-      let val = cache.get(node);
-      if (val === undefined) {
-        val = nodeSize(node);
-        const [width, height] = val;
-        if (width <= 0 || height <= 0) {
-          throw err`all node sizes must be positive, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the callback passed to \`sugiyama().nodeSize(...)\` is doing that`;
-        }
-        cache.set(node, val);
-      }
-      return val;
-    };
-
-    return [(node) => cached(node)[0], (node) => cached(node)[1]];
-  }
-}
-
 function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   options: Ops & SugiyamaOps<ON, OL>,
   sizes: {
@@ -262,7 +231,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
       res = { width: 0, height: 0 };
     } else {
       // cache and split node sizes
-      const [xLen, yLen] = cachedNodeSize(options.nodeSize);
+      const [xLen, yLen] = splitNodeSize(cachedNodeSize(options.nodeSize));
 
       // separate gaps
       const [xGap, yGap] = sizes.gap;
