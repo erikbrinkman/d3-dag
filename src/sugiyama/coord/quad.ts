@@ -23,6 +23,12 @@ import {
  * a strictly callable {@link NodeWeight}
  */
 export interface CallableNodeWeight<NodeDatum = never, LinkDatum = never> {
+  /**
+   * get the weight of a node
+   *
+   * @param node - the node to get the weight of
+   * @returns weight - the corresponding weight
+   */
   (node: GraphNode<NodeDatum, LinkDatum>): number;
 }
 /**
@@ -38,6 +44,12 @@ export type NodeWeight<NodeDatum = never, LinkDatum = never> =
  * a strictly callable {@link LinkWeight}
  */
 export interface CallableLinkWeight<NodeDatum = never, LinkDatum = never> {
+  /**
+   * get the weight of a link
+   *
+   * @param link - the link to get the weight of
+   * @returns weight - the corresponding weight
+   */
   (link: GraphLink<NodeDatum, LinkDatum>): number;
 }
 /**
@@ -174,7 +186,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
   /** get the current compress weight. */
   compress(): number;
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

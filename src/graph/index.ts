@@ -32,6 +32,13 @@ import { toJson } from "./json";
  * ```
  */
 export interface Rank<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * compute the rank of a node
+   *
+   * @param node - the node to compute the rank of
+   * @returns rank - the rank of the node; if defined lower ranks indicate
+   *   nodes that come earlier (lower y's)
+   */
   (node: GraphNode<NodeDatum, LinkDatum>): number | undefined;
 }
 
@@ -1191,8 +1198,8 @@ class DirectedLink<N, L> implements MutGraphLink<N, L> {
  * grf.connected(); // true
  * ```
  *
- * @typeParam NodeDatum the extra user data attached to each node
- * @typeParam LinkDatum the extra data attached to each link
+ * @typeParam NodeDatum - the extra user data attached to each node
+ * @typeParam LinkDatum - the extra data attached to each link
  */
 export function graph<NodeDatum, LinkDatum>(): MutGraph<NodeDatum, LinkDatum> {
   return new DirectedGraph<NodeDatum, LinkDatum>();

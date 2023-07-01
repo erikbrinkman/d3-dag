@@ -64,5 +64,10 @@ import { SugiNode } from "../sugify";
  * ```
  */
 export interface Decross<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * remove crossings from a layered graph
+   *
+   * @param layers - the layers of nodes that this should rearrange.
+   */
   (layers: SugiNode<NodeDatum, LinkDatum>[][]): void;
 }

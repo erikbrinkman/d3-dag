@@ -46,7 +46,7 @@ export interface TwolayerOpt extends Twolayer<unknown, unknown> {
   /** get whether the current layout minimizes distance */
   dist(): boolean;
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

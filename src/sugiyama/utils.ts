@@ -5,17 +5,26 @@ import { NodeLength } from "../layout";
 /**
  * A separation function that indicates how far apart nodes should be the layering / height assignment.
  *
- * Upper or lower are undefined to indicate the separation from the extents of
- * the layout (0, or height).
  *
  * @remarks upper and lower are historic, since arbitrary graphs are handled,
  * there is no longer a notion of upper or lower and separation should return
  * the correct separation independent of nodes relations in the graph.
  */
 export interface Separation<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * compute the necessary separation between two nodes
+   *
+   * `first` and `second` are `undefined` to indicate the separation from the
+   * extents of the layout (0, or height). Both will never be `undefined`.
+   *
+   * @param first - one node to find the separation between
+   * @param second - the other node to find the separation between
+   * @returns sep - the minimum separation between the two nodes, regardless of which
+   *   one is on top
+   */
   (
-    upper: GraphNode<NodeDatum, LinkDatum> | undefined,
-    lower: GraphNode<NodeDatum, LinkDatum> | undefined
+    first: GraphNode<NodeDatum, LinkDatum> | undefined,
+    second: GraphNode<NodeDatum, LinkDatum> | undefined
   ): number;
 }
 

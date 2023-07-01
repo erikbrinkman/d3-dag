@@ -33,7 +33,7 @@ export interface CoordTopological extends Coord<unknown, unknown> {
   /** get the current simplex setting. */
   straight(): boolean;
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

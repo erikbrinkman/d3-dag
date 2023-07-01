@@ -19,6 +19,13 @@ import { SugiNode } from "../sugify";
  * undefined if and only if indices is empty.
  */
 export interface Aggregator {
+  /**
+   * aggregate indices
+   *
+   * @param indices - the indices to aggregate
+   * @returns index - the aggregate index, `undefined` if and only if `indices`
+   *   is empty
+   */
   (indices: Iterable<number>): number | undefined;
 }
 
@@ -115,7 +122,7 @@ export interface TwolayerAgg<Agg extends Aggregator = Aggregator>
    */
   aggregator(): Agg;
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

@@ -1,5 +1,5 @@
 /**
- * A {@link grid/lane!Lane} that assigns lanes greedily, but quickly.
+ * A {@link Lane} that assigns lanes greedily, but quickly.
  *
  * @packageDocumentation
  */
@@ -55,7 +55,7 @@ export interface LaneGreedy extends Lane<unknown, unknown> {
   /** get the current bidirectional setting */
   bidirectional(): boolean;
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

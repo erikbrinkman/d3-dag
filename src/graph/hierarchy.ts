@@ -17,7 +17,15 @@ import { err } from "../utils";
  * Can be modified with {@link Hierarchy#children}.
  */
 export interface Children<in out NodeDatum> {
-  (d: NodeDatum, i: number): Iterable<NodeDatum> | undefined;
+  /**
+   * get children from a node
+   *
+   * @param datum - the datum to get children of
+   * @param index - the index with which the data was encountered
+   * @returns children - all the children data of this node, or undefined if
+   *   there are no children
+   */
+  (datum: NodeDatum, index: number): Iterable<NodeDatum> | undefined;
 }
 
 /**
@@ -28,7 +36,15 @@ export interface Children<in out NodeDatum> {
  * Can be modified with {@link Hierarchy#childrenData}.
  */
 export interface ChildrenData<in out NodeDatum, out LinkDatum = unknown> {
-  (d: NodeDatum, i: number):
+  /**
+   * get children data from a node
+   *
+   * @param datum - the datum to get children of
+   * @param index - the index with which the data was encountered
+   * @returns childrenData - all the children data of this node, or undefined if
+   *   there are no children
+   */
+  (datum: NodeDatum, index: number):
     | Iterable<readonly [NodeDatum, LinkDatum]>
     | undefined;
 }
@@ -76,6 +92,13 @@ export interface Hierarchy<
   Child extends Children<NodeDatum>,
   ChildData extends ChildrenData<NodeDatum, LinkDatum>
 > {
+  /**
+   * construct a graph from hierarchical data
+   *
+   * @param data - a source node to recursively find children of; you can pass
+   *   multiple source nodes for disconnected or multi-rooted graphs
+   * @returns graph - a graph of the hierarchical data
+   */
   (...data: readonly NodeDatum[]): MutGraph<NodeDatum, LinkDatum>;
 
   /**

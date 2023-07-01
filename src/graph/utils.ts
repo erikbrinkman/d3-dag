@@ -16,11 +16,18 @@ export function verifyId(id: string): string {
  * The accessor must return an appropriate unique string id for given datum.
  * This operator will only be called once for each input.
  *
- * `i` will increment in the order data are processed.
+ * `index` will increment in the order data are processed.
  *
  * This is used in {@link Stratify#id}, {@link Connect#sourceId}, and
  * {@link Connect#targetId}.
  */
 export interface Id<in Datum = never> {
-  (d: Datum, i: number): string;
+  /**
+   * get node id from a datum
+   *
+   * @param datum - the datum to get the id from
+   * @param index - the index that the data was encountered in
+   * @returns id - the id corresponding to the node datum
+   */
+  (datum: Datum, index: number): string;
 }

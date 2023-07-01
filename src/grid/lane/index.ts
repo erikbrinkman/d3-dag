@@ -29,5 +29,11 @@ import { GraphNode } from "../../graph";
  * ```
  */
 export interface Lane<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * assign lanes to ordered nodes
+   *
+   * @param ordered - the nodes in to assign lanes to in order from top to
+   *   bottom
+   */
   (ordered: readonly GraphNode<NodeDatum, LinkDatum>[]): void;
 }

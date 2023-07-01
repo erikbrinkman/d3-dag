@@ -12,10 +12,11 @@ import { SugiNode } from "../sugify";
  * This is used to customize {@link DecrossTwoLayer}.
  *
  * When called with `topDown = true` `topLayer` should be untouched, and
- * `bottomLayer` should be rearranged to minimize crossings. When `topDown =
- * false` then `topLayer` should be rearranged, and `bottomLayer` should remain
- * fixed. There are no requirements for how these needs to order nodes, but
- * doing so in such a way to minimize edge crossings is usually desired.
+ * `bottomLayer` should be rearranged to minimize crossings. When
+ * `topDown = false` then `topLayer` should be rearranged, and `bottomLayer`
+ * should remain fixed. There are no requirements for how these needs to order
+ * nodes, but doing so in such a way to minimize edge crossings is usually
+ * desired.
  *
  * @example
  *
@@ -40,6 +41,13 @@ import { SugiNode } from "../sugify";
  * ```
  */
 export interface Twolayer<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * rearrange one layer conditioned on another
+   *
+   * @param topLayer - the top layer
+   * @param bottomLayer - the bottom layer
+   * @param topDown - if true rearrange `bottomLayer`, else rearrange `topLayer`
+   */
   (
     topLayer: SugiNode<NodeDatum, LinkDatum>[],
     bottomLayer: SugiNode<NodeDatum, LinkDatum>[],

@@ -1,5 +1,5 @@
 /**
- * A {@link grid/lane!Lane} that assigns lanes to minimize edge crossings.
+ * A {@link Lane} that assigns lanes to minimize edge crossings.
  *
  * @packageDocumentation
  */
@@ -53,7 +53,7 @@ export interface LaneOpt extends Lane<unknown, unknown> {
   /** Return the handling of large graphs. */
   check(): OptChecking;
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

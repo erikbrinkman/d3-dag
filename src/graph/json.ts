@@ -4,6 +4,12 @@ import { err, U } from "../utils";
 
 /** an interface for hydrating serialized graph data */
 export interface Hydrator<T = unknown> {
+  /**
+   * hydrate unknown parsed data into the desired type
+   *
+   * @param parsed - the parsed data without compile-time type information
+   * @returns data - the verified and potentially parsed data
+   */
   (parsed: unknown): T;
 }
 
@@ -147,15 +153,21 @@ export interface JsonOps<out N = unknown, out L = unknown> {
  * nodeDatum} and {@link linkDatum} to define node and link data type, and
  * optionally perform extra deserialization.
  *
- * @typeParam NodeDatum the node data type of the deserialized graph
- * @typeParam LinkDatum the link data type of the deserialized graph
- * @typeParam Ops the operators associated with deserialization
+ * @typeParam NodeDatum - the node data type of the deserialized graph
+ * @typeParam LinkDatum - the link data type of the deserialized graph
+ * @typeParam Ops - the operators associated with deserialization
  */
 export interface Json<
   NodeDatum,
   LinkDatum,
   Ops extends JsonOps<NodeDatum, LinkDatum>
 > {
+  /**
+   * deserialize parsed json as a graph
+   *
+   * @param json - the parsed json, usually created from `JSON.parse`
+   * @returns graph - the deserialized graph
+   */
   (json: unknown): MutGraph<NodeDatum, LinkDatum>;
 
   /**

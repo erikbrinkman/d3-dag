@@ -11,7 +11,15 @@ import { Id, verifyId } from "./utils";
  * This can be modified with the {@link Stratify#parentIds} method.
  */
 export interface ParentIds<in NodeDatum = never> {
-  (d: NodeDatum, i: number): Iterable<string> | undefined;
+  /**
+   * get parent ids from a node datum
+   *
+   * @param datum - the node data to get parent ids from
+   * @param index - the order that the datum was encountered in
+   * @returns parentIds - the parent ids that correspond to the node datum,
+   *   undefined is the same as empty
+   */
+  (datum: NodeDatum, index: number): Iterable<string> | undefined;
 }
 
 /**
@@ -23,7 +31,17 @@ export interface ParentIds<in NodeDatum = never> {
  * This can be modified with the {@link Stratify#parentData} method.
  */
 export interface ParentData<in NodeDatum = never, out LinkDatum = unknown> {
-  (d: NodeDatum, i: number): Iterable<readonly [string, LinkDatum]> | undefined;
+  /**
+   * get parent ids and link data from a node datum
+   *
+   * @param datum - the node data to get parent ids from
+   * @param index - the order that the datum was encountered in
+   * @returns parentData - the parent ids and link data that correspond to the
+   *   node datum, undefined is the same as empty
+   */
+  (datum: NodeDatum, index: number):
+    | Iterable<readonly [string, LinkDatum]>
+    | undefined;
 }
 
 type StratifyNodeDatum<Ops extends StratifyOps> = Ops extends StratifyOps<
@@ -97,6 +115,12 @@ export interface Stratify<
   LinkDatum,
   Ops extends StratifyOps<never, LinkDatum>
 > {
+  /**
+   * create a graph from stratify data
+   *
+   * @param data - the node data to create a graph from
+   * @returns graph - the graph representation of the data
+   */
   <N extends StratifyNodeDatum<Ops>>(data: readonly N[]): MutGraph<
     N,
     LinkDatum

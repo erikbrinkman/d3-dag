@@ -10,6 +10,12 @@ import { err } from "./utils";
  * A strictly callable {@link NodeSize}
  */
 export interface CallableNodeSize<NodeDatum = never, LinkDatum = never> {
+  /**
+   * compute the node size of a graph node
+   *
+   * @param node - the node to get the size of
+   * @returns dimensions - the width and height of `node`
+   */
   (node: GraphNode<NodeDatum, LinkDatum>): readonly [number, number];
 }
 
@@ -43,6 +49,12 @@ export type NodeSize<NodeDatum = never, LinkDatum = never> =
 
 /** An accessor for computing the length of a node */
 export interface NodeLength<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * compute the length (width or height) of a graph node
+   *
+   * @param node - the node to get the length of
+   * @returns length - the width or height of `node`
+   */
   (node: GraphNode<NodeDatum, LinkDatum>): number;
 }
 

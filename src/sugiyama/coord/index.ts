@@ -43,6 +43,13 @@ import { SugiNode, SugiSeparation } from "../sugify";
  * ```
  */
 export interface Coord<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * assign coordinates to a layered graph
+   *
+   * @param layers - a layered graph of sugiyama nodes
+   * @param sep - how much horizontal separation should exist between nodes
+   * @returns width - the total width of the layout
+   */
   <N extends NodeDatum, L extends LinkDatum>(
     layers: SugiNode<N, L>[][],
     sep: SugiSeparation<N, L>
@@ -53,7 +60,7 @@ export interface Coord<in NodeDatum = never, in LinkDatum = never> {
    * and LinkDatum, because the extra generics make it otherwise hard to infer.
    * It's a function to keep the same variance.
    *
-   * @ignore
+   * @internal
    */
   __sentinel__?: (_: NodeDatum, __: LinkDatum) => void;
 }

@@ -8,6 +8,13 @@ import { Id, verifyId } from "./utils";
  * The index passed in is the edge index where the id is first seen.
  */
 export interface IdNodeDatum<out D = unknown> {
+  /**
+   * get node data from an id
+   *
+   * @param id - the id of the node
+   * @param index - the index of when the node is encountered
+   * @returns datum - the datum associated with the id
+   */
   (id: string, index: number): D;
 }
 
@@ -45,6 +52,12 @@ type ConnectLinkDatum<Ops extends ConnectOps> = Ops extends ConnectOps<
  * will have the ids referenced as either the source or the target.
  */
 export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
+  /**
+   * convert connect data into a graph
+   *
+   * @param data - an array of each connection
+   * @returns grf - the resulting graph
+   */
   <L extends ConnectLinkDatum<Ops>>(data: readonly L[]): MutGraph<NodeDatum, L>;
 
   /**

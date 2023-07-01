@@ -16,6 +16,13 @@ import { Separation } from "../utils";
  * nodes with the same group should have the same layer.
  */
 export interface Group<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * assign a group to a node
+   *
+   * @param node - the node to assign a group to
+   * @returns group - the node's group, `undefined` if the node doesn't have a
+   *   group
+   */
   (node: GraphNode<NodeDatum, LinkDatum>): string | undefined;
 }
 
@@ -69,8 +76,18 @@ export function layerSeparation(
  * ```
  */
 export interface Layering<in NodeDatum = never, in LinkDatum = never> {
+  /**
+   * layer a graph
+   *
+   * After calling this, every node should have a `y` coordinate that satisfies
+   * `sep`.
+   *
+   * @param graph - the graph to layer
+   * @param sep - the minimum separation between nodes
+   * @returns height - the height after layering
+   */
   <N extends NodeDatum, L extends LinkDatum>(
-    dag: Graph<N, L>,
+    graph: Graph<N, L>,
     sep: Separation<N, L>
   ): number;
 
@@ -79,7 +96,7 @@ export interface Layering<in NodeDatum = never, in LinkDatum = never> {
    * and LinkDatum, because the extra generics make it otherwise hard to infer.
    * It's a function to keep the same variance.
    *
-   * @ignore
+   * @internal
    */
   __sentinel__?: (_: NodeDatum, __: LinkDatum) => void;
 }

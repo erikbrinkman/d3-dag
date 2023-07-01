@@ -17,7 +17,7 @@ import { SugiNode, SugiSeparation } from "../sugify";
  * Create with {@link coordCenter}.
  */
 export interface CoordCenter extends Coord<unknown, unknown> {
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

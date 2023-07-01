@@ -16,6 +16,14 @@ import { avgHeight } from "./utils";
  * a strictly callable {@link SimplexWeight}
  */
 export interface CallableSimplexWeight<NodeDatum = never, LinkDatum = never> {
+  /**
+   * get the simplex weights for a link
+   *
+   * Higher weights indicate a strong preference for verticality.
+   *
+   * @param link - the link in question
+   * @returns weights - the weights for short, medium, and long edges respectively
+   */
   (link: GraphLink<NodeDatum, LinkDatum>): readonly [number, number, number];
 }
 /**
@@ -83,7 +91,7 @@ export interface CoordSimplex<Ops extends CoordSimplexOps>
   /** gets the current weight accessor */
   weight(): Ops["weight"];
 
-  /** flag indicating that this is built in to d3dag and shouldn't error in specific instances */
+  /** @internal flag indicating that this is built in to d3dag and shouldn't error in specific instances */
   readonly d3dagBuiltin: true;
 }
 

@@ -34,6 +34,12 @@ export interface GridOps<in N = never, in L = never> {
  * Create with {@link grid}.
  */
 export interface Grid<Ops extends GridOps = GridOps> {
+  /**
+   * layout a graph with the grid layout
+   *
+   * @param grf - the graph to layout
+   * @returns dimensions - the width and height of the final layout
+   */
   (
     grf: Ops extends GridOps<infer N, infer L> ? Graph<N, L> : never
   ): LayoutResult;

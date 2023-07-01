@@ -25,6 +25,13 @@ import { err } from "./utils";
  * the new dimensions after tweaking the layout.
  */
 export interface Tweak<in N = never, in L = never> {
+  /**
+   * tweak the graph with the current dimensions
+   *
+   * @param graph - the graph to  tweak
+   * @param res - the current dimensions of the graph
+   * @returns the new dimensions
+   */
   (graph: Graph<N, L>, res: Readonly<LayoutResult>): LayoutResult;
 }
 
@@ -179,20 +186,25 @@ export function tweakFlip(
 /**
  * a shape callable used to truncate an edge path at a node
  *
- * You can implement your own shape by satisfying the invariants of the
- * interface.  A shape callable takes four parameters:
- *
- * - `center` - the center of the node
- * - `nodeSize` - the bounding box size of the node
- * - `start` - the start of the path edge
- * - `end` - the end of the path edge
- *
- * This should return a new "start" point that touches the edge of the desired
- * shape. In all cases, `start` should equal `center` and `end` should be
- * ouside of the bounding box, but it won't hurt for implementations to be
- * robust in case this isn't true.
+ * This represents how to tweak the edge of a link conditioned on the shape of
+ * the node. This is useful for adding endings to an link (like arrows) that
+ * will align with a node well.
  */
 export interface Shape {
+  /**
+   * compute the new start link edge point from the current settings
+   *
+   * This should return a new "start" point that touches the edge of the
+   * desired shape. In all cases, `start` should equal `center` and `end`
+   * should be ouside of the bounding box, but it won't hurt for
+   * implementations to be robust in case this isn't true.
+   *
+   * @param center - the center of the node
+   * @param nodeSize - the bounding box size of the node
+   * @param start - the start of the path edge
+   * @param end - the end of the path edge
+   * @returns the new start point for the edge of the shape
+   */
   (
     center: readonly [number, number],
     nodeSize: readonly [number, number],

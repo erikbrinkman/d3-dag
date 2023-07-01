@@ -19,6 +19,17 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 - [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
 
+## Alternatives
+
+Since creating this library, some reasonable alternatives have been developed,
+they're worth checking out to make sure they din't fit your needs better:
+
+- [graphology](https://www.npmjs.com/package/graphology) - a general javascript
+  graph library that's similar to the graph implementation provided as part of
+  this library.
+- [sigma](https://www.npmjs.com/package/sigma) - a graph layout library
+  specifically targeted at large graphs.
+
 ## Installing
 
 If you use node, `npm i d3-dag` or `yarn add d3-dag`.

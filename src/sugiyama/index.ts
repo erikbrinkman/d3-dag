@@ -67,8 +67,14 @@ export interface SugiyamaOps<in N = never, in L = never> {
  * component function successively.
  */
 export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
+  /**
+   * layout the graph using the sugiyama layout
+   *
+   * @param graph - the graph to layout
+   * @returns dimension - the width and height of resulting layout
+   */
   (
-    dag: Ops extends SugiyamaOps<infer N, infer L> ? Graph<N, L> : never
+    graph: Ops extends SugiyamaOps<infer N, infer L> ? Graph<N, L> : never
   ): LayoutResult;
 
   /**

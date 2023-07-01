@@ -31,6 +31,9 @@ export interface ZherebkoOps<in N = never, in L = never> {
  * Create with {@link zherebko}.
  */
 export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
+  /**
+   * layout the graph using the current operator
+   */
   (
     graph: Ops extends ZherebkoOps<infer N, infer L> ? Graph<N, L> : never
   ): LayoutResult;
