@@ -29,6 +29,7 @@ const pkg = await new Promise((res, rej) =>
 const config = {
   entryPoints: ["src/index.ts"],
   tsconfig: "tsconfig.build.json",
+  target: "es6",  // needs to be defined despite tsconfig
   bundle: true,
   minify: true,
   plugins: [
