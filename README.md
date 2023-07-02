@@ -2,24 +2,23 @@
 
 [![npm](https://img.shields.io/npm/v/d3-dag.svg)](https://www.npmjs.com/package/d3-dag)
 [![build](https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg)](https://github.com/erikbrinkman/d3-dag/actions)
-[![docs](https://img.shields.io/badge/docs-docs-informational)](https://erikbrinkman.github.io/d3-dag/)
+[![docs](https://img.shields.io/badge/docs-docs-informational)](https://erikbrinkman.github.io/d3-dag/modules.html)
 
 Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
 In these instances `d3-hierarchy` may not suit your needs, which is why `d3-dag` (Directed Acyclic Graph) exists.
 This module implements a data structure for manipulating DAGs.
 Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard set by d3.
 
-
 ## Examples
 
-* [Javascript API](https://erikbrinkman.github.io/d3-dag/modules/index.html) - methods exported to flat javascript
-- [Observable with Sugiyama Layout](https://beta.observablehq.com/@erikbrinkman/d3-dag-sugiyama) - Allows you to experiment with different layouts and different datasets for the sugiyama layout to understand the effects of different options.
-- [Observable with Topological Layouts](https://beta.observablehq.com/@erikbrinkman/d3-dag-topological) - Allows you to experiment with different layouts and different datasets for topological layouts.
-- [Codepen with Sugiyama Layout](https://codepen.io/brinkbot/pen/oNZJXqK) - For people who want a straight javascript example without the Observable fanciness.
-- [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
-
+- **Sugiyama** [[codepen](https://codepen.io/brinkbot/pen/oNQwNRv)] [[observable](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama)] [[api](https://erikbrinkman.github.io/d3-dag/functions/sugiyama-1.html)] - a robust layered layout
+- **Zherebko** [[codepen](https://codepen.io/brinkbot/pen/dyQRPMY)] [[observable](https://observablehq.com/d/9ce02b308bb2b138)] [[api](https://erikbrinkman.github.io/d3-dag/functions/zherebko-1.html)] - a linear topological layout
+- **Grid** [[codepen](https://codepen.io/brinkbot/pen/eYQRmzx)] [[observable](https://observablehq.com/@erikbrinkman/d3-dag-topological)] [[api](https://erikbrinkman.github.io/d3-dag/functions/grid-1.html)] - a grid based topological layout
+- **Dynamic** [[codepen](https://codepen.io/brinkbot/pen/dyQRPpG)] - a dynamic sugiyama layout, click on nodes to activate or deactivate them
 
 ## Status
+
+> :warning: **tl;dr** this is effectively in light maintanence mode: simple feature requests may still be implemented, but I won't be trying to expand to new use cases
 
 This project started years ago with the intention of providing a rough
 framework for implementing or extending a sugiyama-style layout for small to
@@ -70,7 +69,7 @@ For example, the `stratify` operator creates dags from id-based parent data, can
 
 ```ts
 // note initial function call with no arguments to create default operator
-const stratify = dagStratify();
+const stratify = graphStratify();
 const dag = stratify([{ id: "parent" }, { id: "child", parentIds: ["parent"] }]);
 
 stratify.id(({ myid }: { myid: string }) => myid);
