@@ -16,16 +16,20 @@ too difficult.
 This is a rough overview of the next three sections.
 
 - The old static dag data structure has been upgraded to a dynamic graph
-  structure. The only current limitation is that it doesn't support self-loops.
+  structure. This includes a lof of changes:  
+  - `Graph` and `GraphNode` aren't iterable, you must call `.nodes()` to get an
+    iterator.
+  - `Graph#nodes()` no longer has traversal order. To get someting similar to "before"
+    use the `.topological()` method.
+  - All graph methods now return iterables, so they must be collected into an
+    array via `[..grf.nodes()]` if you need an array.
+  - A few methods got new names to be more concrete, `grf#size()` became
+    `grf#nnodes()` and now supports counting links with `grf#nlinks()`.
+  - Points on links are now tuples of numbers, e.g. `[1, 1]` not
+    `{ x: 1, y: 1 }`, adjust usage accordingly.
+- Layout operators no longer have a `.size(...)` method, instead use
 - `dagStratify`, `dagConnect`, and `dagHierarchy` are now prefixed by graph,
   e.g. `graphStratify`, since they now operate on the dynamic graph structure.
-- `Graph` and `GraphNode` aren't iterable, you must call `.nodes()` to get an
-  iterator.
-- `Graph#nodes()` no longer has traversal order. To get someting similar to "before"
-  use the `.topological()` method.
-- Points on links are now tuples of numbers, e.g. `[1, 1]` not
-  `{ x: 1, y: 1 }`, adjust usage accordingly.
-- Layout operators no longer have a `.size(...)` method, instead use
   `.tweaks([tweakSize(...)])`.
 - All types have been given consistent naming, check the api documentation to
   find the new name.
