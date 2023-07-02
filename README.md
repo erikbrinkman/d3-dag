@@ -19,10 +19,18 @@ Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, ne
 - [Expandable Family Tree](https://github.com/BenPortner/js_family_tree) - An expandable family tree rendered using d3-dag.
 
 
-## Alternatives
+## Status
 
-Since creating this library, some reasonable alternatives have been developed,
-they're worth checking out to make sure they din't fit your needs better:
+This project started years ago with the intention of providing a rough
+framework for implementing or extending a sugiyama-style layout for small to
+medium sized static DAGs. At the time, this was one of the only libraries to
+support layered graph layouts in javascript. Since then many more libraries
+exist, and since I no longer use it, it's been hard to actively develop.
+
+In addition, I started this mostly for experimentation purposes, but most
+people just want something reasonable out of the box, that works for most
+inputs. Fully supporting that would take a different library, but fortunately
+there are several: (Note this list may not be up to date, but PRs are welcome)
 
 - [graphology](https://www.npmjs.com/package/graphology) - a general javascript
   graph library that's similar to the graph implementation provided as part of

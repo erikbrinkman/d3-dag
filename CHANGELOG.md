@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2023-07-02
 
 This change is a major rewrite of a lot of the library, so expect some effort
 to migrate. Most invocations stayed similar, so hopefully the change won't be
@@ -13,11 +13,15 @@ too difficult.
 
 ### Upgrading
 
+This is a rough overview of the next three sections.
+
+- The old static dag data structure has been upgraded to a dynamic graph
+  structure. The only current limitation is that it doesn't support self-loops.
 - `dagStratify`, `dagConnect`, and `dagHierarchy` are now prefixed by graph,
-  e.g. `graphStratify`.
+  e.g. `graphStratify`, since they now operate on the dynamic graph structure.
 - `Graph` and `GraphNode` aren't iterable, you must call `.nodes()` to get an
   iterator.
-- `nodes()` no longer has traversal order. To get someting similar to "before"
+- `Graph#nodes()` no longer has traversal order. To get someting similar to "before"
   use the `.topological()` method.
 - Points on links are now tuples of numbers, e.g. `[1, 1]` not
   `{ x: 1, y: 1 }`, adjust usage accordingly.
@@ -41,7 +45,8 @@ too difficult.
   and is relatively expensive and hard to maintain.
 - `.size()` funtion on layouts - instead creating a size tweak.
 - graphs are no longer iterable instead explicitely call `.nodes()`
-- Experimental es6 imports for a simplified interface and documentation.
+- Experimental es6 imports were removed for a simplified interface and
+  documentation.
 
 ### Changed
 
@@ -51,14 +56,17 @@ too difficult.
 - `Layering` operators now take a separation function instead of always keeping
   separation at one. This can now be thought of more generally as a height
   assignment which will be grouped into layers. This is to support more compact
-  sugiyama layouts with minimal effort.
+  sugiyama layouts with minimal effort in the future.
 - `Coord` operators were tweaked to take separation as a parameter instead of
   node size.
-- Type names have been simplified and rearranged.
-- All layouts have four consistent attributes, the layout function, `nodeSize`,
-  `gap`, and `tweaks`.
+- Type names have been simplified and rearranged, given the now global export
+  scope. It should be pretty easy to find the new name in the api
+  documentation.
+- All layouts have three consistent attributes, the layout function, `nodeSize`,
+  `gap`, and `tweaks`. They also have a `rank` attribute, but that's
+  encapsulated in the layering function for sugiyama.
 - Link points are now `[x, y]` tuples so they work more conveniently with
-  `d3.line`s default typing.
+  `d3.line`s default accessors.
 - Various interfaces for accessors now accept constants as well, e.g. you can
   now pass `[2, 2]` into `.nodeSize()` without having to make it a constant
   function. This also serves as the indicator that it's constant giving it the

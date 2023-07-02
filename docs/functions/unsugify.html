@@ -1,0 +1,205 @@
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>unsugify | d3-dag</title><meta name="description" content="Documentation for d3-dag"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container">
+<div class="table-cell" id="tsd-search" data-base="..">
+<div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
+<div class="field">
+<div id="tsd-toolbar-links"></div></div>
+<ul class="results">
+<li class="state loading">Preparing search index...</li>
+<li class="state failure">The search index is not available</li></ul><a href="../index.html" class="title">d3-dag</a></div>
+<div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="2" fill="var(--color-text)"></rect><rect x="1" y="7" width="14" height="2" fill="var(--color-text)"></rect><rect x="1" y="11" width="14" height="2" fill="var(--color-text)"></rect></svg></a></div></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb">
+<li><a href="../modules.html">d3-dag</a></li>
+<li><a href="unsugify.html">unsugify</a></li></ul>
+<h1>Function unsugify</h1></div>
+<section class="tsd-panel">
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="unsugify"><span class="tsd-kind-call-signature">unsugify</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">N</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type tsd-kind-type-parameter">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">layers</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#unsugify" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Unsugify a sugi graph</p>
+<p>Given a sugi graph where each sugi node has an assigned x and y coordinate,
+convert those back into coordinates on the underlying nodes, or point arrays
+on the edges.</p>
+</div>
+<section class="tsd-panel">
+<h4>Type Parameters</h4>
+<ul class="tsd-type-parameter-list">
+<li>
+<h4><span class="tsd-kind-type-parameter">N</span></h4></li>
+<li>
+<h4><span class="tsd-kind-type-parameter">L</span></h4></li></ul></section>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">layers</span>: <a href="../types/SugiNode.html" class="tsd-signature-type tsd-kind-type-alias">SugiNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">N</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type tsd-kind-type-parameter">L</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/erikbrinkman/d3-dag/blob/9a3f89b/src/sugiyama/sugify.ts#L333">sugiyama/sugify.ts:333</a></li></ul></aside></li></ul></section></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
+<h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)" id="icon-chevronDown"></path></svg>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility">
+<h4 class="uppercase">Member Visibility</h4><form>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-private" name="private"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Private</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div>
+<div class="tsd-theme-toggle">
+<h4 class="uppercase">Theme</h4><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>d3-<wbr/>dag</span></a>
+<ul class="tsd-small-nested-navigation">
+<li><a href="../interfaces/Aggregator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>Aggregator</span></a></li>
+<li><a href="../interfaces/CallableLinkWeight.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Callable<wbr/>Link<wbr/>Weight</span></a></li>
+<li><a href="../interfaces/CallableNodeSize.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Callable<wbr/>Node<wbr/>Size</span></a></li>
+<li><a href="../interfaces/CallableNodeWeight.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Callable<wbr/>Node<wbr/>Weight</span></a></li>
+<li><a href="../interfaces/CallableSimplexWeight.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Callable<wbr/>Simplex<wbr/>Weight</span></a></li>
+<li><a href="../interfaces/Children.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Children</span></a></li>
+<li><a href="../interfaces/ChildrenData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Children<wbr/>Data</span></a></li>
+<li><a href="../interfaces/Connect.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Connect</span></a></li>
+<li><a href="../interfaces/ConnectOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Connect<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/Coord.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord</span></a></li>
+<li><a href="../interfaces/CoordCenter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Center</span></a></li>
+<li><a href="../interfaces/CoordGreedy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Greedy</span></a></li>
+<li><a href="../interfaces/CoordQuad.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Quad</span></a></li>
+<li><a href="../interfaces/CoordQuadOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Quad<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/CoordSimplex.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Simplex</span></a></li>
+<li><a href="../interfaces/CoordSimplexOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Simplex<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/CoordTopological.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coord<wbr/>Topological</span></a></li>
+<li><a href="../interfaces/Decross.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Decross</span></a></li>
+<li><a href="../interfaces/DecrossDfs.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Decross<wbr/>Dfs</span></a></li>
+<li><a href="../interfaces/DecrossOpt.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Decross<wbr/>Opt</span></a></li>
+<li><a href="../interfaces/DecrossTwoLayer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Decross<wbr/>Two<wbr/>Layer</span></a></li>
+<li><a href="../interfaces/DecrossTwoLayerOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Decross<wbr/>Two<wbr/>Layer<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/Graph.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Graph</span></a></li>
+<li><a href="../interfaces/GraphLink.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Graph<wbr/>Link</span></a></li>
+<li><a href="../interfaces/GraphNode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Graph<wbr/>Node</span></a></li>
+<li><a href="../interfaces/Grid.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Grid</span></a></li>
+<li><a href="../interfaces/GridOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Grid<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/Group.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Group</span></a></li>
+<li><a href="../interfaces/HasChildren.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Has<wbr/>Children</span></a></li>
+<li><a href="../interfaces/HasId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Has<wbr/>Id</span></a></li>
+<li><a href="../interfaces/HasOneString.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Has<wbr/>One<wbr/>String</span></a></li>
+<li><a href="../interfaces/HasParentIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Has<wbr/>Parent<wbr/>Ids</span></a></li>
+<li><a href="../interfaces/HasZeroString.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Has<wbr/>Zero<wbr/>String</span></a></li>
+<li><a href="../interfaces/Hierarchy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Hierarchy</span></a></li>
+<li><a href="../interfaces/Hydrator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Hydrator</span></a></li>
+<li><a href="../interfaces/Id.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Id</span></a></li>
+<li><a href="../interfaces/IdNodeDatum.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Id<wbr/>Node<wbr/>Datum</span></a></li>
+<li><a href="../interfaces/Json.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Json</span></a></li>
+<li><a href="../interfaces/JsonOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Json<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/Lane.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Lane</span></a></li>
+<li><a href="../interfaces/LaneGreedy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Lane<wbr/>Greedy</span></a></li>
+<li><a href="../interfaces/LaneOpt.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Lane<wbr/>Opt</span></a></li>
+<li><a href="../interfaces/Layering.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering</span></a></li>
+<li><a href="../interfaces/LayeringLongestPath.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering<wbr/>Longest<wbr/>Path</span></a></li>
+<li><a href="../interfaces/LayeringLongestPathOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering<wbr/>Longest<wbr/>Path<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/LayeringSimplex.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering<wbr/>Simplex</span></a></li>
+<li><a href="../interfaces/LayeringSimplexOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering<wbr/>Simplex<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/LayeringTopological.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering<wbr/>Topological</span></a></li>
+<li><a href="../interfaces/LayeringTopologicalOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layering<wbr/>Topological<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/LayoutResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Layout<wbr/>Result</span></a></li>
+<li><a href="../interfaces/MutGraph.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mut<wbr/>Graph</span></a></li>
+<li><a href="../interfaces/MutGraphLink.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mut<wbr/>Graph<wbr/>Link</span></a></li>
+<li><a href="../interfaces/MutGraphNode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Mut<wbr/>Graph<wbr/>Node</span></a></li>
+<li><a href="../interfaces/Named.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Named</span></a></li>
+<li><a href="../interfaces/NodeLength.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Node<wbr/>Length</span></a></li>
+<li><a href="../interfaces/ParentData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Parent<wbr/>Data</span></a></li>
+<li><a href="../interfaces/ParentIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Parent<wbr/>Ids</span></a></li>
+<li><a href="../interfaces/Rank.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Rank</span></a></li>
+<li><a href="../interfaces/Separation.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Separation</span></a></li>
+<li><a href="../interfaces/Shape.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Shape</span></a></li>
+<li><a href="../interfaces/Stratify.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Stratify</span></a></li>
+<li><a href="../interfaces/StratifyOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Stratify<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/SugiLinkDatum.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Sugi<wbr/>Link<wbr/>Datum</span></a></li>
+<li><a href="../interfaces/SugiNodeDatum.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Sugi<wbr/>Node<wbr/>Datum</span></a></li>
+<li><a href="../interfaces/Sugiyama.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Sugiyama</span></a></li>
+<li><a href="../interfaces/SugiyamaOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Sugiyama<wbr/>Ops</span></a></li>
+<li><a href="../interfaces/Tweak.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Tweak</span></a></li>
+<li><a href="../interfaces/Twolayer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Twolayer</span></a></li>
+<li><a href="../interfaces/TwolayerAgg.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Twolayer<wbr/>Agg</span></a></li>
+<li><a href="../interfaces/TwolayerGreedy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Twolayer<wbr/>Greedy</span></a></li>
+<li><a href="../interfaces/TwolayerOpt.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Twolayer<wbr/>Opt</span></a></li>
+<li><a href="../interfaces/WrappedChildren.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wrapped<wbr/>Children</span></a></li>
+<li><a href="../interfaces/WrappedChildrenData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wrapped<wbr/>Children<wbr/>Data</span></a></li>
+<li><a href="../interfaces/WrappedParentData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wrapped<wbr/>Parent<wbr/>Data</span></a></li>
+<li><a href="../interfaces/WrappedParentIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wrapped<wbr/>Parent<wbr/>Ids</span></a></li>
+<li><a href="../interfaces/Zherebko.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Zherebko</span></a></li>
+<li><a href="../interfaces/ZherebkoOps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Zherebko<wbr/>Ops</span></a></li>
+<li><a href="../types/DefaultConnect.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4194304"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-type-alias)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.31 16V8.224H8.91V7.24H14.79V8.224H12.39V16H11.31Z" fill="var(--color-text)"></path></g></svg><span>Default<wbr/>Connect</span></a></li>
+<li><a href="../types/DefaultCoordQuad.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Coord<wbr/>Quad</span></a></li>
+<li><a href="../types/DefaultCoordSimplex.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Coord<wbr/>Simplex</span></a></li>
+<li><a href="../types/DefaultDecrossTwoLayer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Decross<wbr/>Two<wbr/>Layer</span></a></li>
+<li><a href="../types/DefaultGrid.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Grid</span></a></li>
+<li><a href="../types/DefaultHierarchy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Hierarchy</span></a></li>
+<li><a href="../types/DefaultJson.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Json</span></a></li>
+<li><a href="../types/DefaultLayeringLongestPath.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Layering<wbr/>Longest<wbr/>Path</span></a></li>
+<li><a href="../types/DefaultLayeringSimplex.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Layering<wbr/>Simplex</span></a></li>
+<li><a href="../types/DefaultLayeringTopological.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Layering<wbr/>Topological</span></a></li>
+<li><a href="../types/DefaultStratify.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Stratify</span></a></li>
+<li><a href="../types/DefaultSugiyama.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Sugiyama</span></a></li>
+<li><a href="../types/DefaultTwolayerGreedy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Twolayer<wbr/>Greedy</span></a></li>
+<li><a href="../types/DefaultZherebko.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Default<wbr/>Zherebko</span></a></li>
+<li><a href="../types/LinkWeight.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Link<wbr/>Weight</span></a></li>
+<li><a href="../types/NodeSize.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Node<wbr/>Size</span></a></li>
+<li><a href="../types/NodeWeight.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Node<wbr/>Weight</span></a></li>
+<li><a href="../types/OptChecking.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Opt<wbr/>Checking</span></a></li>
+<li><a href="../types/SimplexWeight.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Simplex<wbr/>Weight</span></a></li>
+<li><a href="../types/SugiDatum.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sugi<wbr/>Datum</span></a></li>
+<li><a href="../types/SugiNode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sugi<wbr/>Node</span></a></li>
+<li><a href="../types/SugiNodeLength.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sugi<wbr/>Node<wbr/>Length</span></a></li>
+<li><a href="../types/SugiSeparation.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sugi<wbr/>Separation</span></a></li>
+<li><a href="../types/U.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>U</span></a></li>
+<li><a href="aggMean.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-64"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)"></path></g></svg><span>agg<wbr/>Mean</span></a></li>
+<li><a href="aggMedian.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>agg<wbr/>Median</span></a></li>
+<li><a href="aggWeightedMedian.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>agg<wbr/>Weighted<wbr/>Median</span></a></li>
+<li><a href="cachedNodeSize.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>cached<wbr/>Node<wbr/>Size</span></a></li>
+<li><a href="coordCenter-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>coord<wbr/>Center</span></a></li>
+<li><a href="coordGreedy-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>coord<wbr/>Greedy</span></a></li>
+<li><a href="coordQuad-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>coord<wbr/>Quad</span></a></li>
+<li><a href="coordSimplex-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>coord<wbr/>Simplex</span></a></li>
+<li><a href="coordTopological-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>coord<wbr/>Topological</span></a></li>
+<li><a href="decrossDfs-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>decross<wbr/>Dfs</span></a></li>
+<li><a href="decrossOpt-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>decross<wbr/>Opt</span></a></li>
+<li><a href="decrossTwoLayer-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>decross<wbr/>Two<wbr/>Layer</span></a></li>
+<li><a href="graph-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>graph</span></a></li>
+<li><a href="graphConnect.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>graph<wbr/>Connect</span></a></li>
+<li><a href="graphHierarchy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>graph<wbr/>Hierarchy</span></a></li>
+<li><a href="graphJson.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>graph<wbr/>Json</span></a></li>
+<li><a href="graphStratify.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>graph<wbr/>Stratify</span></a></li>
+<li><a href="grid-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>grid</span></a></li>
+<li><a href="laneGreedy-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>lane<wbr/>Greedy</span></a></li>
+<li><a href="laneOpt-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>lane<wbr/>Opt</span></a></li>
+<li><a href="layerSeparation.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>layer<wbr/>Separation</span></a></li>
+<li><a href="layeringLongestPath-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>layering<wbr/>Longest<wbr/>Path</span></a></li>
+<li><a href="layeringSimplex-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>layering<wbr/>Simplex</span></a></li>
+<li><a href="layeringTopological-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>layering<wbr/>Topological</span></a></li>
+<li><a href="shapeEllipse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>shape<wbr/>Ellipse</span></a></li>
+<li><a href="shapeRect.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>shape<wbr/>Rect</span></a></li>
+<li><a href="sizedSeparation.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>sized<wbr/>Separation</span></a></li>
+<li><a href="splitNodeSize.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>split<wbr/>Node<wbr/>Size</span></a></li>
+<li><a href="sugiNodeLength-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>sugi<wbr/>Node<wbr/>Length</span></a></li>
+<li><a href="sugifyCompact.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>sugify<wbr/>Compact</span></a></li>
+<li><a href="sugifyLayer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>sugify<wbr/>Layer</span></a></li>
+<li><a href="sugiyama-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>sugiyama</span></a></li>
+<li><a href="tweakFlip.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>tweak<wbr/>Flip</span></a></li>
+<li><a href="tweakGrid.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>tweak<wbr/>Grid</span></a></li>
+<li><a href="tweakShape.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>tweak<wbr/>Shape</span></a></li>
+<li><a href="tweakSize.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>tweak<wbr/>Size</span></a></li>
+<li><a href="twolayerAgg-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>twolayer<wbr/>Agg</span></a></li>
+<li><a href="twolayerGreedy-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>twolayer<wbr/>Greedy</span></a></li>
+<li><a href="twolayerOpt-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>twolayer<wbr/>Opt</span></a></li>
+<li><a href="unsugify.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>unsugify</span></a></li>
+<li><a href="zherebko-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>zherebko</span></a></li></ul></nav></div></div></div>
+<div class="tsd-generator">
+<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
+<div class="overlay"></div></body></html>
