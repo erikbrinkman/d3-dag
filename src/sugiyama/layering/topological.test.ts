@@ -101,6 +101,6 @@ test("layeringTopological() works for cyclic graph", () => {
 test("layeringTopological() fails passing an arg to constructor", () => {
   // @ts-expect-error no args
   expect(() => layeringTopological(null)).toThrow(
-    "got arguments to layeringTopological"
+    "got arguments to layeringTopological",
   );
 });

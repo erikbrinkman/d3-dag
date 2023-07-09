@@ -17,7 +17,7 @@ function qp(
   c: number[],
   A: number[][],
   b: number[],
-  meq: number
+  meq: number,
 ): number[] {
   if (!c.length) {
     return [];
@@ -57,7 +57,7 @@ export function solve(
   c: number[],
   A: number[][],
   b: number[],
-  meq: number = 0
+  meq: number = 0,
 ): number[] {
   // Arbitrarily set the last coordinate to 0 (by removing it from the
   // equation), which makes the formula valid This is simpler than special
@@ -77,7 +77,7 @@ export function solve(
 
 /** compute indices used to index arrays */
 export function indices<N, L>(
-  layers: SugiNode<N, L>[][]
+  layers: SugiNode<N, L>[][],
 ): Map<SugiNode<N, L>, number> {
   const mapping = new Map<SugiNode<N, L>, number>();
   let i = 0;
@@ -96,7 +96,7 @@ export function init<N, L>(
   layers: SugiNode<N, L>[][],
   inds: Map<SugiNode, number>,
   sep: SugiSeparation<N, L>,
-  compress: number = 0
+  compress: number = 0,
 ): [number[][], number[], number[][], number[]] {
   // NOTE max because we might assign a node the same index
   const n = 1 + Math.max(...inds.values());
@@ -106,7 +106,7 @@ export function init<N, L>(
     .map((_, i) =>
       Array<null>(n)
         .fill(null)
-        .map((_, j) => (i === j ? compress : 0))
+        .map((_, j) => (i === j ? compress : 0)),
     );
   const c = Array<number>(n).fill(0);
   const A: number[][] = [];
@@ -132,7 +132,7 @@ export function minDist(
   Q: number[][],
   pind: number,
   cind: number,
-  coef: number
+  coef: number,
 ): void {
   Q[cind][cind] += coef;
   Q[cind][pind] -= coef;
@@ -151,7 +151,7 @@ export function minBend(
   nind: number,
   cind: number,
   pcoef: number,
-  ccoef: number
+  ccoef: number,
 ): void {
   const ncoef = pcoef + ccoef;
   Q[cind][cind] += ccoef * ccoef;
@@ -173,7 +173,7 @@ export function layout<N, L>(
   layers: SugiNode<N, L>[][],
   sep: SugiSeparation<N, L>,
   inds: Map<SugiNode, number>,
-  solution: number[]
+  solution: number[],
 ): number {
   // assign solution
   for (const [node, key] of inds) {
@@ -203,6 +203,6 @@ export function layout<N, L>(
 export function avgHeight(nodes: Iterable<GraphNode>): number {
   // NOTE graph is guaranteed not to be multi
   return aggMean(
-    flatMap(nodes, (node) => map(node.children(), (child) => child.y - node.y))
+    flatMap(nodes, (node) => map(node.children(), (child) => child.y - node.y)),
   )!;
 }

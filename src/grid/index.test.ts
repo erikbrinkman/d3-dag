@@ -101,7 +101,7 @@ test("grid() allows setting custom operators", () => {
 
   function tweakOne(
     grf: Graph<{ tweak: null }>,
-    res: LayoutResult
+    res: LayoutResult,
   ): LayoutResult {
     grf.nnodes();
     return res;
@@ -109,7 +109,7 @@ test("grid() allows setting custom operators", () => {
 
   function tweakTwo(
     grf: Graph<unknown, { tweak: null }>,
-    res: LayoutResult
+    res: LayoutResult,
   ): LayoutResult {
     grf.nnodes();
     return res;
@@ -247,7 +247,7 @@ test("grid() throws for invalid lane operators", () => {
   }
   const neg = grid().lane(negOp);
   expect(() => neg(orig)).toThrow(
-    "custom lane 'negOp' assigned an x less than 0: -1"
+    "custom lane 'negOp' assigned an x less than 0: -1",
   );
 
   function skipOp(ordered: readonly GraphNode[]) {
@@ -265,7 +265,7 @@ test("grid() throws for invalid lane operators", () => {
   }
   const invalid = grid().lane(invalidOp);
   expect(() => invalid(orig)).toThrow(
-    "custom lane 'invalidOp' assigned nodes to an overlapping lane: 0"
+    "custom lane 'invalidOp' assigned nodes to an overlapping lane: 0",
   );
 });
 

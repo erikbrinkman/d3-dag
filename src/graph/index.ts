@@ -119,7 +119,7 @@ export interface Graph<out NodeDatum = unknown, out LinkDatum = unknown> {
    * without a rank are unconstrained.
    */
   topological(
-    rank?: Rank<NodeDatum, LinkDatum>
+    rank?: Rank<NodeDatum, LinkDatum>,
   ): GraphNode<NodeDatum, LinkDatum>[];
 
   /**
@@ -261,7 +261,7 @@ export interface GraphNodeMixin<out NodeDatum, out LinkDatum> {
 
   /** iterator over every link from a specific node */
   parentLinksTo(
-    node: GraphNode<NodeDatum, LinkDatum>
+    node: GraphNode<NodeDatum, LinkDatum>,
   ): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 
   /** the number of links to a specific node */
@@ -269,7 +269,7 @@ export interface GraphNodeMixin<out NodeDatum, out LinkDatum> {
 
   /** iterator over every link to a specific node */
   childLinksTo(
-    node: GraphNode<NodeDatum, LinkDatum>
+    node: GraphNode<NodeDatum, LinkDatum>,
   ): IterableIterator<GraphLink<NodeDatum, LinkDatum>>;
 
   /** iterator over this node's unique parent nodes */
@@ -331,12 +331,12 @@ export interface MutGraphNode<in out NodeDatum, in out LinkDatum>
 
   /** {@inheritDoc GraphNode#parentLinksTo} */
   parentLinksTo(
-    node: GraphNode<NodeDatum, LinkDatum>
+    node: GraphNode<NodeDatum, LinkDatum>,
   ): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
 
   /** {@inheritDoc GraphNode#childLinksTo} */
   childLinksTo(
-    node: GraphNode<NodeDatum, LinkDatum>
+    node: GraphNode<NodeDatum, LinkDatum>,
   ): IterableIterator<MutGraphLink<NodeDatum, LinkDatum>>;
 
   /** {@inheritDoc GraphNode#parents} */
@@ -398,7 +398,7 @@ class AugmentedNode<out N, out L> {
       | "active"
       | "top"
       | "bottom"
-      | "inactive" = "inactive"
+      | "inactive" = "inactive",
   ) {}
 
   bucket(): number {
@@ -454,7 +454,7 @@ function getTail<T>(arr: Set<T>[]): Set<T> | undefined {
 // optimized.
 function topological<N, L>(
   nodes: Iterable<GraphNode<N, L>>,
-  ranker: Rank<N, L> = () => undefined
+  ranker: Rank<N, L> = () => undefined,
 ): GraphNode<N, L>[] {
   // initial setup
   const augmented = new Map<GraphNode<N, L>, AugmentedNode<N, L>>();
@@ -523,7 +523,7 @@ function topological<N, L>(
       // or nothing has a rank, in which indeg = outdeg guaranteeing something
       // non-negative
       return setPop(
-        topBuckets.length > bottomBuckets.length ? topNodes! : bottomNodes
+        topBuckets.length > bottomBuckets.length ? topNodes! : bottomNodes,
       );
     } else if (topNodes) {
       return setPop(topNodes);
@@ -587,12 +587,12 @@ function topological<N, L>(
 
 function acyclic<N, L>(nodes: Iterable<GraphNode<N, L>>): boolean {
   const counts = new Map(
-    map(nodes, (node) => [node, node.nparents()] as const)
+    map(nodes, (node) => [node, node.nparents()] as const),
   );
   const queue = [
     ...map(
       filter(counts, ([, pars]) => pars === 0),
-      ([node]) => node
+      ([node]) => node,
     ),
   ];
   for (const node of queue) {
@@ -704,14 +704,14 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
       this.#deleteNode,
       this.#addLink,
       this.#deleteLink,
-      datum! // NOTE hack that allows us to call with missing undefined data
+      datum!, // NOTE hack that allows us to call with missing undefined data
     );
   }
 
   link(
     source: MutGraphNode<N, L>,
     target: MutGraphNode<N, L>,
-    datum?: L
+    datum?: L,
   ): MutGraphLink<N, L> {
     return source.link(source, target, datum!);
   }
@@ -744,7 +744,7 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
 }
 
 function multimapValuesNext<V>(
-  multimap: Map<unknown, Iterable<V>>
+  multimap: Map<unknown, Iterable<V>>,
 ): V | undefined {
   for (const iters of multimap.values()) {
     for (const ret of iters) {
@@ -754,7 +754,7 @@ function multimapValuesNext<V>(
 }
 
 function isDirectedNode<N, L>(
-  node: GraphNode<N, L>
+  node: GraphNode<N, L>,
 ): node is DirectedNode<N, L> {
   return node instanceof DirectedNode;
 }
@@ -823,7 +823,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
     deleteNode: () => void,
     addLink: (multi: boolean, connecting: boolean) => void,
     deleteLink: (multi: boolean) => void,
-    public data: N
+    public data: N,
   ) {
     this.#graph = graph;
     this.#components = components;
@@ -910,7 +910,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   nodes(): IterableIterator<DirectedNode<N, L>> {
     return dfs(
       (n: DirectedNode<N, L>) => chain(n.children(), n.parents()),
-      this
+      this,
     );
   }
 
@@ -967,7 +967,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   link(
     source: MutGraphNode<N, L>,
     target: MutGraphNode<N, L>,
-    datum?: L
+    datum?: L,
   ): MutGraphLink<N, L> {
     if (!this.#graph) {
       throw err`can't add a link from a deleted node`;
@@ -984,7 +984,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
         source,
         target,
         this.#deleteLink,
-        datum! // NOTE hack for missing undefined
+        datum!, // NOTE hack for missing undefined
       );
       const multi = source.nchildLinksTo(target) > 0;
       const srepr = source.#repr();
@@ -1152,7 +1152,7 @@ class DirectedLink<N, L> implements MutGraphLink<N, L> {
     readonly source: DirectedNode<N, L>,
     readonly target: DirectedNode<N, L>,
     deleteLink: (link: DirectedLink<N, L>) => void,
-    public data: L
+    public data: L,
   ) {
     this.#graph = graph;
     this.#deleteLink = deleteLink;

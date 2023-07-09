@@ -7,7 +7,7 @@ import { Lane } from "./index";
 /** the effective children for grid layouts */
 export function gridChildren(node: GraphNode): Set<GraphNode> {
   return new Set(
-    filter(chain(node.children(), node.parents()), (other) => other.y > node.y)
+    filter(chain(node.children(), node.parents()), (other) => other.y > node.y),
   );
 }
 

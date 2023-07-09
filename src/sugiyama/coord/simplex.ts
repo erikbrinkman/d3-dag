@@ -83,7 +83,7 @@ export interface CoordSimplex<Ops extends CoordSimplexOps>
    * (default: `[1, 2, 8]`)
    */
   weight<NewWeight extends SimplexWeight>(
-    val: NewWeight
+    val: NewWeight,
   ): CoordSimplex<{
     /** new weight */
     weight: NewWeight;
@@ -109,7 +109,7 @@ function validateWeights([two, one, zero]: readonly [number, number, number]) {
  */
 function createCachedSimplexWeightAccessor<N, L>(
   layers: readonly SugiNode<N, L>[][],
-  weight: SimplexWeight<N, L>
+  weight: SimplexWeight<N, L>,
 ): (par: SugiNode<N, L>, child: SugiNode<N, L>) => number {
   if (typeof weight !== "function") {
     const [two, one, zero] = weight;
@@ -174,11 +174,11 @@ function createCachedSimplexWeightAccessor<N, L>(
 function buildOperator<
   NodeDatum,
   LinkDatum,
-  Ops extends CoordSimplexOps<NodeDatum, LinkDatum>
+  Ops extends CoordSimplexOps<NodeDatum, LinkDatum>,
 >(opts: Ops & CoordSimplexOps<NodeDatum, LinkDatum>): CoordSimplex<Ops> {
   function coordSimplex<N extends NodeDatum, L extends LinkDatum>(
     layers: SugiNode<N, L>[][],
-    sep: SugiSeparation<N, L>
+    sep: SugiSeparation<N, L>,
   ): number {
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
@@ -275,13 +275,13 @@ function buildOperator<
   }
 
   function weight<NewWeight extends SimplexWeight>(
-    val: NewWeight
+    val: NewWeight,
   ): CoordSimplex<{
     weight: NewWeight;
   }>;
   function weight(): Ops["weight"];
   function weight<NewWeight extends SimplexWeight>(
-    val?: NewWeight
+    val?: NewWeight,
   ):
     | CoordSimplex<{
         weight: NewWeight;

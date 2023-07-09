@@ -67,5 +67,5 @@ await Promise.all(files.map((file) => transpile(rootCache, file)));
 await saveCache(rootCache);
 const totalEnd = performance.now();
 console.log(
-  `finished flow transpiling in ${(totalEnd - totalStart).toFixed(1)}ms`
+  `finished flow transpiling in ${(totalEnd - totalStart).toFixed(1)}ms`,
 );

@@ -17,19 +17,19 @@ async function wrapper(options) {
   const { dir, base } = parse(outfile);
   console.log(
     chalk.white(`\n  ${dir}/`) + chalk.bold(`${base}`),
-    chalk.cyan(` ${(size / 1024).toFixed(1)}kb`)
+    chalk.cyan(` ${(size / 1024).toFixed(1)}kb`),
   );
   return res;
 }
 
 // read package.json and dat to get info for preamble
 const pkg = await new Promise((res, rej) =>
-  readPackageJson("./package.json", (err, dat) => (err ? rej(err) : res(dat)))
+  readPackageJson("./package.json", (err, dat) => (err ? rej(err) : res(dat))),
 );
 const config = {
   entryPoints: ["src/index.ts"],
   tsconfig: "tsconfig.build.json",
-  target: "es6",  // needs to be defined despite tsconfig
+  target: "es6", // needs to be defined despite tsconfig
   bundle: true,
   minify: true,
   plugins: [

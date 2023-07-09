@@ -10,7 +10,7 @@ test("cachedNodeSize() const", () => {
 
 test("cachedNodeSize() const error", () => {
   expect(() => cachedNodeSize([0, 1])).toThrow(
-    "all node sizes must be positive"
+    "all node sizes must be positive",
   );
 });
 

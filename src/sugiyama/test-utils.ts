@@ -53,7 +53,7 @@ export interface TestDatum {
 }
 
 export function createLayers(
-  children: (number[] | number | bigint)[][]
+  children: (number[] | number | bigint)[][],
 ): SugiNode<TestDatum, undefined>[][] {
   // easy checks
   assert(children.length);
@@ -68,8 +68,8 @@ export function createLayers(
   const sugi = graph<MutSugiDatum<TestDatum, undefined>, undefined>();
   const layers = children.map((layer) =>
     Array<MutGraphNode<MutSugiDatum<TestDatum, undefined>, undefined>>(
-      layer.length
-    )
+      layer.length,
+    ),
   );
 
   // create original nodes and corresponding sugi nodes
@@ -151,7 +151,7 @@ export function createLayers(
 /** return true if there are any compact crossings */
 export function compactCrossings(
   topLayer: readonly SugiNode[],
-  bottomLayer: readonly SugiNode[]
+  bottomLayer: readonly SugiNode[],
 ): boolean {
   // compute partition of compact and non-compact nodes
   const bottomInds = new Map(map(bottomLayer, (node, i) => [node, i]));

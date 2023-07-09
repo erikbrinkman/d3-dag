@@ -72,7 +72,7 @@ export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
    * ```
    */
   sourceId<NewId extends Id>(
-    id: NewId
+    id: NewId,
   ): Connect<NodeDatum, U<Ops, "sourceId", NewId>>;
   /** Gets the current sourceId accessor. */
   sourceId(): Ops["sourceId"];
@@ -89,7 +89,7 @@ export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
    * ```
    */
   targetId<NewId extends Id>(
-    id: NewId
+    id: NewId,
   ): Connect<NodeDatum, U<Ops, "targetId", NewId>>;
   /** Gets the current targetId accessor. */
   targetId(): Ops["targetId"];
@@ -107,7 +107,7 @@ export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
    * ```
    */
   nodeDatum<NewNodeDatum, NewNodeDatumOp extends IdNodeDatum<NewNodeDatum>>(
-    data: NewNodeDatumOp & IdNodeDatum<NewNodeDatum>
+    data: NewNodeDatumOp & IdNodeDatum<NewNodeDatum>,
   ): Connect<NewNodeDatum, U<Ops, "nodeDatum", NewNodeDatumOp>>;
   /** Get the current id node datum operator */
   nodeDatum(): Ops["nodeDatum"];
@@ -129,7 +129,7 @@ export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
 }
 
 function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
-  operators: Ops & ConnectOps<N, LinkDatum> & { single: boolean }
+  operators: Ops & ConnectOps<N, LinkDatum> & { single: boolean },
 ): Connect<N, Ops> {
   function connect<L extends LinkDatum>(data: readonly L[]): MutGraph<N, L> {
     const connected = graph<N, L>();
@@ -161,7 +161,7 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
   function sourceId(): Ops["sourceId"];
   function sourceId<NI extends Id>(id: NI): Connect<N, U<Ops, "sourceId", NI>>;
   function sourceId<NI extends Id>(
-    id?: NI
+    id?: NI,
   ): Ops["sourceId"] | Connect<N, U<Ops, "sourceId", NI>> {
     if (id === undefined) {
       return operators.sourceId;
@@ -175,7 +175,7 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
   function targetId(): Ops["targetId"];
   function targetId<NI extends Id>(id: NI): Connect<N, U<Ops, "targetId", NI>>;
   function targetId<NI extends Id>(
-    id?: NI
+    id?: NI,
   ): Ops["targetId"] | Connect<N, U<Ops, "targetId", NI>> {
     if (id === undefined) {
       return operators.targetId;
@@ -188,10 +188,10 @@ function buildConnect<N, LinkDatum, Ops extends ConnectOps<N, LinkDatum>>(
 
   function nodeDatum(): Ops["nodeDatum"];
   function nodeDatum<NN, ND extends IdNodeDatum<NN>>(
-    id: ND
+    id: ND,
   ): Connect<NN, U<Ops, "nodeDatum", ND>>;
   function nodeDatum<NN, ND extends IdNodeDatum<NN>>(
-    id?: ND
+    id?: ND,
   ): Ops["nodeDatum"] | Connect<NN, U<Ops, "nodeDatum", ND>> {
     if (id === undefined) {
       return operators.nodeDatum;

@@ -185,7 +185,7 @@ test("sugiyama() allows changing nodeSize and gap", () => {
 test("sugiyama() allows changing operators", () => {
   const dag = dummy();
   const layering: Layering<string, unknown> = <N extends string, L>(
-    dag: Graph<N, L>
+    dag: Graph<N, L>,
   ): number => {
     const ordered = canonical(dag);
     for (const [i, node] of ordered.entries()) {
@@ -247,7 +247,7 @@ test("sugiyama() throws with noop layering", () => {
   const dag = dummy();
   const layout = sugiyama().layering(noop);
   expect(() => layout(dag)).toThrow(
-    "custom layering 'noop' didn't assign a layer to a node"
+    "custom layering 'noop' didn't assign a layer to a node",
   );
 });
 
@@ -264,7 +264,7 @@ test("sugiyama() throws with invalid layers", () => {
 
   const layout = sugiyama().layering(layering);
   expect(() => layout(dag)).toThrow(
-    `custom layering 'layering' assigned node an invalid layer: -1`
+    `custom layering 'layering' assigned node an invalid layer: -1`,
   );
 });
 
@@ -281,7 +281,7 @@ test("sugiyama() throws with flat layering", () => {
 
   const layout = sugiyama().layering(layering);
   expect(() => layout(dag)).toThrow(
-    "custom layering 'layering' assigned nodes with an edge to the same layer"
+    "custom layering 'layering' assigned nodes with an edge to the same layer",
   );
 });
 
@@ -290,7 +290,7 @@ test("sugiyama() throws with noop coord", () => {
   const coord: Coord<unknown, unknown> = () => 1;
   const layout = sugiyama().coord(coord);
   expect(() => layout(dag)).toThrow(
-    "custom coord 'coord' didn't assign an x to every node"
+    "custom coord 'coord' didn't assign an x to every node",
   );
 });
 
@@ -305,7 +305,7 @@ test("sugiyama() throws with large coord width", () => {
     return 1; // 1 < 2
   });
   expect(() => layout(dag)).toThrow(
-    "custom coord 'anonymous' assigned nodes too close for separation"
+    "custom coord 'anonymous' assigned nodes too close for separation",
   );
 });
 
@@ -320,21 +320,21 @@ test("sugiyama() throws with negative width", () => {
     return 1;
   });
   expect(() => layout(dag)).toThrow(
-    "custom coord 'anonymous' assigned nodes too close for separation"
+    "custom coord 'anonymous' assigned nodes too close for separation",
   );
 });
 
 test("sugiyama() throws with non-positive const node width", () => {
   const layout = sugiyama();
   expect(() => layout.nodeSize([0, 1])).toThrow(
-    "constant nodeSize must be positive, but got: [0, 1]"
+    "constant nodeSize must be positive, but got: [0, 1]",
   );
 });
 
 test("sugiyama() throws with non-positive const node height", () => {
   const layout = sugiyama();
   expect(() => layout.nodeSize([1, 0])).toThrow(
-    "constant nodeSize must be positive, but got: [1, 0]"
+    "constant nodeSize must be positive, but got: [1, 0]",
   );
 });
 
@@ -353,7 +353,7 @@ test("sugiyama() throws with zero node height", () => {
 test("sugiyama() throws with negative gap width", () => {
   const layout = sugiyama();
   expect(() => layout.gap([-1, 1])).toThrow(
-    "gap width (-1) and height (1) must be non-negative"
+    "gap width (-1) and height (1) must be non-negative",
   );
 });
 

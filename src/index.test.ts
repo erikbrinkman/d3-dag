@@ -71,7 +71,7 @@ test("graph()", () => {
   expect(link.data).toBe("0");
 
   const rnk: Rank<string, string> = (
-    node: GraphNode<string, string>
+    node: GraphNode<string, string>,
   ): number | undefined => {
     if (node.data === "a") {
       return 1;
@@ -199,7 +199,7 @@ test("sugiyama.decross()", () => {
   const twolayer: Twolayer<string, number> = (
     topLayer: SugiNode<string, number>[],
     bottomLayer: SugiNode<string, number>[],
-    topDown: boolean
+    topDown: boolean,
   ) => {
     if (topDown) {
       bottomLayer.reverse();
@@ -208,7 +208,7 @@ test("sugiyama.decross()", () => {
     }
   };
   const decross: Decross<string, number> = (
-    layers: SugiNode<string, number>[][]
+    layers: SugiNode<string, number>[][],
   ) => {
     for (const layer of layers) {
       layer.reverse();
@@ -226,10 +226,10 @@ test("sugiyama.decross()", () => {
             .aggregator(maxAgg)
             .aggregator(aggWeightedMedian)
             .aggregator(aggMedian)
-            .aggregator(aggMean)
+            .aggregator(aggMean),
         )
         .order(twolayerOpt())
-        .order(twolayerGreedy())
+        .order(twolayerGreedy()),
     );
   const { width, height } = layout(dag);
   expect(width).toBeGreaterThanOrEqual(0);
@@ -255,7 +255,7 @@ test("sugiyama.coord()", () => {
     return [1, 2, data * 8];
   };
   const coord: Coord<string, number> = (
-    layers: SugiNode<string, number>[][]
+    layers: SugiNode<string, number>[][],
   ) => {
     for (const layer of layers) {
       for (const node of layer) {
@@ -315,7 +315,7 @@ test("manual sugiyama() layered", () => {
     yLen,
     yGap,
     numLayers + 1,
-    layering
+    layering,
   );
   decross(layers);
   const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
@@ -361,7 +361,7 @@ test("grid()", () => {
     return isNaN(res) ? undefined : res;
   };
   const lane: Lane<string, number> = (
-    ordered: readonly GraphNode<string, number>[]
+    ordered: readonly GraphNode<string, number>[],
   ) => {
     for (const node of ordered) {
       node.x = 0;

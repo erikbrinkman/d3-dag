@@ -41,12 +41,12 @@ export interface Tweak<in N = never, in L = never> {
  * The x and y coordinates of everything are rescaled to fit within the specified size.
  */
 export function tweakSize(
-  size: Readonly<LayoutResult>
+  size: Readonly<LayoutResult>,
 ): Tweak<unknown, unknown> {
   const { width: nw, height: nh } = size;
   function tweakSize(
     graph: Graph<unknown, unknown>,
-    res: Readonly<LayoutResult>
+    res: Readonly<LayoutResult>,
   ): LayoutResult {
     const { width: ow, height: oh } = res;
     const xscale = nw / ow;
@@ -78,12 +78,12 @@ export function tweakSize(
  * rounding should be set somewhere between 0 and nodeSize.
  */
 export function tweakGrid(
-  rounding: readonly [number, number]
+  rounding: readonly [number, number],
 ): Tweak<unknown, unknown> {
   const [xt, yt] = rounding;
   function tweakGrid(
     graph: Graph<unknown, unknown>,
-    res: Readonly<LayoutResult>
+    res: Readonly<LayoutResult>,
   ): LayoutResult {
     for (const link of graph.links()) {
       const [first, mid, last, rem] = link.points;
@@ -109,7 +109,7 @@ export function tweakGrid(
 
 function tweakFlipDiag(
   graph: Graph<unknown, unknown>,
-  res: Readonly<LayoutResult>
+  res: Readonly<LayoutResult>,
 ): LayoutResult {
   for (const node of graph.nodes()) {
     const temp = node.x;
@@ -130,7 +130,7 @@ function tweakFlipDiag(
 
 function tweakFlipVert(
   graph: Graph<unknown, unknown>,
-  res: Readonly<LayoutResult>
+  res: Readonly<LayoutResult>,
 ): LayoutResult {
   const { height } = res;
   for (const node of graph.nodes()) {
@@ -147,7 +147,7 @@ function tweakFlipVert(
 
 function tweakFlipHoriz(
   graph: Graph<unknown, unknown>,
-  res: Readonly<LayoutResult>
+  res: Readonly<LayoutResult>,
 ): LayoutResult {
   const { width } = res;
   for (const node of graph.nodes()) {
@@ -170,7 +170,7 @@ function tweakFlipHoriz(
  * - `vertical` : inverts y
  */
 export function tweakFlip(
-  style: "diagonal" | "horizontal" | "vertical" = "diagonal"
+  style: "diagonal" | "horizontal" | "vertical" = "diagonal",
 ): Tweak<unknown, unknown> {
   if (style === "diagonal") {
     return tweakFlipDiag;
@@ -209,7 +209,7 @@ export interface Shape {
     center: readonly [number, number],
     nodeSize: readonly [number, number],
     start: readonly [number, number],
-    end: readonly [number, number]
+    end: readonly [number, number],
   ): [number, number];
 }
 
@@ -229,7 +229,7 @@ export function shapeRect(
   center: readonly [number, number],
   nodeSize: readonly [number, number],
   start: readonly [number, number],
-  end: readonly [number, number]
+  end: readonly [number, number],
 ): [number, number] {
   const [cx, cy] = center;
   const [width, height] = nodeSize;
@@ -299,7 +299,7 @@ export function shapeEllipse(
   center: readonly [number, number],
   nodeSize: readonly [number, number],
   start: readonly [number, number],
-  end: readonly [number, number]
+  end: readonly [number, number],
 ): [number, number] {
   const [cx, cy] = center;
   const [width, height] = nodeSize;
@@ -355,11 +355,11 @@ export function shapeEllipse(
  */
 export function tweakShape<N, L>(
   nodeSize: NodeSize<N, L>,
-  shape: Shape = shapeRect
+  shape: Shape = shapeRect,
 ): Tweak<N, L> {
   function tweakShape(
     graph: Graph<N, L>,
-    res: Readonly<LayoutResult>
+    res: Readonly<LayoutResult>,
   ): LayoutResult {
     for (const node of graph.nodes()) {
       const center = [node.x, node.y] as const;
@@ -387,7 +387,7 @@ function clipPoint(
   [sx, sy]: readonly [number, number],
   [ex, ey]: readonly [number, number],
   y: number,
-  [sr, er]: readonly [number, number]
+  [sr, er]: readonly [number, number],
 ): number {
   const dy = ey - sy;
   const mx = (dy === 0 ? 0 : ((y - sy) / dy) * (ex - sx)) + sx;
@@ -398,7 +398,7 @@ function findClip(
   p1: readonly [number, number],
   p2: readonly [number, number],
   ys: readonly number[],
-  xrange: readonly [number, number]
+  xrange: readonly [number, number],
 ): undefined | [number, number] {
   // ensure p2 has higher y
   if (p1[1] > p2[1]) {
@@ -429,7 +429,7 @@ export function tweakSugiyama<N, L>(nodeSize: NodeSize<N, L>): Tweak<N, L> {
 
   function tweakSugiyama(
     graph: Graph<N, L>,
-    res: Readonly<LayoutResult>
+    res: Readonly<LayoutResult>,
   ): LayoutResult {
     // NOTE we compute this per link instead of per node so that the first
     // modification doesn't affect the second for two-point nodes

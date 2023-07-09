@@ -116,7 +116,7 @@ function deserialize<N, L>(
   links: readonly SerializedLink[],
   index: number | undefined,
   hnode: Hydrator<N>,
-  hlink: Hydrator<L>
+  hlink: Hydrator<L>,
 ): MutGraph<N, L> {
   const res = graph<N, L>();
   // deserialize nodes
@@ -160,7 +160,7 @@ export interface JsonOps<out N = unknown, out L = unknown> {
 export interface Json<
   NodeDatum,
   LinkDatum,
-  Ops extends JsonOps<NodeDatum, LinkDatum>
+  Ops extends JsonOps<NodeDatum, LinkDatum>,
 > {
   /**
    * deserialize parsed json as a graph
@@ -202,7 +202,7 @@ export interface Json<
    * ```
    */
   nodeDatum<NN, NewNode extends Hydrator<NN>>(
-    val: NewNode & Hydrator<NN>
+    val: NewNode & Hydrator<NN>,
   ): Json<NN, LinkDatum, U<Ops, "nodeDatum", NewNode>>;
   /** get the node data hydrator */
   nodeDatum(): Ops["nodeDatum"];
@@ -214,7 +214,7 @@ export interface Json<
    * like.
    */
   linkDatum<NL, NewLink extends Hydrator<NL>>(
-    val: NewLink & Hydrator<NL>
+    val: NewLink & Hydrator<NL>,
   ): Json<NodeDatum, NL, U<Ops, "linkDatum", NewLink>>;
   /** get the link data hydrator */
   linkDatum(): Ops["linkDatum"];
@@ -224,7 +224,7 @@ export interface Json<
 }
 
 function buildOperator<N, L, O extends JsonOps<N, L>>(
-  ops: O & JsonOps<N, L>
+  ops: O & JsonOps<N, L>,
 ): Json<N, L, O> {
   function graphJson(parsedJson: unknown): MutGraph<N, L> {
     if (typeof parsedJson !== "object" || parsedJson === null) {
@@ -248,10 +248,10 @@ function buildOperator<N, L, O extends JsonOps<N, L>>(
 
   function nodeDatum(): O["nodeDatum"];
   function nodeDatum<NN, NH extends Hydrator<NN>>(
-    val: NH
+    val: NH,
   ): Json<NN, L, U<O, "nodeDatum", NH>>;
   function nodeDatum<NN, NH extends Hydrator<NN>>(
-    val?: NH
+    val?: NH,
   ): O["nodeDatum"] | Json<NN, L, U<O, "nodeDatum", NH>> {
     if (val === undefined) {
       return ops.nodeDatum;
@@ -264,10 +264,10 @@ function buildOperator<N, L, O extends JsonOps<N, L>>(
 
   function linkDatum(): O["linkDatum"];
   function linkDatum<NL, NH extends Hydrator<NL>>(
-    val: NH
+    val: NH,
   ): Json<N, NL, U<O, "linkDatum", NH>>;
   function linkDatum<NL, NH extends Hydrator<NL>>(
-    val?: NH
+    val?: NH,
   ): O["linkDatum"] | Json<N, NL, U<O, "linkDatum", NH>> {
     if (val === undefined) {
       return ops.linkDatum;

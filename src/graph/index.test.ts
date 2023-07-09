@@ -679,18 +679,18 @@ test("random modifications", () => {
     expect(grf.nlinks()).toBe(links.length);
     expect(grf.nnodes()).toBe(length(grf.nodes()));
     expect(grf.nlinks()).toBe(
-      reduce(grf.nodes(), (t, n) => t + n.nchildLinks(), 0)
+      reduce(grf.nodes(), (t, n) => t + n.nchildLinks(), 0),
     );
     expect(grf.nlinks()).toBe(
-      reduce(grf.nodes(), (t, n) => t + n.nparentLinks(), 0)
+      reduce(grf.nodes(), (t, n) => t + n.nparentLinks(), 0),
     );
     const [first] = grf.nodes();
     expect(grf.connected()).toBe((first?.nnodes() ?? 0) === grf.nnodes());
     expect(grf.multi()).toBe(
-      some(grf.nodes(), (n) => some(n.childCounts(), ([, c]) => c > 1))
+      some(grf.nodes(), (n) => some(n.childCounts(), ([, c]) => c > 1)),
     );
     expect(grf.multi()).toBe(
-      some(grf.nodes(), (n) => some(n.parentCounts(), ([, c]) => c > 1))
+      some(grf.nodes(), (n) => some(n.parentCounts(), ([, c]) => c > 1)),
     );
     const expected = acyclic(grf.topological());
     expect(grf.acyclic()).toBe(expected);
@@ -702,16 +702,16 @@ test("random modifications", () => {
     for (const comp of grf.split()) {
       expect(comp.nnodes()).toBe(length(comp.nodes()));
       expect(comp.nlinks()).toBe(
-        reduce(comp.nodes(), (t, n) => t + n.nchildLinks(), 0)
+        reduce(comp.nodes(), (t, n) => t + n.nchildLinks(), 0),
       );
       expect(comp.nlinks()).toBe(
-        reduce(comp.nodes(), (t, n) => t + n.nparentLinks(), 0)
+        reduce(comp.nodes(), (t, n) => t + n.nparentLinks(), 0),
       );
       expect(comp.multi()).toBe(
-        some(comp.nodes(), (n) => some(n.childCounts(), ([, c]) => c > 1))
+        some(comp.nodes(), (n) => some(n.childCounts(), ([, c]) => c > 1)),
       );
       expect(comp.multi()).toBe(
-        some(comp.nodes(), (n) => some(n.parentCounts(), ([, c]) => c > 1))
+        some(comp.nodes(), (n) => some(n.parentCounts(), ([, c]) => c > 1)),
       );
       expect(comp.acyclic()).toBe(acyclic(comp.topological()));
       tnodes += comp.nnodes();

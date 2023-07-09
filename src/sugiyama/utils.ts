@@ -24,7 +24,7 @@ export interface Separation<in NodeDatum = never, in LinkDatum = never> {
    */
   (
     first: GraphNode<NodeDatum, LinkDatum> | undefined,
-    second: GraphNode<NodeDatum, LinkDatum> | undefined
+    second: GraphNode<NodeDatum, LinkDatum> | undefined,
   ): number;
 }
 
@@ -36,11 +36,11 @@ export interface Separation<in NodeDatum = never, in LinkDatum = never> {
  */
 export function sizedSeparation<NodeDatum, LinkDatum>(
   len: NodeLength<NodeDatum, LinkDatum>,
-  gap: number
+  gap: number,
 ): Separation<NodeDatum, LinkDatum> {
   function sizedSeparation(
     left: GraphNode<NodeDatum, LinkDatum> | undefined,
-    right: GraphNode<NodeDatum, LinkDatum> | undefined
+    right: GraphNode<NodeDatum, LinkDatum> | undefined,
   ): number {
     const llen = left ? len(left) : 0;
     const rlen = right ? len(right) : 0;

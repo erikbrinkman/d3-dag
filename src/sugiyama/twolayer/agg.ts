@@ -56,7 +56,7 @@ export function aggMedian(indices: Iterable<number>): number | undefined {
  * slightly more computation time.
  */
 export function aggWeightedMedian(
-  indices: Iterable<number>
+  indices: Iterable<number>,
 ): number | undefined {
   const vals = [...indices];
   vals.sort((a, b) => a - b);
@@ -141,7 +141,7 @@ export interface TwolayerAgg<Agg extends Aggregator = Aggregator>
  */
 function order(
   layer: SugiNode[],
-  poses: Map<SugiNode, number | undefined>
+  poses: Map<SugiNode, number | undefined>,
 ): void {
   // first group by number and preserve order, this makes ties resolve to the
   // same order as layer
@@ -167,7 +167,7 @@ function order(
     ustart: number,
     uend: number,
     ostart: number,
-    oend: number
+    oend: number,
   ): void {
     if (uend <= ustart) return;
     const umid = Math.floor((ustart + uend) / 2);
@@ -212,7 +212,7 @@ function buildOperator<Agg extends Aggregator>({
   function twolayerAgg(
     topLayer: SugiNode[],
     bottomLayer: SugiNode[],
-    topDown: boolean
+    topDown: boolean,
   ): void {
     const [reordered, reference] = topDown
       ? [bottomLayer, topLayer]
@@ -228,18 +228,18 @@ function buildOperator<Agg extends Aggregator>({
         const ind = inds.get(node);
         const agg = ind ?? aggregate(map(ancestors(node), (c) => inds.get(c)!));
         return [node, agg] as const;
-      })
+      }),
     );
 
     order(reordered, aggs);
   }
 
   function aggregator<NewAgg extends Aggregator>(
-    val: NewAgg
+    val: NewAgg,
   ): TwolayerAgg<NewAgg>;
   function aggregator(): Agg;
   function aggregator<NewAgg extends Aggregator>(
-    val?: NewAgg
+    val?: NewAgg,
   ): Agg | TwolayerAgg<NewAgg> {
     if (val === undefined) {
       return aggregate;

@@ -30,7 +30,7 @@ export interface DecrossTwoLayerOps<N = never, L = never> {
  * different {@link inits}, or the number of {@link passes}.
  */
 export interface DecrossTwoLayer<
-  Ops extends DecrossTwoLayerOps = DecrossTwoLayerOps
+  Ops extends DecrossTwoLayerOps = DecrossTwoLayerOps,
 > extends Decross<
     Ops extends DecrossTwoLayerOps<infer N, never> ? N : never,
     Ops extends DecrossTwoLayerOps<never, infer L> ? L : never
@@ -57,7 +57,7 @@ export interface DecrossTwoLayer<
    * (default: {@link twolayerGreedy})
    */
   order<NewOrder extends Twolayer>(
-    val: NewOrder
+    val: NewOrder,
   ): DecrossTwoLayer<U<Ops, "order", NewOrder>>;
   /**
    * get the current {@link Twolayer} for ordering
@@ -75,7 +75,7 @@ export interface DecrossTwoLayer<
    * (default: `[decrossDfs(), decrossDfs().topDown(false)]`)
    */
   inits<const NewInits extends readonly Decross[]>(
-    val: NewInits
+    val: NewInits,
   ): DecrossTwoLayer<U<Ops, "inits", NewInits>>;
   /**
    * get the current initialization passes
@@ -104,7 +104,7 @@ function buildOperator<N, L, O extends DecrossTwoLayerOps<N, L>>(
   options: O &
     DecrossTwoLayerOps<N, L> & {
       passes: number;
-    }
+    },
 ): DecrossTwoLayer<O> {
   function decrossTwoLayer(layers: SugiNode<N, L>[][]): void {
     const reversed = layers.slice().reverse();
@@ -157,11 +157,11 @@ function buildOperator<N, L, O extends DecrossTwoLayerOps<N, L>>(
   }
 
   function order<NO extends Twolayer>(
-    ord: NO
+    ord: NO,
   ): DecrossTwoLayer<U<O, "order", NO>>;
   function order(): O["order"];
   function order<NO extends Twolayer>(
-    ord?: NO
+    ord?: NO,
   ): O["order"] | DecrossTwoLayer<U<O, "order", NO>> {
     if (ord === undefined) {
       return options.order;
@@ -173,11 +173,11 @@ function buildOperator<N, L, O extends DecrossTwoLayerOps<N, L>>(
   decrossTwoLayer.order = order;
 
   function inits<NewInits extends readonly Decross[]>(
-    val: NewInits
+    val: NewInits,
   ): DecrossTwoLayer<U<O, "inits", NewInits>>;
   function inits(): O["inits"];
   function inits<NewInits extends readonly Decross[]>(
-    val?: NewInits
+    val?: NewInits,
   ): O["inits"] | DecrossTwoLayer<U<O, "inits", NewInits>> {
     if (val === undefined) {
       return [...options.inits];

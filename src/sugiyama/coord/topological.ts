@@ -40,12 +40,12 @@ export interface CoordTopological extends Coord<unknown, unknown> {
 function buildOperator(opts: { simp: boolean }): CoordTopological {
   function coordTopological<N, L>(
     layers: SugiNode<N, L>[][],
-    sep: SugiSeparation<N, L>
+    sep: SugiSeparation<N, L>,
   ): number {
     for (const layer of layers) {
       const numNodes = layer.reduce(
         (count, node) => count + +(node.data.role === "node"),
-        0
+        0,
       );
       if (numNodes > 1) {
         throw err`topological() only works with a topological layering, make sure you've set up sugiyama as \`sugiyama().layering(layeringTopological())\``;

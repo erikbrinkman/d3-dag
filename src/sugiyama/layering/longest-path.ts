@@ -33,7 +33,7 @@ type OpsLinkDatum<Ops extends LayeringLongestPathOps> =
  * Create with {@link layeringLongestPath}.
  */
 export interface LayeringLongestPath<
-  Ops extends LayeringLongestPathOps = LayeringLongestPathOps
+  Ops extends LayeringLongestPathOps = LayeringLongestPathOps,
 > extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
    * set the {@link Rank}
@@ -43,7 +43,7 @@ export interface LayeringLongestPath<
    * are *not* guaranteed to be on the same layer.
    */
   rank<NewRank extends Rank>(
-    newRank: NewRank
+    newRank: NewRank,
   ): LayeringLongestPath<U<Ops, "rank", NewRank>>;
   /**
    * get the current {@link Rank}.
@@ -68,11 +68,11 @@ export interface LayeringLongestPath<
 
 function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
   ops: O & LayeringLongestPathOps<ND, LD>,
-  options: { topDown: boolean }
+  options: { topDown: boolean },
 ): LayeringLongestPath<O> {
   function layeringLongestPath<N extends ND, L extends LD>(
     dag: Graph<N, L>,
-    sep: Separation<N, L>
+    sep: Separation<N, L>,
   ): number {
     let height = 0;
     const nodes = dag.topological(ops.rank);
@@ -93,8 +93,8 @@ function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
         sep(undefined, node),
         ...map(
           chain(node.parents(), node.children()),
-          (c) => (c.uy ?? -Infinity) + sep(c, node)
-        )
+          (c) => (c.uy ?? -Infinity) + sep(c, node),
+        ),
       );
       height = Math.max(height, val + sep(node, undefined));
       node.y = val;
@@ -105,8 +105,8 @@ function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
       const val = Math.min(
         ...map(
           filter(chain(node.parents(), node.children()), (c) => node.y < c.y),
-          (c) => c.y - sep(c, node)
-        )
+          (c) => c.y - sep(c, node),
+        ),
       );
 
       // don't update position if node has no "children" on this pass
@@ -126,11 +126,11 @@ function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
   }
 
   function rank<NR extends Rank>(
-    newRank: NR
+    newRank: NR,
   ): LayeringLongestPath<U<O, "rank", NR>>;
   function rank(): O["rank"];
   function rank<NR extends Rank>(
-    newRank?: NR
+    newRank?: NR,
   ): LayeringLongestPath<U<O, "rank", NR>> | O["rank"] {
     if (newRank === undefined) {
       return ops.rank;

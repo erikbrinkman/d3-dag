@@ -39,9 +39,10 @@ export interface ParentData<in NodeDatum = never, out LinkDatum = unknown> {
    * @returns parentData - the parent ids and link data that correspond to the
    *   node datum, undefined is the same as empty
    */
-  (datum: NodeDatum, index: number):
-    | Iterable<readonly [string, LinkDatum]>
-    | undefined;
+  (
+    datum: NodeDatum,
+    index: number,
+  ): Iterable<readonly [string, LinkDatum]> | undefined;
 }
 
 type StratifyNodeDatum<Ops extends StratifyOps> = Ops extends StratifyOps<
@@ -92,7 +93,7 @@ type IdsStratify<Ops extends StratifyOps, ParIds extends ParentIds> = Stratify<
 type DataStratify<
   LinkDatum,
   Ops extends StratifyOps,
-  ParData extends ParentData<never, LinkDatum>
+  ParData extends ParentData<never, LinkDatum>,
 > = Stratify<
   LinkDatum,
   {
@@ -113,7 +114,7 @@ type DataStratify<
  */
 export interface Stratify<
   LinkDatum,
-  Ops extends StratifyOps<never, LinkDatum>
+  Ops extends StratifyOps<never, LinkDatum>,
 > {
   /**
    * create a graph from stratify data
@@ -121,10 +122,9 @@ export interface Stratify<
    * @param data - the node data to create a graph from
    * @returns graph - the graph representation of the data
    */
-  <N extends StratifyNodeDatum<Ops>>(data: readonly N[]): MutGraph<
-    N,
-    LinkDatum
-  >;
+  <N extends StratifyNodeDatum<Ops>>(
+    data: readonly N[],
+  ): MutGraph<N, LinkDatum>;
 
   /**
    * Sets the id accessor to the given {@link Id} and returns a
@@ -153,7 +153,7 @@ export interface Stratify<
    * ```
    */
   parentIds<NewParentIds extends ParentIds>(
-    ids: NewParentIds
+    ids: NewParentIds,
   ): Stratify<
     undefined,
     {
@@ -178,9 +178,9 @@ export interface Stratify<
    */
   parentData<
     NewLinkDatum,
-    NewParentData extends ParentData<never, NewLinkDatum>
+    NewParentData extends ParentData<never, NewLinkDatum>,
   >(
-    data: NewParentData & ParentData<never, NewLinkDatum>
+    data: NewParentData & ParentData<never, NewLinkDatum>,
   ): Stratify<
     NewLinkDatum,
     {
@@ -201,10 +201,10 @@ export interface Stratify<
 }
 
 function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
-  operators: Ops & StratifyOps<NodeDatum, L>
+  operators: Ops & StratifyOps<NodeDatum, L>,
 ): Stratify<L, Ops> {
   function stratify<N extends StratifyNodeDatum<Ops>>(
-    data: readonly N[]
+    data: readonly N[],
   ): MutGraph<N, L> {
     const stratified = graph<N, L>();
 
@@ -248,10 +248,10 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
 
   function parentData(): Ops["parentData"];
   function parentData<NL, D extends ParentData<never, NL>>(
-    data: D
+    data: D,
   ): DataStratify<NL, Ops, D>;
   function parentData<NL, D extends ParentData<never, NL>>(
-    data?: D
+    data?: D,
   ): Ops["parentData"] | DataStratify<NL, Ops, D> {
     if (data === undefined) {
       return operators.parentData;
@@ -269,7 +269,7 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
   function parentIds(): Ops["parentIds"];
   function parentIds<P extends ParentIds>(ids: P): IdsStratify<Ops, P>;
   function parentIds<P extends ParentIds>(
-    ids?: P
+    ids?: P,
   ): Ops["parentIds"] | IdsStratify<Ops, P> {
     if (ids === undefined) {
       return operators.parentIds;
@@ -288,7 +288,7 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
 }
 
 function wrapParentIds<N, P extends ParentIds<N>>(
-  parentIds: P & ParentIds<N>
+  parentIds: P & ParentIds<N>,
 ): WrappedParentIds<P> {
   function wrapper(d: N, i: number): IterableIterator<[string, undefined]> {
     return map(parentIds(d, i) ?? [], (id) => [id, undefined]);
@@ -298,7 +298,7 @@ function wrapParentIds<N, P extends ParentIds<N>>(
 }
 
 function wrapParentData<N, D extends ParentData<N>>(
-  parentData: D & ParentData<N>
+  parentData: D & ParentData<N>,
 ): WrappedParentData<D> {
   function wrapper(d: N, i: number): IterableIterator<string> {
     return map(parentData(d, i) ?? [], ([id]) => id);

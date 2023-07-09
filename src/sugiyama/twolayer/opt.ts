@@ -61,7 +61,7 @@ function minCrossings(
   inds: Map<SugiNode, number>,
   oinds: Map<SugiNode, number>,
   counts: (node: SugiNode) => IterableIterator<readonly [SugiNode, number]>,
-  { dist, check }: { dist: boolean; check: OptChecking }
+  { dist, check }: { dist: boolean; check: OptChecking },
 ): Record<string, number> {
   // compute unconstrained nodes for distance minimization
   const unconstrained = dist ? reordered.filter((n) => !first(counts(n))) : [];
@@ -81,7 +81,7 @@ function minCrossings(
   const groupSize = reduce(
     groups.values(),
     (t, c) => t + c.length * c.length,
-    0
+    0,
   );
   const maxDistCons = (groupSize * unconstrained.length) / 4;
 
@@ -227,7 +227,7 @@ function buildOperator(options: {
   function twolayerOpt(
     topLayer: SugiNode[],
     bottomLayer: SugiNode[],
-    topDown: boolean
+    topDown: boolean,
   ): void {
     // swap layers
     const [reordered, other] = topDown

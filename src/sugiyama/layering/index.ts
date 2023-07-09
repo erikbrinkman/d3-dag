@@ -33,7 +33,7 @@ export interface Group<in NodeDatum = never, in LinkDatum = never> {
  */
 export function layerSeparation(
   upper?: GraphNode | undefined,
-  lower?: GraphNode | undefined
+  lower?: GraphNode | undefined,
 ): number {
   return +!!(upper && lower);
 }
@@ -88,7 +88,7 @@ export interface Layering<in NodeDatum = never, in LinkDatum = never> {
    */
   <N extends NodeDatum, L extends LinkDatum>(
     graph: Graph<N, L>,
-    sep: Separation<N, L>
+    sep: Separation<N, L>,
   ): number;
 
   /**

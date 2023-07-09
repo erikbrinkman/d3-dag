@@ -36,7 +36,7 @@ export function* dfs<T>(
  */
 function interleave(
   larger: readonly string[],
-  smaller: Iterable<string>
+  smaller: Iterable<string>,
 ): string {
   const formatted = [];
   for (const [i, val] of entries(smaller)) {
@@ -54,7 +54,7 @@ export function err(strings: readonly string[], ...objs: unknown[]): Error {
       indent: "  ",
       singleQuotes: false,
       inlineCharacterLimit: 60,
-    })
+    }),
   );
   return new Error(interleave(strings, stringified));
 }
@@ -95,6 +95,6 @@ export function berr(
   return new Error(
     "d3dagBuiltin" in named
       ? wrapInternalMsg(`builtin ${typ}'${name}'${msg}`)
-      : `custom ${typ}'${name}'${msg}`
+      : `custom ${typ}'${name}'${msg}`,
   );
 }

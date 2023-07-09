@@ -75,6 +75,6 @@ declare module "quadprog" {
     Amat: number[][],
     bvec: number[],
     meq?: number,
-    factorized?: [number, number]
+    factorized?: [number, number],
   ): Result;
 }

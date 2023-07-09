@@ -134,7 +134,7 @@ test("coordQuad() works with compact dag", () => {
 test("coordQuad() fails with invalid weights", () => {
   const layout = coordQuad();
   expect(() => layout.compress(0)).toThrow(
-    "compress weight must be positive, but was: 0"
+    "compress weight must be positive, but was: 0",
   );
 });
 
@@ -146,7 +146,7 @@ test("coordQuad() fails with negative constant vert weak", () => {
 test("coordQuad() fails with negative constant vert string", () => {
   const layout = coordQuad();
   expect(() => layout.vertStrong(-1)).toThrow(
-    "vertStrong must be non-negative"
+    "vertStrong must be non-negative",
   );
 });
 
@@ -164,7 +164,7 @@ test("coordQuad() fails with negative vert weak", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const layout = coordQuad().vertWeak(() => -1);
   expect(() => layout(layers, nodeSep)).toThrow(
-    `link weights must be non-negative`
+    `link weights must be non-negative`,
   );
 });
 
@@ -172,7 +172,7 @@ test("coordQuad() fails with negative link weight", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const layout = coordQuad().linkCurve(() => -1);
   expect(() => layout(layers, nodeSep)).toThrow(
-    `link weights must be non-negative`
+    `link weights must be non-negative`,
   );
 });
 
@@ -180,7 +180,7 @@ test("coordQuad() fails with negative node weight", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const layout = coordQuad().nodeCurve(() => -1);
   expect(() => layout(layers, nodeSep)).toThrow(
-    `node weights must be non-negative`
+    `node weights must be non-negative`,
   );
 });
 
@@ -192,6 +192,6 @@ test("coordQuad() fails passing an arg to constructor", () => {
 test("coordQuad() throws for zero width", () => {
   const layers = createLayers([[[]]]);
   expect(() => coordQuad()(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node"
+    "must assign nonzero width to at least one node",
   );
 });

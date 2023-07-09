@@ -47,7 +47,7 @@ for (const [name, method] of [
         }
         for (const [first, second] of bigrams(layer)) {
           expect(second.x - first.x).toBeGreaterThanOrEqual(
-            nodeSep(first, second) - 1e-3
+            nodeSep(first, second) - 1e-3,
           );
         }
       }

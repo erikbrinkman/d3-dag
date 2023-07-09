@@ -8,5 +8,5 @@ function nodeHeight({ data }: GraphNode<string>): number {
 /** default sized separation */
 export const sizedSep: Separation<string, unknown> = sizedSeparation(
   nodeHeight,
-  1
+  1,
 );

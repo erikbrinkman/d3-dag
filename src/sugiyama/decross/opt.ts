@@ -116,7 +116,7 @@ function buildOperator(options: {
   function decrossOpt(layers: SugiNode[][]): void {
     const numVars = layers.reduce(
       (t, l) => t + (l.length * Math.max(l.length - 1, 0)) / 2,
-      0
+      0,
     );
 
     // compute extra constraints for minimizing distance

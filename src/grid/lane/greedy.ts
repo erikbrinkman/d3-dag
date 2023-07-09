@@ -263,7 +263,7 @@ function bottomUpOp(nodes: readonly GraphNode[], inds: Indexer): void {
 function buildOperator(
   topDownVal: boolean,
   compressedVal: boolean,
-  bidirectionalVal: boolean
+  bidirectionalVal: boolean,
 ): LaneGreedy {
   function laneGreedy(ordered: readonly GraphNode[]): void {
     // clear xs

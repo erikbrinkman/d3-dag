@@ -46,7 +46,7 @@ export type OpsLinkDatum<Ops extends LayeringSimplexOps> =
  * Create with {@link layeringSimplex}.
  */
 export interface LayeringSimplex<
-  Ops extends LayeringSimplexOps = LayeringSimplexOps
+  Ops extends LayeringSimplexOps = LayeringSimplexOps,
 > extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
    * set the {@link Rank}
@@ -56,7 +56,7 @@ export interface LayeringSimplex<
    * ill-defined, and may result in an error during layout.
    */
   rank<NewRank extends Rank>(
-    newRank: NewRank
+    newRank: NewRank,
   ): LayeringSimplex<U<Ops, "rank", NewRank>>;
   /**
    * get the current {@link Rank}
@@ -72,7 +72,7 @@ export interface LayeringSimplex<
    * layout.
    */
   group<NewGroup extends Group>(
-    newGroup: NewGroup
+    newGroup: NewGroup,
   ): LayeringSimplex<U<Ops, "group", NewGroup>>;
   /**
    * get the current {@link Group}
@@ -84,17 +84,17 @@ export interface LayeringSimplex<
 }
 
 function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
-  options: Ops & LayeringSimplexOps<ND, LD>
+  options: Ops & LayeringSimplexOps<ND, LD>,
 ): LayeringSimplex<Ops> {
   function layeringSimplex<N extends ND, L extends LD>(
     dag: Graph<N, L>,
-    sep: Separation<N, L>
+    sep: Separation<N, L>,
   ): number {
     const variables: Record<string, Variable> = {};
     const constraints: Record<string, Constraint> = {};
 
     const ids = new Map(
-      map(dag.nodes(), (node, i) => [node, i.toString()] as const)
+      map(dag.nodes(), (node, i) => [node, i.toString()] as const),
     );
 
     /** get node id */
@@ -117,7 +117,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
       first: GraphNode<N, L>,
       second: GraphNode<N, L>,
       diff: number,
-      opt: number = 0
+      opt: number = 0,
     ): void {
       const fvar = variable(first);
       const svar = variable(second);
@@ -135,7 +135,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     function equal(
       prefix: string,
       first: GraphNode<N, L>,
-      second: GraphNode<N, L>
+      second: GraphNode<N, L>,
     ): void {
       before(`${prefix} before`, first, second, 0);
       before(`${prefix} after`, second, first, 0);
@@ -221,11 +221,11 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
   }
 
   function rank<NR extends Rank>(
-    newRank: NR
+    newRank: NR,
   ): LayeringSimplex<U<Ops, "rank", NR>>;
   function rank(): Ops["rank"];
   function rank<NR extends Rank>(
-    newRank?: NR
+    newRank?: NR,
   ): LayeringSimplex<U<Ops, "rank", NR>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;
@@ -237,11 +237,11 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
   layeringSimplex.rank = rank;
 
   function group<NG extends Group>(
-    newGroup: NG
+    newGroup: NG,
   ): LayeringSimplex<U<Ops, "group", NG>>;
   function group(): Ops["group"];
   function group<NG extends Group>(
-    newGroup?: NG
+    newGroup?: NG,
   ): LayeringSimplex<U<Ops, "group", NG>> | Ops["group"] {
     if (newGroup === undefined) {
       return options.group;

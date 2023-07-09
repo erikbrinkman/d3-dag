@@ -162,10 +162,10 @@ test("graphHierarchy() fails with incorrect children", () => {
   const build = graphHierarchy();
   // @ts-expect-error invalid arg
   expect(() => build(null)).toThrow(
-    "datum did not have an iterable children field, and no custom children accessor was specified"
+    "datum did not have an iterable children field, and no custom children accessor was specified",
   );
   // @ts-expect-error invalid arg
   expect(() => build({ children: null })).toThrow(
-    "datum did not have an iterable children field, and no custom children accessor was specified"
+    "datum did not have an iterable children field, and no custom children accessor was specified",
   );
 });

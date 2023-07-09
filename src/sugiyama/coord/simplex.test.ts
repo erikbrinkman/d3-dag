@@ -53,7 +53,7 @@ test("coordSimplex() works for triangle", () => {
   const layout = coordSimplex();
   const sep = sizedSeparation(
     sugiNodeLength(() => 1),
-    0
+    0,
   );
   const width = layout(layers, sep);
 
@@ -157,7 +157,7 @@ test("coordSimplex() works with compact dag", () => {
 test("coordSimplex() fails with non-positive constant weight", () => {
   const layout = coordSimplex();
   expect(() => layout.weight([0, 1, 2])).toThrow(
-    "simplex weights must be positive, but got"
+    "simplex weights must be positive, but got",
   );
 });
 
@@ -165,7 +165,7 @@ test("coordSimplex() fails with non-positive weight", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);
   const layout = coordSimplex().weight(() => [0, 1, 2]);
   expect(() => layout(layers, nodeSep)).toThrow(
-    "simplex weights must be positive, but got"
+    "simplex weights must be positive, but got",
   );
 });
 
@@ -178,6 +178,6 @@ test("coordSimplex() throws for zero width", () => {
   const layers = createLayers([[[]]]);
   const layout = coordSimplex();
   expect(() => layout(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node"
+    "must assign nonzero width to at least one node",
   );
 });

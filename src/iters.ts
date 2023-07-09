@@ -37,7 +37,7 @@ export function* entries<T>(iter: Iterable<T>): IterableIterator<[number, T]> {
 /** iterable flat map */
 export function* flatMap<T, S>(
   iter: Iterable<T>,
-  callback: MapCallback<T, Iterable<S>>
+  callback: MapCallback<T, Iterable<S>>,
 ): IterableIterator<S> {
   for (const [index, element] of entries(iter)) {
     yield* callback(element, index);
@@ -48,7 +48,7 @@ export function* flatMap<T, S>(
 export function reduce<T, S>(
   iter: Iterable<T>,
   callback: ReduceCallback<T, S>,
-  initialValue: S
+  initialValue: S,
 ): S {
   let accumulator = initialValue;
   for (const [index, element] of entries(iter)) {
@@ -60,7 +60,7 @@ export function reduce<T, S>(
 /** iterable map */
 export function* map<T, S>(
   iter: Iterable<T>,
-  callback: MapCallback<T, S>
+  callback: MapCallback<T, S>,
 ): IterableIterator<S> {
   for (const [index, element] of entries(iter)) {
     yield callback(element, index);
@@ -70,16 +70,16 @@ export function* map<T, S>(
 /** guard iterable filter */
 export function filter<T, S extends T>(
   iter: Iterable<T>,
-  callback: FilterGuardCallback<T, S>
+  callback: FilterGuardCallback<T, S>,
 ): IterableIterator<S>;
 /** generic iterable filter */
 export function filter<T>(
   iter: Iterable<T>,
-  callback: MapCallback<T, boolean>
+  callback: MapCallback<T, boolean>,
 ): IterableIterator<T>;
 export function* filter<T>(
   iter: Iterable<T>,
-  callback: MapCallback<T, boolean>
+  callback: MapCallback<T, boolean>,
 ): IterableIterator<T> {
   for (const [index, element] of entries(iter)) {
     if (callback(element, index)) {
@@ -91,7 +91,7 @@ export function* filter<T>(
 /** iterable some */
 export function some<T>(
   iter: Iterable<T>,
-  callback: MapCallback<T, boolean>
+  callback: MapCallback<T, boolean>,
 ): boolean {
   for (const [index, element] of entries(iter)) {
     if (callback(element, index)) {
@@ -104,15 +104,15 @@ export function some<T>(
 /** iterable every */
 export function every<T, R extends T>(
   iter: Iterable<T>,
-  callback: GuardCallback<T, R>
+  callback: GuardCallback<T, R>,
 ): iter is Iterable<R>;
 export function every<T>(
   iter: Iterable<T>,
-  callback: MapCallback<T, boolean>
+  callback: MapCallback<T, boolean>,
 ): boolean;
 export function every<T>(
   iter: Iterable<T>,
-  callback: MapCallback<T, boolean>
+  callback: MapCallback<T, boolean>,
 ): boolean {
   return !some(iter, (e, i) => !callback(e, i));
 }
@@ -128,7 +128,7 @@ function* slicePos<T>(
   arr: readonly T[],
   frm: number,
   to: number,
-  stride: number
+  stride: number,
 ): IterableIterator<T> {
   const limit = Math.min(to, arr.length);
   for (let i = frm; i < limit; i += stride) {
@@ -140,7 +140,7 @@ function* sliceNeg<T>(
   arr: readonly T[],
   frm: number,
   to: number,
-  stride: number
+  stride: number,
 ): IterableIterator<T> {
   const limit = Math.max(to, -1);
   for (let i = frm; i > limit; i += stride) {
@@ -153,7 +153,7 @@ export function slice<T>(
   arr: readonly T[],
   frm: number = 0,
   to: number = arr.length,
-  stride: number = 1
+  stride: number = 1,
 ): IterableIterator<T> {
   if (stride > 0) {
     return slicePos(arr, frm, to, stride);

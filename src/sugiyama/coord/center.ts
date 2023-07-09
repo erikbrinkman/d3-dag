@@ -31,7 +31,7 @@ export function coordCenter(...args: never[]): CoordCenter {
 
   function coordCenter<N, L>(
     layers: SugiNode<N, L>[][],
-    sep: SugiSeparation<N, L>
+    sep: SugiSeparation<N, L>,
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;

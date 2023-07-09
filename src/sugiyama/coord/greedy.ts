@@ -28,7 +28,7 @@ export interface CoordGreedy extends Coord<unknown, unknown> {
 /** assign nodes based on the median of their ancestor exes */
 function assign(
   layer: readonly SugiNode[],
-  ancestors: (node: SugiNode) => Iterable<SugiNode>
+  ancestors: (node: SugiNode) => Iterable<SugiNode>,
 ): void {
   for (const node of layer) {
     const x = median([...map(ancestors(node), ({ x }) => x)]);
@@ -41,7 +41,7 @@ function assign(
 /** same as assign, but only for links between two dummy nodes */
 function straighten(
   layer: readonly SugiNode[],
-  ancestors: (node: SugiNode) => Iterable<SugiNode>
+  ancestors: (node: SugiNode) => Iterable<SugiNode>,
 ): void {
   for (const node of layer) {
     const [ancestor] = ancestors(node);
@@ -59,7 +59,7 @@ function straighten(
  */
 function space<N, L>(
   layer: readonly SugiNode<N, L>[],
-  sep: SugiSeparation<N, L>
+  sep: SugiSeparation<N, L>,
 ): void {
   let last = layer[layer.length - 1];
   let lastx = last.x;
@@ -116,7 +116,7 @@ export function coordGreedy(...args: never[]): CoordGreedy {
 
   function coordGreedy<N, L>(
     layers: SugiNode<N, L>[][],
-    sep: SugiSeparation<N, L>
+    sep: SugiSeparation<N, L>,
   ): number {
     // get statistics on layers
     let xmean = 0;

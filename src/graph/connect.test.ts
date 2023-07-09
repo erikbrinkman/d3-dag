@@ -247,7 +247,7 @@ test("topological() correctly handles complex case", () => {
     map(entries(slice(rem, rem.length - 1, -1, -1)), ([i, { data }]) => [
       data,
       i,
-    ])
+    ]),
   );
   expect(inds.get("d")! < inds.get("e")!).toBe(true);
 });
@@ -260,21 +260,21 @@ test("graphConnect() fails passing an arg to connect", () => {
 test("graphConnect() fails on non-string source", () => {
   // @ts-expect-error invalid data
   expect(() => graphConnect()([null])).toThrow(
-    "default source id expected datum[0] to exist but got datum: "
+    "default source id expected datum[0] to exist but got datum: ",
   );
   // @ts-expect-error invalid data
   expect(() => graphConnect()([[null, "a"]])).toThrow(
-    "default source id expected datum[0] to be a string but got datum: "
+    "default source id expected datum[0] to be a string but got datum: ",
   );
 });
 
 test("graphConnect() fails on non-string target", () => {
   // @ts-expect-error invalid data
   expect(() => graphConnect()([["a"]])).toThrow(
-    "default target id expected datum[1] to exist but got datum: "
+    "default target id expected datum[1] to exist but got datum: ",
   );
   // @ts-expect-error invalid data
   expect(() => graphConnect()([["a", null]])).toThrow(
-    "default target id expected datum[1] to be a string but got datum: "
+    "default target id expected datum[1] to be a string but got datum: ",
   );
 });

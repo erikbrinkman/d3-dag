@@ -181,6 +181,6 @@ test("layeringLongestPath() works for eye multi dag bottom up", () => {
 test("layeringLongestPath() fails passing an arg to constructor", () => {
   // @ts-expect-error no args
   expect(() => layeringLongestPath(null)).toThrow(
-    "got arguments to layeringLongestPath"
+    "got arguments to layeringLongestPath",
   );
 });

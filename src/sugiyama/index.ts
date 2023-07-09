@@ -74,7 +74,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * @returns dimension - the width and height of resulting layout
    */
   (
-    graph: Ops extends SugiyamaOps<infer N, infer L> ? Graph<N, L> : never
+    graph: Ops extends SugiyamaOps<infer N, infer L> ? Graph<N, L> : never,
   ): LayoutResult;
 
   /**
@@ -106,7 +106,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * ```
    */
   layering<NewLayering extends Layering>(
-    layer: NewLayering
+    layer: NewLayering,
   ): Sugiyama<U<Ops, "layering", NewLayering>>;
   /**
    * get the current {@link Layering}.
@@ -143,7 +143,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * ```
    */
   decross<NewDecross extends Decross>(
-    dec: NewDecross
+    dec: NewDecross,
   ): Sugiyama<U<Ops, "decross", NewDecross>>;
   /**
    * get the current {@link Decross}.
@@ -183,7 +183,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * ```
    */
   coord<NewCoord extends Coord>(
-    crd: NewCoord
+    crd: NewCoord,
   ): Sugiyama<U<Ops, "coord", NewCoord>>;
   /**
    * get the current {@link Coord}.
@@ -194,7 +194,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * set the {@link Tweak}s to apply after layout
    */
   tweaks<const NewTweaks extends readonly Tweak[]>(
-    val: NewTweaks
+    val: NewTweaks,
   ): Sugiyama<U<Ops, "tweaks", NewTweaks>>;
   /**
    * get the current {@link Tweak}s.
@@ -207,7 +207,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * (default: `[1, 1]`)
    */
   nodeSize<NewNodeSize extends NodeSize>(
-    acc: NewNodeSize
+    acc: NewNodeSize,
   ): Sugiyama<U<Ops, "nodeSize", NewNodeSize>>;
   /** get the current node size */
   nodeSize(): Ops["nodeSize"];
@@ -226,10 +226,10 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   options: Ops & SugiyamaOps<ON, OL>,
   sizes: {
     gap: readonly [number, number];
-  }
+  },
 ): Sugiyama<Ops> {
   function sugiyama<N extends ON, L extends OL>(
-    dag: Graph<N, L>
+    dag: Graph<N, L>,
   ): LayoutResult {
     let res;
     // short circuit for empty graph
@@ -249,7 +249,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
         yLen,
         yGap,
         numLayers,
-        options.layering
+        options.layering,
       );
 
       // minimize edge crossings
@@ -275,10 +275,10 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
 
   function layering(): Ops["layering"];
   function layering<NL extends Layering>(
-    layer: NL
+    layer: NL,
   ): Sugiyama<U<Ops, "layering", NL>>;
   function layering<NL extends Layering>(
-    layer?: NL
+    layer?: NL,
   ): Ops["layering"] | Sugiyama<U<Ops, "layering", NL>> {
     if (layer === undefined) {
       return options.layering;
@@ -289,7 +289,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
           ...rest,
           layering: layer,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -297,10 +297,10 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
 
   function decross(): Ops["decross"];
   function decross<ND extends Decross>(
-    dec: ND
+    dec: ND,
   ): Sugiyama<U<Ops, "decross", ND>>;
   function decross<ND extends Decross>(
-    dec?: ND
+    dec?: ND,
   ): Ops["decross"] | Sugiyama<U<Ops, "decross", ND>> {
     if (dec === undefined) {
       return options.decross;
@@ -311,7 +311,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
           ...rest,
           decross: dec,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -320,7 +320,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   function coord(): Ops["coord"];
   function coord<NC extends Coord>(crd: NC): Sugiyama<U<Ops, "coord", NC>>;
   function coord<NC extends Coord>(
-    crd?: NC
+    crd?: NC,
   ): Ops["coord"] | Sugiyama<U<Ops, "coord", NC>> {
     if (crd === undefined) {
       return options.coord;
@@ -331,7 +331,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
           ...rest,
           coord: crd,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -339,10 +339,10 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
 
   function tweaks(): Ops["tweaks"];
   function tweaks<NT extends readonly Tweak[]>(
-    val: NT
+    val: NT,
   ): Sugiyama<U<Ops, "tweaks", NT>>;
   function tweaks<NT extends readonly Tweak[]>(
-    val?: NT
+    val?: NT,
   ): Ops["tweaks"] | Sugiyama<U<Ops, "tweaks", NT>> {
     if (val === undefined) {
       return options.tweaks;
@@ -353,7 +353,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
           ...rest,
           tweaks: val,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -361,10 +361,10 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
 
   function nodeSize(): Ops["nodeSize"];
   function nodeSize<NNS extends NodeSize>(
-    val: NNS
+    val: NNS,
   ): Sugiyama<U<Ops, "nodeSize", NNS>>;
   function nodeSize<NNS extends NodeSize>(
-    val?: NNS
+    val?: NNS,
   ): Sugiyama<U<Ops, "nodeSize", NNS>> | Ops["nodeSize"] {
     if (val === undefined) {
       return options.nodeSize;
@@ -378,7 +378,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
           ...rest,
           nodeSize: val,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -387,7 +387,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   function gap(): readonly [number, number];
   function gap(val: readonly [number, number]): Sugiyama<Ops>;
   function gap(
-    val?: readonly [number, number]
+    val?: readonly [number, number],
   ): Sugiyama<Ops> | readonly [number, number] {
     if (val !== undefined) {
       const [width, height] = val;
@@ -475,7 +475,7 @@ export function sugiyama(...args: never[]): DefaultSugiyama {
       },
       {
         gap: [1, 1],
-      }
+      },
     );
   }
 }

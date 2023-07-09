@@ -111,7 +111,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
    * (default: `1`)
    */
   vertWeak<NewVertWeak extends LinkWeight>(
-    val: NewVertWeak
+    val: NewVertWeak,
   ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>>;
   /**
    * get the current vertWeak accessor
@@ -128,7 +128,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
    * (default: `0`)
    */
   vertStrong<NewVertStrong extends LinkWeight>(
-    val: NewVertStrong
+    val: NewVertStrong,
   ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>>;
   /**
    * get the current vertStrong accessor
@@ -145,7 +145,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
    * (default: `1`)
    */
   linkCurve<NewLinkCurve extends LinkWeight>(
-    val: NewLinkCurve
+    val: NewLinkCurve,
   ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>>;
   /**
    * get the current link curve weight accessor
@@ -164,7 +164,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
    * (default: `0`)
    */
   nodeCurve<NewNodeCurve extends NodeWeight>(
-    val: NewNodeCurve
+    val: NewNodeCurve,
   ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>>;
   /**
    * get the current node curve accessor
@@ -199,7 +199,7 @@ export interface CoordQuad<Ops extends CoordQuadOps>
  */
 function cacheVertWeak<N, L>(
   vertWeak: LinkWeight<N, L>,
-  layers: SugiNode<N, L>[][]
+  layers: SugiNode<N, L>[][],
 ): (src: GraphNode<N, L>, targ: GraphNode<N, L>) => number {
   if (typeof vertWeak !== "function") {
     return () => vertWeak;
@@ -232,7 +232,7 @@ function cacheVertWeak<N, L>(
 function normalizeAccessor<T>(
   accessor: number | ((inp: T) => number),
   typ: "node" | "link",
-  func: "nodeCurve" | "linkCurve" | "vertStrong"
+  func: "nodeCurve" | "linkCurve" | "vertStrong",
 ): (inp: T) => number {
   if (typeof accessor !== "function") {
     return () => accessor;
@@ -244,7 +244,7 @@ function normalizeAccessor<T>(
         const val = accessor(inp);
         if (val < 0) {
           throw new Error(
-            `${typ} weights must be non-negative; double check the accessor passed into \`coordQuad().${func}(...)\``
+            `${typ} weights must be non-negative; double check the accessor passed into \`coordQuad().${func}(...)\``,
           );
         } else {
           cache.set(inp, val);
@@ -261,16 +261,16 @@ function normalizeAccessor<T>(
 function buildOperator<
   ND extends never,
   LD extends never,
-  Ops extends CoordQuadOps<ND, LD>
+  Ops extends CoordQuadOps<ND, LD>,
 >(
   opts: Ops &
     CoordQuadOps<ND, LD> & {
       comp: number;
-    }
+    },
 ): CoordQuad<Ops> {
   function coordQuad<N extends ND, L extends LD>(
     layers: SugiNode<N, L>[][],
-    sep: SugiSeparation<N, L>
+    sep: SugiSeparation<N, L>,
   ): number {
     const inds = indices(layers);
     const [Q, c, A, b] = init(layers, inds, sep, opts.comp);
@@ -279,17 +279,17 @@ function buildOperator<
     const cachedVertStrong = normalizeAccessor(
       opts.vertStrong,
       "link",
-      "vertStrong"
+      "vertStrong",
     );
     const cachedLinkCurve = normalizeAccessor(
       opts.linkCurve,
       "link",
-      "linkCurve"
+      "linkCurve",
     );
     const cachedNodeCurve = normalizeAccessor(
       opts.nodeCurve,
       "node",
-      "nodeCurve"
+      "nodeCurve",
     );
 
     // normalization factor for height difference
@@ -347,11 +347,11 @@ function buildOperator<
   }
 
   function vertWeak<NewVertWeak extends LinkWeight>(
-    val: NewVertWeak
+    val: NewVertWeak,
   ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>>;
   function vertWeak(): Ops["vertWeak"];
   function vertWeak<NewVertWeak extends LinkWeight>(
-    val?: NewVertWeak
+    val?: NewVertWeak,
   ): CoordQuad<U<Ops, "vertWeak", NewVertWeak>> | Ops["vertWeak"] {
     if (val === undefined) {
       return opts.vertWeak;
@@ -368,11 +368,11 @@ function buildOperator<
   coordQuad.vertWeak = vertWeak;
 
   function vertStrong<NewVertStrong extends LinkWeight>(
-    val: NewVertStrong
+    val: NewVertStrong,
   ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>>;
   function vertStrong(): Ops["vertStrong"];
   function vertStrong<NewVertStrong extends LinkWeight>(
-    val?: NewVertStrong
+    val?: NewVertStrong,
   ): CoordQuad<U<Ops, "vertStrong", NewVertStrong>> | Ops["vertStrong"] {
     if (val === undefined) {
       return opts.vertStrong;
@@ -389,11 +389,11 @@ function buildOperator<
   coordQuad.vertStrong = vertStrong;
 
   function linkCurve<NewLinkCurve extends LinkWeight>(
-    val: NewLinkCurve
+    val: NewLinkCurve,
   ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>>;
   function linkCurve(): Ops["linkCurve"];
   function linkCurve<NewLinkCurve extends LinkWeight>(
-    val?: NewLinkCurve
+    val?: NewLinkCurve,
   ): CoordQuad<U<Ops, "linkCurve", NewLinkCurve>> | Ops["linkCurve"] {
     if (val === undefined) {
       return opts.linkCurve;
@@ -410,11 +410,11 @@ function buildOperator<
   coordQuad.linkCurve = linkCurve;
 
   function nodeCurve<NewNodeCurve extends NodeWeight>(
-    val: NewNodeCurve
+    val: NewNodeCurve,
   ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>>;
   function nodeCurve(): Ops["nodeCurve"];
   function nodeCurve<NewNodeCurve extends NodeWeight>(
-    val?: NewNodeCurve
+    val?: NewNodeCurve,
   ): CoordQuad<U<Ops, "nodeCurve", NewNodeCurve>> | Ops["nodeCurve"] {
     if (val === undefined) {
       return opts.nodeCurve;

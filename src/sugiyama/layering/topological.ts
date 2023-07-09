@@ -33,7 +33,7 @@ type OpsLinkDatum<Ops extends LayeringTopologicalOps> =
  * Create with {@link layeringTopological}.
  */
 export interface LayeringTopological<
-  Ops extends LayeringTopologicalOps = LayeringTopologicalOps
+  Ops extends LayeringTopologicalOps = LayeringTopologicalOps,
 > extends Layering<OpsNodeDatum<Ops>, OpsLinkDatum<Ops>> {
   /**
    * set the {@link Rank}
@@ -42,7 +42,7 @@ export interface LayeringTopological<
    * attempting to minimize edge inversions.
    */
   rank<NewRank extends Rank>(
-    newRank: NewRank
+    newRank: NewRank,
   ): LayeringTopological<U<Ops, "rank", NewRank>>;
   /**
    * get the current {@link Rank}.
@@ -57,11 +57,11 @@ export interface LayeringTopological<
  * Create a topological layering.
  */
 function buildOperator<ND, LD, Ops extends LayeringTopologicalOps<ND, LD>>(
-  options: Ops & LayeringTopologicalOps<ND, LD>
+  options: Ops & LayeringTopologicalOps<ND, LD>,
 ): LayeringTopological<Ops> {
   function layeringTopological<N extends ND, L extends LD>(
     dag: Graph<N, L>,
-    sep: Separation<N, L>
+    sep: Separation<N, L>,
   ): number {
     let height = 0;
     let last;
@@ -75,11 +75,11 @@ function buildOperator<ND, LD, Ops extends LayeringTopologicalOps<ND, LD>>(
   }
 
   function rank<NR extends Rank>(
-    newRank: NR
+    newRank: NR,
   ): LayeringTopological<U<Ops, "rank", NR>>;
   function rank(): Ops["rank"];
   function rank<NR extends Rank>(
-    newRank?: NR
+    newRank?: NR,
   ): LayeringTopological<U<Ops, "rank", NR>> | Ops["rank"] {
     if (newRank === undefined) {
       return options.rank;

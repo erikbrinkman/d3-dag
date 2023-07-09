@@ -147,7 +147,7 @@ test("graphStratify() works with data accessor", () => {
   const justIds = build.parentIds();
   for (const data of complexSquare) {
     expect([...(justIds(data, 0) ?? [])].sort()).toEqual(
-      (data.pd ?? []).map(([id]: readonly [string, string]) => id).sort()
+      (data.pd ?? []).map(([id]: readonly [string, string]) => id).sort(),
     );
   }
 
@@ -207,13 +207,13 @@ test("graphStratify() fails at undefined id", () => {
     // @ts-expect-error null id
     graphStratify()([{ id: null }]);
   }).toThrow(
-    "datum has an id field that was not a string, and no id accessor was specified"
+    "datum has an id field that was not a string, and no id accessor was specified",
   );
   expect(() => {
     // @ts-expect-error no id
     graphStratify()([{}]);
   }).toThrow(
-    "datum did not have an id field, and no id accessor was specified"
+    "datum did not have an id field, and no id accessor was specified",
   );
 });
 
@@ -290,7 +290,7 @@ test("graphStratify() fails with invalid id type", () => {
   const id: () => string = () => null;
   const build = graphStratify().id(id);
   expect(() => build([{ parentIds: [] }])).toThrow(
-    `id is supposed to be type string but got type "object"`
+    `id is supposed to be type string but got type "object"`,
   );
 });
 
@@ -298,10 +298,10 @@ test("graphStratify() fails with incorrect parentIds", () => {
   const builder = graphStratify();
   // @ts-expect-error invalid datum
   expect(() => builder.id(() => "")([null])).toThrow(
-    "default parentIds function expected datum to be an object but got: "
+    "default parentIds function expected datum to be an object but got: ",
   );
   // @ts-expect-error invalid datum
   expect(() => builder([{ id: "1", parentIds: null }])).toThrow(
-    "default parentIds function expected parentIds to be an iterable of strings but got: "
+    "default parentIds function expected parentIds to be an iterable of strings but got: ",
   );
 });

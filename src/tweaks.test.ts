@@ -72,7 +72,7 @@ test("tweakGrid() throws for non-grid", () => {
   const old = layout(grf);
   const tweak = tweakGrid([1, 1]);
   expect(() => tweak(grf, old)).toThrow(
-    "link points had more than three points"
+    "link points had more than three points",
   );
 });
 
@@ -110,7 +110,7 @@ test("tweakFlip()", () => {
 
   // @ts-expect-error invalid option
   expect(() => tweakFlip("unknown")).toThrow(
-    `invalid tweakFlip style: "unknown"`
+    `invalid tweakFlip style: "unknown"`,
   );
 });
 
@@ -189,7 +189,7 @@ test("shapeRect()", () => {
 
   // invalid end
   expect(() => shapeRect([0, 0], [2, 2], [2, 0], [0, 0])).toThrow(
-    "ended inside rectangle"
+    "ended inside rectangle",
   );
 });
 
@@ -249,7 +249,7 @@ test("shapeEllipse()", () => {
 
   // invalid end
   expect(() => shapeEllipse([0, 0], [2, 2], [2, 0], [0, 0])).toThrow(
-    "ended inside ellipse"
+    "ended inside ellipse",
   );
 });
 

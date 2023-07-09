@@ -52,7 +52,7 @@ export interface Coord<in NodeDatum = never, in LinkDatum = never> {
    */
   <N extends NodeDatum, L extends LinkDatum>(
     layers: SugiNode<N, L>[][],
-    sep: SugiSeparation<N, L>
+    sep: SugiSeparation<N, L>,
   ): number;
 
   /**

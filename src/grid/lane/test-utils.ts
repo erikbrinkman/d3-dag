@@ -21,7 +21,7 @@ export function hard(): ConnectGraph {
 /** puts nodes in numeric id order, verifying it's also topological */
 export function prepare(grf: Graph<string>): GraphNode<string, unknown>[] {
   const nodes: GraphNode<string, unknown>[] = Array<GraphNode<string, unknown>>(
-    grf.nnodes()
+    grf.nnodes(),
   );
   for (const node of grf.nodes()) {
     const y = parseInt(node.data);

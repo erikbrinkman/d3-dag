@@ -47,18 +47,18 @@ function buildOperator(options: { topDown: boolean }): DecrossDfs {
         (n) => [...n.children()].sort((a, b) => b.nchildren() - a.nchildren()),
         ...flatMap(layers, (layer) =>
           [...filter(layer, (n) => !n.nparents())].sort(
-            (a, b) => b.nchildren() - a.nchildren()
-          )
-        )
+            (a, b) => b.nchildren() - a.nchildren(),
+          ),
+        ),
       );
     } else {
       iter = depthFirstSearch(
         (n) => [...n.parents()].sort((a, b) => b.nparents() - a.nparents()),
         ...flatMap(slice(layers, layers.length - 1, -1, -1), (layer) =>
           [...filter(layer, (n) => !n.nchildren())].sort(
-            (a, b) => b.nparents() - a.nparents()
-          )
-        )
+            (a, b) => b.nparents() - a.nparents(),
+          ),
+        ),
       );
     }
 

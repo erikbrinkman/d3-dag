@@ -60,7 +60,7 @@ export function setPop<T>(elems: Set<T>): T | undefined {
 export function listMultimapPush<K, V>(
   multimap: Map<K, V[]>,
   key: K,
-  val: V
+  val: V,
 ): void {
   const value = multimap.get(key);
   if (value === undefined) {
@@ -76,7 +76,7 @@ export function listMultimapPush<K, V>(
 export function setMultimapAdd<K, V>(
   multimap: Map<K, Set<V>>,
   key: K,
-  val: V
+  val: V,
 ): void {
   const value = multimap.get(key);
   if (value === undefined) {
@@ -92,7 +92,7 @@ export function setMultimapAdd<K, V>(
 export function setMultimapDelete<K, V>(
   multimap: Map<K, Set<V>>,
   key: K,
-  val: V
+  val: V,
 ): void {
   const value = multimap.get(key);
   if (value !== undefined) {

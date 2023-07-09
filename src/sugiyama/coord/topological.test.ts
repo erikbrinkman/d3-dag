@@ -101,7 +101,7 @@ test("topological().straight(false) works for compact", () => {
 test("topological() throws for non-topological", () => {
   const layers = createLayers([[[0], [0]], [[]]]);
   expect(() => topological()(layers, nodeSep)).toThrow(
-    "only works with a topological layering"
+    "only works with a topological layering",
   );
 });
 
@@ -114,7 +114,7 @@ test("topological() throws for zero width", () => {
   const layers = createLayers([[[]]]);
   const coord = topological();
   expect(() => coord(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node"
+    "must assign nonzero width to at least one node",
   );
 });
 
@@ -122,6 +122,6 @@ test("topological().straight(false) throws for zero width", () => {
   const layers = createLayers([[[]]]);
   const coord = topological().straight(false);
   expect(() => coord(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node"
+    "must assign nonzero width to at least one node",
   );
 });

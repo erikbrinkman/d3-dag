@@ -131,30 +131,30 @@ test("graphJson() fails to parse invalid formats", () => {
   expect(() => builder(null)).toThrow("was null");
   expect(() => builder({})).toThrow("didn't have 'nodes' and 'links'");
   expect(() => builder({ nodes: null, links: null })).toThrow(
-    "'nodes' and 'links' weren't arrays"
+    "'nodes' and 'links' weren't arrays",
   );
   expect(() => builder({ nodes: [null], links: [] })).toThrow(
-    "'nodes' and 'links' didn't have the appropriate structure"
+    "'nodes' and 'links' didn't have the appropriate structure",
   );
   expect(() => builder({ nodes: [{ x: true }], links: [] })).toThrow(
-    "'nodes' and 'links' didn't have the appropriate structure"
+    "'nodes' and 'links' didn't have the appropriate structure",
   );
   expect(() => builder({ nodes: [{ x: "0", y: "0" }], links: [] })).toThrow(
-    "'nodes' and 'links' didn't have the appropriate structure"
+    "'nodes' and 'links' didn't have the appropriate structure",
   );
   expect(() => builder({ nodes: [{}], links: [{}] })).toThrow(
-    "'nodes' and 'links' didn't have the appropriate structure"
+    "'nodes' and 'links' didn't have the appropriate structure",
   );
   expect(() =>
     builder({
       nodes: [{}],
       links: [{ source: null, target: null, points: [] }],
-    })
+    }),
   ).toThrow("'nodes' and 'links' didn't have the appropriate structure");
   expect(() =>
     builder({
       nodes: [{}],
       links: [{ source: 0, target: 0, points: [null] }],
-    })
+    }),
   ).toThrow("'nodes' and 'links' didn't have the appropriate structure");
 });

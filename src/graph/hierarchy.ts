@@ -44,9 +44,10 @@ export interface ChildrenData<in out NodeDatum, out LinkDatum = unknown> {
    * @returns childrenData - all the children data of this node, or undefined if
    *   there are no children
    */
-  (datum: NodeDatum, index: number):
-    | Iterable<readonly [NodeDatum, LinkDatum]>
-    | undefined;
+  (
+    datum: NodeDatum,
+    index: number,
+  ): Iterable<readonly [NodeDatum, LinkDatum]> | undefined;
 }
 
 /**
@@ -70,7 +71,7 @@ export interface WrappedChildren<NodeDatum, Child extends Children<NodeDatum>>
  */
 export interface WrappedChildrenData<
   NodeDatum,
-  ChildData extends ChildrenData<NodeDatum>
+  ChildData extends ChildrenData<NodeDatum>,
 > extends Children<NodeDatum> {
   /** the wrapped children data operator */
   wrapped: ChildData;
@@ -90,7 +91,7 @@ export interface Hierarchy<
   NodeDatum,
   LinkDatum,
   Child extends Children<NodeDatum>,
-  ChildData extends ChildrenData<NodeDatum, LinkDatum>
+  ChildData extends ChildrenData<NodeDatum, LinkDatum>,
 > {
   /**
    * construct a graph from hierarchical data
@@ -118,7 +119,7 @@ export interface Hierarchy<
    * ```
    */
   children<NewNode, NewChildren extends Children<NewNode>>(
-    val: NewChildren & Children<NewNode>
+    val: NewChildren & Children<NewNode>,
   ): Hierarchy<
     NewNode,
     undefined,
@@ -151,9 +152,9 @@ export interface Hierarchy<
   childrenData<
     NewNode,
     NewLink,
-    NewChildrenData extends ChildrenData<NewNode, NewLink>
+    NewChildrenData extends ChildrenData<NewNode, NewLink>,
   >(
-    data: NewChildrenData & ChildrenData<NewNode, NewLink>
+    data: NewChildrenData & ChildrenData<NewNode, NewLink>,
   ): Hierarchy<
     NewNode,
     NewLink,
@@ -175,7 +176,7 @@ function buildHierarchy<
   N,
   L,
   C extends Children<N>,
-  CD extends ChildrenData<N, L>
+  CD extends ChildrenData<N, L>,
 >(childOp: C, childDataOp: CD): Hierarchy<N, L, C, CD> {
   function hierarchy(...data: N[]): MutGraph<N, L> {
     const hierarchied = graph<N, L>();
@@ -217,17 +218,17 @@ function buildHierarchy<
 
   function children(): C;
   function children<NN, NC extends Children<NN>>(
-    childs: NC
+    childs: NC,
   ): Hierarchy<NN, undefined, NC, WrappedChildren<NN, NC>>;
   function children<NN, NC extends Children<NN>>(
-    childs?: NC
+    childs?: NC,
   ): C | Hierarchy<NN, undefined, NC, WrappedChildren<NN, NC>> {
     if (childs === undefined) {
       return childOp;
     } else {
       return buildHierarchy<NN, undefined, NC, WrappedChildren<NN, NC>>(
         childs,
-        wrapChildren(childs)
+        wrapChildren(childs),
       );
     }
   }
@@ -235,17 +236,17 @@ function buildHierarchy<
 
   function childrenData(): CD;
   function childrenData<NN, NL, NCD extends ChildrenData<NN, NL>>(
-    data: NCD
+    data: NCD,
   ): Hierarchy<NN, NL, WrappedChildrenData<NN, NCD>, NCD>;
   function childrenData<NN, NL, NCD extends ChildrenData<NN, NL>>(
-    data?: NCD
+    data?: NCD,
   ): CD | Hierarchy<NN, NL, WrappedChildrenData<NN, NCD>, NCD> {
     if (data === undefined) {
       return childDataOp;
     } else {
       return buildHierarchy<NN, NL, WrappedChildrenData<NN, NCD>, NCD>(
         wrapChildrenData(data),
-        data
+        data,
       );
     }
   }
@@ -255,7 +256,7 @@ function buildHierarchy<
 }
 
 function wrapChildren<N, C extends Children<N>>(
-  children: C
+  children: C,
 ): WrappedChildren<N, C> {
   function wrapped(d: N, i: number): IterableIterator<[N, undefined]> {
     return map(children(d, i) ?? [], (d) => [d, undefined]);
@@ -265,7 +266,7 @@ function wrapChildren<N, C extends Children<N>>(
 }
 
 function wrapChildrenData<N, C extends ChildrenData<N>>(
-  childrenData: C
+  childrenData: C,
 ): WrappedChildrenData<N, C> {
   function wrapped(d: N, i: number): IterableIterator<N> {
     return map(childrenData(d, i) ?? [], ([d]) => d);

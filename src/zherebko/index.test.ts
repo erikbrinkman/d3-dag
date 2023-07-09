@@ -29,7 +29,7 @@ test("zherebko() allows setting custom operators", () => {
 
   function tweakOne(
     grf: Graph<{ tweak: null }>,
-    res: LayoutResult
+    res: LayoutResult,
   ): LayoutResult {
     grf.nnodes();
     return res;
@@ -37,7 +37,7 @@ test("zherebko() allows setting custom operators", () => {
 
   function tweakTwo(
     grf: Graph<unknown, null>,
-    res: LayoutResult
+    res: LayoutResult,
   ): LayoutResult {
     grf.nnodes();
     return res;
@@ -112,7 +112,7 @@ test("zherebko() works for a multidag line", () => {
   expect(tail.y).toBeCloseTo(4);
 
   const [small, big] = [...map(grf.links(), ({ points }) => points)].sort(
-    (a, b) => a.length - b.length
+    (a, b) => a.length - b.length,
   );
   expect(small).toHaveLength(2);
   expect(big).toHaveLength(3);

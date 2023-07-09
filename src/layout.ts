@@ -62,7 +62,7 @@ export interface NodeLength<in NodeDatum = never, in LinkDatum = never> {
  * cache a {@link NodeSize} so it is called at most once for every node
  */
 export function cachedNodeSize<N, L>(
-  nodeSize: NodeSize<N, L>
+  nodeSize: NodeSize<N, L>,
 ): CallableNodeSize<N, L> {
   if (typeof nodeSize !== "function") {
     const [x, y] = nodeSize;
@@ -99,7 +99,7 @@ export function cachedNodeSize<N, L>(
  * {@link sugiyama} independently.
  */
 export function splitNodeSize<N, L>(
-  nodeSize: NodeSize<N, L>
+  nodeSize: NodeSize<N, L>,
 ): readonly [NodeLength<N, L>, NodeLength<N, L>] {
   if (typeof nodeSize !== "function") {
     const [x, y] = nodeSize;

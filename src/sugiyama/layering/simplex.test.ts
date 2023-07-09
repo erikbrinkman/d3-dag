@@ -101,7 +101,7 @@ test("simplex() works for X", () => {
 test("simplex() respects equality rank", () => {
   const dag = ex();
   const layering = simplex().rank((node: GraphNode<string>) =>
-    node.data === "0" || node.data === "2" ? 0 : undefined
+    node.data === "0" || node.data === "2" ? 0 : undefined,
   );
   const num = layering(dag, layerSeparation);
   expect(num).toBe(4);
@@ -189,16 +189,16 @@ test("simplex() fails with ill-defined groups", () => {
     return node.data === "0" || node.data === "1" ? "" : undefined;
   });
   expect(() => layout(dag, layerSeparation)).toThrow(
-    "could not find a feasible simplex layout"
+    "could not find a feasible simplex layout",
   );
 });
 
 test("simplex() fails with ill-defined group", () => {
   const dag = square();
   const layout = simplex().group((node: GraphNode<string>) =>
-    node.data === "0" || node.data === "3" ? "group" : undefined
+    node.data === "0" || node.data === "3" ? "group" : undefined,
   );
   expect(() => layout(dag, layerSeparation)).toThrow(
-    "could not find a feasible simplex layout"
+    "could not find a feasible simplex layout",
   );
 });

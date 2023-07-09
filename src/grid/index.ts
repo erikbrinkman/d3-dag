@@ -41,7 +41,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
    * @returns dimensions - the width and height of the final layout
    */
   (
-    grf: Ops extends GridOps<infer N, infer L> ? Graph<N, L> : never
+    grf: Ops extends GridOps<infer N, infer L> ? Graph<N, L> : never,
   ): LayoutResult;
 
   /**
@@ -88,7 +88,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
    * set the {@link Tweak}s to apply after layout
    */
   tweaks<const NewTweaks extends readonly Tweak[]>(
-    val: NewTweaks
+    val: NewTweaks,
   ): Grid<U<Ops, "tweaks", NewTweaks>>;
   /**
    * get the current {@link Tweak}s.
@@ -104,7 +104,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
    * (default: `[1, 1]`)
    */
   nodeSize<NewNodeSize extends NodeSize>(
-    val: NewNodeSize
+    val: NewNodeSize,
   ): Grid<U<Ops, "nodeSize", NewNodeSize>>;
   /** Get the current node size */
   nodeSize(): Ops["nodeSize"];
@@ -125,7 +125,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
   sizes: {
     xgap: number;
     ygap: number;
-  }
+  },
 ): Grid<Ops> {
   function grid<N extends ND, L extends LD>(grf: Graph<N, L>): LayoutResult {
     // NOTE this doesn't render multi-link any differently (i.e. they'll
@@ -218,7 +218,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
   function lane(): Ops["lane"];
   function lane<NL extends Lane>(val: NL): Grid<U<Ops, "lane", NL>>;
   function lane<NL extends Lane>(
-    val?: NL
+    val?: NL,
   ): Grid<U<Ops, "lane", NL>> | Ops["lane"] {
     if (val === undefined) {
       return options.lane;
@@ -232,7 +232,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
   function rank(): Ops["rank"];
   function rank<NR extends Rank>(val: NR): Grid<U<Ops, "rank", NR>>;
   function rank<NR extends Rank>(
-    val?: NR
+    val?: NR,
   ): Grid<U<Ops, "rank", NR>> | Ops["rank"] {
     if (val === undefined) {
       return options.rank;
@@ -245,10 +245,10 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
 
   function tweaks(): Ops["tweaks"];
   function tweaks<NT extends readonly Tweak[]>(
-    val: NT
+    val: NT,
   ): Grid<U<Ops, "tweaks", NT>>;
   function tweaks<NT extends readonly Tweak[]>(
-    val?: NT
+    val?: NT,
   ): Ops["tweaks"] | Grid<U<Ops, "tweaks", NT>> {
     if (val === undefined) {
       return options.tweaks;
@@ -259,7 +259,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
           ...rest,
           tweaks: val,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -267,10 +267,10 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
 
   function nodeSize(): Ops["nodeSize"];
   function nodeSize<NNS extends NodeSize>(
-    val: NNS
+    val: NNS,
   ): Grid<U<Ops, "nodeSize", NNS>>;
   function nodeSize<NNS extends NodeSize>(
-    val?: NNS
+    val?: NNS,
   ): Grid<U<Ops, "nodeSize", NNS>> | Ops["nodeSize"] {
     if (val === undefined) {
       return options.nodeSize;
@@ -284,7 +284,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
           ...rest,
           nodeSize: val,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -293,7 +293,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
   function gap(): readonly [number, number];
   function gap(val: readonly [number, number]): Grid<Ops>;
   function gap(
-    val?: readonly [number, number]
+    val?: readonly [number, number],
   ): Grid<Ops> | readonly [number, number] {
     if (val !== undefined) {
       const [xgap, ygap] = val;
@@ -383,6 +383,6 @@ export function grid(...args: never[]): DefaultGrid {
     {
       xgap: 1,
       ygap: 1,
-    }
+    },
   );
 }

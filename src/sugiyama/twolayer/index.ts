@@ -51,6 +51,6 @@ export interface Twolayer<in NodeDatum = never, in LinkDatum = never> {
   (
     topLayer: SugiNode<NodeDatum, LinkDatum>[],
     bottomLayer: SugiNode<NodeDatum, LinkDatum>[],
-    topDown: boolean
+    topDown: boolean,
   ): void;
 }

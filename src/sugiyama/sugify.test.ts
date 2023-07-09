@@ -22,7 +22,7 @@ function dataHeight({ data }: GraphNode<number>): number {
 
 function expectLayersToSatisfyInvariants(
   layers: readonly (readonly SugiNode[])[],
-  height: number
+  height: number,
 ): void {
   for (const layer of layers) {
     for (const sugi of layer) {
@@ -39,7 +39,7 @@ function expectGraphToSatisfyHeights(
   {
     height = nodeHeight,
     gap = 1,
-  }: { height?: (node: GraphNode) => number; gap?: number } = {}
+  }: { height?: (node: GraphNode) => number; gap?: number } = {},
 ): void {
   for (const { source, target } of grf.links()) {
     const sep = height(source) / 2 + height(target) / 2 + gap;
@@ -232,7 +232,7 @@ test("sugifyLayer() throws for missing layer", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
   expect(() => sugifyLayer(grf, nodeHeight, 1, 0, noopLayering)).toThrow(
-    "custom layering 'noopLayering' didn't assign a layer to a node"
+    "custom layering 'noopLayering' didn't assign a layer to a node",
   );
 });
 
@@ -244,7 +244,7 @@ test("sugifyLayer() throws for edge in the same layer", () => {
   left.y = 0;
   right.y = 0;
   expect(() => sugifyLayer(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' assigned nodes with an edge to the same layer"
+    "custom layering 'noopLayering' assigned nodes with an edge to the same layer",
   );
 });
 
@@ -253,11 +253,11 @@ test("sugifyLayer() throws for invalid layers", () => {
   const node = grf.node();
   node.y = -1;
   expect(() => sugifyLayer(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' assigned node an invalid layer: -1"
+    "custom layering 'noopLayering' assigned node an invalid layer: -1",
   );
   node.y = 1;
   expect(() => sugifyLayer(grf, nodeHeight, 1, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' assigned node an invalid layer: 1"
+    "custom layering 'noopLayering' assigned node an invalid layer: 1",
   );
 });
 
@@ -266,7 +266,7 @@ test("sugifyLayer() throws for empty layers", () => {
   const node = grf.node();
   node.y = 0;
   expect(() => sugifyLayer(grf, nodeHeight, 1, 2, noopLayering)).toThrow(
-    "custom layering 'noopLayering' didn't assign a node to every layer"
+    "custom layering 'noopLayering' didn't assign a node to every layer",
   );
 });
 
@@ -491,6 +491,6 @@ test("sugifyCompact() throws for missing coordinate", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
   expect(() => sugifyCompact(grf, nodeHeight, 1, noopLayering)).toThrow(
-    "custom layering 'noopLayering' didn't assign a y coordinate to every node"
+    "custom layering 'noopLayering' didn't assign a y coordinate to every node",
   );
 });

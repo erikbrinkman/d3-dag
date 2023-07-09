@@ -35,7 +35,7 @@ export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
    * layout the graph using the current operator
    */
   (
-    graph: Ops extends ZherebkoOps<infer N, infer L> ? Graph<N, L> : never
+    graph: Ops extends ZherebkoOps<infer N, infer L> ? Graph<N, L> : never,
   ): LayoutResult;
 
   /**
@@ -49,7 +49,7 @@ export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
    * set the {@link Tweak}s to apply after layout
    */
   tweaks<const NewTweaks extends readonly Tweak[]>(
-    val: NewTweaks
+    val: NewTweaks,
   ): Zherebko<U<Ops, "tweaks", NewTweaks>>;
   /**
    * get the current {@link Tweak}s.
@@ -62,7 +62,7 @@ export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
    * (default: `[1, 1]`)
    */
   nodeSize<NewNodeSize extends NodeSize>(
-    val: NewNodeSize
+    val: NewNodeSize,
   ): Zherebko<U<Ops, "nodeSize", NewNodeSize>>;
   /** get the current node size */
   nodeSize(): Ops["nodeSize"];
@@ -91,10 +91,10 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
   sizes: {
     xgap: number;
     ygap: number;
-  }
+  },
 ): Zherebko<O> {
   function zherebko<N extends ND, L extends LD>(
-    inp: Graph<N, L>
+    inp: Graph<N, L>,
   ): LayoutResult {
     let res;
     // short-circuit empty graph
@@ -126,8 +126,9 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
         ...map(
           bigrams(ordered),
           ([f, s]) =>
-            (s.y - f.y) / (f.nchildLinksTo(s) + f.nparentLinksTo(s) > 1 ? 2 : 1)
-        )
+            (s.y - f.y) /
+            (f.nchildLinksTo(s) + f.nparentLinksTo(s) > 1 ? 2 : 1),
+        ),
       );
 
       // get link indices
@@ -184,7 +185,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
   function rank(): O["rank"];
   function rank<NR extends Rank>(val: NR): Zherebko<U<O, "rank", NR>>;
   function rank<NR extends Rank>(
-    val?: NR
+    val?: NR,
   ): Zherebko<U<O, "rank", NR>> | O["rank"] {
     if (val === undefined) {
       return ops.rank;
@@ -197,10 +198,10 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
 
   function tweaks(): O["tweaks"];
   function tweaks<NT extends readonly Tweak[]>(
-    val: NT
+    val: NT,
   ): Zherebko<U<O, "tweaks", NT>>;
   function tweaks<NT extends readonly Tweak[]>(
-    val?: NT
+    val?: NT,
   ): O["tweaks"] | Zherebko<U<O, "tweaks", NT>> {
     if (val === undefined) {
       return ops.tweaks;
@@ -211,7 +212,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
           ...rest,
           tweaks: val,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -219,10 +220,10 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
 
   function nodeSize(): O["nodeSize"];
   function nodeSize<NNS extends NodeSize>(
-    val: NNS
+    val: NNS,
   ): Zherebko<U<O, "nodeSize", NNS>>;
   function nodeSize<NNS extends NodeSize>(
-    val?: NNS
+    val?: NNS,
   ): Zherebko<U<O, "nodeSize", NNS>> | O["nodeSize"] {
     if (val === undefined) {
       return ops.nodeSize;
@@ -236,7 +237,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
           ...rest,
           nodeSize: val,
         },
-        sizes
+        sizes,
       );
     }
   }
@@ -245,7 +246,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
   function gap(): readonly [number, number];
   function gap(val: readonly [number, number]): Zherebko<O>;
   function gap(
-    val?: readonly [number, number]
+    val?: readonly [number, number],
   ): Zherebko<O> | readonly [number, number] {
     if (val !== undefined) {
       const [xgap, ygap] = val;
@@ -304,6 +305,6 @@ export function zherebko(...args: never[]): DefaultZherebko {
     {
       xgap: 1,
       ygap: 1,
-    }
+    },
   );
 }

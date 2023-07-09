@@ -57,7 +57,7 @@ interface SwapChange<N, L> {
 
 function createSwapChange<N, L>(
   stationary: readonly SugiNode<N, L>[],
-  children: (node: SugiNode<N, L>) => Iterable<[SugiNode<N, L>, number]>
+  children: (node: SugiNode<N, L>) => Iterable<[SugiNode<N, L>, number]>,
 ): SwapChange<N, L> {
   const cache = new Map<SugiNode, Map<SugiNode, number>>();
   const inds = new Map<SugiNode, number>(stationary.map((n, i) => [n, i]));
@@ -101,7 +101,7 @@ function createSwapChange<N, L>(
 
 function adjacentSwap<N, L>(
   layer: SugiNode<N, L>[],
-  swapChange: SwapChange<N, L>
+  swapChange: SwapChange<N, L>,
 ): void {
   const ranges: [number, number][] = [[0, layer.length]];
   let range;
@@ -128,10 +128,10 @@ function adjacentSwap<N, L>(
 
 function scanSwap<N, L>(
   layer: SugiNode<N, L>[],
-  swapChange: SwapChange<N, L>
+  swapChange: SwapChange<N, L>,
 ): void {
   const costs: number[] = Array<number>(
-    (layer.length * (layer.length - 1)) / 2
+    (layer.length * (layer.length - 1)) / 2,
   );
   for (;;) {
     let start = 0;
@@ -182,7 +182,7 @@ function buildOperator<N, L, Op extends Twolayer<N, L>>({
   function twolayerGreedy(
     topLayer: SugiNode<N, L>[],
     bottomLayer: SugiNode<N, L>[],
-    topDown: boolean
+    topDown: boolean,
   ): void {
     baseOp(topLayer, bottomLayer, topDown);
 
@@ -201,7 +201,7 @@ function buildOperator<N, L, Op extends Twolayer<N, L>>({
   function base<NewOp extends Twolayer>(val: NewOp): TwolayerGreedy<NewOp>;
   function base(): Op;
   function base<NewOp extends Twolayer>(
-    val?: NewOp
+    val?: NewOp,
   ): Op | TwolayerGreedy<NewOp> {
     if (val === undefined) {
       return baseOp;

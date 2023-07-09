@@ -22,7 +22,7 @@ import { Separation } from "./utils";
 /** data for a sugi node that maps to a real node */
 export interface SugiNodeDatum<
   out NodeDatum = unknown,
-  out LinkDatum = unknown
+  out LinkDatum = unknown,
 > {
   /** tag indicating that this sugi node is backed by a graph node */
   role: "node";
@@ -37,7 +37,7 @@ export interface SugiNodeDatum<
 /** data for a dummy sugi node that maps to part of a link */
 export interface SugiLinkDatum<
   out NodeDatum = unknown,
-  out LinkDatum = unknown
+  out LinkDatum = unknown,
 > {
   /** tag indicating that this sugi node is backed by a link */
   role: "link";
@@ -79,7 +79,7 @@ function addSugiLinks<N, L>(
   sugied: MutGraph<SugiDatum<N, L>, undefined>,
   nodeMap: Map<GraphNode<N, L>, MapVal<N, L>>,
   numLayers: number,
-  layering: Named
+  layering: Named,
 ): SugiNode<N, L>[][] {
   // create dummy nodes for all child links
   for (const [node, [sourceData, sugiSource]] of nodeMap) {
@@ -152,7 +152,7 @@ export function sugifyLayer<N, L>(
   nodeHeight: NodeLength<N, L>,
   gap: number,
   numLayers: number,
-  layering: Named
+  layering: Named,
 ): readonly [SugiNode<N, L>[][], number] {
   // create sugi graph
   const sugied = graph<SugiDatum<N, L>, undefined>();
@@ -203,8 +203,8 @@ export function sugifyLayer<N, L>(
     const layerHeight = Math.max(
       -gap, // in case all dummy nodes
       ...map(layer, ({ data }) =>
-        data.role === "node" ? nodeHeight(data.node) : -Infinity
-      )
+        data.role === "node" ? nodeHeight(data.node) : -Infinity,
+      ),
     );
     const y = height + layerHeight / 2;
     for (const sugi of layer) {
@@ -225,7 +225,7 @@ export function sugifyCompact<N, L>(
   input: Graph<N, L>,
   nodeHeight: NodeLength<N, L>,
   height: number,
-  layering: Named
+  layering: Named,
 ): SugiNode<N, L>[][] {
   // create sugi graph
   const sugied = graph<SugiDatum<N, L>, undefined>();
@@ -276,7 +276,7 @@ export function sugifyCompact<N, L>(
     const target = layer - 1;
     for (const [child, count] of chain(
       node.childCounts(),
-      node.parentCounts()
+      node.parentCounts(),
     )) {
       if (count > 1) {
         const [{ bottomLayer }] = nodeMap.get(child)!;
@@ -389,7 +389,7 @@ export type SugiSeparation<NodeDatum = never, LinkDatum = never> = Separation<
  */
 export function sugiNodeLength<N, L>(
   len: NodeLength<N, L>,
-  dummy: number = 0
+  dummy: number = 0,
 ): SugiNodeLength<N, L> {
   return ({ data }: SugiNode<N, L>): number =>
     data.role === "node" ? len(data.node) : dummy;
@@ -401,7 +401,7 @@ export function validateCoord<N, L>(
   xSep: SugiSeparation<N, L>,
   width: number,
   coord: Named,
-  tol: number = 0.001
+  tol: number = 0.001,
 ) {
   for (const layer of layers) {
     for (const node of layer) {
@@ -414,8 +414,8 @@ export function validateCoord<N, L>(
       chain<[undefined | SugiNode<N, L>, number]>(
         [[undefined, 0]],
         map(layer, (n) => [n, n.x]),
-        [[undefined, width]]
-      )
+        [[undefined, width]],
+      ),
     )) {
       if (nx - lx < xSep(last, next) - tol) {
         throw berr`coord ${coord} assigned nodes too close for separation`;

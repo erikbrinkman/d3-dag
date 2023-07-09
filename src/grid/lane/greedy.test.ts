@@ -37,7 +37,7 @@ test("greedy() compresses single directionally", () => {
       // overall width
       ["5", "6"],
       ["5", "7"],
-    ])
+    ]),
   );
   const layout = greedy();
   layout(nodes);
@@ -99,7 +99,7 @@ test("greedy() compresses bidirectionally", () => {
       // overall width
       ["6", "7"],
       ["6", "9"],
-    ])
+    ]),
   );
   const layout = greedy().bidirectional(true);
   layout(nodes);
@@ -125,7 +125,7 @@ test("greedy() produces layout for bottom-up bidirectional uncompressed", () => 
       ["3", "6"],
       ["4", "9"],
       ["5", "7"],
-    ])
+    ]),
   );
   const layout = greedy().topDown(false).compressed(false).bidirectional(true);
   layout(nodes);

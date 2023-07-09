@@ -9,7 +9,7 @@ import { GraphLink, GraphNode } from "../graph";
 import { bigrams } from "../iters";
 
 function* zhereParentLinks(
-  node: GraphNode
+  node: GraphNode,
 ): IterableIterator<[GraphNode, GraphNode, GraphLink]> {
   for (const link of node.parentLinks()) {
     const { source } = link;
@@ -39,7 +39,7 @@ function firstAvailable(inds: number[], target: number) {
  */
 export function greedy(
   nodes: readonly GraphNode[],
-  gap: number
+  gap: number,
 ): Map<GraphLink, number> {
   // We first create an array of every link we want to render, with the layer
   // of their source and target node so that we can sort first by target layer

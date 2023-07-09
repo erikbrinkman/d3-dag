@@ -29,7 +29,7 @@ test("decrossTwoLayer() allows setting operators", () => {
   function order(
     above: SugiNode<{ order: number }>[],
     below: SugiNode<{ order: number }>[],
-    topDown: boolean
+    topDown: boolean,
   ): void {
     const layer = topDown ? below : above;
     for (const _ of layer) {
@@ -120,13 +120,13 @@ test("decrossTwoLayer() can be set with no inits", () => {
 
 test("decrossTwoLayer() fails passing 0 to passes", () => {
   expect(() => decrossTwoLayer().passes(0)).toThrow(
-    "number of passes must be positive"
+    "number of passes must be positive",
   );
 });
 
 test("decrossTwoLayer() fails passing an arg to constructor", () => {
   // @ts-expect-error no args
   expect(() => decrossTwoLayer(null)).toThrow(
-    "got arguments to decrossTwoLayer"
+    "got arguments to decrossTwoLayer",
   );
 });
