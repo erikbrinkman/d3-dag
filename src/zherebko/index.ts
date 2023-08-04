@@ -7,7 +7,7 @@ import { Graph, Rank } from "../graph";
 import { bigrams, map } from "../iters";
 import { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
 import { Tweak } from "../tweaks";
-import { U, err } from "../utils";
+import { err, U } from "../utils";
 import { greedy } from "./greedy";
 
 /** all operators for the zherebko layout */
@@ -48,7 +48,7 @@ export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
   /**
    * set the {@link Tweak}s to apply after layout
    */
-  tweaks<const NewTweaks extends readonly Tweak[]>(
+  tweaks<NewTweaks extends readonly Tweak[]>(
     val: NewTweaks,
   ): Zherebko<U<Ops, "tweaks", NewTweaks>>;
   /**

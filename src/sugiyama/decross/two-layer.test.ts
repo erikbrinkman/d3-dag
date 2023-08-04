@@ -53,7 +53,7 @@ test("decrossTwoLayer() allows setting operators", () => {
   // @ts-expect-error invalid data
   ordered satisfies Decross<unknown, unknown>;
 
-  const layout = ordered.inits([initOne, initTwo]);
+  const layout = ordered.inits([initOne, initTwo] as const);
   layout satisfies Decross<{ order: number; init: boolean }, null>;
   // @ts-expect-error invalid data
   layout satisfies Decross<{ order: number }, unknown>;

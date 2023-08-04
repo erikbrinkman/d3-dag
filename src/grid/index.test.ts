@@ -1,5 +1,5 @@
 import { grid } from ".";
-import { Graph, GraphNode, graph } from "../graph";
+import { Graph, graph, GraphNode } from "../graph";
 import { filter } from "../iters";
 import { LayoutResult } from "../layout";
 import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs";
@@ -131,7 +131,7 @@ test("grid() allows setting custom operators", () => {
   // @ts-expect-error old data
   laned satisfies Grid<{ rank: number; size: number }, unknown>;
 
-  const layout = laned.tweaks([tweakOne, tweakTwo]);
+  const layout = laned.tweaks([tweakOne, tweakTwo] as const);
   layout satisfies Grid<
     { rank: number; size: number; tweak: null },
     { lane: number; tweak: null }

@@ -7,7 +7,7 @@
 import { Coord } from ".";
 import { GraphLink, GraphNode } from "../../graph";
 import { flatMap } from "../../iters";
-import { U, err, ierr } from "../../utils";
+import { err, ierr, U } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
 import {
   avgHeight,

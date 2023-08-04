@@ -6,7 +6,7 @@
 import { Graph, Rank } from "../graph";
 import { LayoutResult, NodeSize } from "../layout";
 import { Tweak } from "../tweaks";
-import { U, err } from "../utils";
+import { err, U } from "../utils";
 import { Lane } from "./lane";
 import { LaneGreedy, laneGreedy } from "./lane/greedy";
 import { verifyLanes } from "./lane/utils";
@@ -87,7 +87,7 @@ export interface Grid<Ops extends GridOps = GridOps> {
   /**
    * set the {@link Tweak}s to apply after layout
    */
-  tweaks<const NewTweaks extends readonly Tweak[]>(
+  tweaks<NewTweaks extends readonly Tweak[]>(
     val: NewTweaks,
   ): Grid<U<Ops, "tweaks", NewTweaks>>;
   /**

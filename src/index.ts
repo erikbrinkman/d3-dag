@@ -270,9 +270,9 @@ export {
   type LayeringTopologicalOps,
 } from "./sugiyama/layering/topological";
 export {
-  sugiNodeLength,
   sugifyCompact,
   sugifyLayer,
+  sugiNodeLength,
   unsugify,
   type SugiDatum,
   type SugiLinkDatum,

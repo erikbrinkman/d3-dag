@@ -1,5 +1,5 @@
 import { zherebko } from ".";
-import { Graph, GraphNode, graph } from "../graph";
+import { Graph, graph, GraphNode } from "../graph";
 import { graphConnect } from "../graph/connect";
 import { filter, map } from "../iters";
 import { LayoutResult } from "../layout";
@@ -54,7 +54,7 @@ test("zherebko() allows setting custom operators", () => {
   // @ts-expect-error old data
   sized satisfies Zhere<{ rank: number }, unknown>;
 
-  const layout = sized.tweaks([tweakOne, tweakTwo]);
+  const layout = sized.tweaks([tweakOne, tweakTwo] as const);
   layout satisfies Zhere<{ rank: number; size: number; tweak: null }, null>;
   // @ts-expect-error old data
   layout satisfies Zhere<{ rank: number; size: number }, unknown>;

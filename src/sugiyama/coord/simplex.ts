@@ -7,7 +7,7 @@
 import { Coord } from ".";
 import { GraphLink, GraphNode } from "../../graph";
 import { bigrams, flatMap } from "../../iters";
-import { Constraint, Variable, solve } from "../../simplex";
+import { Constraint, solve, Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode, SugiSeparation } from "../sugify";
 import { avgHeight } from "./utils";

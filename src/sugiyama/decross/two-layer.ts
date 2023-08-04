@@ -74,7 +74,7 @@ export interface DecrossTwoLayer<
    *
    * (default: `[decrossDfs(), decrossDfs().topDown(false)]`)
    */
-  inits<const NewInits extends readonly Decross[]>(
+  inits<NewInits extends readonly Decross[]>(
     val: NewInits,
   ): DecrossTwoLayer<U<Ops, "inits", NewInits>>;
   /**

@@ -6,7 +6,7 @@
 import { Layering } from ".";
 import { Graph, Rank } from "../../graph";
 import { chain, filter, map } from "../../iters";
-import { U, err } from "../../utils";
+import { err, U } from "../../utils";
 import { Separation } from "../utils";
 
 /** longest path operators */

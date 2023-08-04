@@ -1,5 +1,5 @@
 import { Graph } from "./graph";
-import { LayoutResult, NodeSize, cachedNodeSize } from "./layout";
+import { cachedNodeSize, LayoutResult, NodeSize } from "./layout";
 import { err } from "./utils";
 
 /**

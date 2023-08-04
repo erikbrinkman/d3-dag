@@ -7,8 +7,8 @@
 import { Group, Layering } from ".";
 import { Graph, GraphNode, Rank } from "../../graph";
 import { bigrams, map } from "../../iters";
-import { Constraint, Variable, solve } from "../../simplex";
-import { U, err, ierr } from "../../utils";
+import { Constraint, solve, Variable } from "../../simplex";
+import { err, ierr, U } from "../../utils";
 import { Separation } from "../utils";
 
 /** simplex operator operators */

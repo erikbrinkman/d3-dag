@@ -5,7 +5,7 @@
  */
 import { Layering } from ".";
 import { Graph, Rank } from "../../graph";
-import { U, err } from "../../utils";
+import { err, U } from "../../utils";
 import { Separation } from "../utils";
 
 /** topological operators */

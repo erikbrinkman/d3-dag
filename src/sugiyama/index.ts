@@ -5,20 +5,20 @@
  */
 import { Graph } from "../graph";
 import {
+  cachedNodeSize,
   LayoutResult,
   NodeSize,
-  cachedNodeSize,
   splitNodeSize,
 } from "../layout";
 import { Tweak } from "../tweaks";
-import { U, err } from "../utils";
+import { err, U } from "../utils";
 import { Coord } from "./coord";
-import { DefaultCoordSimplex, coordSimplex } from "./coord/simplex";
+import { coordSimplex, DefaultCoordSimplex } from "./coord/simplex";
 import { Decross } from "./decross";
-import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
+import { decrossTwoLayer, DefaultDecrossTwoLayer } from "./decross/two-layer";
 import { Layering, layerSeparation } from "./layering";
 import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
-import { sugiNodeLength, sugifyLayer, unsugify, validateCoord } from "./sugify";
+import { sugifyLayer, sugiNodeLength, unsugify, validateCoord } from "./sugify";
 import { sizedSeparation } from "./utils";
 
 /** sugiyama operators */
@@ -193,7 +193,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   /**
    * set the {@link Tweak}s to apply after layout
    */
-  tweaks<const NewTweaks extends readonly Tweak[]>(
+  tweaks<NewTweaks extends readonly Tweak[]>(
     val: NewTweaks,
   ): Sugiyama<U<Ops, "tweaks", NewTweaks>>;
   /**

@@ -8,7 +8,7 @@ import { Twolayer } from ".";
 import { listMultimapPush } from "../../collections";
 import { entries, first, map, reduce, slice } from "../../iters";
 import { OptChecking } from "../../layout";
-import { Constraint, Variable, solve } from "../../simplex";
+import { Constraint, solve, Variable } from "../../simplex";
 import { err } from "../../utils";
 import { SugiNode } from "../sugify";
 

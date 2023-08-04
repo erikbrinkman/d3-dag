@@ -7,7 +7,7 @@ import { Decross } from ".";
 import { listMultimapPush } from "../../collections";
 import { bigrams, entries, slice } from "../../iters";
 import { OptChecking } from "../../layout";
-import { Constraint, Variable, solve } from "../../simplex";
+import { Constraint, solve, Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
 import { SugiNode } from "../sugify";
 
