@@ -6,6 +6,8 @@ test("empty graph", () => {
 
   expect([...grf.nodes()]).toEqual([]);
   expect([...grf.links()]).toEqual([]);
+  expect([...grf.roots()]).toEqual([]);
+  expect([...grf.leaves()]).toEqual([]);
   expect(grf.nnodes()).toBe(0);
   expect(grf.nlinks()).toBe(0);
   expect([...grf.split()]).toEqual([]);
@@ -20,6 +22,8 @@ test("singleton graph", () => {
 
   expect([...grf.nodes()]).toEqual([node]);
   expect([...grf.links()]).toEqual([]);
+  expect([...grf.roots()]).toEqual([node]);
+  expect([...grf.leaves()]).toEqual([node]);
   expect(grf.nnodes()).toBe(1);
   expect(grf.nlinks()).toBe(0);
   expect([...grf.split()]).toEqual([node]);
@@ -29,6 +33,10 @@ test("singleton graph", () => {
 
   expect([...node.nodes()]).toEqual([node]);
   expect([...node.links()]).toEqual([]);
+  expect([...node.roots()]).toEqual([node]);
+  expect([...node.leaves()]).toEqual([node]);
+  expect([...node.ancestors()]).toEqual([node]);
+  expect([...node.descendants()]).toEqual([node]);
   expect(node.nnodes()).toBe(1);
   expect(node.nlinks()).toBe(0);
   expect([...node.split()]).toEqual([node]);
@@ -59,6 +67,8 @@ test("line graph", () => {
 
   expect([...grf.nodes()]).toEqual([down, up]);
   expect([...grf.links()]).toEqual([link]);
+  expect([...grf.roots()]).toEqual([up]);
+  expect([...grf.leaves()]).toEqual([down]);
   expect(grf.nnodes()).toBe(2);
   expect(grf.nlinks()).toBe(1);
   expect([...grf.split()]).toHaveLength(1);
@@ -68,6 +78,10 @@ test("line graph", () => {
 
   expect([...up.nodes()]).toEqual([up, down]);
   expect([...up.links()]).toEqual([link]);
+  expect([...up.roots()]).toEqual([up]);
+  expect([...up.leaves()]).toEqual([down]);
+  expect([...up.ancestors()]).toEqual([up]);
+  expect([...up.descendants()]).toEqual([up, down]);
   expect(up.nnodes()).toBe(2);
   expect(up.nlinks()).toBe(1);
   expect([...up.split()]).toHaveLength(1);
@@ -90,6 +104,8 @@ test("line graph", () => {
   expect([...up.childCounts()]).toEqual([[down, 1]]);
   expect([...up.childLinks()]).toEqual([link]);
 
+  expect([...down.ancestors()]).toEqual([down, up]);
+  expect([...down.descendants()]).toEqual([down]);
   expect(down.nparents()).toBe(1);
   expect(down.nparentLinks()).toBe(1);
   expect(down.nparentLinksTo(down)).toBe(0);
@@ -109,6 +125,12 @@ test("line graph", () => {
   link.delete();
 
   expect(grf.connected()).toBe(false);
+  expect([...grf.roots()]).toEqual([up, down]);
+  expect([...grf.leaves()]).toEqual([up, down]);
+  expect([...up.roots()]).toEqual([up]);
+  expect([...up.leaves()]).toEqual([up]);
+  expect([...down.roots()]).toEqual([down]);
+  expect([...down.leaves()]).toEqual([down]);
 });
 
 test("multi graph", () => {
@@ -129,6 +151,8 @@ test("multi graph", () => {
 
   expect([...grf.nodes()]).toEqual([down, up]);
   expect([...grf.links()]).toEqual([first, second]);
+  expect([...grf.roots()]).toEqual([up]);
+  expect([...grf.leaves()]).toEqual([down]);
   expect(grf.nnodes()).toBe(2);
   expect(grf.nlinks()).toBe(2);
   expect([...grf.split()]).toHaveLength(1);
@@ -136,6 +160,8 @@ test("multi graph", () => {
   expect(grf.multi()).toBe(true);
   expect(grf.acyclic()).toBe(true);
 
+  expect([...up.ancestors()]).toEqual([up]);
+  expect([...up.descendants()]).toEqual([up, down]);
   expect(up.nchildren()).toBe(1);
   expect(up.nchildLinks()).toBe(2);
   expect(up.nchildLinksTo(up)).toBe(0);
@@ -144,6 +170,8 @@ test("multi graph", () => {
   expect([...up.childCounts()]).toEqual([[down, 2]]);
   expect([...up.childLinks()]).toEqual([first, second]);
 
+  expect([...down.ancestors()]).toEqual([down, up]);
+  expect([...down.descendants()]).toEqual([down]);
   expect(down.nparents()).toBe(1);
   expect(down.nparentLinks()).toBe(2);
   expect(down.nparentLinksTo(down)).toBe(0);
@@ -164,6 +192,8 @@ test("cycle graph", () => {
 
   expect([...grf.nodes()]).toEqual([below, above]);
   expect([...grf.links()]).toEqual([up, down]);
+  expect([...grf.roots()]).toEqual([below]); // brittle [above]
+  expect([...grf.leaves()]).toEqual([below]); // brittle [above]
   expect(grf.nnodes()).toBe(2);
   expect(grf.nlinks()).toBe(2);
   expect([...grf.split()]).toHaveLength(1);
@@ -171,6 +201,8 @@ test("cycle graph", () => {
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(false);
 
+  expect([...above.ancestors()]).toEqual([above, below]);
+  expect([...above.descendants()]).toEqual([above, below]);
   expect(above.nparents()).toBe(1);
   expect(above.nparentLinks()).toBe(1);
   expect(above.nparentLinksTo(below)).toBe(1);
@@ -185,6 +217,9 @@ test("cycle graph", () => {
   expect([...above.childCounts()]).toEqual([[below, 1]]);
   expect([...above.childLinks()]).toEqual([down]);
   expect([...above.childLinksTo(below)]).toEqual([down]);
+
+  expect([...below.ancestors()]).toEqual([below, above]);
+  expect([...below.descendants()]).toEqual([below, above]);
 });
 
 test("disconnected graph", () => {
@@ -205,6 +240,8 @@ test("disconnected graph", () => {
 
   expect([...above.nodes()]).toEqual([above]);
   expect([...above.links()]).toEqual([]);
+  expect([...above.ancestors()]).toEqual([above]);
+  expect([...above.descendants()]).toEqual([above]);
   expect(above.nnodes()).toBe(1);
   expect(above.nlinks()).toBe(0);
   expect([...above.split()]).toHaveLength(1);
@@ -229,6 +266,8 @@ test("disconnected graph", () => {
 
   expect([...below.nodes()]).toEqual([below]);
   expect([...below.links()]).toEqual([]);
+  expect([...below.ancestors()]).toEqual([below]);
+  expect([...below.descendants()]).toEqual([below]);
   expect(below.nnodes()).toBe(1);
   expect(below.nlinks()).toBe(0);
   expect([...below.split()]).toHaveLength(1);
@@ -254,6 +293,11 @@ test("disconnected graph", () => {
 
 test("complex graph", () => {
   const grf = graph<undefined, undefined>();
+  // a
+  // |\
+  // m |
+  // |/
+  // b
 
   const above = grf.node();
   const middle = grf.node();
@@ -265,6 +309,8 @@ test("complex graph", () => {
   expect(grf.connected()).toBe(true);
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(true);
+  expect([...middle.ancestors()]).toEqual([middle, above]);
+  expect([...middle.descendants()]).toEqual([middle, below]);
 });
 
 test("dynamic graph", () => {
@@ -281,6 +327,8 @@ test("dynamic graph", () => {
   expect(grf.connected()).toBe(false);
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(true);
+  expect([...grf.roots()]).toEqual([one, two, three]);
+  expect([...grf.leaves()]).toEqual([one, two, three]);
 
   grf.link(one, two);
   const lcyc = grf.link(two, one);
@@ -288,18 +336,24 @@ test("dynamic graph", () => {
   expect(grf.connected()).toBe(false);
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(false);
+  expect([...grf.roots()]).toEqual([one, three]); // brittle [two, three]
+  expect([...grf.leaves()]).toEqual([one, three]); // brittle [two, three]
 
   const lconn = grf.link(two, three);
 
   expect(grf.connected()).toBe(true);
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(false);
+  expect([...grf.roots()]).toEqual([two]); // brittle [one]
+  expect([...grf.leaves()]).toEqual([three]);
 
   grf.link(one, two);
 
   expect(grf.connected()).toBe(true);
   expect(grf.multi()).toBe(true);
   expect(grf.acyclic()).toBe(false);
+  expect([...grf.roots()]).toEqual([two]); // brittle [one]
+  expect([...grf.leaves()]).toEqual([three]);
 
   lconn.delete();
 
@@ -320,12 +374,16 @@ test("dynamic graph", () => {
   expect(grf.connected()).toBe(false);
   expect(grf.multi()).toBe(true);
   expect(grf.acyclic()).toBe(true);
+  expect([...grf.roots()]).toEqual([one, three]);
+  expect([...grf.leaves()]).toEqual([two, three]);
 
   grf.link(two, three);
 
   expect(grf.connected()).toBe(true);
   expect(grf.multi()).toBe(true);
   expect(grf.acyclic()).toBe(true);
+  expect([...grf.roots()]).toEqual([one]);
+  expect([...grf.leaves()]).toEqual([three]);
 
   two.delete();
   expect(grf.nnodes()).toBe(2);
@@ -629,6 +687,22 @@ class FakeNode implements GraphNode<null, null> {
   }
 
   *childLinks(): IterableIterator<GraphLink<null, null>> {
+    // noop
+  }
+
+  *descendants(): IterableIterator<GraphNode<null, null>> {
+    // noop
+  }
+
+  *ancestors(): IterableIterator<GraphNode<null, null>> {
+    // noop
+  }
+
+  *roots(): IterableIterator<GraphNode<null, null>> {
+    // noop
+  }
+
+  *leaves(): IterableIterator<GraphNode<null, null>> {
     // noop
   }
 
