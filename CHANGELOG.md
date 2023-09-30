@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2023-09-30
+
+### Added
+
+- Re-added `roots` and `descendants` as well as their counterparts `leaves` and
+  `ancestors` which now work with arbitrary graph structure.
+
 ## [1.0.0] - 2023-07-02
 
 This change is a major rewrite of a lot of the library, so expect some effort
