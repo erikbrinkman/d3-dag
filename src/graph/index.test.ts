@@ -1,6 +1,31 @@
 import { graph, GraphLink, GraphNode, MutGraphLink, MutGraphNode } from ".";
 import { length, map, reduce, some } from "../iters";
 
+function isNode(val: unknown): val is GraphNode {
+  return (
+    val !== null &&
+    typeof val === "object" &&
+    val.constructor.name === "DirectedNode"
+  );
+}
+
+function areNodesEqual(a: unknown, b: unknown): boolean | undefined {
+  const isANode = isNode(a);
+  const isBNode = isNode(b);
+
+  if (isANode && isBNode) {
+    return a === b;
+  } else if (isANode === isBNode) {
+    return undefined;
+  } else {
+    return false;
+  }
+}
+
+// @ts-expect-error not in type-stub for some reason
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+expect.addEqualityTesters([areNodesEqual]);
+
 test("empty graph", () => {
   const grf = graph<never, never>();
 
@@ -336,8 +361,8 @@ test("dynamic graph", () => {
   expect(grf.connected()).toBe(false);
   expect(grf.multi()).toBe(false);
   expect(grf.acyclic()).toBe(false);
-  expect([...grf.roots()]).toEqual([one, three]); // brittle [two, three]
-  expect([...grf.leaves()]).toEqual([one, three]); // brittle [two, three]
+  expect([...grf.roots()]).toEqual([two, three]); // brittle [one, three]
+  expect([...grf.leaves()]).toEqual([two, three]); // brittle [one, three]
 
   const lconn = grf.link(two, three);
 
@@ -374,8 +399,8 @@ test("dynamic graph", () => {
   expect(grf.connected()).toBe(false);
   expect(grf.multi()).toBe(true);
   expect(grf.acyclic()).toBe(true);
-  expect([...grf.roots()]).toEqual([one, three]);
-  expect([...grf.leaves()]).toEqual([two, three]);
+  expect([...grf.roots()]).toEqual([three, one]);
+  expect([...grf.leaves()]).toEqual([three, two]);
 
   grf.link(two, three);
 
@@ -529,6 +554,40 @@ test("caching", () => {
   expect(a.nnodes()).toBe(2);
   expect(a.multi()).toBeFalsy();
   expect(a.acyclic()).toBeTruthy();
+});
+
+test("roots leaves cache", () => {
+  const grf = graph<undefined, undefined>();
+  const a = grf.node();
+  const b = grf.node();
+  const c = grf.node();
+  const d = grf.node();
+  a.child(b);
+  const rlink = a.child(c);
+  a.child(d);
+  const llink = b.child(d);
+  c.child(d);
+  //   a
+  //  /|\
+  // b | c
+  //  \|/
+  //   d
+
+  expect([...grf.roots()]).toEqual([a]);
+  expect([...grf.leaves()]).toEqual([d]);
+
+  rlink.delete();
+  expect([...grf.roots()]).toEqual([a, c]);
+  expect([...grf.leaves()]).toEqual([d]);
+
+  llink.delete();
+  expect([...grf.roots()]).toEqual([a, c]);
+  expect([...grf.leaves()]).toEqual([b, d]);
+  //   a
+  //  /|
+  // b | c
+  //   |/
+  //   d
 });
 
 test("positioning works", () => {
