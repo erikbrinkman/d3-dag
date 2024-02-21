@@ -45,19 +45,11 @@ export interface CoordSimplexOps<N = never, L = never> {
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
-  infer N,
-  never
->
-  ? N
-  : never;
+export type OpNodeDatum<O extends CoordSimplexOps> =
+  O extends CoordSimplexOps<infer N, never> ? N : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
-  never,
-  infer L
->
-  ? L
-  : never;
+export type OpLinkDatum<O extends CoordSimplexOps> =
+  O extends CoordSimplexOps<never, infer L> ? L : never;
 
 /**
  * a {@link Coord} that places nodes to maximize edge verticality

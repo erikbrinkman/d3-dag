@@ -34,12 +34,8 @@ export interface ConnectOps<out N = unknown, in L = never> {
  * The constraint applied to data passed into {@link Connect}
  * conditioned on its operators.
  */
-type ConnectLinkDatum<Ops extends ConnectOps> = Ops extends ConnectOps<
-  unknown,
-  infer L
->
-  ? L
-  : never;
+type ConnectLinkDatum<Ops extends ConnectOps> =
+  Ops extends ConnectOps<unknown, infer L> ? L : never;
 
 /**
  * an operator that constructs a {@link MutGraph} from link data.

@@ -456,13 +456,13 @@ class AugmentedNode<out N, out L> {
       this.indeg === 0
         ? -Infinity
         : this.outdeg === 0
-        ? Infinity
-        : this.indeg - this.outdeg;
+          ? Infinity
+          : this.indeg - this.outdeg;
     return this.stat === "top"
       ? Math.min(diff, 0)
       : this.stat === "bottom"
-      ? Math.max(diff, 0)
-      : diff;
+        ? Math.max(diff, 0)
+        : diff;
   }
 
   isTop(): boolean {
@@ -1116,8 +1116,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
           dinfo.acyclic === false || oinfo.acyclic === false
             ? false
             : dinfo.acyclic === true && oinfo.acyclic === true
-            ? true
-            : null;
+              ? true
+              : null;
         dinfo.roots = null;
         dinfo.leaves = null;
       } else if (srepr !== trepr) {

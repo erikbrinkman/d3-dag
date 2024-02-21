@@ -45,11 +45,8 @@ export interface ParentData<in NodeDatum = never, out LinkDatum = unknown> {
   ): Iterable<readonly [string, LinkDatum]> | undefined;
 }
 
-type StratifyNodeDatum<Ops extends StratifyOps> = Ops extends StratifyOps<
-  infer N
->
-  ? N
-  : never;
+type StratifyNodeDatum<Ops extends StratifyOps> =
+  Ops extends StratifyOps<infer N> ? N : never;
 
 /**
  * What gets returned by {@link Stratify#parentData}() when {@link Stratify#parentIds} is set.

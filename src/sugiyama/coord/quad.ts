@@ -76,19 +76,11 @@ export interface CoordQuadOps<N = never, L = never> {
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends CoordQuadOps> = O extends CoordQuadOps<
-  infer N,
-  never
->
-  ? N
-  : never;
+export type OpNodeDatum<O extends CoordQuadOps> =
+  O extends CoordQuadOps<infer N, never> ? N : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends CoordQuadOps> = O extends CoordQuadOps<
-  never,
-  infer L
->
-  ? L
-  : never;
+export type OpLinkDatum<O extends CoordQuadOps> =
+  O extends CoordQuadOps<never, infer L> ? L : never;
 
 /**
  * a {@link Coord} that places nodes to minimize a quadratic function
