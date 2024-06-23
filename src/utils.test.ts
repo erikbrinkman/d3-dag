@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { setEqual } from "./collections";
 import { assert } from "./test-utils";
 import { berr, ierr } from "./utils";

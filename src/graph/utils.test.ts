@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { verifyId } from "./utils";
 
 test("verifyId() throws", () => {

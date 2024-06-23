@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { Layering, layerSeparation } from ".";
 import { doub, eye, multi, oh, square } from "../../test-graphs";
 import { canonical, getLayers } from "../test-utils";

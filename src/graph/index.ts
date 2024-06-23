@@ -1156,7 +1156,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   }
 
   nparentLinksTo(node: GraphNode<N, L>): number {
-    return isDirectedNode(node) ? this.#pmap.get(node)?.size ?? 0 : 0;
+    return isDirectedNode(node) ? (this.#pmap.get(node)?.size ?? 0) : 0;
   }
 
   *parentLinksTo(node: GraphNode<N, L>): IterableIterator<DirectedLink<N, L>> {
@@ -1169,7 +1169,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   }
 
   nchildLinksTo(node: GraphNode<N, L>): number {
-    return isDirectedNode(node) ? this.#cmap.get(node)?.size ?? 0 : 0;
+    return isDirectedNode(node) ? (this.#cmap.get(node)?.size ?? 0) : 0;
   }
 
   *childLinksTo(node: GraphNode<N, L>): IterableIterator<DirectedLink<N, L>> {

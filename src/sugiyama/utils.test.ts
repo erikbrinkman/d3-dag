@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { compactCrossings, createLayers } from "./test-utils";
 
 test("compactCrossings() detects crossing", () => {

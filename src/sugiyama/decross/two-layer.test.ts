@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { Decross } from ".";
 import { SugiNode } from "../sugify";
 import { createLayers, getIndex } from "../test-utils";

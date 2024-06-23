@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { zherebko } from ".";
 import { Graph, GraphNode, graph } from "../graph";
 import { graphConnect } from "../graph/connect";

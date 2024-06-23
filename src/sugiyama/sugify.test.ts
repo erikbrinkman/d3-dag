@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { graph, Graph, GraphNode } from "../graph";
 import { assert } from "../test-utils";
 import {

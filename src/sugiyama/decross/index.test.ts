@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { bigrams } from "../../iters";
 import { compactCrossings, createLayers, getIndex } from "../test-utils";
 import { twolayerAgg } from "../twolayer/agg";

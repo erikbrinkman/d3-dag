@@ -1,30 +1,6 @@
+import { expect, test } from "bun:test";
 import { graph, GraphLink, GraphNode, MutGraphLink, MutGraphNode } from ".";
 import { length, map, reduce, some } from "../iters";
-
-function isNode(val: unknown): val is GraphNode {
-  return (
-    val !== null &&
-    typeof val === "object" &&
-    val.constructor.name === "DirectedNode"
-  );
-}
-
-function areNodesEqual(a: unknown, b: unknown): boolean | undefined {
-  const isANode = isNode(a);
-  const isBNode = isNode(b);
-
-  if (isANode && isBNode) {
-    return a === b;
-  } else if (isANode === isBNode) {
-    return undefined;
-  } else {
-    return false;
-  }
-}
-
-// @ts-expect-error not in type-stub for some reason
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-expect.addEqualityTesters([areNodesEqual]);
 
 test("empty graph", () => {
   const grf = graph<never, never>();

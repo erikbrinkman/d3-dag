@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { Layering, layerSeparation } from ".";
 import { GraphNode } from "../../graph";
 import { graphConnect } from "../../graph/connect";

@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { GraphNode } from "../../graph";
 import { bigrams } from "../../iters";
 import { sugiNodeLength } from "../sugify";

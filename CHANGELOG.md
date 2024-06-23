@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+
+- Removed non esm builds
+
 ## [1.1.0] - 2023-09-30
 
 ### Added
@@ -23,7 +29,7 @@ too difficult.
 This is a rough overview of the next three sections.
 
 - The old static dag data structure has been upgraded to a dynamic graph
-  structure. This includes a lof of changes:  
+  structure. This includes a lof of changes:
   - `Graph` and `GraphNode` aren't iterable, you must call `.nodes()` to get an
     iterator.
   - `Graph#nodes()` no longer has traversal order. To get someting similar to "before"
@@ -147,10 +153,11 @@ This is a rough overview of the next three sections.
 ### Changed
 
 - Some exported operator interface names were renamed to include their type of operator in the name, e.g. `SimplexOperator` was renamed to `SimplexLayeringOperator`.
-  This is to prevent future name conflicts and standardize the exported intreface as some operators already required the name change. 
+  This is to prevent future name conflicts and standardize the exported intreface as some operators already required the name change.
 - `zherebko` now functions similarly to `sugiyama` in that it handles a node size and includes that padding, rather than pushing coordinates right to 0,0.
 
 ### Removed
+
 - In order to reduce bundle size, methods no longer return custom fluent iterables that allow mapping an reducing.
   You'll need to import a fluent iterable library of choice (e.g. [`lfi`](https://www.npmjs.com/package/lfi)).
 
@@ -189,10 +196,11 @@ Most of the breaking changes are in the backend, so if you've only been using th
 - The definition of Dag changed from being a union of `DagNode` and `DagRoot`, to just being a subset of `DagNode` without the local node operations.
   This is arguably a cleaner api, but will change the behavior of things like conditional types.
 - The definition of `TwolayerOperator` must now support going bottom to top.
-- Layout* (e.g. `LayoutDagNode`) has been completely isolated, so it's impossible to create dags manually without implementing the interface yourself.
+- Layout\* (e.g. `LayoutDagNode`) has been completely isolated, so it's impossible to create dags manually without implementing the interface yourself.
   The purpose is to enforce that dags remain dags, and most operators can be do by clever application of the construction methods (see `sugify`).
 
 ### Removed
+
 - The arquint layout was removed.
   The removal makes me sad, but with the drastic rearchitecture of the library, supporting the arquint layout was too difficult.
   If possible, I would like to bring it back.
@@ -226,19 +234,19 @@ Most of the breaking changes are in the backend, so if you've only been using th
 ### Changed
 
 - The type parameters for the `SugiyamaOperator` were changed to only contain the operators.
-  This only matters if you referenced  an operator with its types attached (e.g. `layout: SugiyamaOperator<NodeType, ...> = ...`). All of the individual attribute modifier functions retained their generic signatures.
--  The typing for most operators changed to more easily allow adding new typed
-   attributes later on. `sugiyama` went from being typed like
-   `sugiyama<NodeType, LayeringType, DecrossType, ...>` to
-   `sugiyama<NodeType, { layering: LayeringType, decross: DecrosType, ... }>`.
-   To update, you'll need to change these declarations.
+  This only matters if you referenced an operator with its types attached (e.g. `layout: SugiyamaOperator<NodeType, ...> = ...`). All of the individual attribute modifier functions retained their generic signatures.
+- The typing for most operators changed to more easily allow adding new typed
+  attributes later on. `sugiyama` went from being typed like
+  `sugiyama<NodeType, LayeringType, DecrossType, ...>` to
+  `sugiyama<NodeType, { layering: LayeringType, decross: DecrosType, ... }>`.
+  To update, you'll need to change these declarations.
 
 ## [0.5.0] - 2020-11-17
 
 ### Changed
 
 - The sugiyama layout was entirely rewritten. Instead of defaulting to fitting
-  nodes into [0, 1] in x and y, it now features a `nodeSize` accessor.  Nodes
+  nodes into [0, 1] in x and y, it now features a `nodeSize` accessor. Nodes
   are spaced out to respect their nodeSizes, along x coordinates this is exact,
   the y coordinates will respect the max height in each layer. As a result of
   the this change, there is no longer a separation accessor, as the role of
@@ -247,7 +255,7 @@ Most of the breaking changes are in the backend, so if you've only been using th
   script), it now return an object with the dag, as well as the width and
   height of the final dag, including "padding" for node sizes. The default size
   of dummy nodes is [0, 0]. To get back to almost the old behavior, you can
-  still specify a `size`.  This will rescale everything, but still keep the
+  still specify a `size`. This will rescale everything, but still keep the
   outside padding.
 
 ## [0.4.0] - 2020-09-17

@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { Layering, layerSeparation } from ".";
 import { graphConnect } from "../../graph/connect";
 import { ccoz, eye, multi, oh, square } from "../../test-graphs";

@@ -324,7 +324,6 @@ function buildOperator<
       const solution = solve(Q, c, A, b);
       width = layout(layers, sep, inds, solution);
     } catch (ex) {
-      /* istanbul ignore next */
       if (typeof ex === "string") {
         throw ierr`${ex}`;
       } else {

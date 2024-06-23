@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { createLayers, getIndex } from "../test-utils";
 import { crossings } from "../utils";
 import { decrossOpt } from "./opt";

@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { setIntersect, setMultimapDelete, setPop } from "./collections";
 
 test("setPop()", () => {

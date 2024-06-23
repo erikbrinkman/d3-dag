@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { graphConnect } from "../../graph/connect";
 import { dummy, en, ex, three, trip } from "../../test-graphs";
 import { laneGreedy as greedy } from "./greedy";

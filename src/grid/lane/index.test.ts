@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs";
 import { laneGreedy } from "./greedy";
 import { laneOpt } from "./opt";

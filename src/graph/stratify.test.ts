@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { MutGraph } from ".";
 import { filter, map } from "../iters";
 import { graphStratify } from "./stratify";

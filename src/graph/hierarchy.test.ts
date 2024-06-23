@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { MutGraph } from ".";
 import { map } from "../iters";
 import { graphHierarchy } from "./hierarchy";

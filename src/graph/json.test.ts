@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { graph, MutGraph } from ".";
 import { assert } from "../test-utils";
 import { graphJson } from "./json";

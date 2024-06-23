@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { createLayers, nodeSep } from "../test-utils";
 import { coordTopological as topological } from "./topological";
 

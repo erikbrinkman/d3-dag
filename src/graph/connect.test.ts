@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { MutGraph } from ".";
 import { entries, map, slice } from "../iters";
 import { canonical } from "../sugiyama/test-utils";

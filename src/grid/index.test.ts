@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { grid } from ".";
 import { Graph, GraphNode, graph } from "../graph";
 import { filter } from "../iters";

@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { graphConnect } from "../../graph/connect";
 import { doub, dummy, line, single, zhere } from "../../test-graphs";
 import { laneOpt } from "./opt";

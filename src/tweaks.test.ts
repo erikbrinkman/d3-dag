@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { graph } from "./graph";
 import { graphConnect } from "./graph/connect";
 import { grid } from "./grid";
@@ -88,8 +89,8 @@ test("tweakFlip()", () => {
   const res = diag(grf, old);
   expect(res).toEqual({ width: old.height, height: old.width });
   for (const node of grf.nodes()) {
-    expect(node.x).toBe(ys.get(node));
-    expect(node.y).toBe(xs.get(node));
+    expect(node.x).toBe(ys.get(node)!);
+    expect(node.y).toBe(xs.get(node)!);
   }
 
   const horiz = tweakFlip("horizontal");
@@ -97,7 +98,7 @@ test("tweakFlip()", () => {
   expect(hres).toEqual(res);
   for (const node of grf.nodes()) {
     expect(node.x).toBe(res.width - ys.get(node)!);
-    expect(node.y).toBe(xs.get(node));
+    expect(node.y).toBe(xs.get(node)!);
   }
 
   const vert = tweakFlip("vertical");

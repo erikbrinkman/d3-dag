@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { graph } from "./graph";
 import { cachedNodeSize, splitNodeSize } from "./layout";
 
