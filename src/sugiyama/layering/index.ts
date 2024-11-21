@@ -31,10 +31,7 @@ export interface Group<in NodeDatum = never, in LinkDatum = never> {
  *
  * This separation returns 1 between nodes, or zero if any is not a node.
  */
-export function layerSeparation(
-  upper?: GraphNode | undefined,
-  lower?: GraphNode | undefined,
-): number {
+export function layerSeparation(upper?: GraphNode, lower?: GraphNode): number {
   return +!!(upper && lower);
 }
 

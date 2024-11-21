@@ -334,7 +334,7 @@ export type DefaultGrid = Grid<{
  * This layout produces good representations when you want a compressed layout
  * where each node is on an independent horizontal line.
  *
- * <img alt="grid example" src="media://grid-greedy-topdown.png" width="200">
+ * <img alt="grid example" src="../../resources/grid-greedy-topdown.png" width="200">
  *
  * @remarks
  *

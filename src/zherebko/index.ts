@@ -282,7 +282,7 @@ export type DefaultZherebko = Zherebko<{
  * {@link Zherebko#nodeSize}, {@link Zherebko#gap}, and
  * {@link Zherebko#tweaks}.
  *
- * <img alt="zherebko example" src="media://zherebko.png" width="1000">
+ * <img alt="zherebko example" src="../../resources/zherebko.png" width="1000">
  *
  * @example
  *

@@ -433,7 +433,7 @@ export type DefaultSugiyama = Sugiyama<{
  * {@link Sugiyama#tweaks}. Note that {@link Rank} can be set in some {@link
  * Layering} operators.
  *
- * <img alt="Sugiyama example" src="media://sugi-simplex-twolayer-simplex.png" width="400">
+ * <img alt="Sugiyama example" src="../../resources/sugi-simplex-twolayer-simplex.png" width="400">
  *
  * @example
  *

@@ -1,6 +1,5 @@
 {
   "entryPoints": ["src"],
-  "media": "resources",
   "out": "docs",
   "excludeInternal": true,
   "cleanOutputDir": true,
