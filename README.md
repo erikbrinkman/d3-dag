@@ -31,6 +31,9 @@ people just want something reasonable out of the box, that works for most
 inputs. Fully supporting that would take a different library, but fortunately
 there are several: (Note this list may not be up to date, but PRs are welcome)
 
+- [react flow](https://reactflow.dev/) - an interactive flow chart react library.
+  This focuses more interaction than layout, and has many more included features,
+  but for people starting out, it might provide much more for free.
 - [graphology](https://www.npmjs.com/package/graphology) - a general javascript
   graph library that's similar to the graph implementation provided as part of
   this library.
