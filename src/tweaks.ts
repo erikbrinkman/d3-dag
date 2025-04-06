@@ -343,15 +343,43 @@ export function shapeEllipse(
 }
 
 /**
+ * a shape that aligns edges with the centered top or bottom of a node
+ *
+ * Useful with [`tweakShape`].
+ */
+export function shapeTopBottom(
+  center: readonly [number, number],
+  nodeSize: readonly [number, number],
+  start: readonly [number, number],
+  end: readonly [number, number],
+): [number, number] {
+  const [cx, cy] = center;
+  const [width, height] = nodeSize;
+  const [_, ey] = end;
+
+  const top = cy - height / 2;
+  const bottom = cy + height / 2;
+
+  if (ey < top) {
+    return [cx, top];
+  } else if (ey > bottom) {
+    return [cx, bottom];
+  } else {
+    throw err`line from [${start}] -> [${end}] ended too close to [${cx}, ${cy}] with size [${width}, ${height}]`;
+  }
+}
+
+/**
  * tweak the layout by truncating edges early
  *
  * This tweak truncates edges at the extent of a node shape sized by a bounding
  * box. After applying this tweak, edge endings like arrows can be easily
  * rendered in the appropriate place.
  *
- * There are two built in {@link Shape}s:
+ * There are three built in {@link Shape}s:
  * - {@link shapeRect} - a simple rectangle
  * - {@link shapeEllipse} - an ellipse (circle for square node sizes)
+ * - {@link shapeTopBottom} - to center edges into the top or bottom of a node
  */
 export function tweakShape<N, L>(
   nodeSize: NodeSize<N, L>,

@@ -51,18 +51,26 @@ import {
   layeringLongestPath,
   layeringSimplex,
   layeringTopological,
+  shapeEllipse,
+  shapeRect,
+  shapeTopBottom,
   sizedSeparation,
   splitNodeSize,
   sugiNodeLength,
   sugifyCompact,
   sugifyLayer,
   sugiyama,
+  tweakFlip,
+  tweakGrid,
+  tweakShape,
+  tweakSize,
   twolayerAgg,
   twolayerGreedy,
   twolayerOpt,
   unsugify,
   zherebko,
 } from ".";
+import { tweakSugiyama } from "./tweaks";
 
 test("graph()", () => {
   const grf: MutGraph<string, string> = graph<string, string>();
@@ -273,6 +281,32 @@ test("sugiyama.coord()", () => {
     .coord(coordCenter())
     .coord(coordQuad().linkCurve(linkWeight).nodeCurve(nodeWeight))
     .coord(coordSimplex().weight(simplexWeight));
+  const { width, height } = layout(dag);
+  expect(width).toBeGreaterThanOrEqual(0);
+  expect(height).toBeGreaterThanOrEqual(0);
+});
+
+test("sugiyama.tweak()", () => {
+  const dag = graph<string, number>();
+  dag.node("a");
+
+  function nodeSize(node: GraphNode<string, number>): [number, number] {
+    return node.data == "a" ? [2, 2] : [1, 1];
+  }
+
+  const layout = sugiyama()
+    .nodeSize(nodeSize)
+    .tweaks([
+      tweakGrid([1, 1]),
+      tweakShape(nodeSize, shapeEllipse),
+      tweakShape(nodeSize, shapeRect),
+    ])
+    .tweaks([
+      tweakSize({ width: 1, height: 1 }),
+      tweakFlip(),
+      tweakSugiyama(nodeSize),
+      tweakShape(nodeSize, shapeTopBottom),
+    ]);
   const { width, height } = layout(dag);
   expect(width).toBeGreaterThanOrEqual(0);
   expect(height).toBeGreaterThanOrEqual(0);

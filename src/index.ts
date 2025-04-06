@@ -300,6 +300,7 @@ export { sizedSeparation, type Separation } from "./sugiyama/utils";
 export {
   shapeEllipse,
   shapeRect,
+  shapeTopBottom,
   tweakFlip,
   tweakGrid,
   tweakShape,
