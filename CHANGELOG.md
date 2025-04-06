@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `shapeTopBottom` for aligning edges to the top/bottom of a node
+
 ### Removed
 
 - Removed non esm builds
