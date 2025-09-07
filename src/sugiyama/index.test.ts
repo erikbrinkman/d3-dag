@@ -1,19 +1,17 @@
 import { expect, test } from "bun:test";
-import { sugiyama } from ".";
-import { Graph, graph, GraphNode } from "../graph";
-import { LayoutResult, NodeSize } from "../layout";
+import { type Graph, type GraphNode, graph } from "../graph";
+import type { LayoutResult, NodeSize } from "../layout";
 import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs";
-import { Tweak, tweakSize } from "../tweaks";
-import { Coord } from "./coord";
-import { Decross } from "./decross";
-import { Layering } from "./layering";
+import { type Tweak, tweakSize } from "../tweaks";
+import { sugiyama } from ".";
+import type { Coord } from "./coord";
+import type { Decross } from "./decross";
+import type { Layering } from "./layering";
 import { layeringTopological } from "./layering/topological";
-import { SugiNode } from "./sugify";
+import type { SugiNode, SugiSeparation } from "./sugify";
 import { canonical } from "./test-utils";
 
-interface Sugiyama<N, L> {
-  (inp: Graph<N, L>): LayoutResult;
-}
+type Sugiyama<N, L> = (inp: Graph<N, L>) => LayoutResult;
 
 test("sugiyama() works on empty graph", () => {
   const dag = graph<undefined, undefined>();
@@ -156,7 +154,7 @@ test("sugiyama() allows changing nodeSize and gap", () => {
   const dag = three();
 
   function nodeSize(node: GraphNode<string>): [number, number] {
-    const size = parseInt(node.data) + 1;
+    const size = parseInt(node.data, 10) + 1;
     return [size, size];
   }
 
@@ -195,11 +193,14 @@ test("sugiyama() allows changing operators", () => {
     return dag.nnodes() - 1;
   };
   const decross: Decross<string | number | boolean, unknown> = () => undefined;
-  const coord: Coord<string | number, unknown> = (layers, sep): number => {
+  const coord: Coord<string | number, unknown> = <N extends string | number, L>(
+    layers: SugiNode<N, L>[][],
+    sep: SugiSeparation<N, L>,
+  ): number => {
     let width = 0;
     for (const layer of layers) {
       let x = 0;
-      let last = undefined;
+      let last: SugiNode<N, L> | undefined;
       for (const node of layer) {
         node.x = x += sep(last, node);
         last = node;

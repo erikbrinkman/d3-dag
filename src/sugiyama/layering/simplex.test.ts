@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
-import { Layering, layerSeparation } from ".";
-import { GraphNode } from "../../graph";
+import type { GraphNode } from "../../graph";
 import { graphConnect } from "../../graph/connect";
 import { doub, ex, eye, multi, oh, square } from "../../test-graphs";
 import { canonical, getLayers } from "../test-utils";
+import { type Layering, layerSeparation } from ".";
 import { layeringSimplex as simplex } from "./simplex";
 import { sizedSep } from "./test-utils";
 

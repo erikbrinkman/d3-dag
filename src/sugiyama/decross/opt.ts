@@ -3,13 +3,14 @@
  *
  * @packageDocumentation
  */
-import { Decross } from ".";
+
 import { listMultimapPush } from "../../collections";
 import { bigrams, entries, slice } from "../../iters";
-import { OptChecking } from "../../layout";
-import { Constraint, Variable, solve } from "../../simplex";
+import type { OptChecking } from "../../layout";
+import { type Constraint, solve, type Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
+import type { Decross } from ".";
 
 /**
  * a {@link Decross} that minimizes the number of crossings
@@ -91,7 +92,7 @@ function computeInds(layers: SugiNode[][]): Map<SugiNode, number> {
 
   const inds = new Map<SugiNode, number>();
   let i = 0;
-  let node;
+  let node: SugiNode | undefined;
   while ((node = queue.pop())) {
     inds.set(node, i++);
     for (const next of following.get(node) ?? []) {
@@ -178,7 +179,7 @@ function buildOperator(options: {
     const sets = new Map<string, string[]>();
     for (const [init, rep] of reps) {
       let fin = rep;
-      let next;
+      let next: string | undefined;
       while ((next = reps.get(fin))) {
         fin = next;
       }
@@ -202,7 +203,9 @@ function buildOperator(options: {
     // all pairs at once, so cost is ~(n/2)^2 not n(n-1)/2
     const maxDistCost =
       distanceConstraints.reduce((cost, [unc, gs]) => {
-        return gs.reduce((t, cs) => t + cs.length * cs.length, 0) * unc.length;
+        const add =
+          gs.reduce((t, cs) => t + cs.length * cs.length, 0) * unc.length;
+        return cost + add;
       }, 0) / 4;
     const distWeight = 1 / (maxDistCost + 1);
     // add small value to objective for preserving the original order of nodes

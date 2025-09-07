@@ -31,16 +31,9 @@ import { toJson } from "./json";
  * }
  * ```
  */
-export interface Rank<in NodeDatum = never, in LinkDatum = never> {
-  /**
-   * compute the rank of a node
-   *
-   * @param node - the node to compute the rank of
-   * @returns rank - the rank of the node; if defined lower ranks indicate
-   *   nodes that come earlier (lower y's)
-   */
-  (node: GraphNode<NodeDatum, LinkDatum>): number | undefined;
-}
+export type Rank<in NodeDatum = never, in LinkDatum = never> = (
+  node: GraphNode<NodeDatum, LinkDatum>,
+) => number | undefined;
 
 /**
  * a link between nodes, with attached information
@@ -485,7 +478,7 @@ function getSetArray<T>(arr: Set<T>[], ind: number): Set<T> {
 }
 
 function getTail<T>(arr: Set<T>[]): Set<T> | undefined {
-  let last;
+  let last: Set<T> | undefined;
   while (arr.length && !(last = arr[arr.length - 1])?.size) {
     arr.pop();
   }
@@ -561,7 +554,7 @@ function topological<N, L>(
   }
 
   function popBuckets(): AugmentedNode<N, L> | undefined {
-    let node;
+    let node: AugmentedNode<N, L> | undefined;
     if ((node = setPop(topBucket) ?? setPop(bottomBucket))) {
       return node;
     }
@@ -585,7 +578,7 @@ function topological<N, L>(
   let minRank = 0;
   let maxRank = augmented.size;
 
-  let aug;
+  let aug: AugmentedNode<N, L> | undefined;
   while ((aug = popBuckets())) {
     const { node } = aug;
     const rank = aug.isTop() ? minRank++ : --maxRank;
@@ -642,7 +635,7 @@ function roots<N, L>(
   const roots = new Set<MutGraphNode<N, L>>();
   const seen = new Set<MutGraphNode<N, L>>();
   const queue: MutGraphNode<N, L>[] = [];
-  let next;
+  let next: MutGraphNode<N, L> | undefined;
   for (const node of nodes) {
     if (seen.has(node)) continue;
     queue.push(node);
@@ -670,7 +663,7 @@ function acyclic<N, L>(nodes: Iterable<GraphNode<N, L>>): boolean {
   for (const node of queue) {
     counts.delete(node);
   }
-  let node;
+  let node: GraphNode<N, L> | undefined;
   while ((node = queue.pop())) {
     for (const child of node.children()) {
       const newParents = counts.get(child)! - 1;
@@ -738,7 +731,7 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
 
   *split(): IterableIterator<MutGraphNode<N, L>> {
     yield* this.#components;
-    let node;
+    let node: MutGraphNode<N, L> | undefined;
     while ((node = setNext(this.#extra))) {
       yield node;
       node.nnodes(); // NOTE causes a full sweep of component
@@ -1247,7 +1240,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
 
   delete(): void {
     if (this.#graph) {
-      let link;
+      let link: DirectedLink<N, L> | undefined;
       while ((link = multimapValuesNext(this.#cmap))) {
         link.delete();
       }

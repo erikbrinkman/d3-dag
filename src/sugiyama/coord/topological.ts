@@ -4,11 +4,16 @@
  *
  * @packageDocumentation
  */
-import { Coord } from ".";
+
 import { bigrams } from "../../iters";
-import { Constraint, solve as solveSimp, Variable } from "../../simplex";
+import {
+  type Constraint,
+  solve as solveSimp,
+  type Variable,
+} from "../../simplex";
 import { err } from "../../utils";
-import { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify";
+import type { Coord } from ".";
 import { avgHeight, init, layout, minBend, solve as solveQuad } from "./utils";
 
 /**
@@ -124,7 +129,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
         }
       }
 
-      delete variables["center"];
+      delete variables.center;
 
       const assignment = solveSimp("opt", "min", variables, constraints);
 

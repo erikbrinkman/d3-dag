@@ -3,11 +3,11 @@
  *
  * @packageDocumentation
  */
-import { Graph, Rank } from "../graph";
+import type { Graph, Rank } from "../graph";
 import { bigrams, map } from "../iters";
-import { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
-import { Tweak } from "../tweaks";
-import { U, err } from "../utils";
+import type { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
+import type { Tweak } from "../tweaks";
+import { err, type U } from "../utils";
 import { greedy } from "./greedy";
 
 /** all operators for the zherebko layout */
@@ -96,7 +96,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
   function zherebko<N extends ND, L extends LD>(
     inp: Graph<N, L>,
   ): LayoutResult {
-    let res;
+    let res: LayoutResult;
     // short-circuit empty graph
     if (!inp.nnodes()) {
       res = { width: 0, height: 0 };

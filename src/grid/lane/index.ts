@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { GraphNode } from "../../graph";
+import type { GraphNode } from "../../graph";
 
 /**
  * An operator for assigning nodes to a lane.
@@ -28,12 +28,6 @@ import { GraphNode } from "../../graph";
  * }
  * ```
  */
-export interface Lane<in NodeDatum = never, in LinkDatum = never> {
-  /**
-   * assign lanes to ordered nodes
-   *
-   * @param ordered - the nodes in to assign lanes to in order from top to
-   *   bottom
-   */
-  (ordered: readonly GraphNode<NodeDatum, LinkDatum>[]): void;
-}
+export type Lane<in NodeDatum = never, in LinkDatum = never> = (
+  ordered: readonly GraphNode<NodeDatum, LinkDatum>[],
+) => void;

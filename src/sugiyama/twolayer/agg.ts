@@ -5,11 +5,11 @@
  * @packageDocumentation
  */
 import { median } from "d3-array";
-import { Twolayer } from ".";
 import { listMultimapPush } from "../../collections";
 import { map } from "../../iters";
 import { err } from "../../utils";
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
+import type { Twolayer } from ".";
 
 /**
  * an interface for aggregating numbers
@@ -18,16 +18,7 @@ import { SugiNode } from "../sugify";
  * returned value must be between the min and the max index, and only return
  * undefined if and only if indices is empty.
  */
-export interface Aggregator {
-  /**
-   * aggregate indices
-   *
-   * @param indices - the indices to aggregate
-   * @returns index - the aggregate index, `undefined` if and only if `indices`
-   *   is empty
-   */
-  (indices: Iterable<number>): number | undefined;
-}
+export type Aggregator = (indices: Iterable<number>) => number | undefined;
 
 /** a simple efficient mean aggregator */
 export function aggMean(indices: Iterable<number>): number | undefined {
@@ -194,12 +185,12 @@ function order(
   let insert = 0;
   let uind = 0;
   for (const [i, node] of ordered.entries()) {
-    while (placements[uind] == i) {
+    while (placements[uind] === i) {
       layer[insert++] = unassigned[uind++];
     }
     layer[insert++] = node;
   }
-  while (placements[uind] == ordered.length) {
+  while (placements[uind] === ordered.length) {
     layer[insert++] = unassigned[uind++];
   }
 }

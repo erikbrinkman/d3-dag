@@ -1,11 +1,9 @@
 import { expect, test } from "bun:test";
-import { graph, MutGraph } from ".";
 import { assert } from "../test-utils";
+import { graph, type MutGraph } from ".";
 import { graphJson } from "./json";
 
-interface Json<N, L> {
-  (dat: unknown): MutGraph<N, L>;
-}
+type Json<N, L> = (dat: unknown) => MutGraph<N, L>;
 
 test("graphJson() works for empty", () => {
   const builder = graphJson();

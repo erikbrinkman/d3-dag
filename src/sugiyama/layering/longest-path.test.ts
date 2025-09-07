@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { Layering, layerSeparation } from ".";
 import { graphConnect } from "../../graph/connect";
 import { ccoz, eye, multi, oh, square } from "../../test-graphs";
 import { canonical, getLayers } from "../test-utils";
+import { type Layering, layerSeparation } from ".";
 import { layeringLongestPath } from "./longest-path";
 import { sizedSep } from "./test-utils";
 
@@ -72,7 +72,7 @@ test("layeringLongestPath() works for cyclic graph", () => {
 
 test("layeringLongestPath() works for rank", () => {
   function rank({ data }: { data: string }): number {
-    return -parseInt(data);
+    return -parseInt(data, 10);
   }
 
   const dag = square();

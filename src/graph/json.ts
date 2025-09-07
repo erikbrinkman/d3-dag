@@ -1,17 +1,9 @@
-import { graph, Graph, GraphNode, MutGraph } from ".";
 import { entries } from "../iters";
-import { err, U } from "../utils";
+import { err, type U } from "../utils";
+import { type Graph, type GraphNode, graph, type MutGraph } from ".";
 
 /** an interface for hydrating serialized graph data */
-export interface Hydrator<T = unknown> {
-  /**
-   * hydrate unknown parsed data into the desired type
-   *
-   * @param parsed - the parsed data without compile-time type information
-   * @returns data - the verified and potentially parsed data
-   */
-  (parsed: unknown): T;
-}
+export type Hydrator<T = unknown> = (parsed: unknown) => T;
 
 interface SerializedNode {
   readonly x?: number | undefined;
@@ -87,7 +79,7 @@ interface Serialized {
 export function toJson(grf: Graph): unknown {
   // serialize nodes
   const nodes: SerializedNode[] = [];
-  let index;
+  let index: number | undefined;
   const inds = new Map<GraphNode, number>();
   for (const [ind, node] of entries(grf.nodes())) {
     inds.set(node, ind);

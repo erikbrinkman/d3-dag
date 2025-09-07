@@ -25,9 +25,9 @@
     "/dist/**/*.d.ts"
   ],
   "scripts": {
-    "fmt": "prettier --write --cache '{src,test-d}/**/*.ts' '*.json' 'examples/*.json' flow.mjs eslint.config.mjs",
+    "fmt": "biome format --write",
     "lint:ts": "tsc",
-    "lint:es": "eslint --cache 'src/**/*.ts'",
+    "lint:es": "biome check",
     "lint:doc": "typedoc --emit none",
     "lint": "bun lint:ts && bun lint:doc && bun lint:es",
     "export:ts": "tsc -p tsconfig.build.json",
@@ -45,26 +45,12 @@
     "stringify-object": "^5.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.17.0",
+    "@biomejs/biome": "^2.2.3",
+    "@types/bun": "^1.2.21",
     "@types/d3-array": "^3.2.1",
-    "@types/eslint__js": "^8.42.3",
     "@types/stringify-object": "^4.0.5",
-    "eslint": "^9.17.0",
-    "eslint-plugin-spellcheck": "^0.0.20",
-    "eslint-plugin-tsdoc": "^0.4.0",
-    "flowgen": "^1.21.0",
-    "glob": "^11.0.0",
-    "prettier": "^3.4.2",
-    "prettier-plugin-organize-imports": "^4.1.0",
-    "typedoc": "^0.27.5",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.18.1",
-    "@types/bun": "^1.1.14"
-  },
-  "prettier": {
-    "plugins": [
-      "prettier-plugin-organize-imports"
-    ]
+    "glob": "^11.0.3",
+    "typedoc": "^0.28.12",
+    "typescript": "~5.9.2"
   }
 }

@@ -7,10 +7,10 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 import { median } from "d3-array";
-import { Coord } from ".";
 import { entries, map, slice } from "../../iters";
 import { err } from "../../utils";
-import { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify";
+import type { Coord } from ".";
 
 /**
  * a {@link Coord} that tries to place nodes close to their parents

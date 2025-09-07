@@ -3,10 +3,11 @@
  *
  * @packageDocumentation
  */
-import { Layering } from ".";
-import { Graph, Rank } from "../../graph";
-import { U, err } from "../../utils";
-import { Separation } from "../utils";
+
+import type { Graph, GraphNode, Rank } from "../../graph";
+import { err, type U } from "../../utils";
+import type { Separation } from "../utils";
+import type { Layering } from ".";
 
 /** topological operators */
 export interface LayeringTopologicalOps<in N = never, in L = never> {
@@ -64,7 +65,7 @@ function buildOperator<ND, LD, Ops extends LayeringTopologicalOps<ND, LD>>(
     sep: Separation<N, L>,
   ): number {
     let height = 0;
-    let last;
+    let last: GraphNode<N, L> | undefined;
     for (const node of dag.topological(options.rank)) {
       height += sep(last, node);
       node.y = height;

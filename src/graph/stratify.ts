@@ -1,7 +1,7 @@
-import { graph, MutGraph, MutGraphNode } from ".";
 import { every, isIterable, map } from "../iters";
-import { err, U } from "../utils";
-import { Id, verifyId } from "./utils";
+import { err, type U } from "../utils";
+import { graph, type MutGraph, type MutGraphNode } from ".";
+import { type Id, verifyId } from "./utils";
 
 /**
  * The interface for getting the parent ids from data. This must return an
@@ -10,17 +10,10 @@ import { Id, verifyId } from "./utils";
  *
  * This can be modified with the {@link Stratify#parentIds} method.
  */
-export interface ParentIds<in NodeDatum = never> {
-  /**
-   * get parent ids from a node datum
-   *
-   * @param datum - the node data to get parent ids from
-   * @param index - the order that the datum was encountered in
-   * @returns parentIds - the parent ids that correspond to the node datum,
-   *   undefined is the same as empty
-   */
-  (datum: NodeDatum, index: number): Iterable<string> | undefined;
-}
+export type ParentIds<in NodeDatum = never> = (
+  datum: NodeDatum,
+  index: number,
+) => Iterable<string> | undefined;
 
 /**
  * The interface for getting the parent ids and link data from the current node
@@ -30,23 +23,16 @@ export interface ParentIds<in NodeDatum = never> {
  *
  * This can be modified with the {@link Stratify#parentData} method.
  */
-export interface ParentData<in NodeDatum = never, out LinkDatum = unknown> {
-  /**
-   * get parent ids and link data from a node datum
-   *
-   * @param datum - the node data to get parent ids from
-   * @param index - the order that the datum was encountered in
-   * @returns parentData - the parent ids and link data that correspond to the
-   *   node datum, undefined is the same as empty
-   */
-  (
-    datum: NodeDatum,
-    index: number,
-  ): Iterable<readonly [string, LinkDatum]> | undefined;
-}
+export type ParentData<in NodeDatum = never, out LinkDatum = unknown> = (
+  datum: NodeDatum,
+  index: number,
+) => Iterable<readonly [string, LinkDatum]> | undefined;
 
-type StratifyNodeDatum<Ops extends StratifyOps> =
-  Ops extends StratifyOps<infer N> ? N : never;
+type StratifyNodeDatum<Ops extends StratifyOps> = Ops extends StratifyOps<
+  infer N
+>
+  ? N
+  : never;
 
 /**
  * What gets returned by {@link Stratify#parentData}() when {@link Stratify#parentIds} is set.

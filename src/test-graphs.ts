@@ -4,7 +4,7 @@
  * @internal
  * @packageDocumentation
  */
-import { Graph } from "./graph";
+import type { Graph } from "./graph";
 import { graphConnect } from "./graph/connect";
 
 export type ConnectGraph = Graph<string, [string, string]>;

@@ -5,16 +5,16 @@
  * @packageDocumentation
  */
 import {
-  Graph,
+  type Graph,
+  type GraphNode,
   graph,
-  GraphNode,
-  MutGraph,
-  MutGraphLink,
-  MutGraphNode,
+  type MutGraph,
+  type MutGraphLink,
+  type MutGraphNode,
 } from "../graph";
 import { entries, map, reverse } from "../iters";
 import { assert } from "../test-utils";
-import { SugiLinkDatum, SugiNode, SugiNodeDatum } from "./sugify";
+import type { SugiLinkDatum, SugiNode, SugiNodeDatum } from "./sugify";
 
 interface MutSugiNodeDatum<in out N, in out L> extends SugiNodeDatum<N, L> {
   node: MutGraphNode<N, L>;
@@ -31,7 +31,7 @@ export function getLayers(dag: Graph<string>, numLayers: number): number[][] {
     .fill(null)
     .map(() => []);
   for (const node of dag.nodes()) {
-    layers[node.y].push(parseInt(node.data));
+    layers[node.y].push(parseInt(node.data, 10));
   }
   for (const layer of layers) {
     layer.sort((a, b) => a - b);
@@ -113,7 +113,7 @@ export function createLayers(
     assert(typeof inds === "object");
     for (let index of inds) {
       let lay = initLayer + 1;
-      let next;
+      let next: number[] | number | bigint;
       const queue = [];
       while (typeof (next = children[lay][index]) === "number") {
         queue.push(index);
@@ -185,6 +185,6 @@ export const nodeSep = (a: unknown, b: unknown) => (+!!a + +!!b) / 2;
 /** canonical order for test nodes */
 export function canonical<L>(grf: Graph<string, L>): GraphNode<string, L>[] {
   const arr = [...grf.nodes()];
-  arr.sort((a, b) => parseInt(a.data) - parseInt(b.data));
+  arr.sort((a, b) => parseInt(a.data, 10) - parseInt(b.data, 10));
   return arr;
 }

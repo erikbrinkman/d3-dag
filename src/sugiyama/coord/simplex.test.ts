@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import { Coord } from ".";
-import { GraphLink } from "../../graph";
+import type { GraphLink } from "../../graph";
 import { flatMap } from "../../iters";
 import { sugiNodeLength } from "../sugify";
 import { createLayers, nodeSep } from "../test-utils";
 import { sizedSeparation } from "../utils";
+import type { Coord } from ".";
 import { coordSimplex } from "./simplex";
 
 test("coordSimplex() modifiers work", () => {
@@ -13,7 +13,7 @@ test("coordSimplex() modifiers work", () => {
     source,
     target,
   }: GraphLink<{ index: number }>): [number, number, number] {
-    return [source.data.index == target.data.index ? 1 : 2, 3, 4];
+    return [source.data.index === target.data.index ? 1 : 2, 3, 4];
   }
 
   const init = coordSimplex() satisfies Coord<unknown, unknown>;

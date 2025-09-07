@@ -1,5 +1,5 @@
-import { Graph } from "./graph";
-import { LayoutResult, NodeSize, cachedNodeSize } from "./layout";
+import type { Graph } from "./graph";
+import { cachedNodeSize, type LayoutResult, type NodeSize } from "./layout";
 import { err } from "./utils";
 
 /**
@@ -24,16 +24,10 @@ import { err } from "./utils";
  * and the dimensions of that layout. Modify the graph arbitrarily, and return
  * the new dimensions after tweaking the layout.
  */
-export interface Tweak<in N = never, in L = never> {
-  /**
-   * tweak the graph with the current dimensions
-   *
-   * @param graph - the graph to  tweak
-   * @param res - the current dimensions of the graph
-   * @returns the new dimensions
-   */
-  (graph: Graph<N, L>, res: Readonly<LayoutResult>): LayoutResult;
-}
+export type Tweak<in N = never, in L = never> = (
+  graph: Graph<N, L>,
+  res: Readonly<LayoutResult>,
+) => LayoutResult;
 
 /**
  * tweak the laidout dag by resizing it
@@ -190,30 +184,14 @@ export function tweakFlip(
  * the node. This is useful for adding endings to an link (like arrows) that
  * will align with a node well.
  */
-export interface Shape {
-  /**
-   * compute the new start link edge point from the current settings
-   *
-   * This should return a new "start" point that touches the edge of the
-   * desired shape. In all cases, `start` should equal `center` and `end`
-   * should be ouside of the bounding box, but it won't hurt for
-   * implementations to be robust in case this isn't true.
-   *
-   * @param center - the center of the node
-   * @param nodeSize - the bounding box size of the node
-   * @param start - the start of the path edge
-   * @param end - the end of the path edge
-   * @returns the new start point for the edge of the shape
-   */
-  (
-    center: readonly [number, number],
-    nodeSize: readonly [number, number],
-    start: readonly [number, number],
-    end: readonly [number, number],
-  ): [number, number];
-}
+export type Shape = (
+  center: readonly [number, number],
+  nodeSize: readonly [number, number],
+  start: readonly [number, number],
+  end: readonly [number, number],
+) => [number, number];
 
-const enum Direction {
+enum Direction {
   Left = 1,
   Right = 2,
   Bottom = 4,

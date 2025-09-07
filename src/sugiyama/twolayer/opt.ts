@@ -4,13 +4,14 @@
  *
  * @packageDocumentation
  */
-import { Twolayer } from ".";
+
 import { listMultimapPush } from "../../collections";
 import { entries, first, map, reduce, slice } from "../../iters";
-import { OptChecking } from "../../layout";
-import { Constraint, Variable, solve } from "../../simplex";
+import type { OptChecking } from "../../layout";
+import { type Constraint, solve, type Variable } from "../../simplex";
 import { err } from "../../utils";
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
+import type { Twolayer } from ".";
 
 /**
  * a {@link Twolayer} for optimal decrossing of a single target layer

@@ -3,21 +3,15 @@
  *
  * @packageDocumentation
  */
-import { GraphNode } from "./graph";
+import type { GraphNode } from "./graph";
 import { err } from "./utils";
 
 /**
  * A strictly callable {@link NodeSize}
  */
-export interface CallableNodeSize<NodeDatum = never, LinkDatum = never> {
-  /**
-   * compute the node size of a graph node
-   *
-   * @param node - the node to get the size of
-   * @returns dimensions - the width and height of `node`
-   */
-  (node: GraphNode<NodeDatum, LinkDatum>): readonly [number, number];
-}
+export type CallableNodeSize<NodeDatum = never, LinkDatum = never> = (
+  node: GraphNode<NodeDatum, LinkDatum>,
+) => readonly [number, number];
 
 /**
  * an accessor for computing the size of a node in the layout
@@ -48,15 +42,9 @@ export type NodeSize<NodeDatum = never, LinkDatum = never> =
   | CallableNodeSize<NodeDatum, LinkDatum>;
 
 /** An accessor for computing the length of a node */
-export interface NodeLength<in NodeDatum = never, in LinkDatum = never> {
-  /**
-   * compute the length (width or height) of a graph node
-   *
-   * @param node - the node to get the length of
-   * @returns length - the width or height of `node`
-   */
-  (node: GraphNode<NodeDatum, LinkDatum>): number;
-}
+export type NodeLength<in NodeDatum = never, in LinkDatum = never> = (
+  node: GraphNode<NodeDatum, LinkDatum>,
+) => number;
 
 /**
  * cache a {@link NodeSize} so it is called at most once for every node

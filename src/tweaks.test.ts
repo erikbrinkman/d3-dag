@@ -195,7 +195,7 @@ test("shapeRect()", () => {
   );
 });
 
-const r2 = 0.7071067811865476; // 1 / Math.sqrt(2);
+const r2 = Math.SQRT1_2; // 1 / Math.sqrt(2);
 const r5 = 0.447213595499958; // 1 / Math.sqrt(5)
 
 test("shapeEllipse()", () => {

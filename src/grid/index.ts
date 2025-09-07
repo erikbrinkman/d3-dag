@@ -3,12 +3,12 @@
  *
  * @packageDocumentation
  */
-import { Graph, Rank } from "../graph";
-import { LayoutResult, NodeSize } from "../layout";
-import { Tweak } from "../tweaks";
-import { U, err } from "../utils";
-import { Lane } from "./lane";
-import { LaneGreedy, laneGreedy } from "./lane/greedy";
+import type { Graph, Rank } from "../graph";
+import type { LayoutResult, NodeSize } from "../layout";
+import type { Tweak } from "../tweaks";
+import { err, type U } from "../utils";
+import type { Lane } from "./lane";
+import { type LaneGreedy, laneGreedy } from "./lane/greedy";
 import { verifyLanes } from "./lane/utils";
 
 /** all operators for the grid layout */
@@ -133,7 +133,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
     // after we topologically order, which would be a pain, so we just allow
     // it.
 
-    let res;
+    let res: LayoutResult;
     // short-circuit empty graph
     if (!grf.nnodes()) {
       res = { width: 0, height: 0 };
@@ -150,7 +150,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
 
       // adjust x and y by nodeSize
       const { xgap, ygap } = sizes;
-      let width, height;
+      let width: number, height: number;
       if (typeof options.nodeSize === "function") {
         // assign ys and compute widths
         const laneWidths = Array<number>(numLanes).fill(0);

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { MutGraph } from ".";
 import { map } from "../iters";
+import type { MutGraph } from ".";
 import { graphHierarchy } from "./hierarchy";
 
 // initial types
@@ -8,9 +8,7 @@ interface Init {
   children?: Iterable<Init> | undefined;
 }
 
-interface Hierarchy<N, L> {
-  (...inp: N[]): MutGraph<N, L>;
-}
+type Hierarchy<N, L> = (...inp: N[]) => MutGraph<N, L>;
 
 interface Datum {
   id: string;

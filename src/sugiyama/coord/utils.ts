@@ -5,10 +5,10 @@
  * @packageDocumentation
  */
 import { solveQP } from "quadprog";
-import { GraphNode } from "../../graph";
+import type { GraphNode } from "../../graph";
 import { bigrams, flatMap, map } from "../../iters";
 import { ierr } from "../../utils";
-import { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify";
 import { aggMean } from "../twolayer/agg";
 
 /** wrapper for solveQP */
@@ -64,8 +64,12 @@ export function solve(
   // casing the last element
   c.pop();
   Q.pop();
-  Q.forEach((row) => row.pop());
-  A.forEach((row) => row.pop());
+  Q.forEach((row) => {
+    row.pop();
+  });
+  A.forEach((row) => {
+    row.pop();
+  });
 
   // Solve
   const solution = qp(Q, c, A, b, meq);

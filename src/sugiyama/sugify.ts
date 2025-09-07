@@ -7,17 +7,17 @@
  * @packageDocumentation
  */
 import {
+  type Graph,
+  type GraphLink,
+  type GraphNode,
   graph,
-  Graph,
-  GraphLink,
-  GraphNode,
-  MutGraph,
-  MutGraphNode,
+  type MutGraph,
+  type MutGraphNode,
 } from "../graph";
 import { bigrams, chain, map, some } from "../iters";
-import { NodeLength } from "../layout";
-import { berr, Named } from "../utils";
-import { Separation } from "./utils";
+import type { NodeLength } from "../layout";
+import { berr, type Named } from "../utils";
+import type { Separation } from "./utils";
 
 /** data for a sugi node that maps to a real node */
 export interface SugiNodeDatum<
@@ -342,7 +342,7 @@ export function unsugify<N, L>(layers: SugiNode<N, L>[][]) {
         // okay because sugi graphs are acyclic and non-multi
         for (let next of sugi.children()) {
           const points: [number, number][] = [[sugi.x, sugi.y]];
-          let link;
+          let link: GraphLink<N, L> | undefined;
           while (next.data.role === "link") {
             link = next.data.link;
             points.push([next.x, next.y]);

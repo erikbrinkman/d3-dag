@@ -2,9 +2,9 @@
  * @internal
  * @packageDocumentation
  */
-import { Graph, GraphNode } from "../../graph";
+import type { Graph, GraphNode } from "../../graph";
 import { graphConnect } from "../../graph/connect";
-import { ConnectGraph } from "../../test-graphs";
+import type { ConnectGraph } from "../../test-graphs";
 
 /** a dag where greedy doesn't minimize crossings */
 export function hard(): ConnectGraph {
@@ -24,7 +24,7 @@ export function prepare(grf: Graph<string>): GraphNode<string, unknown>[] {
     grf.nnodes(),
   );
   for (const node of grf.nodes()) {
-    const y = parseInt(node.data);
+    const y = parseInt(node.data, 10);
     node.y = y;
     nodes[y] = node;
   }

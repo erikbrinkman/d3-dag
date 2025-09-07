@@ -1,22 +1,13 @@
-import { graph, MutGraph, MutGraphNode } from ".";
-import { err, U } from "../utils";
-import { Id, verifyId } from "./utils";
+import { err, type U } from "../utils";
+import { graph, type MutGraph, type MutGraphNode } from ".";
+import { type Id, verifyId } from "./utils";
 
 /**
  * An operator that creates node data from an id
  *
  * The index passed in is the edge index where the id is first seen.
  */
-export interface IdNodeDatum<out D = unknown> {
-  /**
-   * get node data from an id
-   *
-   * @param id - the id of the node
-   * @param index - the index of when the node is encountered
-   * @returns datum - the datum associated with the id
-   */
-  (id: string, index: number): D;
-}
+export type IdNodeDatum<out D = unknown> = (id: string, index: number) => D;
 
 /**
  * The operators that parametrize {@link Connect}
@@ -34,8 +25,12 @@ export interface ConnectOps<out N = unknown, in L = never> {
  * The constraint applied to data passed into {@link Connect}
  * conditioned on its operators.
  */
-type ConnectLinkDatum<Ops extends ConnectOps> =
-  Ops extends ConnectOps<unknown, infer L> ? L : never;
+type ConnectLinkDatum<Ops extends ConnectOps> = Ops extends ConnectOps<
+  unknown,
+  infer L
+>
+  ? L
+  : never;
 
 /**
  * an operator that constructs a {@link MutGraph} from link data.

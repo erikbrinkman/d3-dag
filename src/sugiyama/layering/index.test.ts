@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { layerSeparation } from ".";
 import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs";
+import { layerSeparation } from ".";
 import { layeringLongestPath } from "./longest-path";
 import { layeringSimplex } from "./simplex";
 import { sizedSep } from "./test-utils";

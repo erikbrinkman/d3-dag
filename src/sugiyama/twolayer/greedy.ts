@@ -4,9 +4,10 @@
  *
  * @packageDocumentation
  */
-import { Twolayer } from ".";
+
 import { err } from "../../utils";
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
+import type { Twolayer } from ".";
 
 /**
  * a {@link Twolayer} that greedily swaps nodes
@@ -51,9 +52,7 @@ export interface TwolayerGreedy<Op extends Twolayer = Twolayer>
   readonly d3dagBuiltin: true;
 }
 
-interface SwapChange<N, L> {
-  (left: SugiNode<N, L>, right: SugiNode<N, L>): number;
-}
+type SwapChange<N, L> = (left: SugiNode<N, L>, right: SugiNode<N, L>) => number;
 
 function createSwapChange<N, L>(
   stationary: readonly SugiNode<N, L>[],
@@ -104,7 +103,7 @@ function adjacentSwap<N, L>(
   swapChange: SwapChange<N, L>,
 ): void {
   const ranges: [number, number][] = [[0, layer.length]];
-  let range;
+  let range: [number, number] | undefined;
   while ((range = ranges.pop())) {
     const [start, end] = range;
     if (start >= end) continue;

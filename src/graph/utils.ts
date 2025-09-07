@@ -21,13 +21,4 @@ export function verifyId(id: string): string {
  * This is used in {@link Stratify#id}, {@link Connect#sourceId}, and
  * {@link Connect#targetId}.
  */
-export interface Id<in Datum = never> {
-  /**
-   * get node id from a datum
-   *
-   * @param datum - the datum to get the id from
-   * @param index - the index that the data was encountered in
-   * @returns id - the id corresponding to the node datum
-   */
-  (datum: Datum, index: number): string;
-}
+export type Id<in Datum = never> = (datum: Datum, index: number) => string;

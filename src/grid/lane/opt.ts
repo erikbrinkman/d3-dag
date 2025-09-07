@@ -3,12 +3,13 @@
  *
  * @packageDocumentation
  */
-import { Lane } from ".";
-import { GraphNode } from "../../graph";
+
+import type { GraphNode } from "../../graph";
 import { map } from "../../iters";
-import { OptChecking } from "../../layout";
-import { Constraint, solve, Variable } from "../../simplex";
+import type { OptChecking } from "../../layout";
+import { type Constraint, solve, type Variable } from "../../simplex";
 import { err } from "../../utils";
+import type { Lane } from ".";
 import { gridChildren } from "./utils";
 
 /**

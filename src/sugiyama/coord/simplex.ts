@@ -4,28 +4,22 @@
  *
  * @packageDocumentation
  */
-import { Coord } from ".";
-import { GraphLink, GraphNode } from "../../graph";
+
+import type { GraphLink, GraphNode } from "../../graph";
 import { bigrams, flatMap } from "../../iters";
-import { Constraint, Variable, solve } from "../../simplex";
+import { type Constraint, solve, type Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
-import { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify";
+import type { Coord } from ".";
 import { avgHeight } from "./utils";
 
 /**
  * a strictly callable {@link SimplexWeight}
  */
-export interface CallableSimplexWeight<NodeDatum = never, LinkDatum = never> {
-  /**
-   * get the simplex weights for a link
-   *
-   * Higher weights indicate a strong preference for verticality.
-   *
-   * @param link - the link in question
-   * @returns weights - the weights for short, medium, and long edges respectively
-   */
-  (link: GraphLink<NodeDatum, LinkDatum>): readonly [number, number, number];
-}
+export type CallableSimplexWeight<NodeDatum = never, LinkDatum = never> = (
+  link: GraphLink<NodeDatum, LinkDatum>,
+) => readonly [number, number, number];
+
 /**
  * an accessor to get how vertical a weight should be.
  *
@@ -45,11 +39,19 @@ export interface CoordSimplexOps<N = never, L = never> {
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends CoordSimplexOps> =
-  O extends CoordSimplexOps<infer N, never> ? N : never;
+export type OpNodeDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
+  infer N,
+  never
+>
+  ? N
+  : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends CoordSimplexOps> =
-  O extends CoordSimplexOps<never, infer L> ? L : never;
+export type OpLinkDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
+  never,
+  infer L
+>
+  ? L
+  : never;
 
 /**
  * a {@link Coord} that places nodes to maximize edge verticality
