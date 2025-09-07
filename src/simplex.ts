@@ -1,4 +1,4 @@
-import { Constraint, Solve, Variable } from "javascript-lp-solver";
+import { type Constraint, Solve, type Variable } from "javascript-lp-solver";
 import { ierr } from "./utils";
 export type { Constraint, Variable };
 

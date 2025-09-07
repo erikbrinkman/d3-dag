@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { MutGraph } from ".";
 import { entries, map, slice } from "../iters";
 import { canonical } from "../sugiyama/test-utils";
+import type { MutGraph } from ".";
 import { graphConnect } from "./connect";
 
 // initial type
@@ -10,9 +10,7 @@ interface Init {
   1: string;
 }
 
-interface Connect<N, LD> {
-  <L extends LD>(inp: L[]): MutGraph<N, L>;
-}
+type Connect<N, LD> = <L extends LD>(inp: L[]) => MutGraph<N, L>;
 
 const zherebko = [
   ["1", "2"],
@@ -159,7 +157,7 @@ test("graphConnect() parses zherebko", () => {
 });
 
 test("graphConnect() allows custom node data", () => {
-  const nodeDatum = (id: string) => ({ num: parseInt(id) - 1 });
+  const nodeDatum = (id: string) => ({ num: parseInt(id, 10) - 1 });
 
   const init = graphConnect() satisfies Connect<string, Init>;
 

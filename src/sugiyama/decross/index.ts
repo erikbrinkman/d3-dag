@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
 
 /**
  * a decrossing operator rearranges the nodes in a layer to minimize decrossings.
@@ -63,11 +63,6 @@ import { SugiNode } from "../sugify";
  * }
  * ```
  */
-export interface Decross<in NodeDatum = never, in LinkDatum = never> {
-  /**
-   * remove crossings from a layered graph
-   *
-   * @param layers - the layers of nodes that this should rearrange.
-   */
-  (layers: SugiNode<NodeDatum, LinkDatum>[][]): void;
-}
+export type Decross<in NodeDatum = never, in LinkDatum = never> = (
+  layers: SugiNode<NodeDatum, LinkDatum>[][],
+) => void;

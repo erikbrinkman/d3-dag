@@ -3,22 +3,28 @@
  *
  * @packageDocumentation
  */
-import { Graph } from "../graph";
+import type { Graph } from "../graph";
 import {
-  LayoutResult,
-  NodeSize,
   cachedNodeSize,
+  type LayoutResult,
+  type NodeSize,
   splitNodeSize,
 } from "../layout";
-import { Tweak } from "../tweaks";
-import { U, err } from "../utils";
-import { Coord } from "./coord";
-import { DefaultCoordSimplex, coordSimplex } from "./coord/simplex";
-import { Decross } from "./decross";
-import { DefaultDecrossTwoLayer, decrossTwoLayer } from "./decross/two-layer";
-import { Layering, layerSeparation } from "./layering";
-import { DefaultLayeringSimplex, layeringSimplex } from "./layering/simplex";
-import { sugiNodeLength, sugifyLayer, unsugify, validateCoord } from "./sugify";
+import type { Tweak } from "../tweaks";
+import { err, type U } from "../utils";
+import type { Coord } from "./coord";
+import { coordSimplex, type DefaultCoordSimplex } from "./coord/simplex";
+import type { Decross } from "./decross";
+import {
+  type DefaultDecrossTwoLayer,
+  decrossTwoLayer,
+} from "./decross/two-layer";
+import { type Layering, layerSeparation } from "./layering";
+import {
+  type DefaultLayeringSimplex,
+  layeringSimplex,
+} from "./layering/simplex";
+import { sugifyLayer, sugiNodeLength, unsugify, validateCoord } from "./sugify";
 import { sizedSeparation } from "./utils";
 
 /** sugiyama operators */
@@ -231,7 +237,7 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   function sugiyama<N extends ON, L extends OL>(
     dag: Graph<N, L>,
   ): LayoutResult {
-    let res;
+    let res: LayoutResult;
     // short circuit for empty graph
     if (!dag.nnodes()) {
       res = { width: 0, height: 0 };

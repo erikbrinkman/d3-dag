@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { Layering, layerSeparation } from ".";
 import { doub, eye, multi, oh, square } from "../../test-graphs";
 import { canonical, getLayers } from "../test-utils";
+import { type Layering, layerSeparation } from ".";
 import { sizedSep } from "./test-utils";
 import { layeringTopological } from "./topological";
 
@@ -32,7 +32,7 @@ test("layeringTopological() works for square with sizedSep", () => {
 
 test("layeringTopological() allows setting rank", () => {
   const dag = square();
-  const rank = ({ data }: { data: string }) => -parseInt(data);
+  const rank = ({ data }: { data: string }) => -parseInt(data, 10);
 
   const init = layeringTopological() satisfies Layering<unknown, unknown>;
 

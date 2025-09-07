@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify";
 
 /**
  * an operator that assigns coordinates to layered {@link SugiNode}s

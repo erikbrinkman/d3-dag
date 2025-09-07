@@ -4,10 +4,10 @@
  * @packageDocumentation
  */
 import { least, median } from "d3-array";
-import { Lane } from ".";
-import { GraphNode } from "../../graph";
+import type { GraphNode } from "../../graph";
 import { map, slice } from "../../iters";
 import { err } from "../../utils";
+import type { Lane } from ".";
 import { gridChildren } from "./utils";
 
 /**

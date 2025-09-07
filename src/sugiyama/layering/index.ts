@@ -5,8 +5,8 @@
  *
  * @packageDocumentation
  */
-import { Graph, GraphNode } from "../../graph";
-import { Separation } from "../utils";
+import type { Graph, GraphNode } from "../../graph";
+import type { Separation } from "../utils";
 
 /**
  * a group assignment accessor
@@ -15,16 +15,9 @@ import { Separation } from "../utils";
  * operators that take a group accessor should respect the convention that
  * nodes with the same group should have the same layer.
  */
-export interface Group<in NodeDatum = never, in LinkDatum = never> {
-  /**
-   * assign a group to a node
-   *
-   * @param node - the node to assign a group to
-   * @returns group - the node's group, `undefined` if the node doesn't have a
-   *   group
-   */
-  (node: GraphNode<NodeDatum, LinkDatum>): string | undefined;
-}
+export type Group<in NodeDatum = never, in LinkDatum = never> = (
+  node: GraphNode<NodeDatum, LinkDatum>,
+) => string | undefined;
 
 /**
  * default separation for layering

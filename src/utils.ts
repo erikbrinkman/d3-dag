@@ -10,9 +10,7 @@ import { entries, map } from "./iters";
 export type U<O, K extends keyof O, V> = Omit<O, K> & Record<K, V>;
 
 /** a callback for things with children */
-export interface ChildrenCallback<T> {
-  (node: T): Iterable<T>;
-}
+export type ChildrenCallback<T> = (node: T) => Iterable<T>;
 
 /** depth first search for arbitrary types */
 export function* dfs<T>(
@@ -20,7 +18,7 @@ export function* dfs<T>(
   ...queue: T[]
 ): IterableIterator<T> {
   const seen = new Set<T>();
-  let node;
+  let node: T | undefined;
   while ((node = queue.pop()) !== undefined) {
     if (seen.has(node)) continue;
     yield node;

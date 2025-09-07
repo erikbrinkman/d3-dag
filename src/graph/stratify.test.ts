@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { MutGraph } from ".";
 import { filter, map } from "../iters";
+import type { MutGraph } from ".";
 import { graphStratify } from "./stratify";
 
 // initial types
@@ -9,9 +9,7 @@ interface Init {
   parentIds: string[];
 }
 
-interface Stratify<ND, L> {
-  <N extends ND>(inp: N[]): MutGraph<N, L>;
-}
+type Stratify<ND, L> = <N extends ND>(inp: N[]) => MutGraph<N, L>;
 
 interface Datum {
   id: string;

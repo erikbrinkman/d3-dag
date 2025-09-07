@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { Twolayer } from ".";
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
 import { createLayers, getIndex } from "../test-utils";
 import { crossings } from "../utils";
+import type { Twolayer } from ".";
 import { twolayerAgg } from "./agg";
 import { twolayerGreedy } from "./greedy";
 

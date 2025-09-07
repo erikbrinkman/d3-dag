@@ -3,11 +3,12 @@
  *
  * @packageDocumentation
  */
-import { Layering } from ".";
-import { Graph, Rank } from "../../graph";
+
+import type { Graph, Rank } from "../../graph";
 import { chain, filter, map } from "../../iters";
-import { U, err } from "../../utils";
-import { Separation } from "../utils";
+import { err, type U } from "../../utils";
+import type { Separation } from "../utils";
+import type { Layering } from ".";
 
 /** longest path operators */
 export interface LayeringLongestPathOps<in N = never, in L = never> {

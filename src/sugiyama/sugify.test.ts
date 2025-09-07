@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import { graph, Graph, GraphNode } from "../graph";
+import { type Graph, type GraphNode, graph } from "../graph";
 import { assert } from "../test-utils";
 import {
-  SugiDatum,
+  type SugiDatum,
+  type SugiNode,
   sugifyCompact,
   sugifyLayer,
-  SugiNode,
   unsugify,
 } from "./sugify";
 

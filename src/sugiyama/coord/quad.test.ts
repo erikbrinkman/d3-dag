@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { Coord } from ".";
-import { GraphLink } from "../../graph";
+import type { GraphLink } from "../../graph";
 import { createLayers, nodeSep } from "../test-utils";
+import type { Coord } from ".";
 import { coordQuad } from "./quad";
 
 test("coordQuad() modifiers work", () => {

@@ -1,15 +1,13 @@
 import { expect, test } from "bun:test";
-import { zherebko } from ".";
-import { Graph, GraphNode, graph } from "../graph";
+import { type Graph, type GraphNode, graph } from "../graph";
 import { graphConnect } from "../graph/connect";
 import { filter, map } from "../iters";
-import { LayoutResult } from "../layout";
+import type { LayoutResult } from "../layout";
 import { doub, line, oh, single } from "../test-graphs";
 import { tweakSize } from "../tweaks";
+import { zherebko } from ".";
 
-interface Zhere<N, L> {
-  (inp: Graph<N, L>): LayoutResult;
-}
+type Zhere<N, L> = (inp: Graph<N, L>) => LayoutResult;
 
 test("zherebko() works for empty graph", () => {
   const grf = graph();
@@ -155,7 +153,7 @@ test("zherebko() works specific case", () => {
   expect(height).toBeCloseTo(14);
   for (const node of grf.nodes()) {
     expect(node.x).toBeCloseTo(2);
-    expect(node.y).toBeCloseTo(parseInt(node.data) * 3 + 1);
+    expect(node.y).toBeCloseTo(parseInt(node.data, 10) * 3 + 1);
   }
   const [zero, , two] = grf.topological();
 
@@ -212,7 +210,7 @@ test("zherebko() works for four-clique", () => {
   expect(height).toBeCloseTo(11);
   for (const node of grf.nodes()) {
     expect(node.x).toBeCloseTo(2);
-    expect(node.y).toBeCloseTo(parseInt(node.data) * 3 + 1);
+    expect(node.y).toBeCloseTo(parseInt(node.data, 10) * 3 + 1);
   }
 });
 
@@ -337,7 +335,7 @@ test("zherebko() works on induced multi cycle", () => {
 
 test("zherebko() works with inverted edges", () => {
   function rank({ data }: { data: string }): number {
-    return parseInt(data);
+    return parseInt(data, 10);
   }
 
   const build = graphConnect();
@@ -382,8 +380,8 @@ test("zherebko() works with variable node sizes", () => {
     ["2", "3"],
   ]);
   const layout = zherebko().nodeSize(({ data }: GraphNode<string>) => [
-    parseInt(data),
-    parseInt(data),
+    parseInt(data, 10),
+    parseInt(data, 10),
   ]);
   const { width, height } = layout(grf);
   expect(width).toBeCloseTo(4);

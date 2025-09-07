@@ -7,24 +7,26 @@
 import { err } from "./utils";
 
 /** iterable callback that maps a value into another */
-export interface MapCallback<in T, out S> {
-  (element: T, index: number): S;
-}
+export type MapCallback<in T, out S> = (element: T, index: number) => S;
 
 /** iterable callback that maps a value into another */
-export interface GuardCallback<in T, R extends T> {
-  (element: T, index: number): element is R;
-}
+export type GuardCallback<in T, R extends T> = (
+  element: T,
+  index: number,
+) => element is R;
 
 /** reduce callback */
-export interface ReduceCallback<in T, in out S> {
-  (accumulator: S, currentValue: T, index: number): S;
-}
+export type ReduceCallback<in T, in out S> = (
+  accumulator: S,
+  currentValue: T,
+  index: number,
+) => S;
 
 /** filter guard callback */
-export interface FilterGuardCallback<in T, out S extends T> {
-  (element: T, index: number): element is S;
-}
+export type FilterGuardCallback<in T, out S extends T> = (
+  element: T,
+  index: number,
+) => element is S;
 
 /** elements with their zero based index */
 export function* entries<T>(iter: Iterable<T>): IterableIterator<[number, T]> {
@@ -182,7 +184,7 @@ export function* bigrams<T>(iterable: Iterable<T>): IterableIterator<[T, T]> {
   const first = iter.next();
   if (!first.done) {
     let last = first.value;
-    let next;
+    let next: IteratorResult<T, unknown>;
     while (!(next = iter.next()).done) {
       yield [last, next.value];
       last = next.value;

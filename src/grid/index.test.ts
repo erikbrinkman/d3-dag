@@ -1,15 +1,13 @@
 import { expect, test } from "bun:test";
-import { grid } from ".";
-import { Graph, GraphNode, graph } from "../graph";
+import { type Graph, type GraphNode, graph } from "../graph";
 import { filter } from "../iters";
-import { LayoutResult } from "../layout";
+import type { LayoutResult } from "../layout";
 import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs";
 import { tweakSize } from "../tweaks";
+import { grid } from ".";
 import { laneGreedy } from "./lane/greedy";
 
-interface Grid<N, L> {
-  (inp: Graph<N, L>): LayoutResult;
-}
+type Grid<N, L> = (inp: Graph<N, L>) => LayoutResult;
 
 test("grid() works for empty graph", () => {
   const grf = graph();
@@ -273,8 +271,8 @@ test("grid() throws for invalid lane operators", () => {
 test("greedy() works for variable sizes", () => {
   const grf = dummy();
   const layout = grid().nodeSize(({ data }: GraphNode<string>) => [
-    parseInt(data) + 1,
-    parseInt(data) + 1,
+    parseInt(data, 10) + 1,
+    parseInt(data, 10) + 1,
   ]);
   const { width, height } = layout(grf);
   expect(width).toEqual(6);

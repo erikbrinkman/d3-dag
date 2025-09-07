@@ -1,6 +1,6 @@
-import { graph, MutGraph, MutGraphNode } from ".";
 import { isIterable, map } from "../iters";
 import { err } from "../utils";
+import { graph, type MutGraph, type MutGraphNode } from ".";
 
 // NOTE this is typed differently than most operators, and that's because the
 // operators are invariant due to them taking the same type as input and
@@ -16,17 +16,10 @@ import { err } from "../utils";
  *
  * Can be modified with {@link Hierarchy#children}.
  */
-export interface Children<in out NodeDatum> {
-  /**
-   * get children from a node
-   *
-   * @param datum - the datum to get children of
-   * @param index - the index with which the data was encountered
-   * @returns children - all the children data of this node, or undefined if
-   *   there are no children
-   */
-  (datum: NodeDatum, index: number): Iterable<NodeDatum> | undefined;
-}
+export type Children<in out NodeDatum> = (
+  datum: NodeDatum,
+  index: number,
+) => Iterable<NodeDatum> | undefined;
 
 /**
  * The interface for getting children data and associated link data from node
@@ -35,20 +28,10 @@ export interface Children<in out NodeDatum> {
  *
  * Can be modified with {@link Hierarchy#childrenData}.
  */
-export interface ChildrenData<in out NodeDatum, out LinkDatum = unknown> {
-  /**
-   * get children data from a node
-   *
-   * @param datum - the datum to get children of
-   * @param index - the index with which the data was encountered
-   * @returns childrenData - all the children data of this node, or undefined if
-   *   there are no children
-   */
-  (
-    datum: NodeDatum,
-    index: number,
-  ): Iterable<readonly [NodeDatum, LinkDatum]> | undefined;
-}
+export type ChildrenData<in out NodeDatum, out LinkDatum = unknown> = (
+  datum: NodeDatum,
+  index: number,
+) => Iterable<readonly [NodeDatum, LinkDatum]> | undefined;
 
 /**
  * a wrapped children operator that functions as a children data operator
@@ -196,7 +179,7 @@ function buildHierarchy<
     }
 
     // dfs through data
-    let next;
+    let next: [MutGraphNode<N, L>, N, L] | undefined;
     while ((next = queue.pop())) {
       const [pnode, ndatum, datum] = next;
       const cached = mapping.get(ndatum);

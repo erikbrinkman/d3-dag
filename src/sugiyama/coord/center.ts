@@ -4,9 +4,10 @@
  *
  * @packageDocumentation
  */
-import { Coord } from ".";
+
 import { err } from "../../utils";
-import { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify";
+import type { Coord } from ".";
 
 /**
  * A {@link Coord} that spaces every node out by node size, and then centers
@@ -35,7 +36,7 @@ export function coordCenter(...args: never[]): CoordCenter {
   ): number {
     const widths = layers.map((layer) => {
       let width = 0;
-      let last;
+      let last: SugiNode<N, L> | undefined;
       for (const node of layer) {
         width += sep(last, node);
         node.x = width;

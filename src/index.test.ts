@@ -1,65 +1,65 @@
 import { expect, test } from "bun:test";
 import {
-  Aggregator,
-  Children,
-  ChildrenData,
-  Coord,
-  Decross,
-  DefaultConnect,
-  DefaultGrid,
-  DefaultHierarchy,
-  DefaultStratify,
-  DefaultSugiyama,
-  DefaultZherebko,
-  Graph,
-  GraphLink,
-  GraphNode,
-  Group,
-  Id,
-  IdNodeDatum,
-  Lane,
-  Layering,
-  LinkWeight,
-  MutGraph,
-  NodeSize,
-  NodeWeight,
-  ParentData,
-  ParentIds,
-  Rank,
-  SimplexWeight,
-  SugiNode,
-  Twolayer,
+  type Aggregator,
   aggMean,
   aggMedian,
   aggWeightedMedian,
+  type Children,
+  type ChildrenData,
+  type Coord,
   cachedNodeSize,
   coordCenter,
   coordGreedy,
   coordQuad,
   coordSimplex,
   coordTopological,
+  type Decross,
+  type DefaultConnect,
+  type DefaultGrid,
+  type DefaultHierarchy,
+  type DefaultStratify,
+  type DefaultSugiyama,
+  type DefaultZherebko,
   decrossOpt,
   decrossTwoLayer,
+  type Graph,
+  type GraphLink,
+  type GraphNode,
+  type Group,
   graph,
   graphConnect,
   graphHierarchy,
   graphStratify,
   grid,
+  type Id,
+  type IdNodeDatum,
+  type Lane,
+  type Layering,
+  type LinkWeight,
   laneGreedy,
   laneOpt,
-  layerSeparation,
   layeringLongestPath,
   layeringSimplex,
   layeringTopological,
+  layerSeparation,
+  type MutGraph,
+  type NodeSize,
+  type NodeWeight,
+  type ParentData,
+  type ParentIds,
+  type Rank,
+  type SimplexWeight,
+  type SugiNode,
   shapeEllipse,
   shapeRect,
   shapeTopBottom,
   sizedSeparation,
   splitNodeSize,
-  sugiNodeLength,
   sugifyCompact,
   sugifyLayer,
+  sugiNodeLength,
   sugiyama,
+  type Twolayer,
   tweakFlip,
   tweakGrid,
   tweakShape,
@@ -156,7 +156,8 @@ test("graphConnect()", () => {
   }: {
     target: string;
   }): string => target;
-  const nodeDatum: IdNodeDatum<number> = (id: string): number => parseInt(id);
+  const nodeDatum: IdNodeDatum<number> = (id: string): number =>
+    parseInt(id, 10);
   const modified = layout
     .sourceId(sourceId)
     .targetId(targetId)
@@ -177,7 +178,7 @@ test("sugiyama.layering()", () => {
     data,
   }: GraphNode<string, unknown>) => {
     const res = parseFloat(data);
-    return isNaN(res) ? undefined : res;
+    return Number.isNaN(res) ? undefined : res;
   };
   const group: Group<string, unknown> = ({
     data,
@@ -256,7 +257,7 @@ test("sugiyama.coord()", () => {
     data,
   }: GraphNode<string, unknown>) => {
     const res = parseFloat(data);
-    return isNaN(res) ? 0 : res;
+    return Number.isNaN(res) ? 0 : res;
   };
   const simplexWeight: SimplexWeight<unknown, number> = ({
     data,
@@ -291,7 +292,7 @@ test("sugiyama.tweak()", () => {
   dag.node("a");
 
   function nodeSize(node: GraphNode<string, number>): [number, number] {
-    return node.data == "a" ? [2, 2] : [1, 1];
+    return node.data === "a" ? [2, 2] : [1, 1];
   }
 
   const layout = sugiyama()
@@ -393,7 +394,7 @@ test("grid()", () => {
     data,
   }: GraphNode<string, unknown>) => {
     const res = parseFloat(data);
-    return isNaN(res) ? undefined : res;
+    return Number.isNaN(res) ? undefined : res;
   };
   const lane: Lane<string, number> = (
     ordered: readonly GraphNode<string, number>[],

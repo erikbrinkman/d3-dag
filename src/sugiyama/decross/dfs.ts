@@ -4,10 +4,11 @@
  *
  * @packageDocumentation
  */
-import { Decross } from ".";
+
 import { filter, flatMap, slice } from "../../iters";
 import { dfs as depthFirstSearch, err } from "../../utils";
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
+import type { Decross } from ".";
 
 /**
  * a depth first search operator

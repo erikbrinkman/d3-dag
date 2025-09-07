@@ -4,12 +4,13 @@
  *
  * @packageDocumentation
  */
-import { Group, Layering } from ".";
-import { Graph, GraphNode, Rank } from "../../graph";
+
+import type { Graph, GraphNode, Rank } from "../../graph";
 import { bigrams, map } from "../../iters";
-import { Constraint, Variable, solve } from "../../simplex";
-import { U, err, ierr } from "../../utils";
-import { Separation } from "../utils";
+import { type Constraint, solve, type Variable } from "../../simplex";
+import { err, ierr, type U } from "../../utils";
+import type { Separation } from "../utils";
+import type { Group, Layering } from ".";
 
 /** simplex operator operators */
 export interface LayeringSimplexOps<in N = never, in L = never> {

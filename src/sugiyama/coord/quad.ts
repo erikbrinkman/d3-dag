@@ -4,11 +4,12 @@
  *
  * @packageDocumentation
  */
-import { Coord } from ".";
-import { GraphLink, GraphNode } from "../../graph";
+
+import type { GraphLink, GraphNode } from "../../graph";
 import { flatMap } from "../../iters";
-import { U, err, ierr } from "../../utils";
-import { SugiNode, SugiSeparation } from "../sugify";
+import { err, ierr, type U } from "../../utils";
+import type { SugiNode, SugiSeparation } from "../sugify";
+import type { Coord } from ".";
 import {
   avgHeight,
   indices,
@@ -22,15 +23,10 @@ import {
 /**
  * a strictly callable {@link NodeWeight}
  */
-export interface CallableNodeWeight<NodeDatum = never, LinkDatum = never> {
-  /**
-   * get the weight of a node
-   *
-   * @param node - the node to get the weight of
-   * @returns weight - the corresponding weight
-   */
-  (node: GraphNode<NodeDatum, LinkDatum>): number;
-}
+export type CallableNodeWeight<NodeDatum = never, LinkDatum = never> = (
+  node: GraphNode<NodeDatum, LinkDatum>,
+) => number;
+
 /**
  * an accessor to get the optimization of the weight for a node
  *
@@ -43,15 +39,10 @@ export type NodeWeight<NodeDatum = never, LinkDatum = never> =
 /**
  * a strictly callable {@link LinkWeight}
  */
-export interface CallableLinkWeight<NodeDatum = never, LinkDatum = never> {
-  /**
-   * get the weight of a link
-   *
-   * @param link - the link to get the weight of
-   * @returns weight - the corresponding weight
-   */
-  (link: GraphLink<NodeDatum, LinkDatum>): number;
-}
+export type CallableLinkWeight<NodeDatum = never, LinkDatum = never> = (
+  link: GraphLink<NodeDatum, LinkDatum>,
+) => number;
+
 /**
  * an accessor to get the optimization of the weight for a link
  *
@@ -76,11 +67,19 @@ export interface CoordQuadOps<N = never, L = never> {
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends CoordQuadOps> =
-  O extends CoordQuadOps<infer N, never> ? N : never;
+export type OpNodeDatum<O extends CoordQuadOps> = O extends CoordQuadOps<
+  infer N,
+  never
+>
+  ? N
+  : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends CoordQuadOps> =
-  O extends CoordQuadOps<never, infer L> ? L : never;
+export type OpLinkDatum<O extends CoordQuadOps> = O extends CoordQuadOps<
+  never,
+  infer L
+>
+  ? L
+  : never;
 
 /**
  * a {@link Coord} that places nodes to minimize a quadratic function
@@ -319,7 +318,7 @@ function buildOperator<
     }
 
     // get actual solution
-    let width;
+    let width: number;
     try {
       const solution = solve(Q, c, A, b);
       width = layout(layers, sep, inds, solution);

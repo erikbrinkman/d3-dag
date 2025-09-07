@@ -1,6 +1,12 @@
 import { expect, test } from "bun:test";
-import { graph, GraphLink, GraphNode, MutGraphLink, MutGraphNode } from ".";
 import { length, map, reduce, some } from "../iters";
+import {
+  type GraphLink,
+  type GraphNode,
+  graph,
+  type MutGraphLink,
+  type MutGraphNode,
+} from ".";
 
 test("empty graph", () => {
   const grf = graph<never, never>();

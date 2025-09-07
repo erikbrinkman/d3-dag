@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify";
 
 /**
  * an operator for optimizing decrossings one layer at a time.
@@ -40,17 +40,8 @@ import { SugiNode } from "../sugify";
  * }
  * ```
  */
-export interface Twolayer<in NodeDatum = never, in LinkDatum = never> {
-  /**
-   * rearrange one layer conditioned on another
-   *
-   * @param topLayer - the top layer
-   * @param bottomLayer - the bottom layer
-   * @param topDown - if true rearrange `bottomLayer`, else rearrange `topLayer`
-   */
-  (
-    topLayer: SugiNode<NodeDatum, LinkDatum>[],
-    bottomLayer: SugiNode<NodeDatum, LinkDatum>[],
-    topDown: boolean,
-  ): void;
-}
+export type Twolayer<in NodeDatum = never, in LinkDatum = never> = (
+  topLayer: SugiNode<NodeDatum, LinkDatum>[],
+  bottomLayer: SugiNode<NodeDatum, LinkDatum>[],
+  topDown: boolean,
+) => void;

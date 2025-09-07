@@ -1,8 +1,8 @@
-import { GraphNode } from "../../graph";
-import { Separation, sizedSeparation } from "../utils";
+import type { GraphNode } from "../../graph";
+import { type Separation, sizedSeparation } from "../utils";
 
 function nodeHeight({ data }: GraphNode<string>): number {
-  return (parseInt(data) % 3) + 1;
+  return (parseInt(data, 10) % 3) + 1;
 }
 
 /** default sized separation */
