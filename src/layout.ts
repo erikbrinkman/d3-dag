@@ -3,7 +3,8 @@
  *
  * @packageDocumentation
  */
-import type { GraphNode } from "./graph";
+import type { Graph, GraphNode } from "./graph";
+import type { Tweak } from "./tweaks";
 import { err } from "./utils";
 
 /**
@@ -98,9 +99,12 @@ export function splitNodeSize<N, L>(
   }
 }
 
+/** direction of layout */
+export type Rankdir = "TB" | "BT" | "LR" | "RL";
+
 /** the height and width returned after laying out a graph */
 export interface LayoutResult {
-  /** the total weight after layout */
+  /** the total width after layout */
   width: number;
   /** the total height after layout */
   height: number;
@@ -114,3 +118,26 @@ export interface LayoutResult {
  * - `"oom"` - never raise an exception, use at your own risk
  */
 export type OptChecking = "fast" | "slow" | "oom";
+
+/**
+ * common interface shared by all layout operators
+ *
+ * {@link Sugiyama}, {@link Zherebko}, and {@link Grid} all satisfy this
+ * interface, allowing code that is agnostic to the specific layout algorithm.
+ */
+export interface Operator<in N = never, in L = never> {
+  /** run the layout */
+  (graph: Graph<N, L>): LayoutResult;
+  /** get current tweaks */
+  tweaks(): readonly Tweak<N, L>[];
+  /** set tweaks */
+  tweaks(val: readonly Tweak<N, L>[]): Operator<N, L>;
+  /** set node size accessor */
+  nodeSize(val: NodeSize<N, L>): Operator<N, L>;
+  /** get current node size */
+  nodeSize(): NodeSize<N, L>;
+  /** set gap between nodes */
+  gap(val: readonly [number, number]): Operator<N, L>;
+  /** get current gap */
+  gap(): readonly [number, number];
+}

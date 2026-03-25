@@ -145,6 +145,19 @@
  * @packageDocumentation
  */
 export {
+  type DagreAlgorithm,
+  type DagreEdge,
+  type DagreEdgeDescriptor,
+  type DagreGraph,
+  type DagreGraphConfig,
+  type DagreNode,
+  type DagrePoint,
+  type DagreQuality,
+  type DagreRanker,
+  dagre,
+  type Rankdir,
+} from "./dagre";
+export {
   type Graph,
   type GraphLink,
   type GraphNode,
@@ -203,6 +216,7 @@ export {
   type LayoutResult,
   type NodeLength,
   type NodeSize,
+  type Operator,
   type OptChecking,
   splitNodeSize,
 } from "./layout";
@@ -303,10 +317,13 @@ export {
   shapeRect,
   shapeTopBottom,
   type Tweak,
+  tweakDirection,
   tweakFlip,
   tweakGrid,
+  tweakGridHandles,
   tweakShape,
   tweakSize,
+  tweakSugiyama,
 } from "./tweaks";
 export type { Named, U } from "./utils";
 export {

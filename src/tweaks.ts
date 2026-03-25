@@ -1,5 +1,10 @@
 import type { Graph } from "./graph";
-import { cachedNodeSize, type LayoutResult, type NodeSize } from "./layout";
+import {
+  cachedNodeSize,
+  type LayoutResult,
+  type NodeSize,
+  type Rankdir,
+} from "./layout";
 import { err } from "./utils";
 
 /**
@@ -18,6 +23,12 @@ import { err } from "./utils";
  *   shape. For simple layouts, this should prevent needing to render links
  *   behind nodes. In complex cases, it allows consistently rendering arrows or
  *   other link terminal icons at the edge of a shape.
+ * - {@link tweakSugiyama} - Adds control points inside the bounding box of
+ *   source/target nodes, preventing edges from crossing over nodes.
+ * - {@link tweakGridHandles} - Moves grid edge bend points to the midpoint of
+ *   the gap between rows, producing smoother edges for handle-based frameworks.
+ * - {@link tweakDirection} - Converts the default top-to-bottom layout to a
+ *   specified direction (BT, LR, RL).
  *
  * You can also implement your own tweak. There's not a reason to give an
  * example, as tweaks are pretty unbounded. As input you get a laidout graph,
@@ -437,29 +448,102 @@ export function tweakSugiyama<N, L>(nodeSize: NodeSize<N, L>): Tweak<N, L> {
     graph: Graph<N, L>,
     res: Readonly<LayoutResult>,
   ): LayoutResult {
-    // NOTE we compute this per link instead of per node so that the first
-    // modification doesn't affect the second for two-point nodes
     for (const { source, target, points } of graph.links()) {
-      const additions: [number, [number, number]][] = [];
-      for (const [ind, node] of [
-        [1, source],
-        [-1, target],
-      ] as const) {
-        const [width, height] = cachedSize(node);
-        const xrange = [node.x - width / 2, node.x + width / 2] as const;
-        const ys = [node.y - height / 2, node.y + height / 2];
-        const [p1, p2] = points.slice(-2);
-        const added = findClip(p1, p2, ys, xrange);
-        if (added) {
-          additions.push([ind, added]);
-        }
-      }
-      for (const [ind, add] of additions) {
-        points.splice(ind, 0, add);
-      }
+      // compute both clips before any mutation to handle two-point edges
+      const srcSize = cachedSize(source);
+      const srcXrange = [
+        source.x - srcSize[0] / 2,
+        source.x + srcSize[0] / 2,
+      ] as const;
+      const srcYs = [source.y - srcSize[1] / 2, source.y + srcSize[1] / 2];
+      const srcClip = findClip(points[0], points[1], srcYs, srcXrange);
+
+      const tgtSize = cachedSize(target);
+      const tgtXrange = [
+        target.x - tgtSize[0] / 2,
+        target.x + tgtSize[0] / 2,
+      ] as const;
+      const tgtYs = [target.y - tgtSize[1] / 2, target.y + tgtSize[1] / 2];
+      const tgtClip = findClip(
+        points[points.length - 2],
+        points[points.length - 1],
+        tgtYs,
+        tgtXrange,
+      );
+
+      // insert target first so source index isn't shifted
+      if (tgtClip) points.splice(-1, 0, tgtClip);
+      if (srcClip) points.splice(1, 0, srcClip);
     }
     return res;
   }
 
   return tweakSugiyama;
+}
+
+/**
+ * tweak grid edge bend points to the midpoint of the gap between rows
+ *
+ * Grid layouts place bend points at source or target y-levels, which can
+ * cause edges to kink when rendered with handle-based frameworks like React
+ * Flow. This tweak moves interior bend points to the midpoint of the gap
+ * between rows (bottom of node + half of y gap), producing smoother edges.
+ *
+ * @remarks
+ *
+ * This should be applied before flip tweaks.
+ */
+export function tweakGridHandles<N, L>(
+  nodeSize: NodeSize<N, L>,
+  gap: readonly [number, number],
+): Tweak<N, L> {
+  const cachedSize = cachedNodeSize(nodeSize);
+  const [, ygap] = gap;
+
+  function tweakGridHandles(
+    graph: Graph<N, L>,
+    res: Readonly<LayoutResult>,
+  ): LayoutResult {
+    for (const link of graph.links()) {
+      const { source, target, points } = link;
+      const [, middle, last] = points;
+      if (last === undefined) continue; // vertical
+      const [, srcH] = cachedSize(source);
+      const [, tgtH] = cachedSize(target);
+      // shift interior bend points to midpoint of the gap between rows
+      const [, my] = middle;
+      if (my === source.y) {
+        middle[1] += srcH / 2 + ygap / 2;
+      } else if (my === target.y) {
+        middle[1] -= tgtH / 2 + ygap / 2;
+      }
+    }
+    return res;
+  }
+
+  return tweakGridHandles;
+}
+
+/**
+ * tweak the layout to apply a direction
+ *
+ * Layouts produce top-to-bottom (TB) output by default. This tweak converts
+ * the layout to the given direction by composing the appropriate flips.
+ *
+ * @remarks
+ *
+ * This should be applied after all other tweaks.
+ */
+export function tweakDirection(direction: Rankdir): Tweak<unknown, unknown> {
+  if (direction === "TB") {
+    return (_, res) => res;
+  } else if (direction === "BT") {
+    return tweakFlip("vertical");
+  } else if (direction === "LR") {
+    return tweakFlip("diagonal");
+  } else {
+    const diag = tweakFlip("diagonal");
+    const horiz = tweakFlip("horizontal");
+    return (graph, res) => horiz(graph, diag(graph, res));
+  }
 }

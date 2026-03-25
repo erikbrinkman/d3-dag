@@ -4,45 +4,125 @@
 [![build](https://github.com/erikbrinkman/d3-dag/workflows/build/badge.svg)](https://github.com/erikbrinkman/d3-dag/actions)
 [![docs](https://img.shields.io/badge/docs-docs-informational)](https://erikbrinkman.github.io/d3-dag/modules.html)
 
-Often data sets are hierarchical, but are not in a tree structure, such as genetic data.
-In these instances `d3-hierarchy` may not suit your needs, which is why `d3-dag` (Directed Acyclic Graph) exists.
-This module implements a data structure for manipulating DAGs.
-Old versions were designed to mimic `d3-hierarchy`'s api as much as possible, newer versions have opted to use modern javascript conventions while breaking from the standard set by d3.
+Lightweight, TypeScript-first DAG layout for the web.
+`d3-dag` provides layered graph layout algorithms for directed acyclic graphs.
+
+## Why d3-dag?
+
+- **Different layouts** - optimal edge crossing minimization, multiple coordinate assignment strategies, and unique layout algorithms (Zherebko, Grid) not available elsewhere in JavaScript
+- **Small bundle** - a fraction of elkjs's ~500KB transpiled Java
+- **TypeScript-first** - full type safety with generic operators and immutable builders; dagre v3 added TypeScript support, but d3-dag's generic operator pattern provides deeper type safety
+- **Works with React Flow** - drop-in replacement for dagre as a layout engine (see below)
+
+## Quick Start with React Flow
+
+If you're using [React Flow](https://reactflow.dev/) and want different layouts from dagre, d3-dag is a drop-in replacement:
+
+```ts
+import { dagre } from "d3-dag";
+
+function getLayoutedElements(nodes, edges, direction = "TB") {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ rankdir: direction });
+  grf.setDefaultEdgeLabel(() => ({}));
+  for (const node of nodes) {
+    grf.setNode(node.id, {
+      width: node.measured?.width ?? 172,
+      height: node.measured?.height ?? 36,
+    });
+  }
+  for (const edge of edges) grf.setEdge(edge.source, edge.target);
+  dagre.layout(grf);
+  return {
+    nodes: nodes.map((node) => {
+      const pos = grf.node(node.id);
+      return {
+        ...node,
+        position: { x: pos.x - pos.width / 2, y: pos.y - pos.height / 2 },
+      };
+    }),
+    edges,
+  };
+}
+```
+
+The dagre-compatible API supports familiar options (`rankdir`, `nodesep`, `ranksep`) with progressive disclosure into d3-dag's advanced algorithms:
+
+```ts
+import { dagre, sugiyama, decrossOpt, coordQuad } from "d3-dag";
+
+const grf = new dagre.graphlib.Graph();
+grf.setGraph({ rankdir: "LR", nodesep: 50, ranksep: 100 });
+// ... add nodes/edges ...
+dagre.layout(grf);
+
+// Or upgrade to better algorithms
+dagre.layout(grf, sugiyama().decross(decrossOpt()).coord(coordQuad()));
+```
+
+## Migrating from dagre
+
+Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most graph construction and layout methods work the same.
+
+### Supported dagre API
+
+| Category | Methods |
+|----------|---------|
+| **Setup** | `setGraph`, `graph`, `setDefaultNodeLabel`, `setDefaultEdgeLabel`, `isDirected`, `isCompound`, `isMultigraph` |
+| **Nodes** | `setNode`, `setNodes`, `removeNode`, `hasNode`, `node`, `nodes`, `nodeCount`, `filterNodes` |
+| **Edges** | `setEdge`, `removeEdge`, `hasEdge`, `edge`, `edges`, `edgeCount`, `setPath` |
+| **Traversal** | `predecessors`, `successors`, `neighbors`, `inEdges`, `outEdges`, `nodeEdges`, `sources`, `sinks` |
+| **Layout** | `dagre.layout(grf)` with optional `Operator` (e.grf. `sugiyama()` or `zherebko()`) |
+
+### Unsupported dagre API
+
+- **Compound graphs**: `setParent`, `parent`, `children`
+- **Serialization**: `json.write`, `json.read`
+- **Algorithms**: `alg.*` (use d3-dag's native operators instead)
+
+### Notable differences from dagre
+
+- `setGraph` accepts additional `quality`, `ranker`, and `algorithm` options
+- `dagre.layout` accepts an optional `Operator` for fine-grained algorithm control
+- `graph()` returns a shallow copy of the config (mutations require `setGraph`)
+- Default `nodesep` and `ranksep` are `50` (same as dagre)
+
+## Quality Presets
+
+The dagre-compatible API accepts a `quality` option that controls the layout speed/quality trade-off:
+
+```ts
+grf.setGraph({ quality: "fast" }); // faster layout, lower quality
+grf.setGraph();                  // default: "medium", better layout, slower
+```
+
+| preset | description | genealogy (184 nodes) | vs dagre v3 |
+|--------|-------------|----------------------:|-------------|
+| `"fast"` | simplex layering, DFS decrossing, greedy coordinates | 5.1 ms | ~4x faster |
+| `"medium"` | simplex layering, two-layer decrossing, simplex coordinates | 49 ms | ~2x slower |
+| `"slow"` | simplex layering, optimal decrossing, simplex coordinates | small graphs only | — |
+
+The `quality` and `ranker` options only apply when using the sugiyama algorithm (the default). You can also set `algorithm` to `"zherebko"` or `"grid"` for alternative layouts:
+
+```ts
+grf.setGraph({ algorithm: "zherebko" }); // linear topological layout
+grf.setGraph({ algorithm: "grid" });     // grid-based topological layout
+```
+
+The default (`"medium"`) produces better layouts at the cost of being roughly 2x slower on large graphs. Use `"fast"` when layout speed matters more than visual quality, e.grf. for interactive or animated graphs.
+
+dagre v3 added a `customOrder` callback and ordering constraints, allowing users to bring their own node ordering algorithm. d3-dag provides multiple built-in strategies (including ILP-optimal crossing minimization) out of the box, along with multiple coordinate assignment and layering algorithms not available in dagre.
 
 ## Examples
 
-- **Sugiyama** [[codepen](https://codepen.io/brinkbot/pen/oNQwNRv)] [[observable](https://observablehq.com/@erikbrinkman/d3-dag-sugiyama)] [[api](https://erikbrinkman.github.io/d3-dag/functions/sugiyama-1.html)] - a robust layered layout
-- **Zherebko** [[codepen](https://codepen.io/brinkbot/pen/dyQRPMY)] [[observable](https://observablehq.com/d/9ce02b308bb2b138)] [[api](https://erikbrinkman.github.io/d3-dag/functions/zherebko-1.html)] - a linear topological layout
-- **Grid** [[codepen](https://codepen.io/brinkbot/pen/eYQRmzx)] [[observable](https://observablehq.com/@erikbrinkman/d3-dag-topological)] [[api](https://erikbrinkman.github.io/d3-dag/functions/grid-1.html)] - a grid based topological layout
-- **Dynamic** [[codepen](https://codepen.io/brinkbot/pen/dyQRPpG)] - a dynamic sugiyama layout, click on nodes to activate or deactivate them
-
-## Status
-
-> :warning: **tl;dr** this is effectively in light maintanence mode: simple feature requests may still be implemented, but I won't be trying to expand to new use cases
-
-This project started years ago with the intention of providing a rough
-framework for implementing or extending a sugiyama-style layout for small to
-medium sized static DAGs. At the time, this was one of the only libraries to
-support layered graph layouts in javascript. Since then many more libraries
-exist, and since I no longer use it, it's been hard to actively develop.
-
-In addition, I started this mostly for experimentation purposes, but most
-people just want something reasonable out of the box, that works for most
-inputs. Fully supporting that would take a different library, but fortunately
-there are several: (Note this list may not be up to date, but PRs are welcome)
-
-- [react flow](https://reactflow.dev/) - an interactive flow chart react library.
-  This focuses more interaction than layout, and has many more included features,
-  but for people starting out, it might provide much more for free.
-- [graphology](https://www.npmjs.com/package/graphology) - a general javascript
-  graph library that's similar to the graph implementation provided as part of
-  this library.
-- [sigma](https://www.npmjs.com/package/sigma) - a graph layout library
-  specifically targeted at large graphs.
+- **Sugiyama** [[examples](https://erikbrinkman.github.io/d3-dag/documents/examples.html?layout=sugiyama)] [[api](https://erikbrinkman.github.io/d3-dag/functions/sugiyama-1.html)] - a layered layout
+- **Zherebko** [[examples](https://erikbrinkman.github.io/d3-dag/documents/examples.html?layout=zherebko)] [[api](https://erikbrinkman.github.io/d3-dag/functions/zherebko-1.html)] - a linear topological layout
+- **Grid** [[examples](https://erikbrinkman.github.io/d3-dag/documents/examples.html?layout=grid)] [[api](https://erikbrinkman.github.io/d3-dag/functions/grid-1.html)] - a grid based topological layout
+- **Dagre Comparison** [[docs](https://erikbrinkman.github.io/d3-dag/documents/dagre.html)] [[api](https://erikbrinkman.github.io/d3-dag/variables/dagre.html)] - side-by-side comparison of d3-dag vs dagre
 
 ## Installing
 
-If you use node, `npm i d3-dag` or `yarn add d3-dag`.
+If you use node, `npm i d3-dag` or `bun add d3-dag`.
 Otherwise you can load it using `unpkg`:
 
 ```html

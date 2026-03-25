@@ -4,11 +4,15 @@
  * @packageDocumentation
  */
 
+import solver, {
+  type ConstraintBound,
+  type SolveResult,
+  type VariableCoefficients,
+} from "javascript-lp-solver";
 import type { GraphNode } from "../../graph";
 import { map } from "../../iters";
 import type { OptChecking } from "../../layout";
-import { type Constraint, solve, type Variable } from "../../simplex";
-import { err } from "../../utils";
+import { err, ierr } from "../../utils";
 import type { Lane } from ".";
 import { gridChildren } from "./utils";
 
@@ -93,8 +97,8 @@ function buildOperator(options: {
 }): LaneOpt {
   function laneOpt(ordered: readonly GraphNode[]): void {
     // initialize model
-    const variables: Record<string, Variable> = {};
-    const constraints: Record<string, Constraint> = {};
+    const variables: Record<string, VariableCoefficients> = {};
+    const constraints: Record<string, ConstraintBound> = {};
     const ints: Record<string, 1> = {};
 
     // map of node to its unique index / id
@@ -198,7 +202,17 @@ function buildOperator(options: {
       throw err`size of dag to decrossOpt is too large and will likely not complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOp().check("slow"))\``;
     }
 
-    const lanes = solve("opt", "min", variables, constraints, ints);
+    const result = solver.Solve({
+      optimize: "opt",
+      opType: "min",
+      variables,
+      constraints,
+      ints,
+    }) as SolveResult;
+    if (!result.feasible) {
+      throw ierr`could not find a feasible simplex solution`;
+    }
+    const lanes = result as Record<string, number>;
 
     if (options.compressed) {
       for (const [ind, node] of ordered.entries()) {

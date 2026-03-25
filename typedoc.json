@@ -1,9 +1,15 @@
 {
   "entryPoints": ["src"],
+  "exclude": ["**/*.bench.ts"],
   "out": "docs",
   "excludeInternal": true,
   "cleanOutputDir": true,
   "validation": true,
   "githubPages": true,
-  "treatWarningsAsErrors": true
+  "treatWarningsAsErrors": true,
+  "projectDocuments": ["docs-src/*.md"],
+  "navigationLinks": {
+    "Examples": "documents/examples.html",
+    "Dagre Comparison": "documents/dagre.html"
+  }
 }

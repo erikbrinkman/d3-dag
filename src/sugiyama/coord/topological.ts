@@ -5,13 +5,13 @@
  * @packageDocumentation
  */
 
+import solver, {
+  type ConstraintBound,
+  type SolveResult,
+  type VariableCoefficients,
+} from "javascript-lp-solver";
 import { bigrams } from "../../iters";
-import {
-  type Constraint,
-  solve as solveSimp,
-  type Variable,
-} from "../../simplex";
-import { err } from "../../utils";
+import { err, ierr } from "../../utils";
 import type { SugiNode, SugiSeparation } from "../sugify";
 import type { Coord } from ".";
 import { avgHeight, init, layout, minBend, solve as solveQuad } from "./utils";
@@ -59,8 +59,8 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
 
     if (opts.simp) {
       // simplex minimization
-      const variables: Record<string, Variable> = { center: {} };
-      const constraints: Record<string, Constraint> = {};
+      const variables: Record<string, VariableCoefficients> = { center: {} };
+      const constraints: Record<string, ConstraintBound> = {};
 
       // initialize ids and non-slack variables
       const ids = new Map<SugiNode<N, L>, [string, boolean]>();
@@ -131,7 +131,16 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
 
       delete variables.center;
 
-      const assignment = solveSimp("opt", "min", variables, constraints);
+      const solved = solver.Solve({
+        optimize: "opt",
+        opType: "min",
+        variables,
+        constraints,
+      }) as SolveResult;
+      if (!solved.feasible) {
+        throw ierr`could not find a feasible simplex solution`;
+      }
+      const assignment = solved as Record<string, number>;
 
       // assign xes
       for (const [node, [id, flip]] of ids) {

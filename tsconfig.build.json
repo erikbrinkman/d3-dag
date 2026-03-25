@@ -7,7 +7,9 @@
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
+    "rootDir": "./src",
     "outDir": "./dist"
   },
-  "exclude": ["**/*.test.ts", "**/test-*.ts"]
+  "include": ["src"],
+  "exclude": ["**/*.test.ts", "**/test-*.ts", "**/*.bench.ts"]
 }

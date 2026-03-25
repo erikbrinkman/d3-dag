@@ -155,6 +155,22 @@ export interface Graph<out NodeDatum = unknown, out LinkDatum = unknown> {
   leaves(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
 
   /**
+   * an iterator over the sources of the graph
+   *
+   * Sources are nodes with no parents (in-degree zero). Unlike {@link roots},
+   * this does not attempt cycle handling.
+   */
+  sources(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
+
+  /**
+   * an iterator over the sinks of the graph
+   *
+   * Sinks are nodes with no children (out-degree zero). Unlike {@link leaves},
+   * this does not attempt cycle handling.
+   */
+  sinks(): IterableIterator<GraphNode<NodeDatum, LinkDatum>>;
+
+  /**
    * split a graph into connected components
    *
    * @remarks
@@ -215,6 +231,8 @@ export interface MutGraph<in out NodeDatum, in out LinkDatum>
   split(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
   roots(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
   leaves(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
+  sources(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
+  sinks(): IterableIterator<MutGraphNode<NodeDatum, LinkDatum>>;
 
   /**
    * add a new node with datum
@@ -729,6 +747,18 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
     }
   }
 
+  *sources(): IterableIterator<MutGraphNode<N, L>> {
+    for (const node of this.split()) {
+      yield* node.sources();
+    }
+  }
+
+  *sinks(): IterableIterator<MutGraphNode<N, L>> {
+    for (const node of this.split()) {
+      yield* node.sinks();
+    }
+  }
+
   *split(): IterableIterator<MutGraphNode<N, L>> {
     yield* this.#components;
     let node: MutGraphNode<N, L> | undefined;
@@ -843,6 +873,8 @@ interface NodeInfo<N, L> {
   acyclic: boolean | null;
   roots: MutGraphNode<N, L>[] | null;
   leaves: MutGraphNode<N, L>[] | null;
+  sources: Set<MutGraphNode<N, L>> | null;
+  sinks: Set<MutGraphNode<N, L>> | null;
 }
 
 // TODO implement dynamic connectivity to make most of these more efficient
@@ -920,6 +952,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
       acyclic: true,
       roots: [this],
       leaves: [this],
+      sources: new Set([this]),
+      sinks: new Set([this]),
     };
     this.#components.add(this);
   }
@@ -962,6 +996,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
         acyclic: null,
         roots: null,
         leaves: null,
+        sources: null,
+        sinks: null,
       });
     }
   }
@@ -1093,6 +1129,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
       } else if (srepr === trepr && info) {
         info.nlinks += 1;
         if (info.acyclic === true) info.acyclic = null;
+        info.sources?.delete(target);
+        info.sinks?.delete(source);
       } else if (srepr !== trepr && info && tinfo) {
         const [drepr, dinfo, orepr, oinfo] =
           info.nnodes > tinfo.nnodes
@@ -1113,6 +1151,18 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
               : null;
         dinfo.roots = null;
         dinfo.leaves = null;
+        if (dinfo.sources && oinfo.sources) {
+          for (const n of oinfo.sources) dinfo.sources.add(n);
+          dinfo.sources.delete(target);
+        } else {
+          dinfo.sources = null;
+        }
+        if (dinfo.sinks && oinfo.sinks) {
+          for (const n of oinfo.sinks) dinfo.sinks.add(n);
+          dinfo.sinks.delete(source);
+        } else {
+          dinfo.sinks = null;
+        }
       } else if (srepr !== trepr) {
         srepr.#cinfo = null;
         trepr.#cinfo = null;
@@ -1228,6 +1278,28 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
       info.leaves = [...roots(this.nodes(), (n) => n.parents())];
     }
     yield* info.leaves;
+  }
+
+  *sources(): IterableIterator<MutGraphNode<N, L>> {
+    const info = this.#info();
+    if (!info.sources) {
+      info.sources = new Set<MutGraphNode<N, L>>();
+      for (const n of this.nodes()) {
+        if (n.nparents() === 0) info.sources.add(n);
+      }
+    }
+    yield* info.sources;
+  }
+
+  *sinks(): IterableIterator<MutGraphNode<N, L>> {
+    const info = this.#info();
+    if (!info.sinks) {
+      info.sinks = new Set<MutGraphNode<N, L>>();
+      for (const n of this.nodes()) {
+        if (n.nchildren() === 0) info.sinks.add(n);
+      }
+    }
+    yield* info.sinks;
   }
 
   parent(source: MutGraphNode<N, L>, datum?: L): MutGraphLink<N, L> {
