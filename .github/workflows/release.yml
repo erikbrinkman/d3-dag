@@ -1,0 +1,85 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump type
+        required: true
+        type: choice
+        options: [patch, minor, major]
+
+jobs:
+  gate:
+    uses: ./.github/workflows/nodejs.yml
+
+  release:
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun export
+
+      - id: version
+        run: |
+          VERSION=$(npm version --no-git-tag-version ${{ inputs.bump }} | sed 's/^v//')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - uses: thomaseizinger/keep-a-changelog-new-release@v3
+        with:
+          tag: v${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
+
+      - run: |
+          VERSION=${{ steps.version.outputs.version }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json CHANGELOG.md
+          git commit -m "v${VERSION}"
+          git tag -a "v${VERSION}" -m "v${VERSION}"
+
+      # publish before pushing — a failed publish leaves no remote trace
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm publish --provenance --access public --ignore-scripts
+
+      - run: git push --follow-tags
+      - run: gh release create "v${{ steps.version.outputs.version }}" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy-pages:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.version }}
+          fetch-depth: 1
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun doc
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deploy
+        uses: actions/deploy-pages@v4
