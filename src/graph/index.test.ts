@@ -493,10 +493,12 @@ test("topological() ranks inverted square", () => {
   a.child(c);
   b.child(d);
   c.child(d);
-  expect([
+  const sorted = [...grf.topological(({ data }) => data)];
+  const valid: GraphNode<number, undefined>[][] = [
     [d, b, c, a],
     [d, c, b, a],
-  ]).toContainEqual(grf.topological(({ data }) => data));
+  ];
+  expect(valid).toContainEqual(sorted);
 });
 
 test("topological() pops from the bottom for rank", () => {
@@ -570,6 +572,61 @@ test("roots leaves cache", () => {
   // b | c
   //   |/
   //   d
+});
+
+test("sources sinks cache", () => {
+  const grf = graph<undefined, undefined>();
+  const a = grf.node();
+  const b = grf.node();
+  const c = grf.node();
+  const d = grf.node();
+  a.child(b);
+  const rlink = a.child(c);
+  a.child(d);
+  const llink = b.child(d);
+  c.child(d);
+  //   a
+  //  /|\
+  // b | c
+  //  \|/
+  //   d
+
+  expect([...grf.sources()]).toEqual([a]);
+  expect([...grf.sinks()]).toEqual([d]);
+
+  rlink.delete();
+  // a   c
+  // |\
+  // b |
+  //  \|
+  //   d
+  expect([...grf.sources()]).toContainEqual(a);
+  expect([...grf.sources()]).toContainEqual(c);
+  expect([...grf.sources()]).toHaveLength(2);
+  expect([...grf.sinks()]).toEqual([d]);
+
+  llink.delete();
+  // a   c
+  // |
+  // b
+  // |
+  // d
+  expect([...grf.sinks()]).toContainEqual(b);
+  expect([...grf.sinks()]).toContainEqual(d);
+  expect([...grf.sinks()]).toHaveLength(2);
+});
+
+test("sources sinks empty graph", () => {
+  const grf = graph<never, never>();
+  expect([...grf.sources()]).toEqual([]);
+  expect([...grf.sinks()]).toEqual([]);
+});
+
+test("sources sinks isolated node", () => {
+  const grf = graph<undefined, never>();
+  const node = grf.node();
+  expect([...grf.sources()]).toEqual([node]);
+  expect([...grf.sinks()]).toEqual([node]);
 });
 
 test("positioning works", () => {
@@ -744,6 +801,14 @@ class FakeNode implements GraphNode<null, null> {
   }
 
   *leaves(): IterableIterator<GraphNode<null, null>> {
+    // noop
+  }
+
+  *sources(): IterableIterator<GraphNode<null, null>> {
+    // noop
+  }
+
+  *sinks(): IterableIterator<GraphNode<null, null>> {
     // noop
   }
 

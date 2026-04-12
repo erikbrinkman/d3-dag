@@ -4,10 +4,14 @@
  * @packageDocumentation
  */
 
+import solver, {
+  type ConstraintBound,
+  type SolveResult,
+  type VariableCoefficients,
+} from "javascript-lp-solver";
 import { listMultimapPush } from "../../collections";
 import { bigrams, entries, slice } from "../../iters";
 import type { OptChecking } from "../../layout";
-import { type Constraint, solve, type Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
 import type { SugiNode } from "../sugify";
 import type { Decross } from ".";
@@ -212,8 +216,8 @@ function buildOperator(options: {
     const preserveWeight = distWeight / (numVars + 1);
 
     // initialize model
-    const variables: Record<string, Variable> = {};
-    const constraints: Record<string, Constraint> = {};
+    const variables: Record<string, VariableCoefficients> = {};
+    const constraints: Record<string, ConstraintBound> = {};
     const ints: Record<string, 1> = {};
 
     // add variables and permutation invariants
@@ -387,12 +391,21 @@ function buildOperator(options: {
     }
 
     // solve objective
-    // NOTE bundling sets this to undefined, and we need it to be settable
-    const ordering = solve("opt", "min", variables, constraints, ints);
+    const result = solver.Solve({
+      optimize: "opt",
+      opType: "min",
+      variables,
+      constraints,
+      ints,
+    }) as SolveResult;
+    if (!result.feasible) {
+      throw ierr`could not find a feasible simplex solution`;
+    }
     /* istanbul ignore next */
-    if (!ordering.bounded) {
+    if (!result.bounded) {
       throw ierr`optimization result was not bounded`;
     }
+    const ordering = result as Record<string, number>;
 
     // sort layers
     for (const layer of layers) {

@@ -5,9 +5,13 @@
  * @packageDocumentation
  */
 
+import solver, {
+  type ConstraintBound,
+  type SolveResult,
+  type VariableCoefficients,
+} from "javascript-lp-solver";
 import type { Graph, GraphNode, Rank } from "../../graph";
 import { bigrams, map } from "../../iters";
-import { type Constraint, solve, type Variable } from "../../simplex";
 import { err, ierr, type U } from "../../utils";
 import type { Separation } from "../utils";
 import type { Group, Layering } from ".";
@@ -91,8 +95,8 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     dag: Graph<N, L>,
     sep: Separation<N, L>,
   ): number {
-    const variables: Record<string, Variable> = {};
-    const constraints: Record<string, Constraint> = {};
+    const variables: Record<string, VariableCoefficients> = {};
+    const constraints: Record<string, ConstraintBound> = {};
 
     const ids = new Map(
       map(dag.nodes(), (node, i) => [node, i.toString()] as const),
@@ -104,7 +108,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     }
 
     /** get variable associated with a node */
-    function variable(node: GraphNode<N, L>): Variable {
+    function variable(node: GraphNode<N, L>): VariableCoefficients {
       return variables[n(node)];
     }
 
@@ -196,7 +200,17 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     }
 
     try {
-      const assignment = solve("opt", "max", variables, constraints, {});
+      const solved = solver.Solve({
+        optimize: "opt",
+        opType: "max",
+        variables,
+        constraints,
+        ints: {},
+      }) as SolveResult;
+      if (!solved.feasible) {
+        throw ierr`could not find a feasible simplex solution`;
+      }
+      const assignment = solved as Record<string, number>;
 
       let min = 0;
       let max = 0;

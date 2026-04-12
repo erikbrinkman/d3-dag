@@ -7,7 +7,7 @@ node_modules
 .cache
 coverage
 .eslintcache
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 .flow_cache
 .cache
 

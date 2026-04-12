@@ -9,8 +9,10 @@ import {
   shapeEllipse,
   shapeRect,
   shapeTopBottom,
+  tweakDirection,
   tweakFlip,
   tweakGrid,
+  tweakGridHandles,
   tweakShape,
   tweakSize,
   tweakSugiyama,
@@ -432,4 +434,136 @@ test("tweakSugiyama() edge case", () => {
     [1, 2],
     [4, 2],
   ]);
+});
+
+test("tweakGridHandles() shifts bend points", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 0;
+  b.x = 3;
+  b.y = 4;
+  // three-point edge: source → bend at source.y → target
+  link.points = [
+    [1, 0],
+    [3, 0],
+    [3, 4],
+  ];
+
+  const tweak = tweakGridHandles([2, 2], [1, 2]);
+  const res = tweak(grf, { width: 4, height: 6 });
+  expect(res).toEqual({ width: 4, height: 6 });
+
+  // middle point was at source.y (0), should be shifted down by srcH/2 + ygap/2 = 1 + 1 = 2
+  expect(link.points[1]).toEqual([3, 2]);
+});
+
+test("tweakGridHandles() skips two-point edges", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+
+  a.x = 1;
+  a.y = 0;
+  b.x = 1;
+  b.y = 4;
+  link.points = [
+    [1, 0],
+    [1, 4],
+  ];
+
+  const tweak = tweakGridHandles([2, 2], [1, 2]);
+  tweak(grf, { width: 2, height: 6 });
+
+  // two-point (vertical) edge should be unchanged
+  expect(link.points).toEqual([
+    [1, 0],
+    [1, 4],
+  ]);
+});
+
+test("tweakDirection() TB is identity", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  a.child(b);
+
+  a.x = 1;
+  a.y = 0;
+  b.x = 1;
+  b.y = 2;
+
+  const tweak = tweakDirection("TB");
+  const res = tweak(grf, { width: 2, height: 3 });
+  expect(res).toEqual({ width: 2, height: 3 });
+  expect(a.x).toBe(1);
+  expect(a.y).toBe(0);
+  expect(b.x).toBe(1);
+  expect(b.y).toBe(2);
+});
+
+test("tweakDirection() BT flips vertically", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  a.child(b);
+
+  a.x = 1;
+  a.y = 0;
+  b.x = 1;
+  b.y = 2;
+
+  const tweak = tweakDirection("BT");
+  const res = tweak(grf, { width: 2, height: 3 });
+  expect(res).toEqual({ width: 2, height: 3 });
+  expect(a.x).toBe(1);
+  expect(a.y).toBe(3);
+  expect(b.x).toBe(1);
+  expect(b.y).toBe(1);
+});
+
+test("tweakDirection() LR flips diagonally", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  a.child(b);
+
+  a.x = 1;
+  a.y = 0;
+  b.x = 1;
+  b.y = 2;
+
+  const tweak = tweakDirection("LR");
+  const res = tweak(grf, { width: 2, height: 3 });
+  expect(res).toEqual({ width: 3, height: 2 });
+  expect(a.x).toBe(0);
+  expect(a.y).toBe(1);
+  expect(b.x).toBe(2);
+  expect(b.y).toBe(1);
+});
+
+test("tweakDirection() RL flips diagonal then horizontal", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  a.child(b);
+
+  a.x = 1;
+  a.y = 0;
+  b.x = 1;
+  b.y = 2;
+
+  const tweak = tweakDirection("RL");
+  const res = tweak(grf, { width: 2, height: 3 });
+  expect(res).toEqual({ width: 3, height: 2 });
+  // diagonal: (1,0) → (0,1), then horizontal flip: (0,1) → (3,1)
+  expect(a.x).toBe(3);
+  expect(a.y).toBe(1);
+  // diagonal: (1,2) → (2,1), then horizontal flip: (2,1) → (1,1)
+  expect(b.x).toBe(1);
+  expect(b.y).toBe(1);
 });

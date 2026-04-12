@@ -41,11 +41,12 @@ test("coordSimplex() works for square like layout", () => {
 
   expect(width).toBeCloseTo(2);
 
-  // NOTE head and tail could be at either 0.5 or 1.5
-  expect(head.x).toBeCloseTo(1.5);
+  // head centered between children left (0.5) and right (1.5)
+  expect(head.x).toBeCloseTo(1.0);
   expect(left.x).toBeCloseTo(0.5);
   expect(right.x).toBeCloseTo(1.5);
-  expect(tail.x).toBeCloseTo(1.5);
+  // tail centered between parents left (0.5) and right (1.5)
+  expect(tail.x).toBeCloseTo(1.0);
 });
 
 test("coordSimplex() works for triangle", () => {
@@ -117,9 +118,10 @@ test("coordSimplex() works with complex disconnected component", () => {
   expect(left.x).toBeCloseTo(0.5);
   expect(middle.x).toBeCloseTo(1.5);
   expect(right.x).toBeCloseTo(2.5);
-  expect(vee.x).toBeCloseTo(2.5);
-  expect(above.x).toBeCloseTo(3.5);
-  expect(below.x).toBeCloseTo(3.5);
+  // vee centered between parents left (0.5) and right (2.5)
+  expect(vee.x).toBeCloseTo(1.5);
+  expect(above.x).toBeCloseTo(2.5);
+  expect(below.x).toBeCloseTo(2.5);
 });
 
 test("coordSimplex() works with compact dag", () => {

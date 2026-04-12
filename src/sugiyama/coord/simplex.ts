@@ -5,9 +5,13 @@
  * @packageDocumentation
  */
 
+import solver, {
+  type ConstraintBound,
+  type SolveResult,
+  type VariableCoefficients,
+} from "javascript-lp-solver";
 import type { GraphLink, GraphNode } from "../../graph";
 import { bigrams, flatMap } from "../../iters";
-import { type Constraint, solve, type Variable } from "../../simplex";
 import { err, ierr } from "../../utils";
 import type { SugiNode, SugiSeparation } from "../sugify";
 import type { Coord } from ".";
@@ -39,19 +43,11 @@ export interface CoordSimplexOps<N = never, L = never> {
 }
 
 /** node datum for operators */
-export type OpNodeDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
-  infer N,
-  never
->
-  ? N
-  : never;
+export type OpNodeDatum<O extends CoordSimplexOps> =
+  O extends CoordSimplexOps<infer N, never> ? N : never;
 /** link datum for operators */
-export type OpLinkDatum<O extends CoordSimplexOps> = O extends CoordSimplexOps<
-  never,
-  infer L
->
-  ? L
-  : never;
+export type OpLinkDatum<O extends CoordSimplexOps> =
+  O extends CoordSimplexOps<never, infer L> ? L : never;
 
 /**
  * a {@link Coord} that places nodes to maximize edge verticality
@@ -174,8 +170,8 @@ function buildOperator<
     layers: SugiNode<N, L>[][],
     sep: SugiSeparation<N, L>,
   ): number {
-    const variables: Record<string, Variable> = {};
-    const constraints: Record<string, Constraint> = {};
+    const variables: Record<string, VariableCoefficients> = {};
+    const constraints: Record<string, ConstraintBound> = {};
 
     const cachedWeight = createCachedSimplexWeightAccessor(layers, opts.weight);
 
@@ -212,8 +208,15 @@ function buildOperator<
 
     const heightNorm = avgHeight(ids.keys());
 
-    // minimize weighted difference
+    // minimize weighted difference and collect counts for tie-breaking
+    let minPrimaryCoeff = Infinity;
+    let numChild = 0;
+    let numParent = 0;
     for (const node of ids.keys()) {
+      const nc = node.nchildren();
+      const np = node.nparents();
+      if (nc > 0) numChild++;
+      if (np > 0) numParent++;
       const nid = n(node);
       for (const child of node.children()) {
         const cid = n(child);
@@ -233,11 +236,66 @@ function buildOperator<
 
         const weight = cachedWeight(node, child);
         const height = (child.y - node.y) / heightNorm;
-        variables[slack] = { opt: weight / height, [pcons]: 1, [ccons]: 1 };
+        const coef = weight / height;
+        minPrimaryCoeff = Math.min(minPrimaryCoeff, coef);
+        variables[slack] = { opt: coef, [pcons]: 1, [ccons]: 1 };
       }
     }
 
-    const assignment = solve("opt", "min", variables, constraints);
+    // tie-breaking: prefer nodes near mean of all children and parents
+    // eps is set so total tie-breaking contribution can never exceed the
+    // smallest primary coefficient, guaranteeing primary optimality is preserved
+    const childEps = minPrimaryCoeff / (numChild + 1);
+    const parentEps = minPrimaryCoeff / (numParent + 1);
+    for (const node of ids.keys()) {
+      const nc = node.nchildren();
+      const np = node.nparents();
+      if (nc > 0) {
+        const nid = n(node);
+        const slack = `child ${nid}`;
+        const pcons = `${slack} pos`;
+        const ncons = `${slack} neg`;
+        constraints[pcons] = { min: 0 };
+        constraints[ncons] = { min: 0 };
+        variables[nid][pcons] = 1;
+        variables[nid][ncons] = -1;
+        const coeff = 1 / nc;
+        for (const nbr of node.children()) {
+          const nbrId = n(nbr);
+          variables[nbrId][pcons] = -coeff;
+          variables[nbrId][ncons] = coeff;
+        }
+        variables[slack] = { opt: childEps, [pcons]: 1, [ncons]: 1 };
+      }
+      if (np > 0) {
+        const nid = n(node);
+        const slack = `parents ${nid}`;
+        const pcons = `${slack} pos`;
+        const ncons = `${slack} neg`;
+        constraints[pcons] = { min: 0 };
+        constraints[ncons] = { min: 0 };
+        variables[nid][pcons] = 1;
+        variables[nid][ncons] = -1;
+        const coeff = 1 / np;
+        for (const nbr of node.parents()) {
+          const nbrId = n(nbr);
+          variables[nbrId][pcons] = -coeff;
+          variables[nbrId][ncons] = coeff;
+        }
+        variables[slack] = { opt: parentEps, [pcons]: 1, [ncons]: 1 };
+      }
+    }
+
+    const result = solver.Solve({
+      optimize: "opt",
+      opType: "min",
+      variables,
+      constraints,
+    }) as SolveResult;
+    if (!result.feasible) {
+      throw ierr`could not find a feasible simplex solution`;
+    }
+    const assignment = result as Record<string, number>;
 
     // assign initial xes
     for (const [node, id] of ids) {
