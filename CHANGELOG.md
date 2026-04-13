@@ -9,11 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `dagre` - wrapper api for dagre compatability
+- `tweakDirection` - tweak that provides simler direction based coordinate mappings
+- `tweakGridHandles` - a tweak for using grid when you still want bottom handles (e.g. react flow)
 - `shapeTopBottom` for aligning edges to the top/bottom of a node
+- `sources()` and `sinks()` to the graph type to mimic dagre. Unlike `roots()` and `leaves()` these don't break cycles
 
 ### Removed
 
 - Removed non esm builds
+
+### Changed
+
+- Fixed tie breaking in `coordSimplex` to prefer the mean of parents and children
+- Fixed `tweakSugiyama` to appropriate slip the source points
 
 ## [1.1.0] - 2023-09-30
 
