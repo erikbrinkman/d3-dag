@@ -9,6 +9,9 @@ on:
         type: choice
         options: [patch, minor, major]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   gate:
     uses: ./.github/workflows/nodejs.yml
