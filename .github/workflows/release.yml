@@ -49,8 +49,10 @@ jobs:
           git tag -a "v${VERSION}" -m "v${VERSION}"
 
       # publish before pushing — a failed publish leaves no remote trace
+      # Node 24 ships with npm 11.x, required for OIDC trusted publishing
       - uses: actions/setup-node@v4
         with:
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - run: npm publish --provenance --access public --ignore-scripts
 
