@@ -8,6 +8,7 @@
   "files": {
     "includes": [
       "src/**/*.ts",
+      "build/**/*.ts",
       "test-d/**/*.ts",
       "*.json",
       "examples/*.json",
