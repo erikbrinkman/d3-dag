@@ -18,10 +18,21 @@
     "email": "erik.brinkman@gmail.com"
   },
   "license": "MIT",
-  "type": "module",
-  "module": "dist/d3-dag.esm.min.js",
+  "main": "dist/d3-dag.cjs.min.js",
+  "module": "dist/d3-dag.esm.min.mjs",
+  "unpkg": "dist/d3-dag.iife.min.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/d3-dag.esm.min.mjs",
+      "require": "./dist/d3-dag.cjs.min.js",
+      "default": "./dist/d3-dag.esm.min.mjs"
+    }
+  },
   "files": [
     "/dist/**/*.js",
+    "/dist/**/*.mjs",
     "/dist/**/*.d.ts"
   ],
   "scripts": {
@@ -32,7 +43,10 @@
     "lint": "bun lint:ts && bun lint:doc && bun lint:es",
     "export:ts": "tsc -p tsconfig.build.json",
     "export:flow": "bun flow.mjs --cache",
-    "export:bundle": "bun build src/index.ts --minify --outfile dist/d3-dag.esm.min.js -e child_process",
+    "export:bundle:esm": "bun build src/index.ts --minify --format=esm --outfile dist/d3-dag.esm.min.mjs",
+    "export:bundle:cjs": "bun build src/index.ts --minify --format=cjs --target=node --outfile dist/d3-dag.cjs.min.js",
+    "export:bundle:iife": "bun build build/iife.ts --minify --format=iife --target=browser --outfile dist/d3-dag.iife.min.js",
+    "export:bundle": "bun export:bundle:esm && bun export:bundle:cjs && bun export:bundle:iife",
     "export": "bun export:ts && bun export:bundle",
     "prepack": "bun lint && bun test --coverage && bun export",
     "bench": "bun src/dagre.bench.ts",
