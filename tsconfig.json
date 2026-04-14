@@ -15,5 +15,5 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "docs-src"]
+  "include": ["src", "docs-src", "build"]
 }
