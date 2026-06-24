@@ -1,7 +1,7 @@
 {
   "name": "d3-dag",
   "version": "1.2.1",
-  "description": "Layout algorithms for visualizing directed acylic graphs.",
+  "description": "Layout algorithms for visualizing directed acyclic graphs.",
   "keywords": [
     "d3",
     "d3-module",
@@ -13,6 +13,7 @@
     "type": "git",
     "url": "https://github.com/erikbrinkman/d3-dag.git"
   },
+  "homepage": "https://erikbrinkman.github.io/d3-dag/",
   "author": {
     "name": "Erik Brinkman",
     "email": "erik.brinkman@gmail.com"
