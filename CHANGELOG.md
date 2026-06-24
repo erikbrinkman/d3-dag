@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-04-14
+
 ## [1.2.0] - 2026-04-13
 
 ### Added
@@ -317,5 +319,6 @@ Most of the breaking changes are in the backend, so if you've only been using th
 
 - `coordSpread` was removed in favor of `coordCenter` which produces a slightly better layout in the same amount of time.
 
-[unreleased]: https://github.com/erikbrinkman/d3-dag/compare/v1.2.0...HEAD
+[unreleased]: https://github.com/erikbrinkman/d3-dag/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/erikbrinkman/d3-dag/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/erikbrinkman/d3-dag/compare/1793338d5e7dd7601543f9288d84d83797bd2e27...v1.2.0
