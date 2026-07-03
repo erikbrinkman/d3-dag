@@ -446,6 +446,53 @@ test("invalid cache", () => {
   expect(a.nchildLinksTo(c)).toBe(1);
 });
 
+test("relink across invalidated components", () => {
+  const grf = graph<undefined, undefined>();
+  const a = grf.node();
+  const b = grf.node();
+  const c = grf.node();
+
+  // deleting the only link between a and b leaves both component caches
+  // invalidated (null), the state that exercises the merge-with-null branch
+  grf.link(a, b).delete();
+
+  // reconnecting all three into one component must rebuild a single component
+  grf.link(a, c);
+  grf.link(c, b);
+
+  expect([...grf.nodes()]).toHaveLength(3);
+  expect(grf.nnodes()).toBe(3);
+  expect(grf.connected()).toBe(true);
+  expect([...grf.split()]).toHaveLength(1);
+  expect(a.connected()).toBe(true);
+  expect([...a.nodes()]).toHaveLength(3);
+});
+
+test("relink preserves multi across invalidated components", () => {
+  const grf = graph<undefined, undefined>();
+  const a = grf.node();
+  const b = grf.node();
+  const c = grf.node();
+  const x = grf.node();
+
+  // invalidate a's component cache to null
+  grf.link(a, x).delete();
+
+  // a multi edge lives inside the other, still-cached component
+  grf.link(b, c);
+  grf.link(b, c);
+
+  // linking a null-cache representative to a cached one must not orphan or
+  // double-register either component
+  grf.link(a, b);
+
+  expect([...grf.nodes()]).toHaveLength(4);
+  expect(grf.nnodes()).toBe(4);
+  expect([...grf.split()]).toHaveLength(2);
+  expect(grf.multi()).toBe(true);
+  expect(a.multi()).toBe(true);
+});
+
 test("topological() ranks inverted case", () => {
   const grf = graph<number, undefined>();
   const a = grf.node(1);

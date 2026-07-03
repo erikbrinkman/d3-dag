@@ -1164,6 +1164,17 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
           dinfo.sinks = null;
         }
       } else if (srepr !== trepr) {
+        this.#components.delete(srepr);
+        this.#components.delete(trepr);
+
+        this.#extra.add(source);
+        source.#par = source;
+        source.#cinfo = null;
+
+        this.#extra.add(target);
+        target.#par = target;
+        target.#cinfo = null;
+
         srepr.#cinfo = null;
         trepr.#cinfo = null;
       }
