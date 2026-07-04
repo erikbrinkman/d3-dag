@@ -14,7 +14,7 @@ import {
   type MutGraph,
   type MutGraphNode,
 } from "../graph";
-import { bigrams, chain, map, some } from "../iters";
+import { bigrams, chain, map } from "../iters";
 import type { NodeLength } from "../layout";
 import { berr, type Named } from "../utils";
 import type { Separation } from "./utils";
@@ -167,12 +167,19 @@ export function sugifyLayer<N, L>(
     } else if (layer < 0 || layer >= numLayers) {
       throw berr`layering ${layering} assigned node an invalid layer: ${layer}`;
     } else {
-      const ancestors = chain(node.parentCounts(), node.childCounts());
-      if (
-        !layerBoosts[layer] &&
-        some(ancestors, ([{ uy }, cnt]) => cnt > 1 && uy === layer - 1)
-      ) {
-        layerBoosts[layer] = true;
+      if (!layerBoosts[layer]) {
+        // a neighbor on the layer above with more than one link to this node —
+        // counting both directions, so a 2-cycle counts as two — collapses onto
+        // a single sugi edge unless we insert a separating dummy layer
+        for (const neighbor of chain(node.parents(), node.children())) {
+          if (
+            neighbor.uy === layer - 1 &&
+            node.nparentLinksTo(neighbor) + node.nchildLinksTo(neighbor) > 1
+          ) {
+            layerBoosts[layer] = true;
+            break;
+          }
+        }
       }
       const data: SugiNodeDatum<N, L> = {
         node,
