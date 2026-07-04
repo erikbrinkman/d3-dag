@@ -372,6 +372,27 @@ test("zherebko() works with inverted edges", () => {
   }
 });
 
+test("zherebko() keeps reversed link points within bounds", () => {
+  const build = graphConnect();
+  const grf = build([
+    ["a", "b"],
+    ["b", "c"],
+    ["c", "d"],
+    ["d", "a"],
+  ]);
+  const layout = zherebko();
+  const { width, height } = layout(grf);
+
+  for (const { points } of grf.links()) {
+    for (const [x, y] of points) {
+      expect(x).toBeGreaterThanOrEqual(-1e-3);
+      expect(x).toBeLessThanOrEqual(width + 1e-3);
+      expect(y).toBeGreaterThanOrEqual(-1e-3);
+      expect(y).toBeLessThanOrEqual(height + 1e-3);
+    }
+  }
+});
+
 test("zherebko() works with variable node sizes", () => {
   const build = graphConnect();
   const grf = build([
