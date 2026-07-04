@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import type { GraphLink } from "../../graph";
+import { type GraphLink, graph } from "../../graph";
 import { flatMap } from "../../iters";
-import { sugiNodeLength } from "../sugify";
+import { type SugiDatum, sugiNodeLength } from "../sugify";
 import { createLayers, nodeSep } from "../test-utils";
 import { sizedSeparation } from "../utils";
 import type { Coord } from ".";
@@ -95,6 +95,43 @@ test("coordSimplex() works for dee with custom weights", () => {
   expect(four.x).toBeCloseTo(0.5);
   expect(two.x).toBeCloseTo(1.5);
   expect(three.x).toBeCloseTo(1.5);
+});
+
+test("coordSimplex() works for reversed short edge with callable weight", () => {
+  // an original edge source -> target, but layered so target sits above source
+  // (a reversed single-layer edge, as produced by cyclic or custom layerings)
+  const orig = graph<{ index: number }, undefined>();
+  const source = orig.node({ index: 0 });
+  const target = orig.node({ index: 1 });
+  source.child(target, undefined);
+
+  // build the sugi graph with the original target as the parent and the
+  // original source as the child, matching how sugify handles reversed edges
+  const sugi = graph<SugiDatum<{ index: number }, undefined>, undefined>();
+  const sugiTarget = sugi.node({
+    role: "node",
+    node: target,
+    topLayer: 0,
+    bottomLayer: 0,
+  });
+  const sugiSource = sugi.node({
+    role: "node",
+    node: source,
+    topLayer: 1,
+    bottomLayer: 1,
+  });
+  sugiTarget.child(sugiSource, undefined);
+  sugiTarget.y = 0;
+  sugiSource.y = 1;
+
+  const layers = [[sugiTarget], [sugiSource]];
+  const layout = coordSimplex().weight(() => [1, 2, 8]);
+  layout(layers, nodeSep);
+
+  expect(sugiTarget.x).toBeFinite();
+  expect(sugiSource.x).toBeFinite();
+  expect(sugiTarget.x).toBeCloseTo(0.5);
+  expect(sugiSource.x).toBeCloseTo(0.5);
 });
 
 test("coordSimplex() works with flat disconnected component", () => {
