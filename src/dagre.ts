@@ -478,8 +478,8 @@ export class DagreGraph {
 
     let op: DagreOperator;
     if (operator) {
-      // custom operator: apply nodeSize/gap but not direction or algorithm tweaks
-      // (the caller is responsible for their own tweaks)
+      // caller supplies the algorithm and its handle tweaks; graph config still
+      // applies on top, with rankdir handled uniformly by tweakDirection below
       op = operator;
     } else {
       if (config.algorithm === "zherebko") {
@@ -491,8 +491,8 @@ export class DagreGraph {
         op = presetSugiyama(config.quality, config.ranker);
         extraTweaks.push(tweakSugiyama(nodeSizeFn));
       }
-      extraTweaks.push(tweakDirection(config.rankdir ?? "TB"));
     }
+    extraTweaks.push(tweakDirection(config.rankdir ?? "TB"));
 
     const existingTweaks = op.tweaks();
     const configured = op
