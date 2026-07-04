@@ -229,6 +229,37 @@ test("sugifyLayer() works for extended inverted edges", () => {
   ]);
 });
 
+test("sugifyLayer() / unsugify() works for adjacent two-cycle", () => {
+  const grf = graph<undefined, undefined>();
+  const above = grf.node();
+  const below = grf.node();
+  const down = grf.link(above, below);
+  const up = grf.link(below, above);
+  above.y = 0;
+  below.y = 1;
+  const [layers, height] = sugifyLayer(grf, nodeHeight, 1, 2, noopLayering);
+  expectLayersToSatisfyInvariants(layers, height);
+
+  // a separating dummy layer is inserted so both directions stay distinct
+  expect(layers).toHaveLength(3);
+  const [[topSugi], linkLayer, [bottomSugi]] = layers;
+  expect(linkLayer).toHaveLength(2);
+  expect(topSugi.data.role).toBe("node");
+  expect(bottomSugi.data.role).toBe("node");
+
+  topSugi.x = 1;
+  bottomSugi.x = 1;
+  const [linkSugiA, linkSugiB] = linkLayer;
+  linkSugiA.x = 2;
+  linkSugiB.x = 3;
+  unsugify(layers);
+  expectGraphToSatisfyHeights(grf);
+
+  // both directions of the cycle get rendered points
+  expect(down.points.length).toBeGreaterThan(1);
+  expect(up.points.length).toBeGreaterThan(1);
+});
+
 test("sugifyLayer() throws for missing layer", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
