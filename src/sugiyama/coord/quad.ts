@@ -208,7 +208,7 @@ function cacheVertWeak<N, L>(
       }
     }
     return (src: GraphNode<N, L>, targ: GraphNode<N, L>): number =>
-      vertWeakMap.get(src)!.get(targ)!;
+      vertWeakMap.get(src)?.get(targ) ?? vertWeakMap.get(targ)!.get(src)!;
   }
 }
 
@@ -281,11 +281,25 @@ function buildOperator<
     // add loss for nearby nodes and for curve of nodes
     for (const [par, pind] of inds) {
       const pdata = par.data;
-      const source = pdata.role === "node" ? pdata.node : pdata.link.source;
       for (const node of par.children()) {
         const nind = inds.get(node)!;
         const ndata = node.data;
-        const target = ndata.role === "node" ? ndata.node : ndata.link.target;
+
+        // the original link endpoints for this sugi edge; when a dummy is
+        // present its stored link gives the true orientation, which can be
+        // reversed relative to the sugi edge for cycle-broken links
+        let source: GraphNode<N, L>;
+        let target: GraphNode<N, L>;
+        if (pdata.role === "link") {
+          source = pdata.link.source;
+          target = pdata.link.target;
+        } else if (ndata.role === "link") {
+          source = ndata.link.source;
+          target = ndata.link.target;
+        } else {
+          source = pdata.node;
+          target = ndata.node;
+        }
 
         const wpdist =
           pdata.role === "node"
