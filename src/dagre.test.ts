@@ -786,16 +786,37 @@ test("graph() returns a copy", () => {
   expect(grf.graph().rankdir).toBe("LR");
 });
 
-test("custom operator does not get extra direction tweak", () => {
+test("custom operator with rankdir LR does not overlap siblings", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ rankdir: "LR" });
+  grf.setNode("a", { width: 172, height: 36 });
+  grf.setNode("b", { width: 172, height: 36 });
+  grf.setNode("c", { width: 172, height: 36 });
+  grf.setEdge("a", "b");
+  grf.setEdge("a", "c");
+
+  // the README's showcased combination: rankdir LR plus a custom operator
+  dagre.layout(grf, sugiyama().decross(decrossOpt()).coord(coordQuad()));
+
+  // b and c are siblings on the same rank; under LR they share an x and must be
+  // separated by at least their full height along y (no overlap)
+  const b = grf.node("b");
+  const c = grf.node("c");
+  expect(b.x).toBeCloseTo(c.x);
+  expect(Math.abs(b.y - c.y)).toBeGreaterThanOrEqual(36);
+});
+
+test("custom operator honors rankdir from graph config", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setGraph({ rankdir: "LR" });
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setEdge("a", "b");
 
-  // custom operator with no direction tweaks — should layout TB (operator default)
+  // graph config applies on top of a custom operator, so rankdir LR still flips
   dagre.layout(grf, sugiyama());
 
-  // since no direction tweak was applied, layout is TB: y should differ
-  expect(grf.node("a").y).not.toBe(grf.node("b").y);
+  // LR layout: successive ranks advance in x, sharing a y
+  expect(grf.node("a").x).not.toBe(grf.node("b").x);
+  expect(grf.node("a").y).toBe(grf.node("b").y);
 });
