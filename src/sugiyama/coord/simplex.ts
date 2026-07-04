@@ -142,19 +142,28 @@ function createCachedSimplexWeightAccessor<N, L>(
       }
     }
 
+    // handle forward and reversed edges
+    const lookup = (
+      source: GraphNode<N, L>,
+      target: GraphNode<N, L>,
+    ): readonly [number, number, number] => {
+      const forward = cache.get(source)?.get(target);
+      return forward ?? cache.get(target)!.get(source)!;
+    };
+
     return (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
       // NOTE this structure is to make sure type script does inference about
       // the sugi data appropriately
       if (par.data.role === "link") {
         const { source, target } = par.data.link;
-        const [, one, two] = cache.get(source)!.get(target)!;
+        const [, one, two] = lookup(source, target);
         return child.data.role === "link" ? two : one;
       } else if (child.data.role === "link") {
         const { source, target } = child.data.link;
-        const [, val] = cache.get(source)!.get(target)!;
+        const [, val] = lookup(source, target);
         return val;
       } else {
-        const [val] = cache.get(par.data.node)!.get(child.data.node)!;
+        const [val] = lookup(par.data.node, child.data.node);
         return val;
       }
     };
