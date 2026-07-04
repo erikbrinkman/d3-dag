@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import type { GraphLink } from "../../graph";
+import { type GraphLink, graph } from "../../graph";
+import { sugiyama } from "..";
 import { createLayers, nodeSep } from "../test-utils";
 import type { Coord } from ".";
 import { coordQuad } from "./quad";
@@ -42,6 +43,26 @@ test("coordQuad() modifiers work", () => {
   expect(advanced.nodeCurve() satisfies typeof nodeCurve).toBe(nodeCurve);
   expect(advanced.compress()).toEqual(comp);
   advanced(layers, nodeSep);
+});
+
+test("coordQuad() works with a callable vertWeak over a cycle", () => {
+  // a reversed link (from cycle breaking) is traversed against its original
+  // direction, so the callable vertWeak cache must resolve its weight for both
+  // orientations rather than yielding NaN coordinates
+  const grf = graph<string, undefined>();
+  const a = grf.node("a");
+  const b = grf.node("b");
+  const c = grf.node("c");
+  a.child(b, undefined);
+  b.child(c, undefined);
+  c.child(a, undefined);
+
+  const layout = sugiyama().coord(coordQuad().vertWeak(() => 1));
+  layout(grf);
+
+  for (const node of grf.nodes()) {
+    expect(Number.isFinite(node.x)).toBe(true);
+  }
 });
 
 test("coordQuad() works for square like layout", () => {
