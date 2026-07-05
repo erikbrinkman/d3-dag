@@ -1,41 +1,44 @@
-import { createRoot } from "react-dom/client";
-import { useEffect, useMemo, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
-import { graphConnect } from "../src/graph/connect";
-import { grid } from "../src/grid";
-import { laneGreedy } from "../src/grid/lane/greedy";
-import { laneOpt } from "../src/grid/lane/opt";
-import { sugiyama } from "../src/sugiyama";
-import { coordCenter } from "../src/sugiyama/coord/center";
-import { coordGreedy } from "../src/sugiyama/coord/greedy";
-import { coordQuad } from "../src/sugiyama/coord/quad";
-import { coordSimplex } from "../src/sugiyama/coord/simplex";
-import { coordTopological } from "../src/sugiyama/coord/topological";
-import { decrossDfs } from "../src/sugiyama/decross/dfs";
-import { decrossOpt } from "../src/sugiyama/decross/opt";
-import { decrossTwoLayer } from "../src/sugiyama/decross/two-layer";
-import { layeringLongestPath } from "../src/sugiyama/layering/longest-path";
-import { layeringSimplex } from "../src/sugiyama/layering/simplex";
-import { layeringTopological } from "../src/sugiyama/layering/topological";
-import type { DagreAlgorithm } from "../src/dagre";
-import { tweakDirection, tweakGridHandles, tweakSugiyama } from "../src/tweaks";
-import { zherebko } from "../src/zherebko";
+import { useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import type { DagreAlgorithm } from "../src/dagre.js";
+import { graphConnect } from "../src/graph/connect.js";
+import { grid } from "../src/grid/index.js";
+import { laneGreedy } from "../src/grid/lane/greedy.js";
+import { laneOpt } from "../src/grid/lane/opt.js";
+import { coordCenter } from "../src/sugiyama/coord/center.js";
+import { coordGreedy } from "../src/sugiyama/coord/greedy.js";
+import { coordQuad } from "../src/sugiyama/coord/quad.js";
+import { coordSimplex } from "../src/sugiyama/coord/simplex.js";
+import { coordTopological } from "../src/sugiyama/coord/topological.js";
+import { decrossDfs } from "../src/sugiyama/decross/dfs.js";
+import { decrossOpt } from "../src/sugiyama/decross/opt.js";
+import { decrossTwoLayer } from "../src/sugiyama/decross/two-layer.js";
+import { sugiyama } from "../src/sugiyama/index.js";
+import { layeringLongestPath } from "../src/sugiyama/layering/longest-path.js";
+import { layeringSimplex } from "../src/sugiyama/layering/simplex.js";
+import { layeringTopological } from "../src/sugiyama/layering/topological.js";
 import {
+  tweakDirection,
+  tweakGridHandles,
+  tweakSugiyama,
+} from "../src/tweaks.js";
+import { zherebko } from "../src/zherebko/index.js";
+import {
+  type AppLayoutResult,
   type Direction,
   type EdgeMode,
+  edgeKey,
   FlowInner,
+  formatMeta,
   type GraphData,
-  type AppLayoutResult,
+  graphs,
   NODE_H,
   NODE_W,
   Select,
   Slider,
-  edgeKey,
-  formatMeta,
-  graphs,
   toFlowElements,
-} from "./shared";
-
+} from "./shared.js";
 
 function runLayout(
   graphData: GraphData,
@@ -53,7 +56,10 @@ function runLayout(
   const t0 = performance.now();
 
   const connect = graphConnect();
-  const pairs: [string, string][] = graphData.edges.map((e) => [e.source, e.target]);
+  const pairs: [string, string][] = graphData.edges.map((e) => [
+    e.source,
+    e.target,
+  ]);
   // graphConnect needs at least one edge; if graph is edgeless, use graph() directly
   // but all our examples have edges
   const grf = connect(pairs);
@@ -71,45 +77,52 @@ function runLayout(
   if (algorithm === "grid") tweaks.push(tweakGridHandles(nodeSize, gap));
   tweaks.push(tweakDirection(direction));
 
-  let op;
-  if (algorithm === "zherebko") {
-    op = zherebko().nodeSize(nodeSize).gap(gap).tweaks(tweaks);
-  } else if (algorithm === "grid") {
-    let lane;
-    if (opts.lane === "opt") lane = laneOpt();
-    else lane = laneGreedy();
-    op = grid().lane(lane).nodeSize(nodeSize).gap(gap).tweaks(tweaks);
-  } else {
-    let layering;
-    if (opts.layering === "longest-path") layering = layeringLongestPath();
-    else if (opts.layering === "topological") layering = layeringTopological();
-    else layering = layeringSimplex();
-
-    let decross;
-    if (opts.decross === "dfs") decross = decrossDfs();
-    else if (opts.decross === "opt") decross = decrossOpt();
-    else decross = decrossTwoLayer();
-
-    let coord;
-    if (opts.coord === "quad") coord = coordQuad();
-    else if (opts.coord === "greedy") coord = coordGreedy();
-    else if (opts.coord === "center") coord = coordCenter();
-    else if (opts.coord === "topological") coord = coordTopological();
-    else coord = coordSimplex();
-
-    op = sugiyama()
-      .layering(layering)
-      .decross(decross)
-      .coord(coord)
-      .nodeSize(nodeSize)
-      .gap(gap)
-      .tweaks(tweaks);
-  }
+  const op = (() => {
+    if (algorithm === "zherebko") {
+      return zherebko().nodeSize(nodeSize).gap(gap).tweaks(tweaks);
+    } else if (algorithm === "grid") {
+      const lane = opts.lane === "opt" ? laneOpt() : laneGreedy();
+      return grid().lane(lane).nodeSize(nodeSize).gap(gap).tweaks(tweaks);
+    } else {
+      const layering =
+        opts.layering === "longest-path"
+          ? layeringLongestPath()
+          : opts.layering === "topological"
+            ? layeringTopological()
+            : layeringSimplex();
+      const decross =
+        opts.decross === "dfs"
+          ? decrossDfs()
+          : opts.decross === "opt"
+            ? decrossOpt()
+            : decrossTwoLayer();
+      const coord =
+        opts.coord === "quad"
+          ? coordQuad()
+          : opts.coord === "greedy"
+            ? coordGreedy()
+            : opts.coord === "center"
+              ? coordCenter()
+              : opts.coord === "topological"
+                ? coordTopological()
+                : coordSimplex();
+      return sugiyama()
+        .layering(layering)
+        .decross(decross)
+        .coord(coord)
+        .nodeSize(nodeSize)
+        .gap(gap)
+        .tweaks(tweaks);
+    }
+  })();
 
   const result = op(grf);
   const elapsed = performance.now() - t0;
 
-  const positions = new Map<string, { x: number; y: number; width: number; height: number }>();
+  const positions = new Map<
+    string,
+    { x: number; y: number; width: number; height: number }
+  >();
   for (const node of grf.nodes()) {
     const id = node.data;
     positions.set(id, {
@@ -127,7 +140,13 @@ function runLayout(
     edgePoints.set(edgeKey(srcId, tgtId), link.points);
   }
 
-  return { positions, edgePoints, width: result.width, height: result.height, elapsed };
+  return {
+    positions,
+    edgePoints,
+    width: result.width,
+    height: result.height,
+    elapsed,
+  };
 }
 
 function App() {
@@ -142,9 +161,15 @@ function App() {
   const [edgeMode, setEdgeMode] = useState<EdgeMode>("routed");
 
   // sugiyama options
-  const [layering, setLayering] = useState<"simplex" | "longest-path" | "topological">("simplex");
-  const [decross, setDecross] = useState<"two-layer" | "dfs" | "opt">("two-layer");
-  const [coord, setCoord] = useState<"simplex" | "quad" | "greedy" | "center" | "topological">("simplex");
+  const [layering, setLayering] = useState<
+    "simplex" | "longest-path" | "topological"
+  >("simplex");
+  const [decross, setDecross] = useState<"two-layer" | "dfs" | "opt">(
+    "two-layer",
+  );
+  const [coord, setCoord] = useState<
+    "simplex" | "quad" | "greedy" | "center" | "topological"
+  >("simplex");
 
   // grid options
   const [lane, setLane] = useState<"greedy" | "opt">("greedy");
@@ -159,17 +184,31 @@ function App() {
   const graphData = graphs[graphName]!;
 
   const result = useMemo(
-    () => runLayout(graphData, algorithm, direction, nodesep, ranksep, {
+    () =>
+      runLayout(graphData, algorithm, direction, nodesep, ranksep, {
+        layering,
+        decross,
+        coord,
+        lane,
+      }),
+    [
+      graphData,
+      algorithm,
+      direction,
+      nodesep,
+      ranksep,
       layering,
       decross,
       coord,
       lane,
-    }),
-    [graphData, algorithm, direction, nodesep, ranksep, layering, decross, coord, lane],
+    ],
   );
 
   const flow = useMemo(
-    () => toFlowElements(graphData, result, edgeMode, direction, { proportional: true }),
+    () =>
+      toFlowElements(graphData, result, edgeMode, direction, {
+        proportional: true,
+      }),
     [graphData, result, edgeMode, direction],
   );
 
@@ -178,7 +217,11 @@ function App() {
   return (
     <>
       <div className="examples-controls">
-        <Select label="Layout" value={algorithm} onChange={(v) => setAlgorithm(v as DagreAlgorithm)}>
+        <Select
+          label="Layout"
+          value={algorithm}
+          onChange={(v) => setAlgorithm(v as DagreAlgorithm)}
+        >
           <option value="sugiyama">Sugiyama</option>
           <option value="zherebko">Zherebko</option>
           <option value="grid">Grid</option>
@@ -190,7 +233,11 @@ function App() {
             </option>
           ))}
         </Select>
-        <Select label="Direction" value={direction} onChange={(v) => setDirection(v as Direction)}>
+        <Select
+          label="Direction"
+          value={direction}
+          onChange={(v) => setDirection(v as Direction)}
+        >
           <option value="TB">TB</option>
           <option value="LR">LR</option>
           <option value="BT">BT</option>
@@ -199,17 +246,29 @@ function App() {
 
         {algorithm === "sugiyama" && (
           <>
-            <Select label="Layering" value={layering} onChange={(v) => setLayering(v as typeof layering)}>
+            <Select
+              label="Layering"
+              value={layering}
+              onChange={(v) => setLayering(v as typeof layering)}
+            >
               <option value="simplex">simplex</option>
               <option value="longest-path">longest-path</option>
               <option value="topological">topological</option>
             </Select>
-            <Select label="Decross" value={decross} onChange={(v) => setDecross(v as typeof decross)}>
+            <Select
+              label="Decross"
+              value={decross}
+              onChange={(v) => setDecross(v as typeof decross)}
+            >
               <option value="two-layer">two-layer</option>
               <option value="dfs">dfs</option>
               <option value="opt">opt</option>
             </Select>
-            <Select label="Coord" value={coord} onChange={(v) => setCoord(v as typeof coord)}>
+            <Select
+              label="Coord"
+              value={coord}
+              onChange={(v) => setCoord(v as typeof coord)}
+            >
               <option value="simplex">simplex</option>
               <option value="quad">quad</option>
               <option value="greedy">greedy</option>
@@ -220,15 +279,35 @@ function App() {
         )}
 
         {algorithm === "grid" && (
-          <Select label="Lane" value={lane} onChange={(v) => setLane(v as typeof lane)}>
+          <Select
+            label="Lane"
+            value={lane}
+            onChange={(v) => setLane(v as typeof lane)}
+          >
             <option value="greedy">greedy</option>
             <option value="opt">opt</option>
           </Select>
         )}
 
-        <Slider label="nodesep" value={nodesep} onChange={setNodesep} min={1} max={100} />
-        <Slider label="ranksep" value={ranksep} onChange={setRanksep} min={1} max={100} />
-        <Select label="Edges" value={edgeMode} onChange={(v) => setEdgeMode(v as EdgeMode)}>
+        <Slider
+          label="nodesep"
+          value={nodesep}
+          onChange={setNodesep}
+          min={1}
+          max={100}
+        />
+        <Slider
+          label="ranksep"
+          value={ranksep}
+          onChange={setRanksep}
+          min={1}
+          max={100}
+        />
+        <Select
+          label="Edges"
+          value={edgeMode}
+          onChange={(v) => setEdgeMode(v as EdgeMode)}
+        >
           <option value="straight">straight</option>
           <option value="curved">curved</option>
           <option value="routed">routed</option>
@@ -242,7 +321,6 @@ function App() {
           <FlowInner nodes={flow.nodes} edges={flow.edges} />
         </ReactFlowProvider>
       </div>
-
     </>
   );
 }

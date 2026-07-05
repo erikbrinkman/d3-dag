@@ -1,24 +1,29 @@
-import { createRoot } from "react-dom/client";
-import { useMemo, useState } from "react";
-import { ReactFlowProvider, type Edge, type Node } from "@xyflow/react";
 import originalDagre from "@dagrejs/dagre";
-import type { DagreAlgorithm, DagreQuality, DagreRanker, Rankdir } from "../src/dagre";
-import { dagre } from "../src/dagre";
+import { type Edge, type Node, ReactFlowProvider } from "@xyflow/react";
+import { useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import type {
+  DagreAlgorithm,
+  DagreQuality,
+  DagreRanker,
+  Rankdir,
+} from "../src/dagre.js";
+import { dagre } from "../src/dagre.js";
 import {
+  type AppLayoutResult,
   type Direction,
   type EdgeMode,
+  extractDagreLayout,
   FlowInner,
+  formatMeta,
   type GraphData,
-  type AppLayoutResult,
+  graphs,
   NODE_H,
   NODE_W,
   Select,
   Slider,
-  extractDagreLayout,
-  formatMeta,
-  graphs,
   toFlowElements,
-} from "./shared";
+} from "./shared.js";
 
 function layoutWithD3Dag(
   graphData: GraphData,
@@ -31,9 +36,17 @@ function layoutWithD3Dag(
 ): AppLayoutResult {
   const t0 = performance.now();
   const grf = new dagre.graphlib.Graph();
-  grf.setGraph({ rankdir: dir as Rankdir, nodesep, ranksep, quality, ranker, algorithm });
+  grf.setGraph({
+    rankdir: dir as Rankdir,
+    nodesep,
+    ranksep,
+    quality,
+    ranker,
+    algorithm,
+  });
   grf.setDefaultEdgeLabel(() => ({}));
-  for (const n of graphData.nodes) grf.setNode(n.id, { width: NODE_W, height: NODE_H });
+  for (const n of graphData.nodes)
+    grf.setNode(n.id, { width: NODE_W, height: NODE_H });
   for (const e of graphData.edges) grf.setEdge(e.source, e.target);
   dagre.layout(grf);
   return extractDagreLayout(graphData, grf, performance.now() - t0);
@@ -49,7 +62,8 @@ function layoutWithDagre(
   const grf = new originalDagre.graphlib.Graph();
   grf.setGraph({ rankdir: dir, nodesep, ranksep });
   grf.setDefaultEdgeLabel(() => ({}));
-  for (const n of graphData.nodes) grf.setNode(n.id, { width: NODE_W, height: NODE_H });
+  for (const n of graphData.nodes)
+    grf.setNode(n.id, { width: NODE_W, height: NODE_H });
   for (const e of graphData.edges) grf.setEdge(e.source, e.target);
   originalDagre.layout(grf);
   return extractDagreLayout(graphData, grf, performance.now() - t0);
@@ -98,17 +112,36 @@ function App() {
   );
 
   const d3dagResult = useMemo(
-    () => layoutWithD3Dag(graphData, direction, nodesep, ranksep, quality, ranker, algorithm),
+    () =>
+      layoutWithD3Dag(
+        graphData,
+        direction,
+        nodesep,
+        ranksep,
+        quality,
+        ranker,
+        algorithm,
+      ),
     [graphData, direction, nodesep, ranksep, quality, ranker, algorithm],
   );
 
   const dagreFlow = useMemo(
-    () => toFlowElements(graphData, dagreResult, edgeMode === "routed" ? "straight" : edgeMode, direction, { proportional: true }),
+    () =>
+      toFlowElements(
+        graphData,
+        dagreResult,
+        edgeMode === "routed" ? "straight" : edgeMode,
+        direction,
+        { proportional: true },
+      ),
     [graphData, dagreResult, edgeMode, direction],
   );
 
   const d3dagFlow = useMemo(
-    () => toFlowElements(graphData, d3dagResult, edgeMode, direction, { proportional: true }),
+    () =>
+      toFlowElements(graphData, d3dagResult, edgeMode, direction, {
+        proportional: true,
+      }),
     [graphData, d3dagResult, edgeMode, direction],
   );
 
@@ -125,43 +158,87 @@ function App() {
             </option>
           ))}
         </Select>
-        <Select label="Algorithm" value={algorithm} onChange={(v) => setAlgorithm(v as DagreAlgorithm)}>
+        <Select
+          label="Algorithm"
+          value={algorithm}
+          onChange={(v) => setAlgorithm(v as DagreAlgorithm)}
+        >
           <option value="sugiyama">sugiyama</option>
           <option value="zherebko">zherebko</option>
           <option value="grid">grid</option>
         </Select>
-        <Select label="Direction" value={direction} onChange={(v) => setDirection(v as Direction)}>
+        <Select
+          label="Direction"
+          value={direction}
+          onChange={(v) => setDirection(v as Direction)}
+        >
           <option value="TB">TB</option>
           <option value="LR">LR</option>
           <option value="BT">BT</option>
           <option value="RL">RL</option>
         </Select>
         {isSugiyama && (
-          <Select label="Quality" value={quality} onChange={(v) => setQuality(v as DagreQuality)}>
+          <Select
+            label="Quality"
+            value={quality}
+            onChange={(v) => setQuality(v as DagreQuality)}
+          >
             <option value="fast">fast</option>
             <option value="medium">medium</option>
             <option value="slow">slow</option>
           </Select>
         )}
         {isSugiyama && (
-          <Select label="Ranker" value={ranker ?? ""} onChange={(v) => setRanker((v || undefined) as DagreRanker | undefined)}>
+          <Select
+            label="Ranker"
+            value={ranker ?? ""}
+            onChange={(v) =>
+              setRanker((v || undefined) as DagreRanker | undefined)
+            }
+          >
             <option value="">default</option>
             <option value="network-simplex">network-simplex</option>
             <option value="longest-path">longest-path</option>
             <option value="topological">topological</option>
           </Select>
         )}
-        <Slider label="nodesep" value={nodesep} onChange={setNodesep} min={1} max={100} />
-        <Slider label="ranksep" value={ranksep} onChange={setRanksep} min={1} max={100} />
-        <Select label="Edges" value={edgeMode} onChange={(v) => setEdgeMode(v as EdgeMode)}>
+        <Slider
+          label="nodesep"
+          value={nodesep}
+          onChange={setNodesep}
+          min={1}
+          max={100}
+        />
+        <Slider
+          label="ranksep"
+          value={ranksep}
+          onChange={setRanksep}
+          min={1}
+          max={100}
+        />
+        <Select
+          label="Edges"
+          value={edgeMode}
+          onChange={(v) => setEdgeMode(v as EdgeMode)}
+        >
           <option value="straight">straight</option>
           <option value="curved">curved</option>
           <option value="routed">routed (d3-dag)</option>
         </Select>
       </div>
       <div className="compare-container">
-        <Panel title="dagre" meta={metaDagre} nodes={dagreFlow.nodes} edges={dagreFlow.edges} />
-        <Panel title="d3-dag" meta={metaD3dag} nodes={d3dagFlow.nodes} edges={d3dagFlow.edges} />
+        <Panel
+          title="dagre"
+          meta={metaDagre}
+          nodes={dagreFlow.nodes}
+          edges={dagreFlow.edges}
+        />
+        <Panel
+          title="d3-dag"
+          meta={metaD3dag}
+          nodes={d3dagFlow.nodes}
+          edges={d3dagFlow.edges}
+        />
       </div>
     </>
   );
