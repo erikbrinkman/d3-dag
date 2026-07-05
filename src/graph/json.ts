@@ -235,6 +235,16 @@ function buildOperator<N, L, O extends JsonOps<N, L>>(
     ) {
       throw err`'nodes' and 'links' didn't have the appropriate structure: ${parsedJson}`;
     }
+    const inRange = (ind: number): boolean =>
+      Number.isInteger(ind) && ind >= 0 && ind < nodes.length;
+    if (
+      links.some(
+        ({ source, target }) => !inRange(source) || !inRange(target),
+      ) ||
+      (index !== undefined && !inRange(index))
+    ) {
+      throw err`link 'source' or 'target', or the top-level 'index', referenced a node outside the range [0, ${nodes.length}): ${parsedJson}`;
+    }
     return deserialize(nodes, links, index, ops.nodeDatum, ops.linkDatum);
   }
 
