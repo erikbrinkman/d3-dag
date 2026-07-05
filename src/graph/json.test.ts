@@ -157,3 +157,27 @@ test("graphJson() fails to parse invalid formats", () => {
     }),
   ).toThrow("'nodes' and 'links' didn't have the appropriate structure");
 });
+
+test("graphJson() fails on out of range references", () => {
+  const builder = graphJson();
+  expect(() => builder({ nodes: [{}], links: [], index: 3, v: 1 })).toThrow(
+    "referenced a node outside the range",
+  );
+  expect(() => builder({ nodes: [{}], links: [], index: 0.5, v: 1 })).toThrow(
+    "referenced a node outside the range",
+  );
+  expect(() =>
+    builder({
+      nodes: [{}],
+      links: [{ source: 5, target: 0, points: [] }],
+      v: 1,
+    }),
+  ).toThrow("referenced a node outside the range");
+  expect(() =>
+    builder({
+      nodes: [{}],
+      links: [{ source: 0, target: 5, points: [] }],
+      v: 1,
+    }),
+  ).toThrow("referenced a node outside the range");
+});
