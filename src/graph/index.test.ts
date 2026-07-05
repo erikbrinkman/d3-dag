@@ -493,6 +493,25 @@ test("relink preserves multi across invalidated components", () => {
   expect(a.multi()).toBe(true);
 });
 
+test("component multi count survives a multi delete over an invalidated cache", () => {
+  const grf = graph<undefined, undefined>();
+  const a = grf.node();
+  const b = grf.node();
+  const c = grf.node();
+
+  grf.link(a, b);
+  const second = grf.link(a, b);
+  const outer = grf.link(a, c);
+
+  outer.delete(); // non-multi delete invalidates the component cache
+  second.delete(); // multi delete must recompute multis without double-counting
+
+  grf.link(a, b);
+
+  expect(grf.multi()).toBe(true);
+  expect(a.multi()).toBe(true);
+});
+
 test("topological() ranks inverted case", () => {
   const grf = graph<number, undefined>();
   const a = grf.node(1);
