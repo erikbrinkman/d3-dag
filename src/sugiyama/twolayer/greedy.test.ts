@@ -78,6 +78,22 @@ test("twolayerGreedy() improves suboptimal median", () => {
   expect(inds).toEqual([3, 2, 0, 1]);
 });
 
+test("twolayerGreedy() re-evaluates pairs exposed by a swap", () => {
+  // top nodes 0 and 1 share bottom child 2, so swapping them is neutral;
+  // node 2 points to bottom 0, so swapping (1, 2) is profitable and picked
+  // first. that swap makes nodes 0 and 2 adjacent, and swapping them is also
+  // profitable, but only a range that still covers that pair will find it.
+  const [topLayer, bottomLayer] = createLayers([
+    [[2], [2], [0]],
+    [[], [], []],
+  ]);
+  const layout = twolayerGreedy();
+  layout(topLayer, bottomLayer, false);
+  const inds = topLayer.map(getIndex);
+  expect(inds).toEqual([2, 0, 1]);
+  expect(crossings([topLayer, bottomLayer])).toBeCloseTo(0);
+});
+
 test("twolayerGreedy() scan fails where opt succeeds", () => {
   const [topLayer, bottomLayer] = createLayers([
     [[0, 3, 4], [1, 4], [2]],
