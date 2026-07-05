@@ -1,6 +1,6 @@
 {
   "name": "d3-dag",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Layout algorithms for visualizing directed acyclic graphs.",
   "keywords": [
     "d3",
@@ -19,37 +19,35 @@
     "email": "erik.brinkman@gmail.com"
   },
   "license": "MIT",
-  "main": "dist/d3-dag.cjs.min.js",
-  "module": "dist/d3-dag.esm.min.mjs",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
   "unpkg": "dist/d3-dag.iife.min.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/d3-dag.esm.min.mjs",
-      "require": "./dist/d3-dag.cjs.min.js",
-      "default": "./dist/d3-dag.esm.min.mjs"
+      "default": "./dist/index.js"
     }
   },
   "files": [
     "/dist/**/*.js",
-    "/dist/**/*.mjs",
     "/dist/**/*.d.ts"
   ],
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "fmt": "biome format --write",
     "lint:ts": "tsc",
     "lint:es": "biome check",
     "lint:doc": "typedoc --emit none",
     "lint": "bun lint:ts && bun lint:doc && bun lint:es",
-    "export:ts": "tsc -p tsconfig.build.json",
-    "export:flow": "bun flow.mjs --cache",
-    "export:bundle:esm": "bun build src/index.ts --minify --format=esm --outfile dist/d3-dag.esm.min.mjs",
-    "export:bundle:cjs": "bun build src/index.ts --minify --format=cjs --target=node --outfile dist/d3-dag.cjs.min.js",
-    "export:bundle:iife": "bun build build/iife.ts --minify --format=iife --target=browser --outfile dist/d3-dag.iife.min.js",
-    "export:bundle": "bun export:bundle:esm && bun export:bundle:cjs && bun export:bundle:iife",
-    "export": "bun export:ts && bun export:bundle",
-    "prepack": "bun lint && bun test --coverage && bun export",
+    "export:lib": "tsc -p tsconfig.build.json",
+    "export:iife": "bun build build/iife.ts --minify --format=iife --target=browser --outfile dist/d3-dag.iife.min.js",
+    "export": "bun export:lib && bun export:iife",
+    "check:pkg": "publint --strict && attw --pack --profile esm-only",
+    "prepack": "bun export",
     "bench": "bun src/dagre.bench.ts",
     "doc": "typedoc && bun build docs-src/compare-app.tsx --minify -e child_process --outfile docs/compare-app.js && bun build docs-src/examples-app.tsx --minify -e child_process --outfile docs/examples-app.js",
     "doc:watch": "typedoc --watch"
@@ -57,10 +55,11 @@
   "dependencies": {
     "d3-array": "^3.2.4",
     "javascript-lp-solver": "^1.0.3",
-    "quadprog": "^1.6.1",
+    "quadprog": "^2.0.0",
     "stringify-object": "^6.0.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.4",
     "@biomejs/biome": "^2.4.11",
     "@dagrejs/dagre": "^3.0.0",
     "@types/bun": "^1.3.12",
@@ -71,6 +70,7 @@
     "@xyflow/react": "^12.10.2",
     "glob": "^13.0.6",
     "mitata": "^1.0.34",
+    "publint": "^0.3.21",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "typedoc": "^0.28.18",
