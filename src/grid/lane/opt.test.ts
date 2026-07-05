@@ -137,6 +137,32 @@ test("laneOpt() dist compacts slightly", () => {
   expect(Math.max(...nodes.map((node) => node.x))).toBeGreaterThan(3);
 });
 
+test("laneOpt() compacts many lanes monotonically", () => {
+  // regression: the non-compressed branch compacts skipped lane indices, and
+  // the raw lane values must be sorted numerically. With enough distinct lanes
+  // the solver assigns double-digit values (e.g. 10, 11) which a lexicographic
+  // sort would reorder before single-digit values, scrambling the crossing-free
+  // ordering the ILP found.
+  const create = graphConnect();
+  const ids: [string, string][] = [];
+  for (let child = 1; child < 12; ++child) {
+    ids.push(["0", `${child}`]);
+  }
+  for (let node = 1; node < 11; ++node) {
+    ids.push([`${node}`, `${node + 1}`]);
+  }
+  const dag = create(ids);
+  const nodes = prepare(dag);
+
+  const layout = laneOpt();
+  layout(nodes);
+
+  // enough distinct lanes that the solver produces values >= 10
+  expect(new Set(nodes.map((node) => node.x)).size).toBeGreaterThanOrEqual(11);
+  // a lexicographic sort of the raw lanes would reintroduce crossings here
+  expect(crossings(nodes)).toEqual(0);
+}, 30000);
+
 test("laneOpt() throws for large graphs", () => {
   const create = graphConnect();
   const ids: [string, string][] = [];
