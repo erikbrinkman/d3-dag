@@ -296,6 +296,19 @@ test("edge() returns control points after layout", () => {
   expect(e.points.length).toBeGreaterThan(0);
 });
 
+test("edge() label captured before layout reflects points after", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setNode("a", { width: 10, height: 10 });
+  grf.setNode("b", { width: 10, height: 10 });
+  grf.setEdge("a", "b");
+
+  const e = grf.edge("a", "b");
+  expect(grf.edge("a", "b")).toBe(e); // same label object across calls
+  expect(e.points).toHaveLength(0);
+  dagre.layout(grf);
+  expect(e.points.length).toBeGreaterThan(0);
+});
+
 test("edge() throws for missing edge", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setNode("a");
