@@ -224,6 +224,12 @@ test("graphStratify() fails without unique ids", () => {
   expect(() => graphStratify()(data)).toThrow("duplicate id");
 });
 
+test("graphStratify() names the offending id in duplicate error", () => {
+  const data = [{ id: "a" }, { id: "a" }];
+  expect(() => graphStratify()(data)).toThrow('found a duplicate id: "a"');
+  expect(() => graphStratify()(data)).not.toThrow("function");
+});
+
 test("graphStratify() fails with missing id", () => {
   const data = [{ id: "1", parentIds: ["2"] }];
   expect(() => graphStratify()(data)).toThrow("missing id");
