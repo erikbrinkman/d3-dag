@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/erikbrinkman/d3-dag.git"
+    "url": "git+https://github.com/erikbrinkman/d3-dag.git"
   },
   "homepage": "https://erikbrinkman.github.io/d3-dag/",
   "author": {
