@@ -3,7 +3,7 @@
  *
  * @packageDocumentation
  */
-import type { GraphNode, MutGraphNode } from "./graph";
+import type { GraphNode, MutGraphLink, MutGraphNode } from "./graph";
 import { graph } from "./graph";
 import { grid } from "./grid";
 import type { Operator, Rankdir } from "./layout";
@@ -24,8 +24,8 @@ interface IdDagreNode extends DagreNode {
   id: string;
 }
 
-type DagreOperator = Operator<IdDagreNode, undefined>;
-type DagreSugiyama = Sugiyama<SugiyamaOps<IdDagreNode, undefined>>;
+type DagreOperator = Operator<IdDagreNode, DagreEdge>;
+type DagreSugiyama = Sugiyama<SugiyamaOps<IdDagreNode, DagreEdge>>;
 
 export type { Rankdir } from "./layout";
 
@@ -134,8 +134,8 @@ function presetSugiyama(
  * ```
  */
 export class DagreGraph {
-  #mutGraph = graph<IdDagreNode, undefined>();
-  #graphNodes = new Map<string, MutGraphNode<IdDagreNode, undefined>>();
+  #mutGraph = graph<IdDagreNode, DagreEdge>();
+  #graphNodes = new Map<string, MutGraphNode<IdDagreNode, DagreEdge>>();
   #defaultNodeLabel: () => {
     readonly width?: number;
     readonly height?: number;
@@ -226,7 +226,14 @@ export class DagreGraph {
     const src = this.#graphNodes.get(v)!;
     const tgt = this.#graphNodes.get(w)!;
     if (src.nchildLinksTo(tgt) === 0) {
-      this.#mutGraph.link(src, tgt);
+      // label closes over the link it's stored on
+      let link: MutGraphLink<IdDagreNode, DagreEdge>;
+      const label: DagreEdge = {
+        get points() {
+          return link.points.map(([x, y]) => ({ x, y }));
+        },
+      };
+      link = this.#mutGraph.link(src, tgt, label);
     }
     return this;
   }
@@ -274,15 +281,20 @@ export class DagreGraph {
     return graphNode.data;
   }
 
-  /** get edge label (includes points after layout) */
+  /**
+   * get edge label
+   *
+   * Returns the same label object for an edge across calls, stored on its link. Its
+   * `points` is recomputed on each read, so a label captured before {@link
+   * dagre.layout} reflects the laid-out points; the array is a fresh copy and any
+   * label passed to {@link setEdge} is ignored.
+   */
   edge(v: string, w: string): DagreEdge {
     const src = this.#graphNodes.get(v);
     const tgt = this.#graphNodes.get(w);
     if (!src || !tgt) throw err`unknown edge: ${v} -> ${w}`;
     for (const link of src.childLinksTo(tgt)) {
-      return {
-        points: link.points.map(([x, y]) => ({ x, y })),
-      };
+      return link.data;
     }
     throw err`unknown edge: ${v} -> ${w}`;
   }
@@ -463,7 +475,7 @@ export class DagreGraph {
     const isHorizontal = config.rankdir === "LR" || config.rankdir === "RL";
 
     const nodeSizeFn = (
-      graphNode: GraphNode<IdDagreNode, undefined>,
+      graphNode: GraphNode<IdDagreNode, DagreEdge>,
     ): readonly [number, number] => {
       const w = graphNode.data.width;
       const h = graphNode.data.height;
@@ -474,7 +486,7 @@ export class DagreGraph {
       ? [config.ranksep, config.nodesep]
       : [config.nodesep, config.ranksep];
 
-    const extraTweaks: Tweak<IdDagreNode, undefined>[] = [];
+    const extraTweaks: Tweak<IdDagreNode, DagreEdge>[] = [];
 
     let op: DagreOperator;
     if (operator) {
@@ -544,8 +556,9 @@ export const dagre = {
   /**
    * run layout on a graph, mutating it in-place
    *
-   * Sets `x`/`y` on node labels, `points` on edge labels, and
-   * `width`/`height` on the graph config.
+   * Sets `x`/`y` on node labels and `width`/`height` on the graph config. Edge
+   * control points are read via {@link DagreGraph.edge} *after* layout — unlike
+   * dagre, they are not written onto a persistent edge label.
    *
    * @param grf - the graph to lay out
    * @param operator - optional {@link Operator}; graph config is applied on top

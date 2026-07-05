@@ -89,6 +89,9 @@ Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most 
 - Every node needs a positive `width` and `height`. Unlike dagre (which tolerates
   zero-sized nodes), a node created without dimensions — including one auto-created by
   `setEdge` or via a `setDefaultNodeLabel` that returns no size — throws at layout time.
+- `edge(v, w)` returns the same label object each call, and its `points` is recomputed on
+  each read, so a label captured before `dagre.layout` reflects the laid-out points
+  afterward. The array is a fresh copy, and any label passed to `setEdge` is ignored.
 
 ## Quality Presets
 
