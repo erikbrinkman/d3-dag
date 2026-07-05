@@ -86,6 +86,9 @@ Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most 
 - `dagre.layout` accepts an optional `Operator` for fine-grained algorithm control
 - `graph()` returns a shallow copy of the config (mutations require `setGraph`)
 - Default `nodesep` and `ranksep` are `50` (same as dagre)
+- Every node needs a positive `width` and `height`. Unlike dagre (which tolerates
+  zero-sized nodes), a node created without dimensions — including one auto-created by
+  `setEdge` or via a `setDefaultNodeLabel` that returns no size — throws at layout time.
 
 ## Quality Presets
 
