@@ -1,6 +1,6 @@
-import { isIterable, map } from "../iters";
-import { err } from "../utils";
-import { graph, type MutGraph, type MutGraphNode } from ".";
+import { isIterable, map } from "../iters.js";
+import { err } from "../utils.js";
+import { graph, type MutGraph, type MutGraphNode } from "./index.js";
 
 // NOTE this is typed differently than most operators, and that's because the
 // operators are invariant due to them taking the same type as input and

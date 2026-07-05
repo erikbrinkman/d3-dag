@@ -5,9 +5,9 @@
  * @packageDocumentation
  */
 
-import { err } from "../../utils";
-import type { SugiNode, SugiSeparation } from "../sugify";
-import type { Coord } from ".";
+import { err } from "../../utils.js";
+import type { SugiNode, SugiSeparation } from "../sugify.js";
+import type { Coord } from "./index.js";
 
 /**
  * A {@link Coord} that spaces every node out by node size, and then centers

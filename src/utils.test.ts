@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { setEqual } from "./collections";
-import { assert } from "./test-utils";
-import { berr, ierr } from "./utils";
+import { setEqual } from "./collections.js";
+import { assert } from "./test-utils.js";
+import { berr, ierr } from "./utils.js";
 
 test("assert throws", () => {
   expect(assert(true)).toBeUndefined();

@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import type { SugiNode, SugiSeparation } from "../sugify";
+import type { SugiNode, SugiSeparation } from "../sugify.js";
 
 /**
  * an operator that assigns coordinates to layered {@link SugiNode}s

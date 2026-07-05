@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { createLayers, getIndex } from "../test-utils";
-import { crossings } from "../utils";
-import { twolayerOpt } from "./opt";
+import { createLayers, getIndex } from "../test-utils.js";
+import { crossings } from "../utils.js";
+import { twolayerOpt } from "./opt.js";
 
 test("twolayerOpt() allows setting options", () => {
   const layering = twolayerOpt().check("oom").dist(true);

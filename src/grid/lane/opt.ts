@@ -9,12 +9,12 @@ import solver, {
   type SolveResult,
   type VariableCoefficients,
 } from "javascript-lp-solver";
-import type { GraphNode } from "../../graph";
-import { map } from "../../iters";
-import type { OptChecking } from "../../layout";
-import { err, ierr } from "../../utils";
-import type { Lane } from ".";
-import { gridChildren } from "./utils";
+import type { GraphNode } from "../../graph/index.js";
+import { map } from "../../iters.js";
+import type { OptChecking } from "../../layout.js";
+import { err, ierr } from "../../utils.js";
+import type { Lane } from "./index.js";
+import { gridChildren } from "./utils.js";
 
 /**
  * a lane operator that assigns lanes to minimize edge crossings.

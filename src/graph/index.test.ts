@@ -1,12 +1,12 @@
 import { expect, test } from "bun:test";
-import { length, map, reduce, some } from "../iters";
+import { length, map, reduce, some } from "../iters.js";
 import {
   type GraphLink,
   type GraphNode,
   graph,
   type MutGraphLink,
   type MutGraphNode,
-} from ".";
+} from "./index.js";
 
 test("empty graph", () => {
   const grf = graph<never, never>();

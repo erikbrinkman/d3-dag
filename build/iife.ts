@@ -1,4 +1,4 @@
-import * as d3dag from "../src/index";
+import * as d3dag from "../src/index.js";
 
 const globals = globalThis as typeof globalThis & {
   d3?: Record<string, unknown>;

@@ -5,11 +5,11 @@
  * @packageDocumentation
  */
 import { solveQP } from "quadprog";
-import type { GraphNode } from "../../graph";
-import { bigrams, flatMap, map } from "../../iters";
-import { ierr } from "../../utils";
-import type { SugiNode, SugiSeparation } from "../sugify";
-import { aggMean } from "../twolayer/agg";
+import type { GraphNode } from "../../graph/index.js";
+import { bigrams, flatMap, map } from "../../iters.js";
+import { ierr } from "../../utils.js";
+import type { SugiNode, SugiSeparation } from "../sugify.js";
+import { aggMean } from "../twolayer/agg.js";
 
 /** wrapper for solveQP */
 function qp(

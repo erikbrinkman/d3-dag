@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import type { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify.js";
 
 /**
  * a decrossing operator rearranges the nodes in a layer to minimize decrossings.

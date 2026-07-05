@@ -1,6 +1,6 @@
-import { err, type U } from "../utils";
-import { graph, type MutGraph, type MutGraphNode } from ".";
-import { type Id, verifyId } from "./utils";
+import { err, type U } from "../utils.js";
+import { graph, type MutGraph, type MutGraphNode } from "./index.js";
+import { type Id, verifyId } from "./utils.js";
 
 /**
  * An operator that creates node data from an id

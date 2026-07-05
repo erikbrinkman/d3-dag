@@ -3,10 +3,10 @@ import {
   setMultimapDelete,
   setNext,
   setPop,
-} from "../collections";
-import { chain, filter, map } from "../iters";
-import { dfs, err, ierr } from "../utils";
-import { toJson } from "./json";
+} from "../collections.js";
+import { chain, filter, map } from "../iters.js";
+import { dfs, err, ierr } from "../utils.js";
+import { toJson } from "./json.js";
 
 // ---------- //
 // Interfaces //

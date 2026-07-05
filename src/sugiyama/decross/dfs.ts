@@ -5,10 +5,10 @@
  * @packageDocumentation
  */
 
-import { filter, flatMap, slice } from "../../iters";
-import { dfs as depthFirstSearch, err } from "../../utils";
-import type { SugiNode } from "../sugify";
-import type { Decross } from ".";
+import { filter, flatMap, slice } from "../../iters.js";
+import { dfs as depthFirstSearch, err } from "../../utils.js";
+import type { SugiNode } from "../sugify.js";
+import type { Decross } from "./index.js";
 
 /**
  * a depth first search operator

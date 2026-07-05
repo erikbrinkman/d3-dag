@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { entries, map, slice } from "../iters";
-import { canonical } from "../sugiyama/test-utils";
-import type { MutGraph } from ".";
-import { graphConnect } from "./connect";
+import { entries, map, slice } from "../iters.js";
+import { canonical } from "../sugiyama/test-utils.js";
+import { graphConnect } from "./connect.js";
+import type { MutGraph } from "./index.js";
 
 // initial type
 interface Init {

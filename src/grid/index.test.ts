@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import { type Graph, type GraphNode, graph } from "../graph";
-import { filter } from "../iters";
-import type { LayoutResult } from "../layout";
-import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs";
-import { tweakSize } from "../tweaks";
-import { grid } from ".";
-import { laneGreedy } from "./lane/greedy";
+import { type Graph, type GraphNode, graph } from "../graph/index.js";
+import { filter } from "../iters.js";
+import type { LayoutResult } from "../layout.js";
+import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs.js";
+import { tweakSize } from "../tweaks.js";
+import { grid } from "./index.js";
+import { laneGreedy } from "./lane/greedy.js";
 
 type Grid<N, L> = (inp: Graph<N, L>) => LayoutResult;
 

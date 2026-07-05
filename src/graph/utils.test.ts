@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { verifyId } from "./utils";
+import { verifyId } from "./utils.js";
 
 test("verifyId() throws", () => {
   // @ts-expect-error wrong type

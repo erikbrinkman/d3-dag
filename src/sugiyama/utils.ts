@@ -1,6 +1,6 @@
-import type { GraphNode } from "../graph";
-import { bigrams } from "../iters";
-import type { NodeLength } from "../layout";
+import type { GraphNode } from "../graph/index.js";
+import { bigrams } from "../iters.js";
+import type { NodeLength } from "../layout.js";
 
 /**
  * A separation function that indicates how far apart nodes should be the layering / height assignment.

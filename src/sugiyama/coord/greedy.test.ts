@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { bigrams } from "../../iters";
-import { createLayers, nodeSep } from "../test-utils";
-import { coordGreedy } from "./greedy";
+import { bigrams } from "../../iters.js";
+import { createLayers, nodeSep } from "../test-utils.js";
+import { coordGreedy } from "./greedy.js";
 
 test("coordGreedy() works for N", () => {
   // degree matters

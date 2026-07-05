@@ -1,13 +1,13 @@
 import { expect, test } from "bun:test";
-import type { GraphNode } from "../../graph";
-import { bigrams } from "../../iters";
-import { sugiNodeLength } from "../sugify";
-import { createLayers, nodeSep } from "../test-utils";
-import { sizedSeparation } from "../utils";
-import { coordCenter } from "./center";
-import { coordGreedy } from "./greedy";
-import { coordQuad } from "./quad";
-import { coordSimplex } from "./simplex";
+import type { GraphNode } from "../../graph/index.js";
+import { bigrams } from "../../iters.js";
+import { sugiNodeLength } from "../sugify.js";
+import { createLayers, nodeSep } from "../test-utils.js";
+import { sizedSeparation } from "../utils.js";
+import { coordCenter } from "./center.js";
+import { coordGreedy } from "./greedy.js";
+import { coordQuad } from "./quad.js";
+import { coordSimplex } from "./simplex.js";
 
 const square = () => createLayers([[[0], [1]], [[0], [0]], [[]]]);
 const ccoz = () => createLayers([[[0, 1], [2], [3]], [[0], [0], [], []], [[]]]);

@@ -4,11 +4,11 @@
  * @packageDocumentation
  */
 
-import type { Graph, Rank } from "../../graph";
-import { chain, filter, map } from "../../iters";
-import { err, type U } from "../../utils";
-import type { Separation } from "../utils";
-import type { Layering } from ".";
+import type { Graph, Rank } from "../../graph/index.js";
+import { chain, filter, map } from "../../iters.js";
+import { err, type U } from "../../utils.js";
+import type { Separation } from "../utils.js";
+import type { Layering } from "./index.js";
 
 /** longest path operators */
 export interface LayeringLongestPathOps<in N = never, in L = never> {

@@ -5,8 +5,8 @@
  *
  * @packageDocumentation
  */
-import type { Graph, GraphNode } from "../../graph";
-import type { Separation } from "../utils";
+import type { Graph, GraphNode } from "../../graph/index.js";
+import type { Separation } from "../utils.js";
 
 /**
  * a group assignment accessor

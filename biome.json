@@ -25,6 +25,12 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "useImportExtensions": {
+          "level": "error",
+          "options": { "extensionMappings": { "ts": "js", "tsx": "js" } }
+        }
+      },
       "style": {
         "noNonNullAssertion": "off"
       },

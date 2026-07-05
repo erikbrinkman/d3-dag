@@ -3,12 +3,12 @@
  *
  * @packageDocumentation
  */
-import type { Graph, Rank } from "../graph";
-import { bigrams, map } from "../iters";
-import type { CallableNodeSize, LayoutResult, NodeSize } from "../layout";
-import type { Tweak } from "../tweaks";
-import { err, type U } from "../utils";
-import { greedy } from "./greedy";
+import type { Graph, Rank } from "../graph/index.js";
+import { bigrams, map } from "../iters.js";
+import type { CallableNodeSize, LayoutResult, NodeSize } from "../layout.js";
+import type { Tweak } from "../tweaks.js";
+import { err, type U } from "../utils.js";
+import { greedy } from "./greedy.js";
 
 /** all operators for the zherebko layout */
 export interface ZherebkoOps<in N = never, in L = never> {

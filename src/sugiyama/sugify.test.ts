@@ -1,13 +1,13 @@
 import { expect, test } from "bun:test";
-import { type Graph, type GraphNode, graph } from "../graph";
-import { assert } from "../test-utils";
+import { type Graph, type GraphNode, graph } from "../graph/index.js";
+import { assert } from "../test-utils.js";
 import {
   type SugiDatum,
   type SugiNode,
   sugifyCompact,
   sugifyLayer,
   unsugify,
-} from "./sugify";
+} from "./sugify.js";
 
 function noopLayering(): void {
   // noop

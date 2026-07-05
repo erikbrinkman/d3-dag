@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { setIntersect, setMultimapDelete, setPop } from "./collections";
+import { setIntersect, setMultimapDelete, setPop } from "./collections.js";
 
 test("setPop()", () => {
   expect(setPop(new Set())).toBeUndefined();

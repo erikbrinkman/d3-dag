@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import type { DagreAlgorithm, DagreQuality } from "./dagre";
-import { dagre } from "./dagre";
-import { sugiyama } from "./sugiyama";
-import { coordQuad } from "./sugiyama/coord/quad";
-import { decrossOpt } from "./sugiyama/decross/opt";
-import { layeringLongestPath } from "./sugiyama/layering/longest-path";
-import { zherebko } from "./zherebko";
+import type { DagreAlgorithm, DagreQuality } from "./dagre.js";
+import { dagre } from "./dagre.js";
+import { coordQuad } from "./sugiyama/coord/quad.js";
+import { decrossOpt } from "./sugiyama/decross/opt.js";
+import { sugiyama } from "./sugiyama/index.js";
+import { layeringLongestPath } from "./sugiyama/layering/longest-path.js";
+import { zherebko } from "./zherebko/index.js";
 
 test("basic TB layout", () => {
   const grf = new dagre.graphlib.Graph();
