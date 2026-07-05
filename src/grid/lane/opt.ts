@@ -224,7 +224,12 @@ function buildOperator(options: {
       for (const ind of ordered.keys()) {
         vals.add(lanes[ind] ?? 0);
       }
-      const mapping = new Map(map([...vals].sort(), (v, i) => [v, i] as const));
+      const mapping = new Map(
+        map(
+          [...vals].sort((first, second) => first - second),
+          (v, i) => [v, i] as const,
+        ),
+      );
       for (const [ind, node] of ordered.entries()) {
         node.x = mapping.get(lanes[ind] ?? 0)!;
       }
