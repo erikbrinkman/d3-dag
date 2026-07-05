@@ -158,12 +158,14 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
         if (index !== 0) {
           // assumed long link
           const x = (index - minIndex) * xgap + (index > 0 ? maxWidth : 0);
-          const y1 = source.y + gap;
-          const y2 = target.y - gap;
-          if (y2 - y1 > 1e-3 * gap) {
+          const laneTop = Math.min(source.y, target.y) + gap;
+          const laneBottom = Math.max(source.y, target.y) - gap;
+          if (laneBottom - laneTop > 1e-3 * gap) {
+            const y1 = source.y < target.y ? laneTop : laneBottom;
+            const y2 = source.y < target.y ? laneBottom : laneTop;
             points.push([x, y1], [x, y2]);
           } else {
-            points.push([x, y1]);
+            points.push([x, source.y < target.y ? laneTop : laneBottom]);
           }
         }
         points.push([target.x, target.y]);
