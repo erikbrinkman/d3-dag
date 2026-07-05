@@ -120,7 +120,7 @@ function adjacentSwap<N, L>(
       const temp = layer[ind + 1];
       layer[ind + 1] = layer[ind];
       layer[ind] = temp;
-      ranges.push([start, ind], [ind + 2, end]);
+      ranges.push([start, ind + 1], [ind + 1, end]);
     }
   }
 }
