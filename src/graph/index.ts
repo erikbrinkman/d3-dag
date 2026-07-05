@@ -1007,8 +1007,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
     const multi = source.nchildLinksTo(target) > 1;
 
     if (multi) {
-      source.#cmultis -= 1;
       const info = source.#info();
+      source.#cmultis -= 1;
       info.nlinks -= 1;
       info.multis -= 1;
     } else {
