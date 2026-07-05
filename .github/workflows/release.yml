@@ -80,19 +80,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-  deploy-pages:
+  pages-build:
     needs: release
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
       pages: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    concurrency:
-      group: pages
-      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -105,5 +98,20 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
+
+  # separate from the build so a failed deploy re-runs without rebuilding the docs
+  pages-deploy:
+    needs: pages-build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
