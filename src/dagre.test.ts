@@ -194,16 +194,21 @@ test("layout requires positive node sizes", () => {
   expect(() => dagre.layout(grf)).toThrow("positive");
 });
 
-test("throws for edge with unknown source", () => {
+test("setEdge auto-creates unknown endpoints like graphlib", () => {
   const grf = new dagre.graphlib.Graph();
-  grf.setNode("a");
-  expect(() => grf.setEdge("missing", "a")).toThrow("unknown source node");
+  grf.setEdge("a", "b");
+  expect(grf.hasNode("a")).toBe(true);
+  expect(grf.hasNode("b")).toBe(true);
+  expect(grf.hasEdge("a", "b")).toBe(true);
 });
 
-test("throws for edge with unknown target", () => {
+test("setEdge auto-creates endpoints with the default node label", () => {
   const grf = new dagre.graphlib.Graph();
-  grf.setNode("a");
-  expect(() => grf.setEdge("a", "missing")).toThrow("unknown target node");
+  grf.setDefaultNodeLabel(() => ({ width: 10, height: 10 }));
+  grf.setEdge("a", "b");
+  dagre.layout(grf);
+  expect(grf.node("a")).toMatchObject({ width: 10, height: 10 });
+  expect(grf.node("b")).toMatchObject({ width: 10, height: 10 });
 });
 
 test("empty graph", () => {

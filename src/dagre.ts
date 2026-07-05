@@ -221,10 +221,10 @@ export class DagreGraph {
 
   /** add an edge (label is accepted for dagre compatibility but not used) */
   setEdge(v: string, w: string, _label?: Record<string, unknown>): this {
-    const src = this.#graphNodes.get(v);
-    const tgt = this.#graphNodes.get(w);
-    if (!src) throw err`edge references unknown source node: ${v}`;
-    if (!tgt) throw err`edge references unknown target node: ${w}`;
+    if (!this.#graphNodes.has(v)) this.setNode(v);
+    if (!this.#graphNodes.has(w)) this.setNode(w);
+    const src = this.#graphNodes.get(v)!;
+    const tgt = this.#graphNodes.get(w)!;
     if (src.nchildLinksTo(tgt) === 0) {
       this.#mutGraph.link(src, tgt);
     }
