@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { createLayers, nodeSep } from "../test-utils";
-import { coordCenter as center } from "./center";
+import { createLayers, nodeSep } from "../test-utils.js";
+import { coordCenter as center } from "./center.js";
 
 test("center() works for square like layout", () => {
   const layers = createLayers([[[0, 1]], [[0], [0]], [[]]]);

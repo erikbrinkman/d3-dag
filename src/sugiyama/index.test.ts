@@ -1,15 +1,15 @@
 import { expect, test } from "bun:test";
-import { type Graph, type GraphNode, graph } from "../graph";
-import type { LayoutResult, NodeSize } from "../layout";
-import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs";
-import { type Tweak, tweakSize } from "../tweaks";
-import { sugiyama } from ".";
-import type { Coord } from "./coord";
-import type { Decross } from "./decross";
-import type { Layering } from "./layering";
-import { layeringTopological } from "./layering/topological";
-import type { SugiNode, SugiSeparation } from "./sugify";
-import { canonical } from "./test-utils";
+import { type Graph, type GraphNode, graph } from "../graph/index.js";
+import type { LayoutResult, NodeSize } from "../layout.js";
+import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs.js";
+import { type Tweak, tweakSize } from "../tweaks.js";
+import type { Coord } from "./coord/index.js";
+import type { Decross } from "./decross/index.js";
+import { sugiyama } from "./index.js";
+import type { Layering } from "./layering/index.js";
+import { layeringTopological } from "./layering/topological.js";
+import type { SugiNode, SugiSeparation } from "./sugify.js";
+import { canonical } from "./test-utils.js";
 
 type Sugiyama<N, L> = (inp: Graph<N, L>) => LayoutResult;
 

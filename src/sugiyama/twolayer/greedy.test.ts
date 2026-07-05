@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import type { SugiNode } from "../sugify";
-import { createLayers, getIndex } from "../test-utils";
-import { crossings } from "../utils";
-import type { Twolayer } from ".";
-import { twolayerAgg } from "./agg";
-import { twolayerGreedy } from "./greedy";
+import type { SugiNode } from "../sugify.js";
+import { createLayers, getIndex } from "../test-utils.js";
+import { crossings } from "../utils.js";
+import { twolayerAgg } from "./agg.js";
+import { twolayerGreedy } from "./greedy.js";
+import type { Twolayer } from "./index.js";
 
 test("twolayerGreedy() works for very simple case", () => {
   // independent links that need to be swapped

@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import { type Graph, type GraphNode, graph } from "../graph";
-import { graphConnect } from "../graph/connect";
-import { filter, map } from "../iters";
-import type { LayoutResult } from "../layout";
-import { doub, line, oh, single } from "../test-graphs";
-import { tweakSize } from "../tweaks";
-import { zherebko } from ".";
+import { graphConnect } from "../graph/connect.js";
+import { type Graph, type GraphNode, graph } from "../graph/index.js";
+import { filter, map } from "../iters.js";
+import type { LayoutResult } from "../layout.js";
+import { doub, line, oh, single } from "../test-graphs.js";
+import { tweakSize } from "../tweaks.js";
+import { zherebko } from "./index.js";
 
 type Zhere<N, L> = (inp: Graph<N, L>) => LayoutResult;
 

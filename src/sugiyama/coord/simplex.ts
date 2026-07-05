@@ -10,12 +10,12 @@ import solver, {
   type SolveResult,
   type VariableCoefficients,
 } from "javascript-lp-solver";
-import type { GraphLink, GraphNode } from "../../graph";
-import { bigrams, flatMap } from "../../iters";
-import { err, ierr } from "../../utils";
-import type { SugiNode, SugiSeparation } from "../sugify";
-import type { Coord } from ".";
-import { avgHeight } from "./utils";
+import type { GraphLink, GraphNode } from "../../graph/index.js";
+import { bigrams, flatMap } from "../../iters.js";
+import { err, ierr } from "../../utils.js";
+import type { SugiNode, SugiSeparation } from "../sugify.js";
+import type { Coord } from "./index.js";
+import { avgHeight } from "./utils.js";
 
 /**
  * a strictly callable {@link SimplexWeight}

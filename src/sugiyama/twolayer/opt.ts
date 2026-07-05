@@ -10,12 +10,12 @@ import solver, {
   type SolveResult,
   type VariableCoefficients,
 } from "javascript-lp-solver";
-import { listMultimapPush } from "../../collections";
-import { entries, first, map, reduce, slice } from "../../iters";
-import type { OptChecking } from "../../layout";
-import { err, ierr } from "../../utils";
-import type { SugiNode } from "../sugify";
-import type { Twolayer } from ".";
+import { listMultimapPush } from "../../collections.js";
+import { entries, first, map, reduce, slice } from "../../iters.js";
+import type { OptChecking } from "../../layout.js";
+import { err, ierr } from "../../utils.js";
+import type { SugiNode } from "../sugify.js";
+import type { Twolayer } from "./index.js";
 
 /**
  * a {@link Twolayer} for optimal decrossing of a single target layer

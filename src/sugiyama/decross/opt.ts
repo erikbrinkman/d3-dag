@@ -9,12 +9,12 @@ import solver, {
   type SolveResult,
   type VariableCoefficients,
 } from "javascript-lp-solver";
-import { listMultimapPush } from "../../collections";
-import { bigrams, entries, slice } from "../../iters";
-import type { OptChecking } from "../../layout";
-import { err, ierr } from "../../utils";
-import type { SugiNode } from "../sugify";
-import type { Decross } from ".";
+import { listMultimapPush } from "../../collections.js";
+import { bigrams, entries, slice } from "../../iters.js";
+import type { OptChecking } from "../../layout.js";
+import { err, ierr } from "../../utils.js";
+import type { SugiNode } from "../sugify.js";
+import type { Decross } from "./index.js";
 
 /**
  * a {@link Decross} that minimizes the number of crossings

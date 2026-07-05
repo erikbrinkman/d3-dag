@@ -4,7 +4,7 @@
  * @internal
  * @packageDocumentation
  */
-import { err } from "./utils";
+import { err } from "./utils.js";
 
 /** iterable callback that maps a value into another */
 export type MapCallback<in T, out S> = (element: T, index: number) => S;

@@ -2,9 +2,10 @@
  * @internal
  * @packageDocumentation
  */
-import type { Graph, GraphNode } from "../../graph";
-import { graphConnect } from "../../graph/connect";
-import type { ConnectGraph } from "../../test-graphs";
+
+import { graphConnect } from "../../graph/connect.js";
+import type { Graph, GraphNode } from "../../graph/index.js";
+import type { ConnectGraph } from "../../test-graphs.js";
 
 /** a dag where greedy doesn't minimize crossings */
 export function hard(): ConnectGraph {

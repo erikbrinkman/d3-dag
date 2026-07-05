@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import { graphConnect } from "../../graph/connect";
-import { ccoz, eye, multi, oh, square } from "../../test-graphs";
-import { canonical, getLayers } from "../test-utils";
-import { type Layering, layerSeparation } from ".";
-import { layeringLongestPath } from "./longest-path";
-import { sizedSep } from "./test-utils";
+import { graphConnect } from "../../graph/connect.js";
+import { ccoz, eye, multi, oh, square } from "../../test-graphs.js";
+import { canonical, getLayers } from "../test-utils.js";
+import { type Layering, layerSeparation } from "./index.js";
+import { layeringLongestPath } from "./longest-path.js";
+import { sizedSep } from "./test-utils.js";
 
 const changes = [
   ["0", "0"],

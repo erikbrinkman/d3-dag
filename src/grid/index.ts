@@ -3,13 +3,13 @@
  *
  * @packageDocumentation
  */
-import type { Graph, Rank } from "../graph";
-import type { LayoutResult, NodeSize } from "../layout";
-import type { Tweak } from "../tweaks";
-import { err, type U } from "../utils";
-import type { Lane } from "./lane";
-import { type LaneGreedy, laneGreedy } from "./lane/greedy";
-import { verifyLanes } from "./lane/utils";
+import type { Graph, Rank } from "../graph/index.js";
+import type { LayoutResult, NodeSize } from "../layout.js";
+import type { Tweak } from "../tweaks.js";
+import { err, type U } from "../utils.js";
+import { type LaneGreedy, laneGreedy } from "./lane/greedy.js";
+import type { Lane } from "./lane/index.js";
+import { verifyLanes } from "./lane/utils.js";
 
 /** all operators for the grid layout */
 export interface GridOps<in N = never, in L = never> {

@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import { type GraphLink, graph } from "../../graph";
-import { flatMap } from "../../iters";
-import { type SugiDatum, sugiNodeLength } from "../sugify";
-import { createLayers, nodeSep } from "../test-utils";
-import { sizedSeparation } from "../utils";
-import type { Coord } from ".";
-import { coordSimplex } from "./simplex";
+import { type GraphLink, graph } from "../../graph/index.js";
+import { flatMap } from "../../iters.js";
+import { type SugiDatum, sugiNodeLength } from "../sugify.js";
+import { createLayers, nodeSep } from "../test-utils.js";
+import { sizedSeparation } from "../utils.js";
+import type { Coord } from "./index.js";
+import { coordSimplex } from "./simplex.js";
 
 test("coordSimplex() modifiers work", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);

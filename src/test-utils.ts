@@ -1,4 +1,4 @@
-import { err } from "./utils";
+import { err } from "./utils.js";
 
 /** assert something */
 export function assert(statement: unknown): asserts statement {

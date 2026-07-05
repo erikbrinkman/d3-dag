@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import type { GraphNode } from "../../graph";
+import type { GraphNode } from "../../graph/index.js";
 
 /**
  * An operator for assigning nodes to a lane.

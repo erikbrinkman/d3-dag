@@ -5,11 +5,11 @@
  * @packageDocumentation
  */
 
-import type { GraphLink, GraphNode } from "../../graph";
-import { flatMap } from "../../iters";
-import { err, ierr, type U } from "../../utils";
-import type { SugiNode, SugiSeparation } from "../sugify";
-import type { Coord } from ".";
+import type { GraphLink, GraphNode } from "../../graph/index.js";
+import { flatMap } from "../../iters.js";
+import { err, ierr, type U } from "../../utils.js";
+import type { SugiNode, SugiSeparation } from "../sugify.js";
+import type { Coord } from "./index.js";
 import {
   avgHeight,
   indices,
@@ -18,7 +18,7 @@ import {
   minBend,
   minDist,
   solve,
-} from "./utils";
+} from "./utils.js";
 
 /**
  * a strictly callable {@link NodeWeight}

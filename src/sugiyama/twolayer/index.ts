@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import type { SugiNode } from "../sugify";
+import type { SugiNode } from "../sugify.js";
 
 /**
  * an operator for optimizing decrossings one layer at a time.

@@ -1,8 +1,8 @@
-import { setEqual } from "../../collections";
-import type { GraphNode } from "../../graph";
-import { chain, filter, map, slice } from "../../iters";
-import { berr } from "../../utils";
-import type { Lane } from "./index";
+import { setEqual } from "../../collections.js";
+import type { GraphNode } from "../../graph/index.js";
+import { chain, filter, map, slice } from "../../iters.js";
+import { berr } from "../../utils.js";
+import type { Lane } from "./index.js";
 
 /** the effective children for grid layouts */
 export function gridChildren(node: GraphNode): Set<GraphNode> {

@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import type { GraphNode } from "../../graph";
-import { graphConnect } from "../../graph/connect";
-import { doub, ex, eye, multi, oh, square } from "../../test-graphs";
-import { canonical, getLayers } from "../test-utils";
-import { type Layering, layerSeparation } from ".";
-import { layeringSimplex as simplex } from "./simplex";
-import { sizedSep } from "./test-utils";
+import { graphConnect } from "../../graph/connect.js";
+import type { GraphNode } from "../../graph/index.js";
+import { doub, ex, eye, multi, oh, square } from "../../test-graphs.js";
+import { canonical, getLayers } from "../test-utils.js";
+import { type Layering, layerSeparation } from "./index.js";
+import { layeringSimplex as simplex } from "./simplex.js";
+import { sizedSep } from "./test-utils.js";
 
 test("simplex() works for square", () => {
   const dag = square();

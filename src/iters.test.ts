@@ -9,7 +9,7 @@ import {
   map,
   reduce,
   slice,
-} from "./iters";
+} from "./iters.js";
 
 test("entries()", () => {
   expect([...entries([])]).toEqual([]);

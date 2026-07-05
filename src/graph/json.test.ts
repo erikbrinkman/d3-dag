@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { assert } from "../test-utils";
-import { graph, type MutGraph } from ".";
-import { graphJson } from "./json";
+import { assert } from "../test-utils.js";
+import { graph, type MutGraph } from "./index.js";
+import { graphJson } from "./json.js";
 
 type Json<N, L> = (dat: unknown) => MutGraph<N, L>;
 

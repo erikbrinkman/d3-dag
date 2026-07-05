@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { createLayers, getIndex } from "../test-utils";
-import { crossings } from "../utils";
-import { aggMean, aggMedian, aggWeightedMedian, twolayerAgg } from "./agg";
+import { createLayers, getIndex } from "../test-utils.js";
+import { crossings } from "../utils.js";
+import { aggMean, aggMedian, aggWeightedMedian, twolayerAgg } from "./agg.js";
 
 test("twolayerAgg() works for very simple case", () => {
   // independent links that need to be swapped

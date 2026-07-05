@@ -4,10 +4,10 @@
  * @packageDocumentation
  */
 
-import type { Graph, GraphNode, Rank } from "../../graph";
-import { err, type U } from "../../utils";
-import type { Separation } from "../utils";
-import type { Layering } from ".";
+import type { Graph, GraphNode, Rank } from "../../graph/index.js";
+import { err, type U } from "../../utils.js";
+import type { Separation } from "../utils.js";
+import type { Layering } from "./index.js";
 
 /** topological operators */
 export interface LayeringTopologicalOps<in N = never, in L = never> {

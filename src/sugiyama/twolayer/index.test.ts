@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { compactCrossings, createLayers, getIndex } from "../test-utils";
-import { aggMean, aggMedian, aggWeightedMedian, twolayerAgg } from "./agg";
-import { twolayerGreedy } from "./greedy";
-import { twolayerOpt } from "./opt";
+import { compactCrossings, createLayers, getIndex } from "../test-utils.js";
+import { aggMean, aggMedian, aggWeightedMedian, twolayerAgg } from "./agg.js";
+import { twolayerGreedy } from "./greedy.js";
+import { twolayerOpt } from "./opt.js";
 
 const square = () => createLayers([[[0, 1]], [[], []]]);
 const ccoz = () =>

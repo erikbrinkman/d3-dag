@@ -156,17 +156,7 @@ export {
   type DagreRanker,
   dagre,
   type Rankdir,
-} from "./dagre";
-export {
-  type Graph,
-  type GraphLink,
-  type GraphNode,
-  graph,
-  type MutGraph,
-  type MutGraphLink,
-  type MutGraphNode,
-  type Rank,
-} from "./graph";
+} from "./dagre.js";
 export {
   type Connect,
   type ConnectOps,
@@ -175,7 +165,7 @@ export {
   type HasOneString,
   type HasZeroString,
   type IdNodeDatum,
-} from "./graph/connect";
+} from "./graph/connect.js";
 export {
   type Children,
   type ChildrenData,
@@ -185,14 +175,24 @@ export {
   type Hierarchy,
   type WrappedChildren,
   type WrappedChildrenData,
-} from "./graph/hierarchy";
+} from "./graph/hierarchy.js";
+export {
+  type Graph,
+  type GraphLink,
+  type GraphNode,
+  graph,
+  type MutGraph,
+  type MutGraphLink,
+  type MutGraphNode,
+  type Rank,
+} from "./graph/index.js";
 export {
   type DefaultJson,
   graphJson,
   type Hydrator,
   type Json,
   type JsonOps,
-} from "./graph/json";
+} from "./graph/json.js";
 export {
   type DefaultStratify,
   graphStratify,
@@ -204,12 +204,17 @@ export {
   type StratifyOps,
   type WrappedParentData,
   type WrappedParentIds,
-} from "./graph/stratify";
-export type { Id } from "./graph/utils";
-export { type DefaultGrid, type Grid, type GridOps, grid } from "./grid";
-export type { Lane } from "./grid/lane";
-export { type LaneGreedy, laneGreedy } from "./grid/lane/greedy";
-export { type LaneOpt, laneOpt } from "./grid/lane/opt";
+} from "./graph/stratify.js";
+export type { Id } from "./graph/utils.js";
+export {
+  type DefaultGrid,
+  type Grid,
+  type GridOps,
+  grid,
+} from "./grid/index.js";
+export { type LaneGreedy, laneGreedy } from "./grid/lane/greedy.js";
+export type { Lane } from "./grid/lane/index.js";
+export { type LaneOpt, laneOpt } from "./grid/lane/opt.js";
 export {
   type CallableNodeSize,
   cachedNodeSize,
@@ -219,16 +224,10 @@ export {
   type Operator,
   type OptChecking,
   splitNodeSize,
-} from "./layout";
-export {
-  type DefaultSugiyama,
-  type Sugiyama,
-  type SugiyamaOps,
-  sugiyama,
-} from "./sugiyama";
-export type { Coord } from "./sugiyama/coord";
-export { type CoordCenter, coordCenter } from "./sugiyama/coord/center";
-export { type CoordGreedy, coordGreedy } from "./sugiyama/coord/greedy";
+} from "./layout.js";
+export { type CoordCenter, coordCenter } from "./sugiyama/coord/center.js";
+export { type CoordGreedy, coordGreedy } from "./sugiyama/coord/greedy.js";
+export type { Coord } from "./sugiyama/coord/index.js";
 export {
   type CallableLinkWeight,
   type CallableNodeWeight,
@@ -238,7 +237,7 @@ export {
   type DefaultCoordQuad,
   type LinkWeight,
   type NodeWeight,
-} from "./sugiyama/coord/quad";
+} from "./sugiyama/coord/quad.js";
 export {
   type CallableSimplexWeight,
   type CoordSimplex,
@@ -246,43 +245,49 @@ export {
   coordSimplex,
   type DefaultCoordSimplex,
   type SimplexWeight,
-} from "./sugiyama/coord/simplex";
+} from "./sugiyama/coord/simplex.js";
 export {
   type CoordTopological,
   coordTopological,
-} from "./sugiyama/coord/topological";
-export type { Decross } from "./sugiyama/decross";
-export { type DecrossDfs, decrossDfs } from "./sugiyama/decross/dfs";
-export { type DecrossOpt, decrossOpt } from "./sugiyama/decross/opt";
+} from "./sugiyama/coord/topological.js";
+export { type DecrossDfs, decrossDfs } from "./sugiyama/decross/dfs.js";
+export type { Decross } from "./sugiyama/decross/index.js";
+export { type DecrossOpt, decrossOpt } from "./sugiyama/decross/opt.js";
 export {
   type DecrossTwoLayer,
   type DecrossTwoLayerOps,
   type DefaultDecrossTwoLayer,
   decrossTwoLayer,
-} from "./sugiyama/decross/two-layer";
+} from "./sugiyama/decross/two-layer.js";
+export {
+  type DefaultSugiyama,
+  type Sugiyama,
+  type SugiyamaOps,
+  sugiyama,
+} from "./sugiyama/index.js";
 export {
   type Group,
   type Layering,
   layerSeparation,
-} from "./sugiyama/layering";
+} from "./sugiyama/layering/index.js";
 export {
   type DefaultLayeringLongestPath,
   type LayeringLongestPath,
   type LayeringLongestPathOps,
   layeringLongestPath,
-} from "./sugiyama/layering/longest-path";
+} from "./sugiyama/layering/longest-path.js";
 export {
   type DefaultLayeringSimplex,
   type LayeringSimplex,
   type LayeringSimplexOps,
   layeringSimplex,
-} from "./sugiyama/layering/simplex";
+} from "./sugiyama/layering/simplex.js";
 export {
   type DefaultLayeringTopological,
   type LayeringTopological,
   type LayeringTopologicalOps,
   layeringTopological,
-} from "./sugiyama/layering/topological";
+} from "./sugiyama/layering/topological.js";
 export {
   type SugiDatum,
   type SugiLinkDatum,
@@ -294,8 +299,7 @@ export {
   sugifyLayer,
   sugiNodeLength,
   unsugify,
-} from "./sugiyama/sugify";
-export type { Twolayer } from "./sugiyama/twolayer";
+} from "./sugiyama/sugify.js";
 export {
   type Aggregator,
   aggMean,
@@ -303,14 +307,15 @@ export {
   aggWeightedMedian,
   type TwolayerAgg,
   twolayerAgg,
-} from "./sugiyama/twolayer/agg";
+} from "./sugiyama/twolayer/agg.js";
 export {
   type DefaultTwolayerGreedy,
   type TwolayerGreedy,
   twolayerGreedy,
-} from "./sugiyama/twolayer/greedy";
-export { type TwolayerOpt, twolayerOpt } from "./sugiyama/twolayer/opt";
-export { type Separation, sizedSeparation } from "./sugiyama/utils";
+} from "./sugiyama/twolayer/greedy.js";
+export type { Twolayer } from "./sugiyama/twolayer/index.js";
+export { type TwolayerOpt, twolayerOpt } from "./sugiyama/twolayer/opt.js";
+export { type Separation, sizedSeparation } from "./sugiyama/utils.js";
 export {
   type Shape,
   shapeEllipse,
@@ -324,11 +329,11 @@ export {
   tweakShape,
   tweakSize,
   tweakSugiyama,
-} from "./tweaks";
-export type { Named, U } from "./utils";
+} from "./tweaks.js";
+export type { Named, U } from "./utils.js";
 export {
   type DefaultZherebko,
   type Zherebko,
   type ZherebkoOps,
   zherebko,
-} from "./zherebko";
+} from "./zherebko/index.js";

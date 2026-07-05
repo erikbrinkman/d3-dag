@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import { graph } from "./graph";
-import { graphConnect } from "./graph/connect";
-import { grid } from "./grid";
-import { map } from "./iters";
-import { sugiyama } from "./sugiyama";
-import { zhere } from "./test-graphs";
+import { graphConnect } from "./graph/connect.js";
+import { graph } from "./graph/index.js";
+import { grid } from "./grid/index.js";
+import { map } from "./iters.js";
+import { sugiyama } from "./sugiyama/index.js";
+import { zhere } from "./test-graphs.js";
 import {
   shapeEllipse,
   shapeRect,
@@ -16,7 +16,7 @@ import {
   tweakShape,
   tweakSize,
   tweakSugiyama,
-} from "./tweaks";
+} from "./tweaks.js";
 
 test("tweakSize()", () => {
   const layout = sugiyama().nodeSize([2, 2]);

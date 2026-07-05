@@ -4,8 +4,9 @@
  * @internal
  * @packageDocumentation
  */
-import type { Graph } from "./graph";
-import { graphConnect } from "./graph/connect";
+
+import { graphConnect } from "./graph/connect.js";
+import type { Graph } from "./graph/index.js";
 
 export type ConnectGraph = Graph<string, [string, string]>;
 

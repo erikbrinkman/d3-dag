@@ -4,11 +4,11 @@
  * @packageDocumentation
  */
 import { least, median } from "d3-array";
-import type { GraphNode } from "../../graph";
-import { map, slice } from "../../iters";
-import { err } from "../../utils";
-import type { Lane } from ".";
-import { gridChildren } from "./utils";
+import type { GraphNode } from "../../graph/index.js";
+import { map, slice } from "../../iters.js";
+import { err } from "../../utils.js";
+import type { Lane } from "./index.js";
+import { gridChildren } from "./utils.js";
 
 /**
  * a lane operator that assigns lanes greedily, but quickly.

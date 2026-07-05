@@ -5,11 +5,11 @@
  * @packageDocumentation
  */
 import { median } from "d3-array";
-import { listMultimapPush } from "../../collections";
-import { map } from "../../iters";
-import { err } from "../../utils";
-import type { SugiNode } from "../sugify";
-import type { Twolayer } from ".";
+import { listMultimapPush } from "../../collections.js";
+import { map } from "../../iters.js";
+import { err } from "../../utils.js";
+import type { SugiNode } from "../sugify.js";
+import type { Twolayer } from "./index.js";
 
 /**
  * an interface for aggregating numbers

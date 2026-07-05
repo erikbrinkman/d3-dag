@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { createLayers, getIndex } from "../test-utils";
-import { crossings } from "../utils";
-import { decrossOpt } from "./opt";
+import { createLayers, getIndex } from "../test-utils.js";
+import { crossings } from "../utils.js";
+import { decrossOpt } from "./opt.js";
 
 // NOTE optimal decrossing minimization can always be flipped, so there's no
 // way to guarantee a specific orientation

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { compactCrossings, createLayers } from "./test-utils";
+import { compactCrossings, createLayers } from "./test-utils.js";
 
 test("compactCrossings() detects crossing", () => {
   const [topLayer, bottomLayer] = createLayers([
