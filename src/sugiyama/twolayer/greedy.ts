@@ -5,9 +5,9 @@
  * @packageDocumentation
  */
 
-import { err } from "../../utils";
-import type { SugiNode } from "../sugify";
-import type { Twolayer } from ".";
+import { err } from "../../utils.js";
+import type { SugiNode } from "../sugify.js";
+import type { Twolayer } from "./index.js";
 
 /**
  * a {@link Twolayer} that greedily swaps nodes

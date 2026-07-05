@@ -10,11 +10,11 @@ import solver, {
   type SolveResult,
   type VariableCoefficients,
 } from "javascript-lp-solver";
-import type { Graph, GraphNode, Rank } from "../../graph";
-import { bigrams, map } from "../../iters";
-import { err, ierr, type U } from "../../utils";
-import type { Separation } from "../utils";
-import type { Group, Layering } from ".";
+import type { Graph, GraphNode, Rank } from "../../graph/index.js";
+import { bigrams, map } from "../../iters.js";
+import { err, ierr, type U } from "../../utils.js";
+import type { Separation } from "../utils.js";
+import type { Group, Layering } from "./index.js";
 
 /** simplex operator operators */
 export interface LayeringSimplexOps<in N = never, in L = never> {

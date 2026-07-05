@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
-import { bigrams } from "../../iters";
-import { compactCrossings, createLayers, getIndex } from "../test-utils";
-import { twolayerAgg } from "../twolayer/agg";
-import { twolayerOpt } from "../twolayer/opt";
-import { decrossDfs } from "./dfs";
-import { decrossOpt } from "./opt";
-import { decrossTwoLayer } from "./two-layer";
+import { bigrams } from "../../iters.js";
+import { compactCrossings, createLayers, getIndex } from "../test-utils.js";
+import { twolayerAgg } from "../twolayer/agg.js";
+import { twolayerOpt } from "../twolayer/opt.js";
+import { decrossDfs } from "./dfs.js";
+import { decrossOpt } from "./opt.js";
+import { decrossTwoLayer } from "./two-layer.js";
 
 const square = () => createLayers([[[0, 1]], [[0], [0]], [[]]]);
 const ccoz = () => createLayers([[[1], [0, 3], [2]], [[0], [], [], [0]], [[]]]);

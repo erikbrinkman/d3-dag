@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
-import { doub, eye, multi, oh, square } from "../../test-graphs";
-import { canonical, getLayers } from "../test-utils";
-import { type Layering, layerSeparation } from ".";
-import { sizedSep } from "./test-utils";
-import { layeringTopological } from "./topological";
+import { doub, eye, multi, oh, square } from "../../test-graphs.js";
+import { canonical, getLayers } from "../test-utils.js";
+import { type Layering, layerSeparation } from "./index.js";
+import { sizedSep } from "./test-utils.js";
+import { layeringTopological } from "./topological.js";
 
 test("layeringTopological() works for square", () => {
   const dag = square();

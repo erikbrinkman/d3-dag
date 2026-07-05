@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { filter, map } from "../iters";
-import type { MutGraph } from ".";
-import { graphStratify } from "./stratify";
+import { filter, map } from "../iters.js";
+import type { MutGraph } from "./index.js";
+import { graphStratify } from "./stratify.js";
 
 // initial types
 interface Init {

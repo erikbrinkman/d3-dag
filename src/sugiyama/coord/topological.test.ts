@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { createLayers, nodeSep } from "../test-utils";
-import { coordTopological as topological } from "./topological";
+import { createLayers, nodeSep } from "../test-utils.js";
+import { coordTopological as topological } from "./topological.js";
 
 test("topological() works for triangle", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);

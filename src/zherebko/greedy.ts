@@ -5,8 +5,8 @@
  * @packageDocumentation
  */
 // TODO turn this into an operator for zherebko
-import type { GraphLink, GraphNode } from "../graph";
-import { bigrams } from "../iters";
+import type { GraphLink, GraphNode } from "../graph/index.js";
+import { bigrams } from "../iters.js";
 
 function* zhereParentLinks(
   node: GraphNode,

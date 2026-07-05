@@ -3,29 +3,34 @@
  *
  * @packageDocumentation
  */
-import type { Graph } from "../graph";
+import type { Graph } from "../graph/index.js";
 import {
   cachedNodeSize,
   type LayoutResult,
   type NodeSize,
   splitNodeSize,
-} from "../layout";
-import type { Tweak } from "../tweaks";
-import { err, type U } from "../utils";
-import type { Coord } from "./coord";
-import { coordSimplex, type DefaultCoordSimplex } from "./coord/simplex";
-import type { Decross } from "./decross";
+} from "../layout.js";
+import type { Tweak } from "../tweaks.js";
+import { err, type U } from "../utils.js";
+import type { Coord } from "./coord/index.js";
+import { coordSimplex, type DefaultCoordSimplex } from "./coord/simplex.js";
+import type { Decross } from "./decross/index.js";
 import {
   type DefaultDecrossTwoLayer,
   decrossTwoLayer,
-} from "./decross/two-layer";
-import { type Layering, layerSeparation } from "./layering";
+} from "./decross/two-layer.js";
+import { type Layering, layerSeparation } from "./layering/index.js";
 import {
   type DefaultLayeringSimplex,
   layeringSimplex,
-} from "./layering/simplex";
-import { sugifyLayer, sugiNodeLength, unsugify, validateCoord } from "./sugify";
-import { sizedSeparation } from "./utils";
+} from "./layering/simplex.js";
+import {
+  sugifyLayer,
+  sugiNodeLength,
+  unsugify,
+  validateCoord,
+} from "./sugify.js";
+import { sizedSeparation } from "./utils.js";
 
 /** sugiyama operators */
 export interface SugiyamaOps<in N = never, in L = never> {

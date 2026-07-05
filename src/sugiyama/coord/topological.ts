@@ -10,11 +10,17 @@ import solver, {
   type SolveResult,
   type VariableCoefficients,
 } from "javascript-lp-solver";
-import { bigrams } from "../../iters";
-import { err, ierr } from "../../utils";
-import type { SugiNode, SugiSeparation } from "../sugify";
-import type { Coord } from ".";
-import { avgHeight, init, layout, minBend, solve as solveQuad } from "./utils";
+import { bigrams } from "../../iters.js";
+import { err, ierr } from "../../utils.js";
+import type { SugiNode, SugiSeparation } from "../sugify.js";
+import type { Coord } from "./index.js";
+import {
+  avgHeight,
+  init,
+  layout,
+  minBend,
+  solve as solveQuad,
+} from "./utils.js";
 
 /**
  * a {@link Coord} for positioning edges of a topological layout

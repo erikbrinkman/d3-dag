@@ -11,10 +11,10 @@ import {
   type MutGraph,
   type MutGraphLink,
   type MutGraphNode,
-} from "../graph";
-import { entries, map, reverse } from "../iters";
-import { assert } from "../test-utils";
-import type { SugiLinkDatum, SugiNode, SugiNodeDatum } from "./sugify";
+} from "../graph/index.js";
+import { entries, map, reverse } from "../iters.js";
+import { assert } from "../test-utils.js";
+import type { SugiLinkDatum, SugiNode, SugiNodeDatum } from "./sugify.js";
 
 interface MutSugiNodeDatum<in out N, in out L> extends SugiNodeDatum<N, L> {
   node: MutGraphNode<N, L>;

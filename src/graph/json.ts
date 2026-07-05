@@ -1,6 +1,6 @@
-import { entries } from "../iters";
-import { err, type U } from "../utils";
-import { type Graph, type GraphNode, graph, type MutGraph } from ".";
+import { entries } from "../iters.js";
+import { err, type U } from "../utils.js";
+import { type Graph, type GraphNode, graph, type MutGraph } from "./index.js";
 
 /** an interface for hydrating serialized graph data */
 export type Hydrator<T = unknown> = (parsed: unknown) => T;

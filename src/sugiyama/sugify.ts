@@ -13,11 +13,11 @@ import {
   graph,
   type MutGraph,
   type MutGraphNode,
-} from "../graph";
-import { bigrams, chain, map } from "../iters";
-import type { NodeLength } from "../layout";
-import { berr, type Named } from "../utils";
-import type { Separation } from "./utils";
+} from "../graph/index.js";
+import { bigrams, chain, map } from "../iters.js";
+import type { NodeLength } from "../layout.js";
+import { berr, type Named } from "../utils.js";
+import type { Separation } from "./utils.js";
 
 /** data for a sugi node that maps to a real node */
 export interface SugiNodeDatum<

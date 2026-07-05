@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { createLayers, getIndex } from "../test-utils";
-import { decrossDfs } from "./dfs";
+import { createLayers, getIndex } from "../test-utils.js";
+import { decrossDfs } from "./dfs.js";
 
 test("decrossDfs() works on trivial case", () => {
   // o o    o o

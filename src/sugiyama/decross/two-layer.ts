@@ -5,15 +5,15 @@
  * @packageDocumentation
  */
 
-import { bigrams } from "../../iters";
-import { err, type U } from "../../utils";
-import type { SugiNode } from "../sugify";
-import type { Twolayer } from "../twolayer";
-import { type TwolayerAgg, twolayerAgg } from "../twolayer/agg";
-import { type TwolayerGreedy, twolayerGreedy } from "../twolayer/greedy";
-import { crossings } from "../utils";
-import type { Decross } from ".";
-import { type DecrossDfs, decrossDfs } from "./dfs";
+import { bigrams } from "../../iters.js";
+import { err, type U } from "../../utils.js";
+import type { SugiNode } from "../sugify.js";
+import { type TwolayerAgg, twolayerAgg } from "../twolayer/agg.js";
+import { type TwolayerGreedy, twolayerGreedy } from "../twolayer/greedy.js";
+import type { Twolayer } from "../twolayer/index.js";
+import { crossings } from "../utils.js";
+import { type DecrossDfs, decrossDfs } from "./dfs.js";
+import type { Decross } from "./index.js";
 
 /** two layer operators */
 export interface DecrossTwoLayerOps<N = never, L = never> {

@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { graphConnect } from "../../graph/connect";
-import { doub, dummy, line, single, zhere } from "../../test-graphs";
-import { laneOpt } from "./opt";
-import { crossings, hard, prepare } from "./test-utils";
+import { graphConnect } from "../../graph/connect.js";
+import { doub, dummy, line, single, zhere } from "../../test-graphs.js";
+import { laneOpt } from "./opt.js";
+import { crossings, hard, prepare } from "./test-utils.js";
 
 test("laneOpt() works for single", () => {
   const nodes = prepare(single());

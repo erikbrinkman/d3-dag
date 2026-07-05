@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
-import { type GraphLink, graph } from "../../graph";
+import { type GraphLink, graph } from "../../graph/index.js";
 import { sugiyama } from "..";
-import { createLayers, nodeSep } from "../test-utils";
-import type { Coord } from ".";
-import { coordQuad } from "./quad";
+import { createLayers, nodeSep } from "../test-utils.js";
+import type { Coord } from "./index.js";
+import { coordQuad } from "./quad.js";
 
 test("coordQuad() modifiers work", () => {
   const layers = createLayers([[[0, 1]], [[0], 0], [[]]]);

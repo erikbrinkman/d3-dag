@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs";
-import { laneGreedy } from "./greedy";
-import { laneOpt } from "./opt";
-import { verifyLanes } from "./utils";
+import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs.js";
+import { laneGreedy } from "./greedy.js";
+import { laneOpt } from "./opt.js";
+import { verifyLanes } from "./utils.js";
 
 for (const dat of [doub, ex, square, ccoz, multi, oh, zhere]) {
   for (const [name, lane] of [

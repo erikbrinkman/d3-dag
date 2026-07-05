@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { graphConnect } from "../../graph/connect";
-import { dummy, en, ex, three, trip } from "../../test-graphs";
-import { laneGreedy as greedy } from "./greedy";
-import { crossings, hard, prepare } from "./test-utils";
+import { graphConnect } from "../../graph/connect.js";
+import { dummy, en, ex, three, trip } from "../../test-graphs.js";
+import { laneGreedy as greedy } from "./greedy.js";
+import { crossings, hard, prepare } from "./test-utils.js";
 
 test("greedy() works for triangle", () => {
   const nodes = prepare(dummy());

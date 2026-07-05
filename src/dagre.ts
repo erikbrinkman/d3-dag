@@ -3,21 +3,21 @@
  *
  * @packageDocumentation
  */
-import type { GraphNode, MutGraphLink, MutGraphNode } from "./graph";
-import { graph } from "./graph";
-import { grid } from "./grid";
-import type { Operator, Rankdir } from "./layout";
-import type { Sugiyama, SugiyamaOps } from "./sugiyama";
-import { sugiyama } from "./sugiyama";
-import { coordGreedy } from "./sugiyama/coord/greedy";
-import { decrossDfs } from "./sugiyama/decross/dfs";
-import { decrossOpt } from "./sugiyama/decross/opt";
-import { layeringLongestPath } from "./sugiyama/layering/longest-path";
-import { layeringTopological } from "./sugiyama/layering/topological";
-import type { Tweak } from "./tweaks";
-import { tweakDirection, tweakGridHandles, tweakSugiyama } from "./tweaks";
-import { err } from "./utils";
-import { zherebko } from "./zherebko";
+import type { GraphNode, MutGraphLink, MutGraphNode } from "./graph/index.js";
+import { graph } from "./graph/index.js";
+import { grid } from "./grid/index.js";
+import type { Operator, Rankdir } from "./layout.js";
+import { coordGreedy } from "./sugiyama/coord/greedy.js";
+import { decrossDfs } from "./sugiyama/decross/dfs.js";
+import { decrossOpt } from "./sugiyama/decross/opt.js";
+import type { Sugiyama, SugiyamaOps } from "./sugiyama/index.js";
+import { sugiyama } from "./sugiyama/index.js";
+import { layeringLongestPath } from "./sugiyama/layering/longest-path.js";
+import { layeringTopological } from "./sugiyama/layering/topological.js";
+import type { Tweak } from "./tweaks.js";
+import { tweakDirection, tweakGridHandles, tweakSugiyama } from "./tweaks.js";
+import { err } from "./utils.js";
+import { zherebko } from "./zherebko/index.js";
 
 /** @internal */
 interface IdDagreNode extends DagreNode {
@@ -27,7 +27,7 @@ interface IdDagreNode extends DagreNode {
 type DagreOperator = Operator<IdDagreNode, DagreEdge>;
 type DagreSugiyama = Sugiyama<SugiyamaOps<IdDagreNode, DagreEdge>>;
 
-export type { Rankdir } from "./layout";
+export type { Rankdir } from "./layout.js";
 
 /** quality preset for layout speed/quality trade-off */
 export type DagreQuality = "fast" | "medium" | "slow";

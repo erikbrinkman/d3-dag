@@ -1,4 +1,4 @@
-import { err } from "../utils";
+import { err } from "../utils.js";
 
 /**
  * Verify an ID is a valid ID.

@@ -1,7 +1,7 @@
-import { every, isIterable, map } from "../iters";
-import { err, type U } from "../utils";
-import { graph, type MutGraph, type MutGraphNode } from ".";
-import { type Id, verifyId } from "./utils";
+import { every, isIterable, map } from "../iters.js";
+import { err, type U } from "../utils.js";
+import { graph, type MutGraph, type MutGraphNode } from "./index.js";
+import { type Id, verifyId } from "./utils.js";
 
 /**
  * The interface for getting the parent ids from data. This must return an

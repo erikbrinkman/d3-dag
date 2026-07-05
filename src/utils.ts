@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import stringify from "stringify-object";
-import { entries, map } from "./iters";
+import { entries, map } from "./iters.js";
 
 /** utility type for replacing keys with new value */
 export type U<O, K extends keyof O, V> = Omit<O, K> & Record<K, V>;

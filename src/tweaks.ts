@@ -1,11 +1,11 @@
-import type { Graph } from "./graph";
+import type { Graph } from "./graph/index.js";
 import {
   cachedNodeSize,
   type LayoutResult,
   type NodeSize,
   type Rankdir,
-} from "./layout";
-import { err } from "./utils";
+} from "./layout.js";
+import { err } from "./utils.js";
 
 /**
  * a function to tweak a graph layout

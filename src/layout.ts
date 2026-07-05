@@ -3,9 +3,9 @@
  *
  * @packageDocumentation
  */
-import type { Graph, GraphNode } from "./graph";
-import type { Tweak } from "./tweaks";
-import { err } from "./utils";
+import type { Graph, GraphNode } from "./graph/index.js";
+import type { Tweak } from "./tweaks.js";
+import { err } from "./utils.js";
 
 /**
  * A strictly callable {@link NodeSize}

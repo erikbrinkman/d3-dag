@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { map } from "../iters";
-import type { MutGraph } from ".";
-import { graphHierarchy } from "./hierarchy";
+import { map } from "../iters.js";
+import { graphHierarchy } from "./hierarchy.js";
+import type { MutGraph } from "./index.js";
 
 // initial types
 interface Init {

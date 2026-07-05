@@ -7,8 +7,8 @@ import grafoJson from "../examples/grafo.json";
 import materialsJson from "../examples/materials.json";
 import squareJson from "../examples/square.json";
 import zherebkoJson from "../examples/zherebko.json";
-import type { DagreQuality } from "./dagre";
-import { dagre } from "./dagre";
+import type { DagreQuality } from "./dagre.js";
+import { dagre } from "./dagre.js";
 
 interface GraphData {
   readonly nodes: readonly { readonly id: string }[];

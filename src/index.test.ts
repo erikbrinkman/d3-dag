@@ -69,8 +69,8 @@ import {
   twolayerOpt,
   unsugify,
   zherebko,
-} from ".";
-import { tweakSugiyama } from "./tweaks";
+} from "./index.js";
+import { tweakSugiyama } from "./tweaks.js";
 
 test("graph()", () => {
   const grf: MutGraph<string, string> = graph<string, string>();

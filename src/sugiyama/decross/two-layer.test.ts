@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
-import type { SugiNode } from "../sugify";
-import { createLayers, getIndex } from "../test-utils";
-import { twolayerAgg } from "../twolayer/agg";
-import { twolayerOpt } from "../twolayer/opt";
-import type { Decross } from ".";
-import { decrossTwoLayer } from "./two-layer";
+import type { SugiNode } from "../sugify.js";
+import { createLayers, getIndex } from "../test-utils.js";
+import { twolayerAgg } from "../twolayer/agg.js";
+import { twolayerOpt } from "../twolayer/opt.js";
+import type { Decross } from "./index.js";
+import { decrossTwoLayer } from "./two-layer.js";
 
 test("decrossTwoLayer() propagates to both layers", () => {
   // o o    o o
