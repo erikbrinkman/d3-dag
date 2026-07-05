@@ -16,32 +16,51 @@ jobs:
   gate:
     uses: ./.github/workflows/nodejs.yml
 
-  release:
+  # isolated env: runs the third-party changelog action with no publish credentials
+  changelog:
     needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: |
+          VERSION=$(npm version --no-git-tag-version ${{ inputs.bump }} | sed 's/^v//')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+      - uses: thomaseizinger/keep-a-changelog-new-release@v3
+        with:
+          tag: v${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: CHANGELOG.md
+
+  release:
+    needs: changelog
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ needs.changelog.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun export
 
-      - id: version
-        run: |
-          VERSION=$(npm version --no-git-tag-version ${{ inputs.bump }} | sed 's/^v//')
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-
-      - uses: thomaseizinger/keep-a-changelog-new-release@v3
+      # bump package.json here in the trusted job, not from the changelog artifact
+      - run: npm version --no-git-tag-version ${{ needs.changelog.outputs.version }}
+      - uses: actions/download-artifact@v4
         with:
-          tag: v${{ steps.version.outputs.version }}
-          version: ${{ steps.version.outputs.version }}
+          name: changelog
 
       - run: |
-          VERSION=${{ steps.version.outputs.version }}
+          VERSION=${{ needs.changelog.outputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json CHANGELOG.md
@@ -57,7 +76,7 @@ jobs:
       - run: npm publish --provenance --access public --ignore-scripts
 
       - run: git push --follow-tags
-      - run: gh release create "v${{ steps.version.outputs.version }}" --generate-notes
+      - run: gh release create "v${{ needs.changelog.outputs.version }}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
 
