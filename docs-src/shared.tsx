@@ -1,16 +1,23 @@
-import { type FC, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  BaseEdge,
-  Position,
-  ReactFlow,
   applyNodeChanges,
-  useReactFlow,
+  BaseEdge,
   type Edge,
   type EdgeProps,
   type Node,
   type NodeChange,
+  Position,
+  ReactFlow,
+  useReactFlow,
 } from "@xyflow/react";
-import type { Rankdir } from "../src/layout";
+import {
+  type FC,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type { Rankdir } from "../src/layout.js";
 
 export const NODE_W = 40;
 export const NODE_H = 30;
@@ -31,7 +38,14 @@ export const graphs: Record<string, GraphData> = {
     ],
   },
   dag: {
-    nodes: [{ id: "0" }, { id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }, { id: "5" }],
+    nodes: [
+      { id: "0" },
+      { id: "1" },
+      { id: "2" },
+      { id: "3" },
+      { id: "4" },
+      { id: "5" },
+    ],
     edges: [
       { source: "0", target: "1" },
       { source: "0", target: "2" },
@@ -158,7 +172,10 @@ export const graphs: Record<string, GraphData> = {
 };
 
 export interface AppLayoutResult {
-  positions: Map<string, { x: number; y: number; width: number; height: number }>;
+  positions: Map<
+    string,
+    { x: number; y: number; width: number; height: number }
+  >;
   edgePoints: Map<string, [number, number][]>;
   width: number;
   height: number;
@@ -176,10 +193,17 @@ export function formatMeta(result: AppLayoutResult): string {
 /** extract positions and edge points from a dagre-style graph after layout */
 export function extractDagreLayout(
   graphData: GraphData,
-  grf: { node(id: string): { x: number; y: number }; edge(v: string, w: string): { points: { x: number; y: number }[] }; graph(): { width?: number; height?: number } },
+  grf: {
+    node(id: string): { x: number; y: number };
+    edge(v: string, w: string): { points: { x: number; y: number }[] };
+    graph(): { width?: number; height?: number };
+  },
   elapsed: number,
 ): AppLayoutResult {
-  const positions = new Map<string, { x: number; y: number; width: number; height: number }>();
+  const positions = new Map<
+    string,
+    { x: number; y: number; width: number; height: number }
+  >();
   for (const n of graphData.nodes) {
     const pos = grf.node(n.id);
     positions.set(n.id, { x: pos.x, y: pos.y, width: NODE_W, height: NODE_H });
@@ -193,11 +217,24 @@ export function extractDagreLayout(
     );
   }
   const info = grf.graph();
-  return { positions, edgePoints, width: info.width ?? 0, height: info.height ?? 0, elapsed };
+  return {
+    positions,
+    edgePoints,
+    width: info.width ?? 0,
+    height: info.height ?? 0,
+    elapsed,
+  };
 }
 
 /** smooth curve from handle → layout control points → handle */
-export function LayoutEdge({ sourceX, sourceY, targetX, targetY, data, ...rest }: EdgeProps) {
+export function LayoutEdge({
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  data,
+  ...rest
+}: EdgeProps) {
   const layoutPoints = data?.points as [number, number][] | undefined;
   const proportional = data?.proportional as boolean | undefined;
 
@@ -249,7 +286,10 @@ export const edgeTypes = { layout: LayoutEdge };
 export type EdgeMode = "straight" | "curved" | "routed";
 export type Direction = Rankdir;
 
-export function handlePositions(dir: Direction): { source: Position; target: Position } {
+export function handlePositions(dir: Direction): {
+  source: Position;
+  target: Position;
+} {
   switch (dir) {
     case "LR":
       return { source: Position.Right, target: Position.Left };
@@ -269,7 +309,8 @@ export function toFlowElements(
   direction: Direction,
   opts?: { proportional?: boolean },
 ): { nodes: Node[]; edges: Edge[] } {
-  const { source: sourcePosition, target: targetPosition } = handlePositions(direction);
+  const { source: sourcePosition, target: targetPosition } =
+    handlePositions(direction);
   const nodes: Node[] = [];
   for (const n of graphData.nodes) {
     const pos = result.positions.get(n.id);
@@ -296,7 +337,11 @@ export function toFlowElements(
   for (const e of graphData.edges) {
     const key = edgeKey(e.source, e.target);
     const pts = edgeMode === "routed" ? result.edgePoints.get(key) : undefined;
-    const type = pts ? "layout" : edgeMode === "curved" ? "default" : "straight";
+    const type = pts
+      ? "layout"
+      : edgeMode === "curved"
+        ? "default"
+        : "straight";
     edges.push({
       id: `${e.source}-${e.target}`,
       source: e.source,
@@ -324,7 +369,8 @@ export const FlowInner: FC<{ nodes: Node[]; edges: Edge[] }> = ({
   }, [layoutNodes, fitView]);
 
   const onNodesChange = useCallback(
-    (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    (changes: NodeChange[]) =>
+      setNodes((nds) => applyNodeChanges(changes, nds)),
     [],
   );
 
