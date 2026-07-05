@@ -198,7 +198,7 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
         links.push([pid, node, ldatum]);
       }
       if (mapping.has(nid)) {
-        throw err`found a duplicate id: ${id}, but ids passed to \`graphStratify()\` must be unique`;
+        throw err`found a duplicate id: ${nid}, but ids passed to \`graphStratify()\` must be unique`;
       } else {
         mapping.set(nid, node);
       }
