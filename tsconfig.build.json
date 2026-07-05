@@ -1,14 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "es6",
-    "lib": ["es6"],
-    "module": "es6",
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
   "include": ["src"],
   "exclude": ["**/*.test.ts", "**/test-*.ts", "**/*.bench.ts"]
