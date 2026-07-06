@@ -13,9 +13,7 @@
       "docs-src/**/*.tsx",
       "test-d/**/*.ts",
       "*.json",
-      "examples/*.json",
-      "flow.mjs",
-      "eslint.config.mjs"
+      "examples/*.json"
     ],
     "ignoreUnknown": false
   },
