@@ -34,7 +34,7 @@ jobs:
         with:
           tag: v${{ steps.version.outputs.version }}
           version: ${{ steps.version.outputs.version }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: changelog
           path: CHANGELOG.md
