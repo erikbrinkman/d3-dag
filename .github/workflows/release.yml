@@ -114,4 +114,4 @@ jobs:
       cancel-in-progress: false
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
