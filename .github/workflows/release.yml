@@ -55,7 +55,7 @@ jobs:
 
       # bump package.json here in the trusted job, not from the changelog artifact
       - run: npm version --no-git-tag-version ${{ needs.changelog.outputs.version }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: changelog
 
