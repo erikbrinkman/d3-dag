@@ -34,7 +34,7 @@ jobs:
         with:
           tag: v${{ steps.version.outputs.version }}
           version: ${{ steps.version.outputs.version }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: changelog
           path: CHANGELOG.md
@@ -55,7 +55,7 @@ jobs:
 
       # bump package.json here in the trusted job, not from the changelog artifact
       - run: npm version --no-git-tag-version ${{ needs.changelog.outputs.version }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: changelog
 
@@ -69,7 +69,7 @@ jobs:
 
       # publish before pushing — a failed publish leaves no remote trace
       # Node 24 ships with npm 11.x, required for OIDC trusted publishing
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
@@ -94,7 +94,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun doc
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
@@ -114,4 +114,4 @@ jobs:
       cancel-in-progress: false
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
