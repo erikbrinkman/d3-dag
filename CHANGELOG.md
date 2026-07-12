@@ -7,9 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- cjs build
+
+### Changed
+
+- ships unbundled for tree shaking
+- minimum node version is now 20.19
+
 ## [1.2.2] - 2026-07-05
 
+### Fixed
+
+- `graph` caches on link removal
+- `graphJson` parsing corrupt graphs
+- `dagre` applies `rankdir` properly
+- `dagre` automatically creates nodes that are only referenced by edges
+- `dagre` exposes link points so `edge()` reflects the computed layout
+- `sugiyama` boosts layers appropriately for cycles
+- `sugiyama` caches reversed edges correctly
+- `coordQuad` handles reversed edges
+- `zherebko` handles reversed edges
+- `laneOpt` sorts lanes numerically, a lexicographic sort scrambled the
+  crossing free ordering once there were ten or more lanes
+- `twolayerGreedy` properly re-evaluates pairs exposed by a swap
+
 ## [1.2.1] - 2026-04-14
+
+### Fixed
+
+- module exports, and restore the `d3` global in the iife bundle
 
 ## [1.2.0] - 2026-04-13
 
