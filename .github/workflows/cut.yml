@@ -1,0 +1,78 @@
+# Cut a release: the sole writer to main -- bump + changelog + tag, then dispatch release + docs off the tag.
+name: cut
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  gate:
+    uses: ./.github/workflows/nodejs.yml
+
+  # isolated: runs the third-party changelog action with no push or dispatch creds
+  changelog:
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        run: |
+          version=$(npm version --no-git-tag-version ${{ inputs.bump }} | sed 's/^v//')
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+      - uses: thomaseizinger/keep-a-changelog-new-release@v3
+        with:
+          tag: v${{ steps.version.outputs.version }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: changelog
+          path: CHANGELOG.md
+
+  cut:
+    needs: changelog
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the bump + tag
+      actions: write # dispatch release + docs
+    env:
+      VERSION: ${{ needs.changelog.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main # the branch tip, not the dispatch SHA
+          fetch-depth: 0
+      - run: npm version --no-git-tag-version "$VERSION"
+      # take CHANGELOG.md from the isolated job, not this credentialed one
+      - uses: actions/download-artifact@v8
+        with:
+          name: changelog
+      - name: Commit, tag, and trigger release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json CHANGELOG.md
+          git commit -m "v${VERSION}"
+          # branch first, tag second (never --follow-tags): a moved main is rejected before the tag exists
+          git push origin HEAD:main
+          git tag -a "v${VERSION}" -m "v${VERSION}"
+          git push origin "v${VERSION}"
+          # token-pushed tags don't fire on:push, so dispatch instead
+          gh workflow run release.yml --ref main -f tag="v${VERSION}"
+          gh workflow run docs.yml --ref main -f tag="v${VERSION}"
