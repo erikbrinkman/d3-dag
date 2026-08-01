@@ -4,6 +4,8 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    ignore:
+      - { dependency-name: typescript, versions: ["7.0.x"] }
   - package-ecosystem: github-actions
     directory: /
     schedule:
