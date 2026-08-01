@@ -1,117 +1,37 @@
+# Publish a tagged release to npm, then the GitHub release; keep the name release.yml for npm trusted publishing.
 name: release
-
 on:
   workflow_dispatch:
     inputs:
-      bump:
-        description: Version bump type
+      tag:
+        description: "Release tag to publish (e.g. v0.3.0)"
         required: true
-        type: choice
-        options: [patch, minor, major]
+        type: string
+
+permissions:
+  contents: write # create the GitHub release
+  id-token: write # trusted publishing to npm
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
-  gate:
-    uses: ./.github/workflows/nodejs.yml
-
-  # isolated env: runs the third-party changelog action with no publish credentials
-  changelog:
-    needs: gate
+  publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
-      - id: version
-        run: |
-          VERSION=$(npm version --no-git-tag-version ${{ inputs.bump }} | sed 's/^v//')
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-      - uses: thomaseizinger/keep-a-changelog-new-release@v3
         with:
-          tag: v${{ steps.version.outputs.version }}
-          version: ${{ steps.version.outputs.version }}
-      - uses: actions/upload-artifact@v7
-        with:
-          name: changelog
-          path: CHANGELOG.md
-
-  release:
-    needs: changelog
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
-    outputs:
-      version: ${{ needs.changelog.outputs.version }}
-    steps:
-      - uses: actions/checkout@v7
+          ref: ${{ inputs.tag }}
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun export
-
-      # bump package.json here in the trusted job, not from the changelog artifact
-      - run: npm version --no-git-tag-version ${{ needs.changelog.outputs.version }}
-      - uses: actions/download-artifact@v8
-        with:
-          name: changelog
-
-      - run: |
-          VERSION=${{ needs.changelog.outputs.version }}
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json CHANGELOG.md
-          git commit -m "v${VERSION}"
-          git tag -a "v${VERSION}" -m "v${VERSION}"
-
-      # publish before pushing — a failed publish leaves no remote trace
-      # Node 24 ships with npm 11.x, required for OIDC trusted publishing
+      # node 24 ships npm 11.x, required for OIDC trusted publishing
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
       - run: npm publish --provenance --access public --ignore-scripts
-
-      - run: git push --follow-tags
-      - run: gh release create "v${{ needs.changelog.outputs.version }}" --generate-notes
+      - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-
-  pages-build:
-    needs: release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: v${{ needs.release.outputs.version }}
-          fetch-depth: 1
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun doc
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: docs
-
-  # separate from the build so a failed deploy re-runs without rebuilding the docs
-  pages-deploy:
-    needs: pages-build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      pages: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v5
+        run: gh release create "${{ inputs.tag }}" --generate-notes --verify-tag
