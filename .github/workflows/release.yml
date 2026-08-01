@@ -25,7 +25,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: version
         run: |
           VERSION=$(npm version --no-git-tag-version ${{ inputs.bump }} | sed 's/^v//')
@@ -48,7 +48,7 @@ jobs:
     outputs:
       version: ${{ needs.changelog.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun export
@@ -87,7 +87,7 @@ jobs:
       contents: read
       pages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: v${{ needs.release.outputs.version }}
           fetch-depth: 1
