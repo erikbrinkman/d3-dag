@@ -56,7 +56,7 @@
     "d3-array": "^3.2.4",
     "javascript-lp-solver": "^1.0.3",
     "quadprog": "^2.0.0",
-    "stringify-object": "^6.0.0"
+    "stringify-object": "^7.0.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.4",
