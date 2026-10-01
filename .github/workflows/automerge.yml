@@ -1,0 +1,34 @@
+name: automerge
+
+# Split out of nodejs.yml: a workflow reused as a gate can only narrow its caller's token, so
+# the write scopes below would break any release or deploy that calls it.
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+
+jobs:
+  merge:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.actor.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # nothing is checked out here, so gh has no remote to infer the repo from
+      GH_REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - if: github.event.workflow_run.conclusion == 'success'
+        run: gh pr merge --squash --match-head-commit "$HEAD_SHA" "$BRANCH"
+      # a cancelled build or a pull request that has since moved on gets another run, so
+      # neither is worth a mention
+      - if: failure() || github.event.workflow_run.conclusion == 'failure' || github.event.workflow_run.conclusion == 'timed_out'
+        run: |
+          if [ "$(gh pr view "$BRANCH" --json state,headRefOid --jq '"\(.state) \(.headRefOid)"')" = "OPEN $HEAD_SHA" ]; then
+            gh pr comment "$BRANCH" --body "@erikbrinkman automerge left this open: $REASON"
+          fi
+        env:
+          REASON: ${{ github.event.workflow_run.conclusion == 'success' && 'the merge failed' || 'the build failed' }}
