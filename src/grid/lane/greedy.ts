@@ -99,7 +99,11 @@ class OneSidedIndexer implements Indexer {
     }
     const targ = target === undefined ? 0 : target;
     const ind =
-      least(free, (v) => [Math.abs(targ - v), v]) ?? this.indices.length;
+      least(
+        free,
+        (left, right) =>
+          Math.abs(targ - left) - Math.abs(targ - right) || left - right,
+      ) ?? this.indices.length;
     this.setIndex(ind, after);
     return ind;
   }
@@ -162,7 +166,13 @@ class TwoSidedIndexer implements Indexer {
         : this.nextPos();
     // tie break on distance to target, then closest to zero, then positive
     const ind =
-      least(free, (v) => [Math.abs(targ - v), Math.abs(v), -v]) ?? empty;
+      least(
+        free,
+        (left, right) =>
+          Math.abs(targ - left) - Math.abs(targ - right) ||
+          Math.abs(left) - Math.abs(right) ||
+          right - left,
+      ) ?? empty;
     this.setIndex(ind, after);
     return ind;
   }
