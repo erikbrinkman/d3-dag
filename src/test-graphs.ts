@@ -69,18 +69,6 @@ export function multi(): ConnectGraph {
   ]);
 }
 
-// simplest cycle
-//  0
-// / \
-// \ /
-//  1
-export function cyc(): ConnectGraph {
-  return connect([
-    ["0", "1"],
-    ["1", "0"],
-  ]);
-}
-
 // multi-graph where no skips should happen
 //   0
 //  /|\
