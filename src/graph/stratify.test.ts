@@ -310,3 +310,11 @@ test("graphStratify() fails with incorrect parentIds", () => {
     "default parentIds function expected parentIds to be an iterable of strings but got: ",
   );
 });
+
+test("graphStratify() reads parentIds generators once", () => {
+  function* parents(): Generator<string> {
+    yield "a";
+  }
+  const grf = graphStratify()([{ id: "a" }, { id: "b", parentIds: parents() }]);
+  expect(grf.nlinks()).toBe(1);
+});

@@ -1,4 +1,4 @@
-import { every, isIterable, map } from "../iters.js";
+import { isIterable, map } from "../iters.js";
 import { err, type U } from "../utils.js";
 import { graph, type MutGraph, type MutGraphNode } from "./index.js";
 import { type Id, verifyId } from "./utils.js";
@@ -318,12 +318,11 @@ function defaultParentIds(data: unknown): Iterable<string> | undefined {
     return undefined;
   }
   const { parentIds } = data;
-  if (
-    parentIds === undefined ||
-    (isIterable(parentIds) &&
-      every(parentIds, (id): id is string => typeof id === "string"))
-  ) {
-    return parentIds;
+  const ids = isIterable(parentIds) ? [...parentIds] : undefined;
+  if (parentIds === undefined) {
+    return undefined;
+  } else if (ids?.every((id): id is string => typeof id === "string")) {
+    return ids;
   } else {
     throw err`default parentIds function expected parentIds to be an iterable of strings but got: ${parentIds}; try setting a custom accessor for parentIds with \`graphStratify().parentIds(d => ...)\``;
   }
