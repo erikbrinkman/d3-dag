@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { type Graph, type GraphNode, graph } from "../graph/index.js";
 import { filter } from "../iters.js";
 import type { LayoutResult } from "../layout.js";
-import { cyc, dummy, en, multi, oh, single, zhere } from "../test-graphs.js";
+import { dummy, en, multi, oh, single, zhere } from "../test-graphs.js";
 import { tweakSize } from "../tweaks.js";
 import { grid } from "./index.js";
 import { laneGreedy } from "./lane/greedy.js";
@@ -48,7 +48,7 @@ test("greedy() works for zherebko", () => {
 });
 
 test("greedy() works for cycle", () => {
-  const grf = cyc();
+  const grf = oh();
   const layout = grid().nodeSize([2, 2] as const);
   expect(layout.nodeSize()).toEqual([2, 2]);
   const { width, height } = layout(grf);
