@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - ships unbundled for tree shaking
-- minimum node version is now 22
+- minimum node version is now 22.12
 - fixed `graph` caching after deleting links
 - fixed `laneGreedy` sometimes picking a farther lane
 - fixed `graphStratify` dropping links when `parentIds` is a generator
