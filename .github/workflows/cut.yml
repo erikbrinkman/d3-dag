@@ -20,6 +20,8 @@ env:
 jobs:
   gate:
     uses: ./.github/workflows/nodejs.yml
+    permissions:
+      contents: read
 
   # isolated: runs the third-party changelog action with no push or dispatch creds
   changelog:
