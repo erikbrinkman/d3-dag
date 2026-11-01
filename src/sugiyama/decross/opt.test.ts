@@ -189,6 +189,13 @@ test("decrossOpt() fails for large inputs", () => {
   expect(() => decrossOpt()(layers)).toThrow(`"oom"`);
 });
 
+test("decrossOpt() rejects wide layers before building the model", () => {
+  const layers = createLayers([Array<number[]>(400).fill([])]);
+  const start = performance.now();
+  expect(() => decrossOpt()(layers)).toThrow(`"oom"`);
+  expect(performance.now() - start).toBeLessThan(1000);
+});
+
 test("decrossOpt() fails for medium inputs", () => {
   const layers = createLayers([
     indexNestedArray(20),
