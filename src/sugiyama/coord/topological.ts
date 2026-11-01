@@ -19,6 +19,7 @@ import {
   init,
   layout,
   minBend,
+  normalize,
   solve as solveQuad,
 } from "./utils.js";
 
@@ -154,23 +155,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
         node.x = val === undefined ? 0 : flip ? -val : val;
       }
 
-      // assign x and compute offset
-      let offset = 0;
-      let width = 0;
-      for (const layer of layers) {
-        const first = layer[0];
-        offset = Math.min(offset, first.x - sep(undefined, first));
-        const last = layer[layer.length - 1];
-        width = Math.max(width, last.x + sep(last, undefined));
-      }
-
-      // apply offset
-      for (const node of ids.keys()) {
-        node.x -= offset;
-      }
-
-      // compute max width
-      const maxWidth = width - offset;
+      const maxWidth = normalize(layers, sep);
       if (maxWidth <= 0) {
         throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
       } else {

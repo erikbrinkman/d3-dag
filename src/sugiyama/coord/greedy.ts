@@ -11,6 +11,7 @@ import { entries, slice } from "../../iters.js";
 import { err } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
+import { normalize } from "./utils.js";
 
 /**
  * a {@link Coord} that tries to place nodes close to their parents
@@ -179,22 +180,7 @@ export function coordGreedy(...args: never[]): CoordGreedy {
       }
     }
 
-    // figure out width and offset
-    let start = Infinity;
-    let end = -Infinity;
-    for (const layer of layers) {
-      const first = layer[0];
-      start = Math.min(start, first.x - sep(undefined, first));
-      const last = layer[layer.length - 1];
-      end = Math.max(end, last.x + sep(last, undefined));
-    }
-
-    // apply offset
-    for (const node of nodes) {
-      node.x -= start;
-    }
-
-    const width = end - start;
+    const width = normalize(layers, sep);
     if (width <= 0) {
       throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     }

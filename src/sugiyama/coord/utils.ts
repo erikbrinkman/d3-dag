@@ -165,6 +165,26 @@ export function minBend(
   Q[pind][pind] += pcoef * pcoef;
 }
 
+/** shift nodes so the layout's left edge is at zero, and return its width */
+export function normalize<N, L>(
+  layers: readonly (readonly SugiNode<N, L>[])[],
+  sep: SugiSeparation<N, L>,
+): number {
+  let start = Infinity;
+  let finish = -Infinity;
+  for (const layer of layers) {
+    const first = layer[0];
+    const last = layer[layer.length - 1];
+    start = Math.min(start, first.x - sep(undefined, first));
+    finish = Math.max(finish, last.x + sep(last, undefined));
+  }
+  // nodes can span several layers, so each is shifted once
+  for (const node of new Set(layers.flat())) {
+    node.x -= start;
+  }
+  return finish - start;
+}
+
 /**
  * Assign nodes x based off of solution, and return the width of the final
  * layout.
@@ -175,29 +195,10 @@ export function layout<N, L>(
   inds: Map<SugiNode, number>,
   solution: number[],
 ): number {
-  // assign solution
   for (const [node, key] of inds) {
     node.x = solution[key];
   }
-
-  // find span of solution
-  let start = Infinity;
-  let finish = -Infinity;
-  for (const layer of layers) {
-    const first = layer[0];
-    const last = layer[layer.length - 1];
-
-    start = Math.min(start, first.x - sep(undefined, first));
-    finish = Math.max(finish, last.x + sep(last, undefined));
-  }
-
-  // assign indices based off of span
-  for (const node of inds.keys()) {
-    node.x -= start;
-  }
-
-  // return width
-  return finish - start;
+  return normalize(layers, sep);
 }
 
 export function avgHeight(nodes: Iterable<GraphNode>): number {
