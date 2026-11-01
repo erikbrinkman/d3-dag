@@ -226,7 +226,6 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
       }
       return max - min;
     } catch {
-      /* istanbul ignore else */
       if (groups.size) {
         throw err`could not find a feasible simplex layout; this is likely due to group constraints producing an infeasible layout, try relaxing the functions you're passing to \`layeringSimplex().group(...)\``;
       } else {

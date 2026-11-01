@@ -89,7 +89,6 @@ export function berr(
   const stringified = map(info, (val) => val.toString());
   const msg = interleave(rest, stringified);
   const name = named.name || "anonymous";
-  /* istanbul ignore next */
   return new Error(
     "d3dagBuiltin" in named
       ? wrapInternalMsg(`builtin ${typ}'${name}'${msg}`)

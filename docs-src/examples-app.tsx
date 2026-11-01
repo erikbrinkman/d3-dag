@@ -60,8 +60,6 @@ function runLayout(
     e.source,
     e.target,
   ]);
-  // graphConnect needs at least one edge; if graph is edgeless, use graph() directly
-  // but all our examples have edges
   const grf = connect(pairs);
 
   const isHorizontal = direction === "LR" || direction === "RL";

@@ -96,7 +96,7 @@ export function eye(): ConnectGraph {
   ]);
 }
 
-// square, simple with a cycle
+// square, a cycle if edge direction is ignored
 //   0
 //  / \
 // 1   2

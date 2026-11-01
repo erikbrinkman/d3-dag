@@ -43,7 +43,6 @@ function qp(
   bvec.push(...b.map((v) => -v));
 
   const { solution, message } = solveQP(Dmat, dvec, Amat, bvec, meq);
-  /* istanbul ignore if */
   if (message.length) {
     throw ierr`quadratic program failed: ${message}`;
   }
