@@ -1,10 +1,5 @@
-import {
-  setMultimapAdd,
-  setMultimapDelete,
-  setNext,
-  setPop,
-} from "../collections.js";
-import { chain, filter, map } from "../iters.js";
+import { setMultimapAdd, setMultimapDelete, setPop } from "../collections.js";
+import { chain, filter, first, map } from "../iters.js";
 import { dfs, err } from "../utils.js";
 import { toJson } from "./json.js";
 
@@ -757,7 +752,7 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
       yield comp.node;
     }
     let node: MutGraphNode<N, L> | undefined;
-    while ((node = setNext(this.#extra))) {
+    while ((node = first(this.#extra))) {
       yield node;
       node.nnodes(); // NOTE causes a full sweep of component
     }

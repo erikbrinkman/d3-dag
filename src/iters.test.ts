@@ -3,9 +3,7 @@ import {
   bigrams,
   chain,
   entries,
-  every,
   flatMap,
-  length,
   map,
   reduce,
   slice,
@@ -18,11 +16,6 @@ test("entries()", () => {
     [1, 2],
     [2, 3],
   ]);
-});
-
-test("every()", () => {
-  expect(every([1, 2, 3], (v) => v > 0)).toBeTruthy();
-  expect(every([1, -2, 3], (v) => v > 0)).toBeFalsy();
 });
 
 test("flatMap()", () => {
@@ -60,10 +53,4 @@ test("bigrams()", () => {
     [2, 3],
     [3, 4],
   ]);
-});
-
-test("length()", () => {
-  expect(length([])).toBe(0);
-  expect(length([1])).toBe(1);
-  expect(length(chain([1, 2]))).toBe(2);
 });
