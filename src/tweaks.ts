@@ -202,12 +202,12 @@ export type Shape = (
   end: readonly [number, number],
 ) => [number, number];
 
-enum Direction {
-  Left = 1,
-  Right = 2,
-  Bottom = 4,
-  Top = 8,
-}
+const Direction = {
+  Left: 1,
+  Right: 2,
+  Bottom: 4,
+  Top: 8,
+} as const;
 
 /**
  * a bounding box shape for the full rectangle

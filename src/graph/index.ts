@@ -442,17 +442,16 @@ export interface MutGraphNode<in out NodeDatum, in out LinkDatum>
 }
 
 class AugmentedNode<out N, out L> {
-  constructor(
-    readonly node: GraphNode<N, L>,
-    public indeg: number,
-    public outdeg: number,
-    public stat:
-      | "ranked"
-      | "active"
-      | "top"
-      | "bottom"
-      | "inactive" = "inactive",
-  ) {}
+  readonly node: GraphNode<N, L>;
+  indeg: number;
+  outdeg: number;
+  stat: "ranked" | "active" | "top" | "bottom" | "inactive" = "inactive";
+
+  constructor(node: GraphNode<N, L>, indeg: number, outdeg: number) {
+    this.node = node;
+    this.indeg = indeg;
+    this.outdeg = outdeg;
+  }
 
   bucket(): number {
     const diff =
@@ -892,6 +891,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   /** connected component info */
   #cinfo: NodeInfo<N, L> | null | undefined;
 
+  data: N;
   ux?: number | undefined;
   uy?: number | undefined;
 
@@ -926,8 +926,9 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
     deleteNode: () => void,
     addLink: (multi: boolean, connecting: boolean) => void,
     deleteLink: (multi: boolean) => void,
-    public data: N,
+    data: N,
   ) {
+    this.data = data;
     this.#graph = graph;
     this.#components = components;
     this.#extra = extra;
@@ -1337,15 +1338,21 @@ class DirectedLink<N, L> implements MutGraphLink<N, L> {
   #graph: DirectedGraph<N, L> | null;
   #deleteLink: (link: DirectedLink<N, L>) => void;
 
+  readonly source: DirectedNode<N, L>;
+  readonly target: DirectedNode<N, L>;
+  data: L;
   points: [number, number][] = [];
 
   constructor(
     graph: DirectedGraph<N, L>,
-    readonly source: DirectedNode<N, L>,
-    readonly target: DirectedNode<N, L>,
+    source: DirectedNode<N, L>,
+    target: DirectedNode<N, L>,
     deleteLink: (link: DirectedLink<N, L>) => void,
-    public data: L,
+    data: L,
   ) {
+    this.source = source;
+    this.target = target;
+    this.data = data;
     this.#graph = graph;
     this.#deleteLink = deleteLink;
   }
