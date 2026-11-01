@@ -15,7 +15,7 @@ import { bigrams, flatMap } from "../../iters.js";
 import { err, ierr } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
-import { avgHeight } from "./utils.js";
+import { avgHeight, normalize } from "./utils.js";
 
 /**
  * a strictly callable {@link SimplexWeight}
@@ -309,23 +309,7 @@ function buildOperator<
       node.x = assignment[id] ?? 0;
     }
 
-    // figure out width and offset
-    let offset = 0;
-    let width = 0;
-    for (const layer of layers) {
-      const first = layer[0];
-      offset = Math.min(offset, first.x - sep(undefined, first));
-      const last = layer[layer.length - 1];
-      width = Math.max(width, last.x + sep(last, undefined));
-    }
-
-    // apply offset
-    for (const node of ids.keys()) {
-      node.x -= offset;
-    }
-
-    // return width
-    const maxWidth = width - offset;
+    const maxWidth = normalize(layers, sep);
     if (maxWidth <= 0) {
       throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     } else {
