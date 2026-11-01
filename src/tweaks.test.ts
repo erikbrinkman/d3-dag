@@ -378,6 +378,40 @@ test("tweakSugiyama() clipped", () => {
   ]);
 });
 
+test("tweakSugiyama() reads node sizes fresh on each call", () => {
+  const grf = graph<boolean, undefined>();
+  const a = grf.node(true);
+  const b = grf.node(false);
+  const link = a.child(b);
+  a.x = 1;
+  a.y = 1;
+  b.x = 5;
+  b.y = 4;
+
+  let size = 2;
+  const tweak = tweakSugiyama((): [number, number] => [size, size]);
+  link.points = [
+    [1, 1],
+    [5, 4],
+  ];
+  tweak(grf, { width: 6, height: 5 });
+
+  size = 4;
+  link.points = [
+    [1, 1],
+    [5, 4],
+  ];
+  tweak(grf, { width: 6, height: 5 });
+  const second = link.points;
+
+  link.points = [
+    [1, 1],
+    [5, 4],
+  ];
+  tweakSugiyama([4, 4])(grf, { width: 6, height: 5 });
+  expect(second).toEqual(link.points);
+});
+
 test("tweakSugiyama() clipped single", () => {
   // This tests that we set the clip based on the original edge, not by
   // clipping one then the other.

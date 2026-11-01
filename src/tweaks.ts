@@ -442,12 +442,11 @@ function findClip(
  * although it shouldn't be strictly necessary.
  */
 export function tweakSugiyama<N, L>(nodeSize: NodeSize<N, L>): Tweak<N, L> {
-  const cachedSize = cachedNodeSize(nodeSize);
-
   function tweakSugiyama(
     graph: Graph<N, L>,
     res: Readonly<LayoutResult>,
   ): LayoutResult {
+    const cachedSize = cachedNodeSize(nodeSize);
     for (const { source, target, points } of graph.links()) {
       // compute both clips before any mutation to handle two-point edges
       const srcSize = cachedSize(source);
@@ -497,13 +496,13 @@ export function tweakGridHandles<N, L>(
   nodeSize: NodeSize<N, L>,
   gap: readonly [number, number],
 ): Tweak<N, L> {
-  const cachedSize = cachedNodeSize(nodeSize);
   const [, ygap] = gap;
 
   function tweakGridHandles(
     graph: Graph<N, L>,
     res: Readonly<LayoutResult>,
   ): LayoutResult {
+    const cachedSize = cachedNodeSize(nodeSize);
     for (const link of graph.links()) {
       const { source, target, points } = link;
       const [, middle, last] = points;
