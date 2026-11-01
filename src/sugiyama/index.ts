@@ -167,7 +167,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * The final stage is coordinate assignment, which takes a layered graph with
    * nodes in the correct order, and assigns them x coordinates.
    *
-   * There are four built-in coordinate assignment operators:
+   * There are five built-in coordinate assignment operators:
    * - {@link coordSimplex} - This assigns x coordinates based on a simplex
    *   minimization that tries to produce long vertical edges. It usually
    *   produces attractive layouts in a reasonable amount of time.
@@ -180,6 +180,8 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
    * - {@link coordTopological} - This is a coordinate assignment tailored for
    * a {@link layeringTopological | topological layout}. It can use a
    *   simplex or quadratic optimization to create a topological layout.
+   * - {@link coordCenter} - This centers each layer without optimizing, which
+   *   is fast but makes no effort to straighten edges.
    *
    * You can also supply any function that satisfies the {@link Coord}
    * interface. See that documentation for more information about implementing
@@ -224,7 +226,7 @@ export interface Sugiyama<Ops extends SugiyamaOps = SugiyamaOps> {
   nodeSize(): Ops["nodeSize"];
 
   /**
-   * get the gap size between nodes
+   * set the gap size between nodes
    *
    * (default: `[1, 1]`)
    */
@@ -453,8 +455,8 @@ export type DefaultSugiyama = Sugiyama<{
  * ```ts
  * const grf: Graph = ...
  * const layout = sugiyama();
- * layout(dag);
- * for (const node of dag.nodes()) {
+ * layout(grf);
+ * for (const node of grf.nodes()) {
  *   console.log(node.x, node.y);
  * }
  * ```
@@ -466,8 +468,8 @@ export type DefaultSugiyama = Sugiyama<{
  * ```ts
  * const grf: Graph = ...
  * const layout = sugiyama().decross(decrossOpt());
- * layout(dag);
- * for (const node of dag.nodes()) {
+ * layout(grf);
+ * for (const node of grf.nodes()) {
  *   console.log(node.x, node.y);
  * }
  * ```

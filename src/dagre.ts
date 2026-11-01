@@ -48,7 +48,7 @@ export interface DagreGraphConfig {
   ranksep?: number;
   /** quality preset (default: `"medium"`) */
   quality?: DagreQuality;
-  /** layering algorithm (default: `undefined`, uses preset default) */
+  /** layering algorithm (default: `"network-simplex"`) */
   ranker?: DagreRanker;
   /** layout algorithm (default: `"sugiyama"`); `quality`/`ranker` only apply to sugiyama */
   algorithm?: DagreAlgorithm;

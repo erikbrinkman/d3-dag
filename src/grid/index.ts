@@ -196,9 +196,9 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
         } else {
           points.push([source.x, source.y]);
           if (source.y < target.y) {
-            // effectively reverse edge
             points.push([target.x, source.y]);
           } else {
+            // effectively reverse edge
             points.push([source.x, target.y]);
           }
           points.push([target.x, target.y]);
@@ -348,8 +348,8 @@ export type DefaultGrid = Grid<{
  * ```ts
  * const grf = ...
  * const layout = grid();
- * const { width, height } = layout(dag);
- * for (const node of dag) {
+ * const { width, height } = layout(grf);
+ * for (const node of grf.nodes()) {
  *   console.log(node.x, node.y);
  * }
  * ```
@@ -363,8 +363,8 @@ export type DefaultGrid = Grid<{
  * ```ts
  * const grf = ...
  * const layout = grid().lane(laneOpt());
- * const { width, height } = layout(dag);
- * for (const node of dag) {
+ * const { width, height } = layout(grf);
+ * for (const node of grf.nodes()) {
  *   console.log(node.x, node.y);
  * }
  * ```
