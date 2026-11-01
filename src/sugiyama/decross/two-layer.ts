@@ -55,7 +55,7 @@ export interface DecrossTwoLayer<
    *   rarely produces better results than the combination of {@link
    *   twolayerGreedy} and {@link twolayerAgg}.
    *
-   * (default: {@link twolayerGreedy})
+   * (default: `twolayerGreedy().base(twolayerAgg())`)
    */
   order<NewOrder extends Twolayer>(
     val: NewOrder,
