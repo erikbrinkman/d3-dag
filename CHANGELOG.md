@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   may have zero width or height
 - `dagre` lays out nodes added without a size as points, like dagre, instead
   of throwing
+- `coordGreedy` ignores x positions nodes already have, so called directly it
+  gives the same result as inside `sugiyama`
 
 ## [1.2.2] - 2026-07-05
 
