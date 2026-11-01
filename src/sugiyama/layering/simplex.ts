@@ -226,8 +226,8 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
       }
       return max - min;
     } catch {
-      if (groups.size) {
-        throw err`could not find a feasible simplex layout; this is likely due to group constraints producing an infeasible layout, try relaxing the functions you're passing to \`layeringSimplex().group(...)\``;
+      if (ranks.length || groups.size) {
+        throw err`could not find a feasible simplex layout; this is likely due to rank or group constraints producing an infeasible layout, try relaxing the functions you're passing to \`layeringSimplex().rank(...)\` or \`layeringSimplex().group(...)\``;
       } else {
         throw ierr`could not find a feasible simplex solution`;
       }

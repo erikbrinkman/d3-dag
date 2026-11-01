@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed `graphStratify` dropping links when `parentIds` is a generator
 - fixed `tweakSugiyama` and `tweakGridHandles` reusing old node sizes
 - fixed error messages that suggested methods that don't exist
+- fixed `layeringSimplex` reporting contradictory ranks as an internal error
 
 ## [1.2.2] - 2026-07-05
 

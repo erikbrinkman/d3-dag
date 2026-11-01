@@ -194,6 +194,16 @@ test("simplex() fails with ill-defined groups", () => {
   );
 });
 
+test("simplex() fails with ranks that contradict links", () => {
+  const dag = square();
+  const layout = simplex().rank((node: GraphNode<string>) =>
+    node.data === "0" || node.data === "1" ? 0 : undefined,
+  );
+  expect(() => layout(dag, layerSeparation)).toThrow(
+    "layeringSimplex().rank(...)",
+  );
+});
+
 test("simplex() fails with ill-defined group", () => {
   const dag = square();
   const layout = simplex().group((node: GraphNode<string>) =>
