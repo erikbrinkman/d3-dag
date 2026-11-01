@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import stringify from "stringify-object";
-import { entries, map } from "./iters.js";
+import { entries } from "./iters.js";
 
 /** utility type for replacing keys with new value */
 export type U<O, K extends keyof O, V> = Omit<O, K> & Record<K, V>;
@@ -49,7 +49,7 @@ function interleave(
 
 /** pretty error creation */
 export function err(strings: readonly string[], ...objs: unknown[]): Error {
-  const stringified = map(objs, (val) =>
+  const stringified = Iterator.from(objs).map((val) =>
     stringify(val, {
       indent: "  ",
       singleQuotes: false,
@@ -69,7 +69,7 @@ export function ierr(
   strings: readonly string[],
   ...info: (string | number | bigint | boolean)[]
 ): Error {
-  const stringified = map(info, (val) => val.toString());
+  const stringified = Iterator.from(info).map((val) => val.toString());
   return new Error(wrapInternalMsg(interleave(strings, stringified)));
 }
 
@@ -88,7 +88,7 @@ export function berr(
   ...info: (string | number | bigint)[]
 ): Error {
   const [typ, ...rest] = strings;
-  const stringified = map(info, (val) => val.toString());
+  const stringified = Iterator.from(info).map((val) => val.toString());
   const msg = interleave(rest, stringified);
   const name = named.name || "anonymous";
   return new Error(

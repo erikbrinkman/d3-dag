@@ -2,7 +2,6 @@ import { expect, test } from "bun:test";
 import { graphConnect } from "./graph/connect.js";
 import { graph } from "./graph/index.js";
 import { grid } from "./grid/index.js";
-import { map } from "./iters.js";
 import { sugiyama } from "./sugiyama/index.js";
 import { zhere } from "./test-graphs.js";
 import {
@@ -99,8 +98,12 @@ test("tweakFlip()", () => {
   const grf = zhere();
   const old = layout(grf);
 
-  const xs = new Map([...map(grf.nodes(), (node) => [node, node.x] as const)]);
-  const ys = new Map([...map(grf.nodes(), (node) => [node, node.y] as const)]);
+  const xs = new Map([
+    ...Iterator.from(grf.nodes()).map((node) => [node, node.x] as const),
+  ]);
+  const ys = new Map([
+    ...Iterator.from(grf.nodes()).map((node) => [node, node.y] as const),
+  ]);
 
   const diag = tweakFlip();
   const res = diag(grf, old);

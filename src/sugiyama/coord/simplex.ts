@@ -11,7 +11,7 @@ import solver, {
   type VariableCoefficients,
 } from "javascript-lp-solver";
 import type { GraphLink, GraphNode } from "../../graph/index.js";
-import { bigrams, flatMap } from "../../iters.js";
+import { bigrams } from "../../iters.js";
 import { err, ierr } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
@@ -121,7 +121,7 @@ function createCachedSimplexWeightAccessor<N, L>(
       GraphNode<N, L>,
       Map<GraphNode<N, L>, readonly [number, number, number]>
     >();
-    for (const node of flatMap(layers, (l) => l)) {
+    for (const node of layers.flat()) {
       if (node.data.role === "node") {
         const rawNode = node.data.node;
         const targets = new Map<

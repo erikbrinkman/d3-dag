@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import type { Graph, Rank } from "../graph/index.js";
-import { bigrams, map } from "../iters.js";
+import { bigrams } from "../iters.js";
 import type { CallableNodeSize, LayoutResult, NodeSize } from "../layout.js";
 import type { Tweak } from "../tweaks.js";
 import { err, type U } from "../utils.js";
@@ -123,8 +123,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
       // determine edge curve
       const gap = Math.min(
         // space between adjacent nodes or half for multi links
-        ...map(
-          bigrams(ordered),
+        ...Iterator.from(bigrams(ordered)).map(
           ([f, s]) =>
             (s.y - f.y) /
             (f.nchildLinksTo(s) + f.nparentLinksTo(s) > 1 ? 2 : 1),

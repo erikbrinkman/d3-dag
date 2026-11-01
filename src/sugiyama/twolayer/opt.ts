@@ -11,7 +11,7 @@ import solver, {
   type VariableCoefficients,
 } from "javascript-lp-solver";
 import { listMultimapPush } from "../../collections.js";
-import { entries, first, map, reduce, slice } from "../../iters.js";
+import { entries, first, slice } from "../../iters.js";
 import type { OptChecking } from "../../layout.js";
 import { err, ierr } from "../../utils.js";
 import type { SugiNode } from "../sugify.js";
@@ -83,8 +83,7 @@ function minCrossings(
   const numVars = Math.max((reordered.length * (reordered.length - 1)) / 2, 0);
   // NOTE distance cost for an unconstrained node in a group can't violate
   // all pairs at once, the cost is ~(n/2)^2 not n(n-1)/2
-  const groupSize = reduce(
-    groups.values(),
+  const groupSize = Iterator.from(groups.values()).reduce(
     (t, c) => t + c.length * c.length,
     0,
   );
@@ -252,9 +251,9 @@ function buildOperator(options: {
       : (n: SugiNode) => n.childCounts();
 
     // initialize map to create ids for labeling constraints
-    const inds = new Map(map(reordered, (node, i) => [node, i]));
+    const inds = new Map(Iterator.from(reordered).map((node, i) => [node, i]));
     // we need a way to query the order of "other" nodes in constant time
-    const oinds = new Map(map(other, (node, i) => [node, i]));
+    const oinds = new Map(Iterator.from(other).map((node, i) => [node, i]));
 
     // iterate over chunks separated by long nodes
     const ordering: Record<string, number> = {};

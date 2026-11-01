@@ -7,7 +7,7 @@
 import { max } from "d3-array";
 import { solveQP } from "quadprog";
 import type { GraphNode } from "../../graph/index.js";
-import { bigrams, flatMap, map } from "../../iters.js";
+import { bigrams } from "../../iters.js";
 import { ierr } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import { aggMean } from "../twolayer/agg.js";
@@ -204,6 +204,8 @@ export function layout<N, L>(
 export function avgHeight(nodes: Iterable<GraphNode>): number {
   // NOTE graph is guaranteed not to be multi
   return aggMean(
-    flatMap(nodes, (node) => map(node.children(), (child) => child.y - node.y)),
+    Iterator.from(nodes).flatMap((node) =>
+      Iterator.from(node.children()).map((child) => child.y - node.y),
+    ),
   )!;
 }

@@ -14,7 +14,7 @@ import {
   type MutGraph,
   type MutGraphNode,
 } from "../graph/index.js";
-import { bigrams, chain, map } from "../iters.js";
+import { bigrams, chain } from "../iters.js";
 import type { NodeLength } from "../layout.js";
 import { berr, type Named } from "../utils.js";
 import type { Separation } from "./utils.js";
@@ -210,7 +210,7 @@ export function sugifyLayer<N, L>(
     height += gap;
     const layerHeight = Math.max(
       -gap, // in case all dummy nodes
-      ...map(layer, ({ data }) =>
+      ...Iterator.from(layer).map(({ data }) =>
         data.role === "node" ? nodeHeight(data.node) : -Infinity,
       ),
     );
@@ -421,7 +421,7 @@ export function validateCoord<N, L>(
     for (const [[last, lx], [next, nx]] of bigrams(
       chain<[undefined | SugiNode<N, L>, number]>(
         [[undefined, 0]],
-        map(layer, (n) => [n, n.x]),
+        Iterator.from(layer).map((n) => [n, n.x]),
         [[undefined, width]],
       ),
     )) {

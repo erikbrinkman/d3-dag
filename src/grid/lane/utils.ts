@@ -1,13 +1,14 @@
-import { setEqual } from "../../collections.js";
 import type { GraphNode } from "../../graph/index.js";
-import { chain, filter, map, slice } from "../../iters.js";
+import { chain, slice } from "../../iters.js";
 import { berr } from "../../utils.js";
 import type { Lane } from "./index.js";
 
 /** the effective children for grid layouts */
 export function gridChildren(node: GraphNode): Set<GraphNode> {
   return new Set(
-    filter(chain(node.children(), node.parents()), (other) => other.y > node.y),
+    Iterator.from(chain(node.children(), node.parents())).filter(
+      (other) => other.y > node.y,
+    ),
   );
 }
 
@@ -24,7 +25,8 @@ export function verifyLanes(ordered: GraphNode[], lane: Lane): number {
   }
 
   const uniqueExes = new Set(ordered.map((node) => node.x));
-  if (!setEqual(uniqueExes, new Set(map(uniqueExes, (_, i) => i)))) {
+  const expected = new Set(Iterator.from(uniqueExes).map((_, ind) => ind));
+  if (!uniqueExes.isSubsetOf(expected)) {
     const exStr = [...uniqueExes].sort((a, b) => a - b).join(", ");
     throw berr`lane ${lane} didn't assign increasing positive integers for x coordinates: ${exStr}`;
   }

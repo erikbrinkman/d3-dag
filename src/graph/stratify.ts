@@ -1,4 +1,4 @@
-import { isIterable, map } from "../iters.js";
+import { isIterable } from "../iters.js";
 import { err, type U } from "../utils.js";
 import { graph, type MutGraph, type MutGraphNode } from "./index.js";
 import { type Id, verifyId } from "./utils.js";
@@ -271,7 +271,7 @@ function wrapParentIds<N, P extends ParentIds<N>>(
   parentIds: P & ParentIds<N>,
 ): WrappedParentIds<P> {
   function wrapper(d: N, i: number): IterableIterator<[string, undefined]> {
-    return map(parentIds(d, i) ?? [], (id) => [id, undefined]);
+    return Iterator.from(parentIds(d, i) ?? []).map((id) => [id, undefined]);
   }
   wrapper.wrapped = parentIds;
   return wrapper;
@@ -281,7 +281,7 @@ function wrapParentData<N, D extends ParentData<N>>(
   parentData: D & ParentData<N>,
 ): WrappedParentData<D> {
   function wrapper(d: N, i: number): IterableIterator<string> {
-    return map(parentData(d, i) ?? [], ([id]) => id);
+    return Iterator.from(parentData(d, i) ?? []).map(([id]) => id);
   }
   wrapper.wrapped = parentData;
   return wrapper;

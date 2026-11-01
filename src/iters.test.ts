@@ -1,13 +1,5 @@
 import { expect, test } from "bun:test";
-import {
-  bigrams,
-  chain,
-  entries,
-  flatMap,
-  map,
-  reduce,
-  slice,
-} from "./iters.js";
+import { bigrams, chain, entries, slice } from "./iters.js";
 
 test("entries()", () => {
   expect([...entries([])]).toEqual([]);
@@ -16,21 +8,6 @@ test("entries()", () => {
     [1, 2],
     [2, 3],
   ]);
-});
-
-test("flatMap()", () => {
-  expect([...flatMap([1, 2], (v, i) => [v, i])]).toEqual([1, 0, 2, 1]);
-  expect([...flatMap([1, 2], (v) => [v])]).toEqual([1, 2]);
-});
-
-test("map()", () => {
-  expect([...map([1, 2, 3], (v) => v.toString())]).toEqual(["1", "2", "3"]);
-  expect([...map<number, string>([], (v) => v.toString())]).toEqual([]);
-});
-
-test("reduce()", () => {
-  expect(reduce([1, 2, 3], (a, b) => a + b, 0)).toBeCloseTo(6);
-  expect(reduce([1, 2, 3], (a, b) => `${a}${b}`, "")).toBe("123");
 });
 
 test("slice()", () => {

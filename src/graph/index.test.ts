@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import { map, reduce } from "../iters.js";
 import {
   type GraphLink,
   type GraphNode,
@@ -1000,7 +999,9 @@ test("topological edge case", () => {
   three.child(five);
   seven.child(one);
 
-  const ordered = [...map(grf.topological(), (node) => node.data)];
+  const ordered = [
+    ...Iterator.from(grf.topological()).map((node) => node.data),
+  ];
   expect(ordered).toEqual([3, 7, 1, 5]);
 });
 
@@ -1015,10 +1016,10 @@ test("random modifications", () => {
     expect(grf.nlinks()).toBe(links.length);
     expect(grf.nnodes()).toBe([...grf.nodes()].length);
     expect(grf.nlinks()).toBe(
-      reduce(grf.nodes(), (t, n) => t + n.nchildLinks(), 0),
+      Iterator.from(grf.nodes()).reduce((t, n) => t + n.nchildLinks(), 0),
     );
     expect(grf.nlinks()).toBe(
-      reduce(grf.nodes(), (t, n) => t + n.nparentLinks(), 0),
+      Iterator.from(grf.nodes()).reduce((t, n) => t + n.nparentLinks(), 0),
     );
     const [first] = grf.nodes();
     expect(grf.connected()).toBe((first?.nnodes() ?? 0) === grf.nnodes());
@@ -1040,10 +1041,10 @@ test("random modifications", () => {
     for (const comp of grf.split()) {
       expect(comp.nnodes()).toBe([...comp.nodes()].length);
       expect(comp.nlinks()).toBe(
-        reduce(comp.nodes(), (t, n) => t + n.nchildLinks(), 0),
+        Iterator.from(comp.nodes()).reduce((t, n) => t + n.nchildLinks(), 0),
       );
       expect(comp.nlinks()).toBe(
-        reduce(comp.nodes(), (t, n) => t + n.nparentLinks(), 0),
+        Iterator.from(comp.nodes()).reduce((t, n) => t + n.nparentLinks(), 0),
       );
       expect(comp.multi()).toBe(
         [...comp.nodes()].some((n) =>

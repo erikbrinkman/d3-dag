@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
 import { type GraphLink, graph } from "../../graph/index.js";
-import { flatMap } from "../../iters.js";
 import { type SugiDatum, sugiNodeLength } from "../sugify.js";
 import { createLayers, nodeSep } from "../test-utils.js";
 import { sizedSeparation } from "../utils.js";
@@ -28,7 +27,7 @@ test("coordSimplex() modifiers work", () => {
   expect(layout.weight() satisfies typeof weight).toBe(weight);
   layout(layers, nodeSep);
 
-  for (const node of flatMap(layers, (l) => l)) {
+  for (const node of layers.flat()) {
     expect(node.x).toBeDefined();
   }
 });
