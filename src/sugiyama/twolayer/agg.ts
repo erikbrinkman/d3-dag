@@ -6,7 +6,6 @@
  */
 import { mean, median, minIndex } from "d3-array";
 import { listMultimapPush } from "../../collections.js";
-import { map } from "../../iters.js";
 import { err } from "../../utils.js";
 import type { SugiNode } from "../sugify.js";
 import type { Twolayer } from "./index.js";
@@ -211,7 +210,9 @@ function buildOperator<Agg extends Aggregator>({
     const aggs = new Map(
       reordered.map((node) => {
         const ind = inds.get(node);
-        const agg = ind ?? aggregate(map(ancestors(node), (c) => inds.get(c)!));
+        const agg =
+          ind ??
+          aggregate(Iterator.from(ancestors(node)).map((c) => inds.get(c)!));
         return [node, agg] as const;
       }),
     );

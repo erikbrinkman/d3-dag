@@ -5,7 +5,7 @@
  */
 import { least, median } from "d3-array";
 import type { GraphNode } from "../../graph/index.js";
-import { map, slice } from "../../iters.js";
+import { slice } from "../../iters.js";
 import { err } from "../../utils.js";
 import type { Lane } from "./index.js";
 import { gridChildren } from "./utils.js";
@@ -258,7 +258,9 @@ function bottomUpOp(nodes: readonly GraphNode[], inds: Indexer): void {
   for (const node of slice(nodes, nodes.length - 1, -1, -1)) {
     // if node wasn't a highest parent, find it a lane
     if (node.ux === undefined) {
-      const target = median(map(gridChildren(node), (node) => node.x));
+      const target = median(
+        Iterator.from(gridChildren(node)).map((node) => node.x),
+      );
       // note we invert y because we're going bottom up
       node.x = inds.getIndex(nodes.length - node.y, target);
     }

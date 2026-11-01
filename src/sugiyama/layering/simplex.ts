@@ -11,7 +11,7 @@ import solver, {
   type VariableCoefficients,
 } from "javascript-lp-solver";
 import type { Graph, GraphNode, Rank } from "../../graph/index.js";
-import { bigrams, map } from "../../iters.js";
+import { bigrams } from "../../iters.js";
 import { err, ierr, type U } from "../../utils.js";
 import type { Separation } from "../utils.js";
 import type { Group, Layering } from "./index.js";
@@ -99,7 +99,9 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     const constraints: Record<string, ConstraintBound> = {};
 
     const ids = new Map(
-      map(dag.nodes(), (node, i) => [node, i.toString()] as const),
+      Iterator.from(dag.nodes()).map(
+        (node, i) => [node, i.toString()] as const,
+      ),
     );
 
     /** get node id */

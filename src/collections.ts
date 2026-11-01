@@ -4,20 +4,6 @@
  * @packageDocumentation
  */
 
-/** determines if two sets are equal */
-export function setEqual<T>(first: Set<T>, second: Set<T>): boolean {
-  if (second.size !== first.size) {
-    return false;
-  } else {
-    for (const element of first) {
-      if (!second.has(element)) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
-
 /**
  * removes a single arbitrary element from the Set, or undefined if missing
  *

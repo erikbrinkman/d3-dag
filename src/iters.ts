@@ -6,87 +6,11 @@
  */
 import { err } from "./utils.js";
 
-/** iterable callback that maps a value into another */
-export type MapCallback<in T, out S> = (element: T, index: number) => S;
-
-/** iterable callback that maps a value into another */
-export type GuardCallback<in T, R extends T> = (
-  element: T,
-  index: number,
-) => element is R;
-
-/** reduce callback */
-export type ReduceCallback<in T, in out S> = (
-  accumulator: S,
-  currentValue: T,
-  index: number,
-) => S;
-
-/** filter guard callback */
-export type FilterGuardCallback<in T, out S extends T> = (
-  element: T,
-  index: number,
-) => element is S;
-
 /** elements with their zero based index */
 export function* entries<T>(iter: Iterable<T>): IterableIterator<[number, T]> {
   let index = 0;
   for (const element of iter) {
     yield [index++, element];
-  }
-}
-
-/** iterable flat map */
-export function* flatMap<T, S>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, Iterable<S>>,
-): IterableIterator<S> {
-  for (const [index, element] of entries(iter)) {
-    yield* callback(element, index);
-  }
-}
-
-/** iterable reduce */
-export function reduce<T, S>(
-  iter: Iterable<T>,
-  callback: ReduceCallback<T, S>,
-  initialValue: S,
-): S {
-  let accumulator = initialValue;
-  for (const [index, element] of entries(iter)) {
-    accumulator = callback(accumulator, element, index);
-  }
-  return accumulator;
-}
-
-/** iterable map */
-export function* map<T, S>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, S>,
-): IterableIterator<S> {
-  for (const [index, element] of entries(iter)) {
-    yield callback(element, index);
-  }
-}
-
-/** guard iterable filter */
-export function filter<T, S extends T>(
-  iter: Iterable<T>,
-  callback: FilterGuardCallback<T, S>,
-): IterableIterator<S>;
-/** generic iterable filter */
-export function filter<T>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, boolean>,
-): IterableIterator<T>;
-export function* filter<T>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, boolean>,
-): IterableIterator<T> {
-  for (const [index, element] of entries(iter)) {
-    if (callback(element, index)) {
-      yield element;
-    }
   }
 }
 

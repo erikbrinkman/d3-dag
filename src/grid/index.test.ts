@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
 import { type Graph, type GraphNode, graph } from "../graph/index.js";
-import { filter } from "../iters.js";
 import type { LayoutResult } from "../layout.js";
 import { dummy, en, multi, oh, single, zhere } from "../test-graphs.js";
 import { tweakSize } from "../tweaks.js";
@@ -225,7 +224,9 @@ test("grid() handles inverted long edges correctly", () => {
     [1, 7],
   ]);
 
-  const [three] = filter(head.parentLinks(), (link) => link !== one);
+  const [three] = Iterator.from(head.parentLinks()).filter(
+    (link) => link !== one,
+  );
   expect(three.points).toEqual([
     [4, 4],
     [4, 1],

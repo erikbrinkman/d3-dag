@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import { filter, map } from "../iters.js";
 import type { MutGraph } from "./index.js";
 import { graphStratify } from "./stratify.js";
 
@@ -59,7 +58,9 @@ test("graphStratify() parses multi-root graph", () => {
   const build = graphStratify();
   const graph = build(doub);
   expect(graph.nnodes()).toBe(2);
-  const ids = [...map(graph.nodes(), ({ data }) => data.id)].sort();
+  const ids = [
+    ...Iterator.from(graph.nodes()).map(({ data }) => data.id),
+  ].sort();
   expect(ids).toEqual(["0", "1"]);
 });
 
@@ -75,7 +76,9 @@ test("graphStratify() parses ids with spaces", () => {
   ] as const;
   const build = graphStratify();
   const graph = build(spaces);
-  const ids = [...map(graph.nodes(), ({ data }) => data.id)].sort();
+  const ids = [
+    ...Iterator.from(graph.nodes()).map(({ data }) => data.id),
+  ].sort();
   expect(ids).toEqual(["0 0", "1 1"]);
 });
 
@@ -151,7 +154,9 @@ test("graphStratify() works with data accessor", () => {
   }
 
   const graph = build(complexSquare);
-  const [root] = filter(graph.nodes(), ({ data }) => data.i === "a");
+  const [root] = Iterator.from(graph.nodes()).filter(
+    ({ data }) => data.i === "a",
+  );
   expect(root.data.i).toBe("a");
   expect(root.nchildren()).toBe(2);
   const [left, right] = root.children();

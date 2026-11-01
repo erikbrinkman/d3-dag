@@ -1,4 +1,4 @@
-import { isIterable, map } from "../iters.js";
+import { isIterable } from "../iters.js";
 import { err } from "../utils.js";
 import { graph, type MutGraph, type MutGraphNode } from "./index.js";
 
@@ -242,7 +242,10 @@ function wrapChildren<N, C extends Children<N>>(
   children: C,
 ): WrappedChildren<N, C> {
   function wrapped(datum: N, index: number): IterableIterator<[N, undefined]> {
-    return map(children(datum, index) ?? [], (child) => [child, undefined]);
+    return Iterator.from(children(datum, index) ?? []).map((child) => [
+      child,
+      undefined,
+    ]);
   }
   wrapped.wrapped = children;
   return wrapped;
@@ -252,7 +255,9 @@ function wrapChildrenData<N, C extends ChildrenData<N>>(
   childrenData: C,
 ): WrappedChildrenData<N, C> {
   function wrapped(datum: N, index: number): IterableIterator<N> {
-    return map(childrenData(datum, index) ?? [], ([child]) => child);
+    return Iterator.from(childrenData(datum, index) ?? []).map(
+      ([child]) => child,
+    );
   }
   wrapped.wrapped = childrenData;
   return wrapped;

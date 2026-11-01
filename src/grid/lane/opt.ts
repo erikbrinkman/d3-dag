@@ -10,7 +10,6 @@ import solver, {
   type VariableCoefficients,
 } from "javascript-lp-solver";
 import type { GraphNode } from "../../graph/index.js";
-import { map } from "../../iters.js";
 import type { OptChecking } from "../../layout.js";
 import { err, ierr } from "../../utils.js";
 import type { Lane } from "./index.js";
@@ -102,7 +101,7 @@ function buildOperator(options: {
     const ints: Record<string, 1> = {};
 
     // map of node to its unique index / id
-    const inds = new Map(map(ordered, (n, i) => [n, i] as const));
+    const inds = new Map(Iterator.from(ordered).map((n, i) => [n, i] as const));
     const width = options.compressed
       ? getCompressedWidth(ordered)
       : Math.max(ordered.length - 1, 1);
@@ -225,10 +224,9 @@ function buildOperator(options: {
         vals.add(lanes[ind] ?? 0);
       }
       const mapping = new Map(
-        map(
-          [...vals].sort((first, second) => first - second),
-          (v, i) => [v, i] as const,
-        ),
+        [...vals]
+          .sort((first, second) => first - second)
+          .map((v, i) => [v, i] as const),
       );
       for (const [ind, node] of ordered.entries()) {
         node.x = mapping.get(lanes[ind] ?? 0)!;

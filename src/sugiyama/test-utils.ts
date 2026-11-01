@@ -12,7 +12,7 @@ import {
   type MutGraphLink,
   type MutGraphNode,
 } from "../graph/index.js";
-import { entries, map } from "../iters.js";
+import { entries } from "../iters.js";
 import { assert } from "../test-utils.js";
 import type { SugiLinkDatum, SugiNode, SugiNodeDatum } from "./sugify.js";
 
@@ -154,7 +154,9 @@ export function compactCrossings(
   bottomLayer: readonly SugiNode[],
 ): boolean {
   // compute partition of compact and non-compact nodes
-  const bottomInds = new Map(map(bottomLayer, (node, i) => [node, i]));
+  const bottomInds = new Map(
+    Iterator.from(bottomLayer).map((node, i) => [node, i]),
+  );
   const scan = [];
   const cross = [];
   for (const [i, node] of topLayer.entries()) {

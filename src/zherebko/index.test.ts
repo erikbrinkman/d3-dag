@@ -1,7 +1,6 @@
 import { expect, test } from "bun:test";
 import { graphConnect } from "../graph/connect.js";
 import { type Graph, type GraphNode, graph } from "../graph/index.js";
-import { filter, map } from "../iters.js";
 import type { LayoutResult } from "../layout.js";
 import { doub, line, oh, single } from "../test-graphs.js";
 import { tweakSize } from "../tweaks.js";
@@ -110,9 +109,9 @@ test("zherebko() works for a multidag line", () => {
   expect(tail.x).toBeCloseTo(1);
   expect(tail.y).toBeCloseTo(4);
 
-  const [small, big] = [...map(grf.links(), ({ points }) => points)].sort(
-    (a, b) => a.length - b.length,
-  );
+  const [small, big] = [
+    ...Iterator.from(grf.links()).map(({ points }) => points),
+  ].sort((a, b) => a.length - b.length);
   expect(small).toHaveLength(2);
   expect(big).toHaveLength(3);
   const [, [x, y]] = big;
@@ -251,7 +250,9 @@ test("zherebko() works on disconnected dag", () => {
   const grf = doub();
   const layout = zherebko().nodeSize([2, 2]);
   layout(grf);
-  expect([...map(grf.nodes(), (node) => node.y)].sort()).toEqual([1, 4]);
+  expect([...Iterator.from(grf.nodes()).map((node) => node.y)].sort()).toEqual([
+    1, 4,
+  ]);
   for (const node of grf.nodes()) {
     expect(node.x).toEqual(1);
   }
@@ -417,7 +418,9 @@ test("zherebko() works with variable node sizes", () => {
   expect(tail.x).toBe(1.5);
   expect(tail.y).toBe(6.5);
 
-  const [{ points }] = filter(grf.links(), ({ points }) => points.length > 2);
+  const [{ points }] = Iterator.from(grf.links()).filter(
+    ({ points }) => points.length > 2,
+  );
   expect(points).toHaveLength(4);
   const [, [fx, fy], [sx, sy]] = points;
   expect(fx).toBeCloseTo(4);

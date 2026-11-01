@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import { filter, flatMap, slice } from "../../iters.js";
+import { slice } from "../../iters.js";
 import { dfs as depthFirstSearch, err } from "../../utils.js";
 import type { SugiNode } from "../sugify.js";
 import type { Decross } from "./index.js";
@@ -46,8 +46,8 @@ function buildOperator(options: { topDown: boolean }): DecrossDfs {
     if (options.topDown) {
       iter = depthFirstSearch(
         (n) => [...n.children()].sort((a, b) => b.nchildren() - a.nchildren()),
-        ...flatMap(layers, (layer) =>
-          [...filter(layer, (n) => !n.nparents())].sort(
+        ...Iterator.from(layers).flatMap((layer) =>
+          [...Iterator.from(layer).filter((n) => !n.nparents())].sort(
             (a, b) => b.nchildren() - a.nchildren(),
           ),
         ),
@@ -55,10 +55,11 @@ function buildOperator(options: { topDown: boolean }): DecrossDfs {
     } else {
       iter = depthFirstSearch(
         (n) => [...n.parents()].sort((a, b) => b.nparents() - a.nparents()),
-        ...flatMap(slice(layers, layers.length - 1, -1, -1), (layer) =>
-          [...filter(layer, (n) => !n.nchildren())].sort(
-            (a, b) => b.nparents() - a.nparents(),
-          ),
+        ...Iterator.from(slice(layers, layers.length - 1, -1, -1)).flatMap(
+          (layer) =>
+            [...Iterator.from(layer).filter((n) => !n.nchildren())].sort(
+              (a, b) => b.nparents() - a.nparents(),
+            ),
         ),
       );
     }
