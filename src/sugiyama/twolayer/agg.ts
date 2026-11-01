@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { median, minIndex } from "d3-array";
+import { mean, median, minIndex } from "d3-array";
 import { listMultimapPush } from "../../collections.js";
 import { map } from "../../iters.js";
 import { err } from "../../utils.js";
@@ -22,13 +22,7 @@ export type Aggregator = (indices: Iterable<number>) => number | undefined;
 
 /** a simple efficient mean aggregator */
 export function aggMean(indices: Iterable<number>): number | undefined {
-  let mean = 0;
-  let count = 0;
-  for (const val of indices) {
-    count++;
-    mean += (val - mean) / count;
-  }
-  return count ? mean : undefined;
+  return mean(indices);
 }
 
 /**
@@ -37,7 +31,7 @@ export function aggMean(indices: Iterable<number>): number | undefined {
  * This produces close to optimal results.
  */
 export function aggMedian(indices: Iterable<number>): number | undefined {
-  return median([...indices]);
+  return median(indices);
 }
 
 /**
@@ -151,7 +145,7 @@ function order(
   // initialize gaps for unassigned nodes
   const inds = new Map(layer.map((n, i) => [n, i] as const));
   const unassigned = layer.filter((n) => poses.get(n) === undefined);
-  const placements = new Array(unassigned.length).fill(null);
+  const placements = new Array<number | null>(unassigned.length).fill(null);
 
   // recursively split optimal placement
   function recurse(

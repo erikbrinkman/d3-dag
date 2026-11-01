@@ -113,9 +113,10 @@ function addSugiLinks<N, L>(
   }
 
   // allocate the sugi nodes to layers
-  const layers: SugiNode<N, L>[][] = Array<null>(numLayers)
-    .fill(null)
-    .map(() => []);
+  const layers: SugiNode<N, L>[][] = Array.from(
+    { length: numLayers },
+    () => [],
+  );
   for (const sugiNode of sugied.nodes()) {
     const { data } = sugiNode;
     if (data.role === "node") {

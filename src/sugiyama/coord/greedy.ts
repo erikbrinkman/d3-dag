@@ -7,7 +7,7 @@
 // TODO add assignment like mean that skips dummy nodes as that seems like
 // better behavior
 import { median } from "d3-array";
-import { entries, map, slice } from "../../iters.js";
+import { entries, slice } from "../../iters.js";
 import { err } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
@@ -31,7 +31,7 @@ function assign(
   ancestors: (node: SugiNode) => Iterable<SugiNode>,
 ): void {
   for (const node of layer) {
-    const x = median([...map(ancestors(node), ({ x }) => x)]);
+    const x = median(ancestors(node), ({ x }) => x);
     if (x !== undefined) {
       node.x = x;
     }
