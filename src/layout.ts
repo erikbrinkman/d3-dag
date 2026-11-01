@@ -68,7 +68,7 @@ export function cachedNodeSize<N, L>(
         val = nodeSize(node);
         const [width, height] = val;
         if (width <= 0 || height <= 0) {
-          throw err`all node sizes must be positive, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the callback passed to \`sugiyama().nodeSize(...)\` is doing that`;
+          throw err`all node sizes must be positive, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the node size callback only returns positive sizes`;
         }
         cache.set(node, val);
       }

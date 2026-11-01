@@ -211,13 +211,13 @@ export interface HasZeroString {
 
 function defaultSourceId(data: unknown): string {
   if (typeof data !== "object" || data === null || !(0 in data)) {
-    throw err`default source id expected datum[0] to exist but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().source(d => ...).target(d => ...)\``;
+    throw err`default source id expected datum[0] to exist but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().sourceId(d => ...).targetId(d => ...)\``;
   }
   const zero = data[0];
   if (typeof zero === "string") {
     return zero;
   } else {
-    throw err`default source id expected datum[0] to be a string but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().source(d => ...).target(d => ...)\``;
+    throw err`default source id expected datum[0] to be a string but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().sourceId(d => ...).targetId(d => ...)\``;
   }
 }
 
@@ -229,13 +229,13 @@ export interface HasOneString {
 
 function defaultTargetId(data: unknown): string {
   if (typeof data !== "object" || data === null || !(1 in data)) {
-    throw err`default target id expected datum[1] to exist but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().source(d => ...).target(d => ...)\``;
+    throw err`default target id expected datum[1] to exist but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().sourceId(d => ...).targetId(d => ...)\``;
   }
   const one = data[1];
   if (typeof one === "string") {
     return one;
   } else {
-    throw err`default target id expected datum[1] to be a string but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().source(d => ...).target(d => ...)\``;
+    throw err`default target id expected datum[1] to be a string but got datum: ${data}; you should check the data you're passing to \`graphConnect()\` to make sure it looks like \`[[source_id, target_id], ...]\` or set a custom accessor with \`graphConnect().sourceId(d => ...).targetId(d => ...)\``;
   }
 }
 

@@ -214,9 +214,9 @@ function minCrossings(
   const totalVars = Object.keys(variables).length;
   const totalCons = Object.keys(constraints).length;
   if (check !== "oom" && totalVars > 1200) {
-    throw err`size of dag to twolayerOpt is too large and will likely crash instead of complete; you probably want to use a cheaper twolayer strategy for sugiyama like \`decrossTwoLayer(twolayerAgg())\`, but if you still want to continue you can suppress this check with \`decrossTwoLayer().order(twolayerOpt().check("oom"))\``;
+    throw err`size of dag to twolayerOpt is too large and will likely crash instead of complete; you probably want to use a cheaper twolayer strategy for sugiyama like \`decrossTwoLayer().order(twolayerAgg())\`, but if you still want to continue you can suppress this check with \`decrossTwoLayer().order(twolayerOpt().check("oom"))\``;
   } else if (check === "fast" && (totalVars > 400 || totalCons > 1000)) {
-    throw err`size of dag to twolayerOpt is too large and will likely not finish; you probably want to use a cheaper twolayer strategy for sugiyama like \`decrossTwoLayer(twolayerAgg())\`, but if you still want to continue you can suppress this check with \`decrossTwoLayer().order(twolayerOpt().check("slow"))\``;
+    throw err`size of dag to twolayerOpt is too large and will likely not finish; you probably want to use a cheaper twolayer strategy for sugiyama like \`decrossTwoLayer().order(twolayerAgg())\`, but if you still want to continue you can suppress this check with \`decrossTwoLayer().order(twolayerOpt().check("slow"))\``;
   }
 
   // solve objective

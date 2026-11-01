@@ -93,7 +93,7 @@ export function tweakGrid(
     for (const link of graph.links()) {
       const [first, mid, last, rem] = link.points;
       if (rem !== undefined) {
-        throw err`link points had more than three points: ${link.points.length}; tweakGridPoints can only be applied to grid layouts`;
+        throw err`link points had more than three points: ${link.points.length}; tweakGrid can only be applied to grid layouts`;
       } else if (last !== undefined) {
         const [fx, fy] = first;
         const [mx, my] = mid;
@@ -354,7 +354,7 @@ export function shapeTopBottom(
   } else if (ey > bottom) {
     return [cx, bottom];
   } else {
-    throw err`line from [${start}] -> [${end}] ended too close to [${cx}, ${cy}] with size [${width}, ${height}]`;
+    throw err`line from ${start} -> ${end} ended too close to [${cx}, ${cy}] with size [${width}, ${height}]`;
   }
 }
 

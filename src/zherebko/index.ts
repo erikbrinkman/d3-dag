@@ -111,7 +111,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
       for (const node of ordered) {
         const [width, height] = nodeSize(node);
         if (width <= 0 || height <= 0) {
-          throw err`constant nodeSize must be positive, but got: [${width}, ${height}]`;
+          throw err`nodeSize must be positive, but got: [${width}, ${height}]`;
         }
         maxWidth = Math.max(maxWidth, width);
         y += ygap;
