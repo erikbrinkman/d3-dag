@@ -18,62 +18,17 @@ import {
   useState,
 } from "react";
 import type { Rankdir } from "../src/layout.js";
+import { exampleGraphs, type GraphData } from "./graphs.js";
+
+export type { GraphData };
 
 export const NODE_W = 40;
 export const NODE_H = 30;
 
-export interface GraphData {
-  nodes: { id: string }[];
-  edges: { source: string; target: string }[];
-}
-
 export const graphs: Record<string, GraphData> = {
-  square: {
-    nodes: [{ id: "0" }, { id: "1" }, { id: "2" }, { id: "3" }],
-    edges: [
-      { source: "0", target: "1" },
-      { source: "0", target: "2" },
-      { source: "1", target: "3" },
-      { source: "2", target: "3" },
-    ],
-  },
-  dag: {
-    nodes: [
-      { id: "0" },
-      { id: "1" },
-      { id: "2" },
-      { id: "3" },
-      { id: "4" },
-      { id: "5" },
-    ],
-    edges: [
-      { source: "0", target: "1" },
-      { source: "0", target: "2" },
-      { source: "1", target: "3" },
-      { source: "2", target: "3" },
-      { source: "0", target: "4" },
-      { source: "4", target: "5" },
-    ],
-  },
-  ex: {
-    nodes: [
-      { id: "0" },
-      { id: "1" },
-      { id: "2" },
-      { id: "3" },
-      { id: "4" },
-      { id: "5" },
-      { id: "6" },
-    ],
-    edges: [
-      { source: "0", target: "1" },
-      { source: "1", target: "3" },
-      { source: "2", target: "3" },
-      { source: "3", target: "4" },
-      { source: "3", target: "5" },
-      { source: "5", target: "6" },
-    ],
-  },
+  square: exampleGraphs.square,
+  dag: exampleGraphs.dag,
+  ex: exampleGraphs.ex,
   dummy: {
     nodes: [{ id: "0" }, { id: "1" }, { id: "2" }],
     edges: [
@@ -82,93 +37,8 @@ export const graphs: Record<string, GraphData> = {
       { source: "1", target: "2" },
     ],
   },
-  zherebko: {
-    nodes: [
-      { id: "1" },
-      { id: "2" },
-      { id: "3" },
-      { id: "4" },
-      { id: "5" },
-      { id: "6" },
-      { id: "7" },
-      { id: "8" },
-      { id: "9" },
-      { id: "10" },
-      { id: "11" },
-    ],
-    edges: [
-      { source: "1", target: "2" },
-      { source: "1", target: "5" },
-      { source: "1", target: "7" },
-      { source: "2", target: "3" },
-      { source: "2", target: "4" },
-      { source: "2", target: "5" },
-      { source: "2", target: "7" },
-      { source: "2", target: "8" },
-      { source: "3", target: "6" },
-      { source: "3", target: "8" },
-      { source: "4", target: "7" },
-      { source: "5", target: "7" },
-      { source: "5", target: "8" },
-      { source: "5", target: "9" },
-      { source: "6", target: "8" },
-      { source: "7", target: "8" },
-      { source: "9", target: "10" },
-      { source: "9", target: "11" },
-    ],
-  },
-  grafo: {
-    nodes: [
-      { id: "0" },
-      { id: "1" },
-      { id: "2" },
-      { id: "3" },
-      { id: "4" },
-      { id: "5" },
-      { id: "6" },
-      { id: "7" },
-      { id: "8" },
-      { id: "9" },
-      { id: "10" },
-      { id: "11" },
-      { id: "12" },
-      { id: "13" },
-      { id: "14" },
-      { id: "15" },
-      { id: "16" },
-      { id: "17" },
-      { id: "18" },
-      { id: "19" },
-      { id: "20" },
-      { id: "21" },
-    ],
-    edges: [
-      { source: "8", target: "0" },
-      { source: "11", target: "3" },
-      { source: "12", target: "4" },
-      { source: "18", target: "5" },
-      { source: "9", target: "6" },
-      { source: "15", target: "6" },
-      { source: "17", target: "6" },
-      { source: "3", target: "7" },
-      { source: "17", target: "7" },
-      { source: "20", target: "7" },
-      { source: "21", target: "7" },
-      { source: "4", target: "9" },
-      { source: "16", target: "10" },
-      { source: "21", target: "10" },
-      { source: "2", target: "11" },
-      { source: "21", target: "12" },
-      { source: "4", target: "13" },
-      { source: "12", target: "13" },
-      { source: "1", target: "14" },
-      { source: "8", target: "14" },
-      { source: "0", target: "16" },
-      { source: "19", target: "17" },
-      { source: "9", target: "18" },
-      { source: "13", target: "20" },
-    ],
-  },
+  zherebko: exampleGraphs.zherebko,
+  grafo: exampleGraphs.grafo,
 };
 
 export interface AppLayoutResult {
