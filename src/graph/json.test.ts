@@ -67,7 +67,11 @@ test("graphJson() serializes individual nodes", () => {
 });
 
 class CustomNodeDatum {
-  constructor(readonly num: number) {}
+  readonly num: number;
+
+  constructor(num: number) {
+    this.num = num;
+  }
 
   toJSON(): unknown {
     return this.num + 1;
@@ -80,7 +84,11 @@ function hydrateNode(data: unknown): CustomNodeDatum {
 }
 
 class CustomLinkDatum {
-  constructor(readonly str: string) {}
+  readonly str: string;
+
+  constructor(str: string) {
+    this.str = str;
+  }
 
   toJSON(): unknown {
     return `custom: ${this.str}`;
