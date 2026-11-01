@@ -504,7 +504,7 @@ export class DagreGraph {
         extraTweaks.push(tweakSugiyama(nodeSizeFn));
       }
     }
-    extraTweaks.push(tweakDirection(config.rankdir ?? "TB"));
+    extraTweaks.push(tweakDirection(config.rankdir));
 
     const existingTweaks = op.tweaks();
     const configured = op
