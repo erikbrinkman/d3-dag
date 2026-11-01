@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { median } from "d3-array";
+import { median, minIndex } from "d3-array";
 import { listMultimapPush } from "../../collections.js";
 import { map } from "../../iters.js";
 import { err } from "../../utils.js";
@@ -171,7 +171,7 @@ function order(
       last += inds.get(ordered[i])! < nind ? -1 : 1;
       inversions.push(last);
     }
-    const placement = ostart + inversions.indexOf(Math.min(...inversions));
+    const placement = ostart + minIndex(inversions);
     placements[umid] = placement;
 
     recurse(ustart, umid, ostart, placement);

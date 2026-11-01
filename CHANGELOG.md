@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `decrossTwoLayer` counts crossings much faster on wide layers
 - `decrossOpt` rejects layers too wide to fit in memory before building its
   model, instead of after
+- fixed call stack overflows for nodes with very many links
 
 ## [1.2.2] - 2026-07-05
 

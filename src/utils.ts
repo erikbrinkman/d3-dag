@@ -23,7 +23,9 @@ export function* dfs<T>(
     if (seen.has(node)) continue;
     yield node;
     seen.add(node);
-    queue.push(...children(node));
+    for (const child of children(node)) {
+      queue.push(child);
+    }
   }
 }
 
