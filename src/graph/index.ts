@@ -652,7 +652,9 @@ function roots<N, L>(
       roots.delete(next);
       if (seen.has(next)) continue;
       seen.add(next);
-      queue.push(...children(next));
+      for (const child of children(next)) {
+        queue.push(child);
+      }
     }
     roots.add(node);
   }

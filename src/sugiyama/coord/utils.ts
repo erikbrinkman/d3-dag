@@ -4,6 +4,7 @@
  * @internal
  * @packageDocumentation
  */
+import { max } from "d3-array";
 import { solveQP } from "quadprog";
 import type { GraphNode } from "../../graph/index.js";
 import { bigrams, flatMap, map } from "../../iters.js";
@@ -102,7 +103,7 @@ export function init<N, L>(
   compress: number = 0,
 ): [number[][], number[], number[][], number[]] {
   // NOTE max because we might assign a node the same index
-  const n = 1 + Math.max(...inds.values());
+  const n = 1 + (max(inds.values()) ?? -1);
 
   const Q = Array<null>(n)
     .fill(null)
