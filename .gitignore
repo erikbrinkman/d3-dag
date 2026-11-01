@@ -7,8 +7,6 @@ node_modules
 .cache
 coverage
 *.tsbuildinfo
-.flow_cache
-.cache
 
 # Artifacts #
 #############

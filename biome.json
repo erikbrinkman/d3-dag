@@ -11,7 +11,6 @@
       "build/**/*.ts",
       "docs-src/**/*.ts",
       "docs-src/**/*.tsx",
-      "test-d/**/*.ts",
       "*.json",
       "examples/*.json"
     ],
