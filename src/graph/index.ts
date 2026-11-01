@@ -8,10 +8,6 @@ import { chain, filter, map } from "../iters.js";
 import { dfs, err, ierr } from "../utils.js";
 import { toJson } from "./json.js";
 
-// ---------- //
-// Interfaces //
-// ---------- //
-
 /**
  * a way to enforce specific rankings of nodes
  *
@@ -445,10 +441,6 @@ export interface MutGraphNode<in out NodeDatum, in out LinkDatum>
   delete(): void;
 }
 
-// -------------- //
-// Implementation //
-// -------------- //
-
 class AugmentedNode<out N, out L> {
   constructor(
     readonly node: GraphNode<N, L>,
@@ -504,7 +496,7 @@ function getTail<T>(arr: Set<T>[]): Set<T> | undefined {
 }
 
 /**
- * Remove cycles from a constrcuted dag by reversing some edges
+ * Remove cycles from a constructed dag by reversing some edges
  *
  * This uses a modified version of the algorithm from [P Eades, X Lin, WF Smyth
  * - Information Processing Letters
@@ -696,7 +688,7 @@ function acyclic<N, L>(nodes: Iterable<GraphNode<N, L>>): boolean {
   return !counts.size;
 }
 
-// TODO att a private bigint for concurrent modification tests
+// TODO add a private bigint for concurrent modification tests
 class DirectedGraph<N, L> implements MutGraph<N, L> {
   /** number of nodes */
   #nnodes: number = 0;
@@ -959,7 +951,6 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   }
 
   #repr(): DirectedNode<N, L> {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let repr: DirectedNode<N, L> = this;
     while (repr.#par !== repr) {
       repr.#par = repr.#par.#par;
@@ -970,7 +961,6 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
 
   #info(): NodeInfo<N, L> {
     const repr = this.#repr();
-    /* istanbul ignore if */
     if (repr.#cinfo === undefined) {
       throw ierr`undefined cached info`;
     } else if (repr.#cinfo !== null) {

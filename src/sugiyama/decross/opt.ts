@@ -401,7 +401,6 @@ function buildOperator(options: {
     if (!result.feasible) {
       throw ierr`could not find a feasible simplex solution`;
     }
-    /* istanbul ignore next */
     if (!result.bounded) {
       throw ierr`optimization result was not bounded`;
     }
@@ -415,8 +414,6 @@ function buildOperator(options: {
       layer.sort((n1, n2) => {
         const i1 = inds.get(n1)!;
         const i2 = inds.get(n2)!;
-        // NOTE i1 is always < i2 due to the way sort is implemented
-        /* istanbul ignore next */
         return i1 < i2
           ? ordering[pair(i1, i2)] || -1
           : -(ordering[pair(i2, i1)] || -1);

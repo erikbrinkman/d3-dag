@@ -275,8 +275,6 @@ function buildOperator(options: {
     reordered.sort((n1, n2) => {
       const i1 = inds.get(n1)!;
       const i2 = inds.get(n2)!;
-      // NOTE i1 is always < i2 due to the way sort is implemented
-      /* istanbul ignore next */
       return i1 < i2
         ? ordering[pair(i1, i2)] || -1
         : -(ordering[pair(i2, i1)] || -1);

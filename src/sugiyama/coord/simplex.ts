@@ -105,7 +105,6 @@ function createCachedSimplexWeightAccessor<N, L>(
     const [two, one, zero] = weight;
     return (par: SugiNode<N, L>, child: SugiNode<N, L>): number => {
       const count = +(par.data.role === "node") + +(child.data.role === "node");
-      /* istanbul ignore next */
       switch (count) {
         case 0:
           return zero;
@@ -114,7 +113,6 @@ function createCachedSimplexWeightAccessor<N, L>(
         case 2:
           return two;
         default:
-          /* istanbul ignore next */
           throw ierr`invalid count`;
       }
     };
