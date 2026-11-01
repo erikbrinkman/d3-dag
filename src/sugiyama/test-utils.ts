@@ -12,7 +12,7 @@ import {
   type MutGraphLink,
   type MutGraphNode,
 } from "../graph/index.js";
-import { entries, map, reverse } from "../iters.js";
+import { entries, map } from "../iters.js";
 import { assert } from "../test-utils.js";
 import type { SugiLinkDatum, SugiNode, SugiNodeDatum } from "./sugify.js";
 
@@ -88,7 +88,7 @@ export function createLayers(
   }
 
   // replicate nodes upward
-  for (const [ilay, layChildren] of entries(reverse(children))) {
+  for (const [ilay, layChildren] of entries([...children].reverse())) {
     const layer = children.length - ilay;
     for (const [index, child] of layChildren.entries()) {
       if (typeof child === "bigint") {

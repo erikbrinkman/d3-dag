@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { setIntersect, setMultimapDelete, setPop } from "./collections.js";
+import { setMultimapDelete, setPop } from "./collections.js";
 
 test("setPop()", () => {
   expect(setPop(new Set())).toBeUndefined();
@@ -11,10 +11,4 @@ test("setMultimapDelete()", () => {
   const empty = new Map<string, Set<number>>();
   setMultimapDelete(empty, "", 0);
   expect(empty).toEqual(new Map());
-});
-
-test("setIntersect()", () => {
-  expect(setIntersect(new Set([1]), new Set([2]))).toBeFalsy();
-  expect(setIntersect(new Set([1]), new Set([1, 2]))).toBeTruthy();
-  expect(setIntersect(new Set([2, 1]), new Set([1]))).toBeTruthy();
 });
