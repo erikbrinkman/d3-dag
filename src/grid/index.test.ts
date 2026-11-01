@@ -287,13 +287,13 @@ test("greedy() works for variable sizes", () => {
 });
 
 test("grid() throws invalid nodeSize", () => {
-  expect(() => grid().nodeSize([0, 1])).toThrow("must be positive");
+  expect(() => grid().nodeSize([-1, 1])).toThrow("can't be negative");
 });
 
 test("grid() throws invalid callable nodeSize", () => {
-  const layout = grid().nodeSize(() => [0, 1]);
+  const layout = grid().nodeSize(() => [-1, 1]);
   const grf = single();
-  expect(() => layout(grf)).toThrow("must be positive");
+  expect(() => layout(grf)).toThrow("can't be negative");
 });
 
 test("grid() throws invalid gap", () => {

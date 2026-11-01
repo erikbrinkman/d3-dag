@@ -46,9 +46,6 @@ export function coordCenter(...args: never[]): CoordCenter {
       return width;
     });
     const maxWidth = Math.max(...widths);
-    if (maxWidth <= 0) {
-      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
-    }
     for (const [i, layer] of layers.entries()) {
       const width = widths[i];
       const offset = (maxWidth - width) / 2;

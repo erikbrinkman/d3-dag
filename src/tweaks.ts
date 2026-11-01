@@ -54,18 +54,21 @@ export function tweakSize(
     res: Readonly<LayoutResult>,
   ): LayoutResult {
     const { width: ow, height: oh } = res;
-    const xscale = nw / ow;
-    const yscale = nh / oh;
+    // a layout with no extent along an axis is centered along it
+    const xscale = ow ? nw / ow : 0;
+    const xshift = ow ? 0 : nw / 2;
+    const yscale = oh ? nh / oh : 0;
+    const yshift = oh ? 0 : nh / 2;
 
     for (const node of graph.nodes()) {
-      node.x *= xscale;
-      node.y *= yscale;
+      node.x = node.x * xscale + xshift;
+      node.y = node.y * yscale + yshift;
     }
 
     for (const link of graph.links()) {
       for (const point of link.points) {
-        point[0] *= xscale;
-        point[1] *= yscale;
+        point[0] = point[0] * xscale + xshift;
+        point[1] = point[1] * yscale + yshift;
       }
     }
     return size;

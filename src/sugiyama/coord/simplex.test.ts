@@ -214,10 +214,8 @@ test("coordSimplex() fails passing an arg to constructor", () => {
   expect(() => coordSimplex(null)).toThrow("got arguments to coordSimplex");
 });
 
-test("coordSimplex() throws for zero width", () => {
+test("coordSimplex() allows zero width", () => {
   const layers = createLayers([[[]]]);
   const layout = coordSimplex();
-  expect(() => layout(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node",
-  );
+  expect(layout(layers, () => 0)).toBe(0);
 });

@@ -337,11 +337,7 @@ function buildOperator<
       }
     }
     const width = layout(layers, sep, inds, solution);
-    if (width <= 0) {
-      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
-    } else {
-      return width;
-    }
+    return width;
   }
 
   function vertWeak<NewVertWeak extends LinkWeight>(

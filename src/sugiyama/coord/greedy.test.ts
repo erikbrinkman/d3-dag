@@ -109,9 +109,7 @@ test("coordGreedy() fails passing an arg to constructor", () => {
   expect(() => coordGreedy(null)).toThrow("got arguments to coordGreedy");
 });
 
-test("coordGreedy() throws for zero width", () => {
+test("coordGreedy() allows zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => coordGreedy()(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node",
-  );
+  expect(coordGreedy()(layers, () => 0)).toBe(0);
 });

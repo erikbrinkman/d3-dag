@@ -310,11 +310,7 @@ function buildOperator<
     }
 
     const maxWidth = normalize(layers, sep);
-    if (maxWidth <= 0) {
-      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
-    } else {
-      return maxWidth;
-    }
+    return maxWidth;
   }
 
   function weight<NewWeight extends SimplexWeight>(

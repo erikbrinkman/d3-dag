@@ -181,9 +181,6 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     }
 
     const width = normalize(layers, sep);
-    if (width <= 0) {
-      throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
-    }
     return width;
   }
 

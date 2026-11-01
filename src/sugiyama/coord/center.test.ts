@@ -17,9 +17,7 @@ test("center() fails passing an arg to constructor", () => {
   expect(() => center(null as never)).toThrow("got arguments to coordCenter");
 });
 
-test("center() throws for zero width", () => {
+test("center() allows zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => center()(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node",
-  );
+  expect(center()(layers, () => 0)).toBe(0);
 });

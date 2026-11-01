@@ -157,8 +157,8 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
         height = -ygap;
         for (const node of ordered) {
           const [nodeWidth, nodeHeight] = options.nodeSize(node);
-          if (nodeWidth <= 0 || nodeHeight <= 0) {
-            throw err`nodeSize must be positive, but got: [${nodeWidth}, ${nodeHeight}]`;
+          if (!(nodeWidth >= 0 && nodeHeight >= 0)) {
+            throw err`nodeSize can't be negative, but got: [${nodeWidth}, ${nodeHeight}]`;
           }
           laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
           height += ygap;
@@ -274,9 +274,9 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
   ): Grid<U<Ops, "nodeSize", NNS>> | Ops["nodeSize"] {
     if (val === undefined) {
       return options.nodeSize;
-    } else if (typeof val !== "function" && (val[0] <= 0 || val[1] <= 0)) {
+    } else if (typeof val !== "function" && !(val[0] >= 0 && val[1] >= 0)) {
       const [x, y] = val;
-      throw err`constant nodeSize must be positive, but got: [${x}, ${y}]`;
+      throw err`constant nodeSize can't be negative, but got: [${x}, ${y}]`;
     } else {
       const { nodeSize: _, ...rest } = options;
       return buildOperator(

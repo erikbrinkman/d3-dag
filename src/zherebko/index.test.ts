@@ -428,13 +428,13 @@ test("zherebko() works with variable node sizes", () => {
 
 test("zherebko() throws for negative nodeSize", () => {
   const layout = zherebko();
-  expect(() => layout.nodeSize([-1, 0])).toThrow("must be positive");
+  expect(() => layout.nodeSize([-1, 0])).toThrow("can't be negative");
 });
 
 test("zherebko() throws for negative nodeSize function", () => {
   const layout = zherebko().nodeSize(() => [-1, 0]);
   const grf = single();
-  expect(() => layout(grf)).toThrow("must be positive");
+  expect(() => layout(grf)).toThrow("can't be negative");
 });
 
 test("zherebko() throws for negative gap", () => {
