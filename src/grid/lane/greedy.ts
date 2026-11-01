@@ -81,7 +81,11 @@ interface Indexer {
 class OneSidedIndexer implements Indexer {
   private indices: number[] = [];
 
-  constructor(readonly uncompressed: boolean) {}
+  readonly uncompressed: boolean;
+
+  constructor(uncompressed: boolean) {
+    this.uncompressed = uncompressed;
+  }
 
   getIndex(after: number, target?: number): number {
     const free: number[] = [];
@@ -119,7 +123,11 @@ class TwoSidedIndexer implements Indexer {
   private posIndices: number[] = [0];
   private negIndices: number[] = [];
 
-  constructor(readonly uncompressed: boolean) {}
+  readonly uncompressed: boolean;
+
+  constructor(uncompressed: boolean) {
+    this.uncompressed = uncompressed;
+  }
 
   /** the next negative index */
   nextNeg(): number {
