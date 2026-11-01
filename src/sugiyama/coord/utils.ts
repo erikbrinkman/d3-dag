@@ -105,13 +105,9 @@ export function init<N, L>(
   // NOTE max because we might assign a node the same index
   const n = 1 + (max(inds.values()) ?? -1);
 
-  const Q = Array<null>(n)
-    .fill(null)
-    .map((_, i) =>
-      Array<null>(n)
-        .fill(null)
-        .map((_, j) => (i === j ? compress : 0)),
-    );
+  const Q = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (i === j ? compress : 0)),
+  );
   const c = Array<number>(n).fill(0);
   const A: number[][] = [];
   const b: number[] = [];
