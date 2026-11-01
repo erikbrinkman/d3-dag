@@ -207,7 +207,7 @@ function buildStratify<NodeDatum, L, Ops extends StratifyOps<NodeDatum, L>>(
     for (const [pid, cnode, ldatum] of links) {
       const pnode = mapping.get(pid);
       if (!pnode)
-        throw err`missing id: ${pid}; this id was references in a node's parentIds, but no node with that id exists`;
+        throw err`missing id: ${pid}; this id was referenced in a node's parentIds, but no node with that id exists`;
       stratified.link(pnode, cnode, ldatum);
     }
 
