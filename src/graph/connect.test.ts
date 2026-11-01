@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { entries, map, slice } from "../iters.js";
+import { entries, slice } from "../iters.js";
 import { canonical } from "../sugiyama/test-utils.js";
 import { graphConnect } from "./connect.js";
 import type { MutGraph } from "./index.js";
@@ -41,7 +41,7 @@ test("graphConnect() parses a line", () => {
   expect(graph.multi()).toBe(false);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(true);
-  const ids = [...map(graph.nodes(), ({ data }) => data)].sort();
+  const ids = [...Iterator.from(graph.nodes()).map(({ data }) => data)].sort();
   expect(ids).toEqual(["a", "b"]);
 });
 
@@ -56,7 +56,7 @@ test("graphConnect() parses a multi line", () => {
   expect(graph.multi()).toBe(true);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(true);
-  const ids = [...map(graph.nodes(), ({ data }) => data)].sort();
+  const ids = [...Iterator.from(graph.nodes()).map(({ data }) => data)].sort();
   expect(ids).toEqual(["a", "b"]);
 });
 
@@ -82,7 +82,7 @@ test("graphConnect() parses a single node", () => {
 
   const graph = build([["a", "a"]]);
   expect(graph.nnodes()).toBe(1);
-  const ids = [...map(graph.nodes(), ({ data }) => data)];
+  const ids = [...Iterator.from(graph.nodes()).map(({ data }) => data)];
   expect(ids).toEqual(["a"]);
 });
 
@@ -96,7 +96,7 @@ test("graphConnect() parses disconnected", () => {
   expect(graph.multi()).toBe(false);
   expect(graph.acyclic()).toBe(true);
   expect(graph.connected()).toBe(false);
-  const ids = [...map(graph.nodes(), ({ data }) => data)];
+  const ids = [...Iterator.from(graph.nodes()).map(({ data }) => data)];
   expect(ids).toEqual(["a", "b"]);
 });
 
@@ -243,10 +243,9 @@ test("topological() correctly handles complex case", () => {
   expect(g.data).toBe("g");
 
   const inds = new Map(
-    map(entries(slice(rem, rem.length - 1, -1, -1)), ([i, { data }]) => [
-      data,
-      i,
-    ]),
+    Iterator.from(entries(slice(rem, rem.length - 1, -1, -1))).map(
+      ([i, { data }]) => [data, i],
+    ),
   );
   expect(inds.get("d")! < inds.get("e")!).toBe(true);
 });

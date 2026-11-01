@@ -1,15 +1,10 @@
 import { expect, test } from "bun:test";
-import { setEqual } from "./collections.js";
 import { assert } from "./test-utils.js";
 import { berr, ierr } from "./utils.js";
 
 test("assert throws", () => {
   expect(assert(true)).toBeUndefined();
   expect(() => assert(false)).toThrow("failed assert");
-});
-
-test("setEquals fails for different sizes", () => {
-  expect(setEqual(new Set(), new Set([1]))).toBe(false);
 });
 
 test("i err()", () => {

@@ -1,5 +1,5 @@
 import { setMultimapAdd, setMultimapDelete, setPop } from "../collections.js";
-import { chain, filter, first, map } from "../iters.js";
+import { chain, first } from "../iters.js";
 import { dfs, err } from "../utils.js";
 import { toJson } from "./json.js";
 
@@ -658,13 +658,12 @@ function roots<N, L>(
 
 function acyclic<N, L>(nodes: Iterable<GraphNode<N, L>>): boolean {
   const counts = new Map(
-    map(nodes, (node) => [node, node.nparents()] as const),
+    Iterator.from(nodes).map((node) => [node, node.nparents()] as const),
   );
   const queue = [
-    ...map(
-      filter(counts, ([, pars]) => pars === 0),
-      ([node]) => node,
-    ),
+    ...Iterator.from(
+      Iterator.from(counts).filter(([, pars]) => pars === 0),
+    ).map(([node]) => node),
   ];
   for (const node of queue) {
     counts.delete(node);

@@ -6,7 +6,6 @@
  */
 
 import type { GraphLink, GraphNode } from "../../graph/index.js";
-import { flatMap } from "../../iters.js";
 import { err, ierr, type U } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
@@ -191,7 +190,7 @@ function cacheVertWeak<N, L>(
       GraphNode<N, L>,
       Map<GraphNode<N, L>, number>
     >();
-    for (const node of flatMap(layers, (l) => l)) {
+    for (const node of layers.flat()) {
       if (node.data.role === "node") {
         // regular node
         const source = node.data.node;

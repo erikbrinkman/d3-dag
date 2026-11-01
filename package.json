@@ -35,7 +35,7 @@
     "/dist/**/*.d.ts"
   ],
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22"
   },
   "scripts": {
     "fmt": "biome format --write",

@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import { map } from "../iters.js";
 import { graphHierarchy } from "./hierarchy.js";
 import type { MutGraph } from "./index.js";
 
@@ -50,7 +49,7 @@ test("graphHierarchy() parses minimal graph", () => {
   expect([...(build.childrenData()(single, 0) ?? [])]).toHaveLength(0);
   const graph = build(single);
   expect(graph.nnodes()).toBe(1);
-  const ids = [...map(graph.nodes(), ({ data }) => data.id)];
+  const ids = [...Iterator.from(graph.nodes()).map(({ data }) => data.id)];
   expect(ids).toEqual(["a"]);
 });
 
