@@ -119,35 +119,13 @@ export function coordGreedy(...args: never[]): CoordGreedy {
     layers: SugiNode<N, L>[][],
     sep: SugiSeparation<N, L>,
   ): number {
-    // get statistics on layers
-    let xmean = 0;
-    let xcount = 0;
-    const nodes = new Set<SugiNode<N, L>>();
-    for (const layer of layers) {
-      for (const node of layer) {
-        if (!nodes.has(node)) {
-          nodes.add(node);
-          if (node.ux !== undefined) {
-            xmean += (node.ux - xmean) / ++xcount;
-          }
-        }
-      }
+    // start every node at zero, multi-layer nodes keep their first spacing
+    for (const node of layers.flat()) {
+      node.ux = undefined;
     }
-
-    // initialize xes on all layers
     for (const layer of layers) {
-      let mean = 0;
-      let count = 0;
       for (const node of layer) {
-        if (node.ux !== undefined) {
-          mean += (node.ux - mean) / ++count;
-        }
-      }
-      const def = count ? mean : xmean;
-      for (const node of layer) {
-        if (node.ux === undefined) {
-          node.ux = def;
-        }
+        node.ux ??= 0;
       }
       space(layer, sep);
     }
