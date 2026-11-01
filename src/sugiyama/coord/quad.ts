@@ -324,17 +324,19 @@ function buildOperator<
     }
 
     // get actual solution
-    let width: number;
+    let solution: number[];
     try {
-      const solution = solve(Q, c, A, b);
-      width = layout(layers, sep, inds, solution);
+      solution = solve(Q, c, A, b);
     } catch (ex) {
-      if (typeof ex === "string") {
+      if (ex instanceof Error) {
+        throw ex;
+      } else if (typeof ex === "string") {
         throw ierr`${ex}`;
       } else {
         throw ierr`undefined quadprog exception`;
       }
     }
+    const width = layout(layers, sep, inds, solution);
     if (width <= 0) {
       throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
     } else {
