@@ -41,16 +41,27 @@ export function sizedSeparation<NodeDatum, LinkDatum>(
 export function crossings(layers: readonly (readonly GraphNode[])[]): number {
   let crossings = 0;
   for (const [topLayer, bottomLayer] of bigrams(layers)) {
-    const inds = new Map(bottomLayer.map((node, j) => [node, j] as const));
-    for (const [j, p1] of topLayer.entries()) {
-      for (const p2 of topLayer.slice(j + 1)) {
-        for (const [c1, n1] of p1.childCounts()) {
-          for (const [c2, n2] of p2.childCounts()) {
-            if (c1 !== c2 && inds.get(c1)! > inds.get(c2)!) {
-              crossings += n1 * n2;
-            }
-          }
+    const inds = new Map(bottomLayer.map((node, ind) => [node, ind] as const));
+    // fenwick tree of link counts by bottom index, offset by one
+    const tree = new Array<number>(bottomLayer.length + 1).fill(0);
+    let total = 0;
+    for (const node of topLayer) {
+      const links = [...node.childCounts()].map(
+        ([child, count]) => [inds.get(child)! + 1, count] as const,
+      );
+      // links sharing a parent never cross, so all are counted before any is added
+      for (const [ind, count] of links) {
+        let atMost = 0;
+        for (let pos = ind; pos > 0; pos -= pos & -pos) {
+          atMost += tree[pos];
         }
+        crossings += count * (total - atMost);
+      }
+      for (const [ind, count] of links) {
+        for (let pos = ind; pos < tree.length; pos += pos & -pos) {
+          tree[pos] += count;
+        }
+        total += count;
       }
     }
   }
