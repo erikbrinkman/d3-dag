@@ -22,7 +22,7 @@ import type { GraphNode } from "../../graph/index.js";
  *
  * ```ts
  * function trivialLane(ordered: readonly GraphNode[]): void {
- *     for (const [i, node] in ordered.entries()) {
+ *     for (const [i, node] of ordered.entries()) {
  *         node.x = i;
  *     }
  * }

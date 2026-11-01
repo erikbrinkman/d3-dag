@@ -42,7 +42,7 @@ export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
    * set the {@link Rank} operator for the topological ordering
    */
   rank<NewRank extends Rank>(val: NewRank): Zherebko<U<Ops, "rank", NewRank>>;
-  /** get the current lane operator */
+  /** get the current {@link Rank} operator */
   rank(): Ops["rank"];
 
   /**

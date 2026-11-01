@@ -59,7 +59,7 @@ export function layerSeparation(upper?: GraphNode, lower?: GraphNode): number {
  *     }
  *     // assign ys
  *     for (const node of dag) {
- *         node.y = -= min;
+ *         node.y -= min;
  *     }
  *     return max - min;
  * }

@@ -35,7 +35,7 @@ function firstAvailable(inds: number[], target: number) {
 }
 
 /**
- * @returns link map which takes source, target, and ind to get lane
+ * @returns the lane of each link that doesn't connect adjacent nodes
  */
 export function greedy(
   nodes: readonly GraphNode[],
