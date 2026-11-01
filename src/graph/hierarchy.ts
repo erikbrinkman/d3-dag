@@ -241,8 +241,8 @@ function buildHierarchy<
 function wrapChildren<N, C extends Children<N>>(
   children: C,
 ): WrappedChildren<N, C> {
-  function wrapped(d: N, i: number): IterableIterator<[N, undefined]> {
-    return map(children(d, i) ?? [], (d) => [d, undefined]);
+  function wrapped(datum: N, index: number): IterableIterator<[N, undefined]> {
+    return map(children(datum, index) ?? [], (child) => [child, undefined]);
   }
   wrapped.wrapped = children;
   return wrapped;
@@ -251,8 +251,8 @@ function wrapChildren<N, C extends Children<N>>(
 function wrapChildrenData<N, C extends ChildrenData<N>>(
   childrenData: C,
 ): WrappedChildrenData<N, C> {
-  function wrapped(d: N, i: number): IterableIterator<N> {
-    return map(childrenData(d, i) ?? [], ([d]) => d);
+  function wrapped(datum: N, index: number): IterableIterator<N> {
+    return map(childrenData(datum, index) ?? [], ([child]) => child);
   }
   wrapped.wrapped = childrenData;
   return wrapped;
@@ -275,9 +275,9 @@ function hasChildren(data: unknown): data is HasChildren {
   }
 }
 
-function defaultChildren(d: unknown): Iterable<HasChildren> | undefined {
-  if (hasChildren(d)) {
-    return d.children;
+function defaultChildren(datum: unknown): Iterable<HasChildren> | undefined {
+  if (hasChildren(datum)) {
+    return datum.children;
   } else {
     throw err`datum did not have an iterable children field, and no custom children accessor was specified; try calling \`graphHierarchy().children(d => ...)\` to set a custom children accessor`;
   }
