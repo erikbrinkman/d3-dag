@@ -147,37 +147,99 @@ function runLayout(
   };
 }
 
+const algorithms = ["sugiyama", "zherebko", "grid"] as const;
+const directions = ["TB", "BT", "LR", "RL"] as const;
+const edgeModes = ["straight", "curved", "routed"] as const;
+const layerings = ["simplex", "longest-path", "topological"] as const;
+const decrosses = ["two-layer", "dfs", "opt"] as const;
+const coords = ["simplex", "quad", "greedy", "center", "topological"] as const;
+const lanes = ["greedy", "opt"] as const;
+
+/** read a choice from the page URL, falling back when missing or unknown */
+function choiceParam<T extends string>(
+  params: URLSearchParams,
+  key: string,
+  choices: readonly T[],
+  fallback: T,
+): T {
+  const value = params.get(key);
+  return choices.find((choice) => choice === value) ?? fallback;
+}
+
+/** read a number from the page URL, falling back when missing or invalid */
+function numberParam(
+  params: URLSearchParams,
+  key: string,
+  fallback: number,
+): number {
+  const value = Number(params.get(key) ?? Number.NaN);
+  return Number.isFinite(value) ? value : fallback;
+}
+
 function App() {
   const params = new URLSearchParams(window.location.search);
-  const initLayout = (params.get("layout") ?? "sugiyama") as DagreAlgorithm;
 
-  const [algorithm, setAlgorithm] = useState<DagreAlgorithm>(initLayout);
-  const [graphName, setGraphName] = useState("square");
-  const [direction, setDirection] = useState<Direction>("TB");
-  const [nodesep, setNodesep] = useState(20);
-  const [ranksep, setRanksep] = useState(40);
-  const [edgeMode, setEdgeMode] = useState<EdgeMode>("routed");
+  const [algorithm, setAlgorithm] = useState<DagreAlgorithm>(
+    choiceParam(params, "layout", algorithms, "sugiyama"),
+  );
+  const [graphName, setGraphName] = useState(
+    choiceParam(params, "graph", Object.keys(graphs), "square"),
+  );
+  const [direction, setDirection] = useState<Direction>(
+    choiceParam(params, "direction", directions, "TB"),
+  );
+  const [nodesep, setNodesep] = useState(numberParam(params, "nodesep", 20));
+  const [ranksep, setRanksep] = useState(numberParam(params, "ranksep", 40));
+  const [edgeMode, setEdgeMode] = useState<EdgeMode>(
+    choiceParam(params, "edges", edgeModes, "routed"),
+  );
 
   // sugiyama options
-  const [layering, setLayering] = useState<
-    "simplex" | "longest-path" | "topological"
-  >("simplex");
-  const [decross, setDecross] = useState<"two-layer" | "dfs" | "opt">(
-    "two-layer",
+  const [layering, setLayering] = useState(
+    choiceParam(params, "layering", layerings, "simplex"),
   );
-  const [coord, setCoord] = useState<
-    "simplex" | "quad" | "greedy" | "center" | "topological"
-  >("simplex");
+  const [decross, setDecross] = useState(
+    choiceParam(params, "decross", decrosses, "two-layer"),
+  );
+  const [coord, setCoord] = useState(
+    choiceParam(params, "coord", coords, "simplex"),
+  );
 
   // grid options
-  const [lane, setLane] = useState<"greedy" | "opt">("greedy");
+  const [lane, setLane] = useState(
+    choiceParam(params, "lane", lanes, "greedy"),
+  );
 
-  // update URL when algorithm changes
   useEffect(() => {
     const url = new URL(window.location.href);
-    url.searchParams.set("layout", algorithm);
+    const settings = {
+      layout: algorithm,
+      graph: graphName,
+      direction,
+      nodesep: `${nodesep}`,
+      ranksep: `${ranksep}`,
+      edges: edgeMode,
+      layering,
+      decross,
+      coord,
+      lane,
+    };
+    for (const [key, value] of Object.entries(settings)) {
+      url.searchParams.set(key, value);
+    }
     history.replaceState(null, "", url.toString());
-  }, [algorithm]);
+  }, [
+    algorithm,
+    graphName,
+    direction,
+    nodesep,
+    ranksep,
+    edgeMode,
+    layering,
+    decross,
+    coord,
+    lane,
+  ]);
 
   const graphData = graphs[graphName]!;
 
