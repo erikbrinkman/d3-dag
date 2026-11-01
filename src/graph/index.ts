@@ -5,7 +5,7 @@ import {
   setPop,
 } from "../collections.js";
 import { chain, filter, map } from "../iters.js";
-import { dfs, err, ierr } from "../utils.js";
+import { dfs, err } from "../utils.js";
 import { toJson } from "./json.js";
 
 /**
@@ -697,8 +697,8 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
   #multis: number = 0;
   /** cached acyclic if null unknown */
   #acyclic: boolean | null = true;
-  /** representative nodes for known connected components */
-  readonly #components: Set<DirectedNode<N, L>> = new Set();
+  /** known connected components */
+  readonly #components: Set<Component<N, L>> = new Set();
   /** nodes for possible connected components that need to be recomputed */
   readonly #extra: Set<DirectedNode<N, L>> = new Set();
 
@@ -751,7 +751,9 @@ class DirectedGraph<N, L> implements MutGraph<N, L> {
   }
 
   *split(): IterableIterator<MutGraphNode<N, L>> {
-    yield* this.#components;
+    for (const comp of this.#components) {
+      yield comp.node;
+    }
     let node: MutGraphNode<N, L> | undefined;
     while ((node = setNext(this.#extra))) {
       yield node;
@@ -868,6 +870,56 @@ interface NodeInfo<N, L> {
   sinks: Set<MutGraphNode<N, L>> | null;
 }
 
+function singletonInfo<N, L>(node: MutGraphNode<N, L>): NodeInfo<N, L> {
+  return {
+    nnodes: 1,
+    nlinks: 0,
+    multis: 0,
+    acyclic: true,
+    roots: [node],
+    leaves: [node],
+    sources: new Set([node]),
+    sinks: new Set([node]),
+  };
+}
+
+/**
+ * a connected component, merged with others by union-find
+ *
+ * Once a deletion may have split a component its info is cleared for good,
+ * and every node that still leads to it recomputes into a new component.
+ */
+class Component<N, L> {
+  /** the parent in the union-find, or itself at the root */
+  #parent: Component<N, L> = this;
+
+  /** a node in the component */
+  readonly node: DirectedNode<N, L>;
+  /** the component info, or null if it may be stale */
+  info: NodeInfo<N, L> | null;
+
+  constructor(node: DirectedNode<N, L>, info: NodeInfo<N, L> | null) {
+    this.node = node;
+    this.info = info;
+  }
+
+  /** the component this belongs to after every merge */
+  find(): Component<N, L> {
+    let comp: Component<N, L> = this;
+    while (comp.#parent !== comp) {
+      comp.#parent = comp.#parent.#parent;
+      comp = comp.#parent;
+    }
+    return comp;
+  }
+
+  /** merge this component into another */
+  merge(other: Component<N, L>): void {
+    this.#parent = other;
+    this.info = null;
+  }
+}
+
 // TODO implement dynamic connectivity to make most of these more efficient
 // look at this https://arxiv.org/pdf/1209.5608.pdf and related papers as a
 // route to caching some of this, or dynamic-forest
@@ -877,7 +929,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   #graphAddLink: (multi: boolean, connecting: boolean) => void;
   #graphDeleteLink: (multi: boolean) => void;
 
-  readonly #components: Set<DirectedNode<N, L>>;
+  readonly #components: Set<Component<N, L>>;
   readonly #extra: Set<DirectedNode<N, L>>;
   #cmultis: number = 0;
 
@@ -886,10 +938,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   #nclinks: number = 0;
   readonly #cmap: Map<DirectedNode<N, L>, Set<DirectedLink<N, L>>> = new Map();
 
-  /** link to representative node for component */
-  #par: DirectedNode<N, L>;
-  /** connected component info */
-  #cinfo: NodeInfo<N, L> | null | undefined;
+  /** the component this node was last placed in */
+  #comp: Component<N, L>;
 
   data: N;
   ux?: number | undefined;
@@ -921,7 +971,7 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
 
   constructor(
     graph: DirectedGraph<N, L>,
-    components: Set<DirectedNode<N, L>>,
+    components: Set<Component<N, L>>,
     extra: Set<DirectedNode<N, L>>,
     deleteNode: () => void,
     addLink: (multi: boolean, connecting: boolean) => void,
@@ -937,50 +987,36 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
     this.#graphAddLink = addLink;
     this.#graphDeleteLink = deleteLink;
 
-    this.#par = this;
-    this.#cinfo = {
-      nnodes: 1,
-      nlinks: 0,
-      multis: 0,
-      acyclic: true,
-      roots: [this],
-      leaves: [this],
-      sources: new Set([this]),
-      sinks: new Set([this]),
-    };
-    this.#components.add(this);
+    this.#comp = new Component(this, singletonInfo(this));
+    this.#components.add(this.#comp);
   }
 
-  #repr(): DirectedNode<N, L> {
-    let repr: DirectedNode<N, L> = this;
-    while (repr.#par !== repr) {
-      repr.#par = repr.#par.#par;
-      repr = repr.#par;
-    }
-    return repr;
+  /** the current component, compressing the path to it */
+  #root(): Component<N, L> {
+    return (this.#comp = this.#comp.find());
+  }
+
+  /** mark a component stale so its nodes recompute it when next queried */
+  #invalidate(comp: Component<N, L>): void {
+    comp.info = null;
+    this.#components.delete(comp);
   }
 
   #info(): NodeInfo<N, L> {
-    const repr = this.#repr();
-    if (repr.#cinfo === undefined) {
-      throw ierr`undefined cached info`;
-    } else if (repr.#cinfo !== null) {
-      return repr.#cinfo;
+    const root = this.#root();
+    if (root.info) {
+      return root.info;
     } else {
       let nnodes = 0;
       let nlinks = 0;
       let multis = 0;
-      for (const node of this.nodes()) {
+      const members = [...this.nodes()];
+      for (const node of members) {
         nnodes += 1;
         nlinks += node.nchildLinks();
         multis += node.#cmultis;
-        node.#par = this;
-        node.#cinfo = undefined;
-        this.#extra.delete(node);
       }
-
-      this.#components.add(this);
-      return (this.#cinfo = {
+      const info: NodeInfo<N, L> = {
         nnodes,
         nlinks,
         multis,
@@ -989,7 +1025,14 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
         leaves: null,
         sources: null,
         sinks: null,
-      });
+      };
+      const comp = new Component(this, info);
+      for (const node of members) {
+        node.#comp = comp;
+        this.#extra.delete(node);
+      }
+      this.#components.add(comp);
+      return info;
     }
   }
 
@@ -997,34 +1040,29 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
     const { source, target } = link;
     const multi = source.nchildLinksTo(target) > 1;
 
-    if (multi) {
-      const info = source.#info();
-      source.#cmultis -= 1;
-      info.nlinks -= 1;
-      info.multis -= 1;
-    } else {
-      // NOTE if we had a way, we could technically preserve a cache of
-      // acyclic = true for both components
-      const repr = source.#repr();
-      repr.#cinfo = null;
-      this.#components.delete(repr);
-
-      this.#extra.add(source);
-      source.#par = source;
-      source.#cinfo = null;
-
-      this.#extra.add(target);
-      target.#par = target;
-      target.#cinfo = null;
-    }
-
-    this.#graphDeleteLink(multi);
+    const root = source.#root();
+    const { info } = root;
 
     setMultimapDelete(source.#cmap, target, link);
     source.#nclinks -= 1;
 
     setMultimapDelete(target.#pmap, source, link);
     target.#nplinks -= 1;
+
+    if (multi) {
+      source.#cmultis -= 1;
+      if (info) {
+        info.nlinks -= 1;
+        info.multis -= 1;
+      }
+    } else {
+      // the component may have split, so it's recomputed lazily from either end
+      this.#invalidate(root);
+      this.#extra.add(source);
+      this.#extra.add(target);
+    }
+
+    this.#graphDeleteLink(multi);
   };
 
   *nodes(): IterableIterator<DirectedNode<N, L>> {
@@ -1107,30 +1145,29 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
         datum!, // NOTE hack for missing undefined
       );
       const multi = source.nchildLinksTo(target) > 0;
-      const srepr = source.#repr();
-      const info = srepr.#cinfo;
-      const trepr = target.#repr();
-      const tinfo = trepr.#cinfo;
-      if (multi && info) {
+      const sroot = source.#root();
+      const { info } = sroot;
+      const troot = target.#root();
+      const tinfo = troot.info;
+      if (multi) {
         source.#cmultis += 1;
-        info.nlinks += 1;
-        info.multis += 1;
-      } else if (multi) {
-        source.#cmultis += 1;
-      } else if (srepr === trepr && info) {
+        if (info) {
+          info.nlinks += 1;
+          info.multis += 1;
+        }
+      } else if (info && tinfo && sroot === troot) {
         info.nlinks += 1;
         if (info.acyclic === true) info.acyclic = null;
         info.sources?.delete(target);
         info.sinks?.delete(source);
-      } else if (srepr !== trepr && info && tinfo) {
-        const [drepr, dinfo, orepr, oinfo] =
+      } else if (info && tinfo) {
+        const [droot, dinfo, oroot, oinfo] =
           info.nnodes > tinfo.nnodes
-            ? [srepr, info, trepr, tinfo]
-            : [trepr, tinfo, srepr, info];
+            ? [sroot, info, troot, tinfo]
+            : [troot, tinfo, sroot, info];
 
-        this.#components.delete(orepr);
-        orepr.#par = drepr;
-        orepr.#cinfo = undefined;
+        this.#components.delete(oroot);
+        oroot.merge(droot);
         dinfo.nnodes += oinfo.nnodes;
         dinfo.nlinks += oinfo.nlinks + 1;
         dinfo.multis += oinfo.multis;
@@ -1154,23 +1191,15 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
         } else {
           dinfo.sinks = null;
         }
-      } else if (srepr !== trepr) {
-        this.#components.delete(srepr);
-        this.#components.delete(trepr);
-
+      } else {
+        // whether this joins two components is unknown, so both are recomputed
+        this.#invalidate(sroot);
+        this.#invalidate(troot);
         this.#extra.add(source);
-        source.#par = source;
-        source.#cinfo = null;
-
         this.#extra.add(target);
-        target.#par = target;
-        target.#cinfo = null;
-
-        srepr.#cinfo = null;
-        trepr.#cinfo = null;
       }
 
-      this.#graphAddLink(multi, srepr !== trepr);
+      this.#graphAddLink(multi, !multi && !!info && !!tinfo && sroot !== troot);
 
       source.#nclinks += 1;
       setMultimapAdd(source.#cmap, target, link);
@@ -1321,11 +1350,11 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
       while ((link = multimapValuesNext(this.#pmap))) {
         link.delete();
       }
-      this.#components.delete(this);
+      this.#components.delete(this.#root());
       this.#extra.delete(this);
       this.#graphDeleteNode();
       this.#graph = null;
-      this.#cinfo = null;
+      this.#comp = new Component(this, singletonInfo(this));
     }
   }
 

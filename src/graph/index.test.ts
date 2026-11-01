@@ -512,6 +512,96 @@ test("component multi count survives a multi delete over an invalidated cache", 
   expect(a.multi()).toBe(true);
 });
 
+test("splitting a component keeps both halves accurate", () => {
+  const grf = graph<string, undefined>();
+  const [a, b, c, d, e, f] = ["a", "b", "c", "d", "e", "f"].map((id) =>
+    grf.node(id),
+  );
+  grf.link(a, b);
+  grf.link(c, d);
+  grf.link(e, f);
+  grf.link(b, c);
+  grf.link(d, e).delete();
+
+  expect(a.nnodes()).toBe(4);
+  expect(f.nnodes()).toBe(2);
+  expect([...a.roots()].map((node) => node.data)).toEqual(["a"]);
+  expect([...f.roots()].map((node) => node.data)).toEqual(["e"]);
+  expect([...grf.split()]).toHaveLength(2);
+});
+
+test("relinking a split component detects the new cycle", () => {
+  const grf = graph<undefined, undefined>();
+  const [a, b, c, d] = [grf.node(), grf.node(), grf.node(), grf.node()];
+  grf.link(a, b);
+  grf.link(b, c);
+  grf.link(c, d).delete();
+  grf.link(c, a);
+
+  expect(a.acyclic()).toBe(false);
+  expect(grf.acyclic()).toBe(false);
+});
+
+test("component info matches the graph through random edits", () => {
+  let seed = 11;
+  const rand = (): number => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  const component = (start: MutGraphNode<number, undefined>) => {
+    const seen = new Set([start]);
+    const queue = [start];
+    let node: MutGraphNode<number, undefined> | undefined;
+    while ((node = queue.pop())) {
+      for (const next of [...node.children(), ...node.parents()]) {
+        if (!seen.has(next)) {
+          seen.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    return seen;
+  };
+
+  for (let trial = 0; trial < 50; trial++) {
+    const grf = graph<number, undefined>();
+    const nodes = Array.from({ length: 3 + Math.floor(rand() * 6) }, (_, ind) =>
+      grf.node(ind),
+    );
+    const links: MutGraphLink<number, undefined>[] = [];
+    for (let step = 0; step < 40; step++) {
+      if (rand() < 0.55 || !links.length) {
+        const source = nodes[Math.floor(rand() * nodes.length)];
+        const target = nodes[Math.floor(rand() * nodes.length)];
+        if (source !== target) links.push(grf.link(source, target));
+      } else {
+        links.splice(Math.floor(rand() * links.length), 1)[0].delete();
+      }
+      // only query some of the time so stale info builds up between queries
+      if (rand() < 0.5) {
+        for (const node of nodes) {
+          if (rand() < 0.5) continue;
+          const members = [...component(node)];
+          expect(node.nnodes()).toBe(members.length);
+          expect(node.nlinks()).toBe(
+            members.reduce((total, member) => total + member.nchildLinks(), 0),
+          );
+          expect([...node.roots()].length).toBeGreaterThan(0);
+        }
+        const pieces = new Set(
+          nodes.map((node) =>
+            [...component(node)]
+              .map((member) => member.data)
+              .sort()
+              .join(),
+          ),
+        );
+        expect([...grf.split()]).toHaveLength(pieces.size);
+      }
+    }
+  }
+});
+
 test("topological() ranks inverted case", () => {
   const grf = graph<number, undefined>();
   const a = grf.node(1);
