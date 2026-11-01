@@ -381,9 +381,9 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
   ): Sugiyama<U<Ops, "nodeSize", NNS>> | Ops["nodeSize"] {
     if (val === undefined) {
       return options.nodeSize;
-    } else if (typeof val !== "function" && (val[0] <= 0 || val[1] <= 0)) {
+    } else if (typeof val !== "function" && !(val[0] >= 0 && val[1] >= 0)) {
       const [x, y] = val;
-      throw err`constant nodeSize must be positive, but got: [${x}, ${y}]`;
+      throw err`constant nodeSize can't be negative, but got: [${x}, ${y}]`;
     } else {
       const { nodeSize: _, ...rest } = options;
       return buildOperator(

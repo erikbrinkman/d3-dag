@@ -42,6 +42,20 @@ test("tweakSize()", () => {
   }
 });
 
+test("tweakSize() centers a layout with zero width", () => {
+  const grf = graph<undefined, undefined>();
+  const top = grf.node();
+  const bottom = grf.node();
+  top.child(bottom);
+  const res = sugiyama().nodeSize([0, 1])(grf);
+  expect(res.width).toBe(0);
+
+  tweakSize({ width: 4, height: 6 })(grf, res);
+  expect(top.x).toBe(2);
+  expect(bottom.x).toBe(2);
+  expect(bottom.y).toBeGreaterThan(top.y);
+});
+
 test("tweakGrid()", () => {
   const layout = grid().nodeSize([2, 2]);
   const grf = zhere();

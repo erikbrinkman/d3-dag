@@ -211,9 +211,7 @@ test("coordQuad() fails passing an arg to constructor", () => {
   expect(() => coordQuad(null)).toThrow("got arguments to coordQuad");
 });
 
-test("coordQuad() throws for zero width", () => {
+test("coordQuad() allows zero width", () => {
   const layers = createLayers([[[]]]);
-  expect(() => coordQuad()(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node",
-  );
+  expect(coordQuad()(layers, () => 0)).toBe(0);
 });

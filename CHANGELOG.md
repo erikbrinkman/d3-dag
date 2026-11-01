@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `decrossOpt` rejects layers too wide to fit in memory before building its
   model, instead of after
 - fixed call stack overflows for nodes with very many links
+- node sizes may be zero, negative and `NaN` sizes are rejected, and a layout
+  may have zero width or height
+- `dagre` lays out nodes added without a size as points, like dagre, instead
+  of throwing
 
 ## [1.2.2] - 2026-07-05
 

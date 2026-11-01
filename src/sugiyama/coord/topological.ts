@@ -156,11 +156,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
       }
 
       const maxWidth = normalize(layers, sep);
-      if (maxWidth <= 0) {
-        throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
-      } else {
-        return maxWidth;
-      }
+      return maxWidth;
     } else {
       // quadratic minimization
       const inds = new Map<SugiNode<N, L>, number>();
@@ -202,9 +198,6 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
 
       const solution = solveQuad(Q, c, A, b);
       const width = layout(layers, sep, inds, solution);
-      if (width <= 0) {
-        throw err`must assign nonzero width to at least one node; double check the callback passed to \`sugiyama().nodeSize(...)\``;
-      }
       return width;
     }
   }

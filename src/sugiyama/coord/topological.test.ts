@@ -111,18 +111,14 @@ test("topological() fails passing an arg to constructor", () => {
   expect(() => topological(null)).toThrow("got arguments to coordTopological");
 });
 
-test("topological() throws for zero width", () => {
+test("topological() allows zero width", () => {
   const layers = createLayers([[[]]]);
   const coord = topological();
-  expect(() => coord(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node",
-  );
+  expect(coord(layers, () => 0)).toBe(0);
 });
 
-test("topological().straight(false) throws for zero width", () => {
+test("topological().straight(false) allows zero width", () => {
   const layers = createLayers([[[]]]);
   const coord = topological().straight(false);
-  expect(() => coord(layers, () => 0)).toThrow(
-    "must assign nonzero width to at least one node",
-  );
+  expect(coord(layers, () => 0)).toBe(0);
 });

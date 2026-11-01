@@ -10,9 +10,7 @@ test("cachedNodeSize() const", () => {
 });
 
 test("cachedNodeSize() const error", () => {
-  expect(() => cachedNodeSize([0, 1])).toThrow(
-    "all node sizes must be positive",
-  );
+  expect(() => cachedNodeSize([-1, 1])).toThrow("node sizes can't be negative");
 });
 
 test("cachedNodeSize() callable", () => {
@@ -29,8 +27,8 @@ test("cachedNodeSize() callable", () => {
 
 test("cachedNodeSize() callable raises", () => {
   const node = graph().node();
-  const cached = cachedNodeSize(() => [0, 1]);
-  expect(() => cached(node)).toThrow("all node sizes must be positive");
+  const cached = cachedNodeSize(() => [-1, 1]);
+  expect(() => cached(node)).toThrow("node sizes can't be negative");
 });
 
 test("splitNodeSize() const", () => {

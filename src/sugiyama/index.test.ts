@@ -326,30 +326,39 @@ test("sugiyama() throws with negative width", () => {
   );
 });
 
-test("sugiyama() throws with non-positive const node width", () => {
+test("sugiyama() throws with negative const node width", () => {
   const layout = sugiyama();
-  expect(() => layout.nodeSize([0, 1])).toThrow(
-    "constant nodeSize must be positive, but got: [0, 1]",
+  expect(() => layout.nodeSize([-1, 1])).toThrow(
+    "constant nodeSize can't be negative, but got: [-1, 1]",
   );
 });
 
-test("sugiyama() throws with non-positive const node height", () => {
+test("sugiyama() throws with negative const node height", () => {
   const layout = sugiyama();
-  expect(() => layout.nodeSize([1, 0])).toThrow(
-    "constant nodeSize must be positive, but got: [1, 0]",
+  expect(() => layout.nodeSize([1, -1])).toThrow(
+    "constant nodeSize can't be negative, but got: [1, -1]",
   );
 });
 
-test("sugiyama() throws with zero node width", () => {
-  const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [0, 1]);
-  expect(() => layout(dag)).toThrow("all node sizes must be positive");
+test("sugiyama() throws with NaN node sizes", () => {
+  expect(() => sugiyama().nodeSize([Number.NaN, 1])).toThrow(
+    "constant nodeSize can't be negative",
+  );
+  const layout = sugiyama().nodeSize(() => [1, Number.NaN]);
+  expect(() => layout(dummy())).toThrow("node sizes can't be negative");
 });
 
-test("sugiyama() throws with zero node height", () => {
+test("sugiyama() throws with negative node width", () => {
   const dag = dummy();
-  const layout = sugiyama().nodeSize(() => [1, 0]);
-  expect(() => layout(dag)).toThrow("all node sizes must be positive");
+  const layout = sugiyama().nodeSize(() => [-1, 1]);
+  expect(() => layout(dag)).toThrow("node sizes can't be negative");
+});
+
+test("sugiyama() lays out zero-size nodes", () => {
+  const dag = dummy();
+  const { width, height } = sugiyama().nodeSize([0, 0])(dag);
+  expect(width).toBeGreaterThan(0);
+  expect(height).toBeGreaterThan(0);
 });
 
 test("sugiyama() throws with negative gap width", () => {

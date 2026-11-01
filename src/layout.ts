@@ -55,8 +55,8 @@ export function cachedNodeSize<N, L>(
 ): CallableNodeSize<N, L> {
   if (typeof nodeSize !== "function") {
     const [x, y] = nodeSize;
-    if (x <= 0 || y <= 0) {
-      throw err`all node sizes must be positive, but got width ${x} and height ${y}`;
+    if (!(x >= 0 && y >= 0)) {
+      throw err`node sizes can't be negative, but got width ${x} and height ${y}`;
     }
     return () => [x, y];
   } else {
@@ -67,8 +67,8 @@ export function cachedNodeSize<N, L>(
       if (val === undefined) {
         val = nodeSize(node);
         const [width, height] = val;
-        if (width <= 0 || height <= 0) {
-          throw err`all node sizes must be positive, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the node size callback only returns positive sizes`;
+        if (!(width >= 0 && height >= 0)) {
+          throw err`node sizes can't be negative, but got width ${width} and height ${height} for node with data: ${node.data}; make sure the node size callback only returns non-negative sizes`;
         }
         cache.set(node, val);
       }

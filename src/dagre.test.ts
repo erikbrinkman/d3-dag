@@ -184,14 +184,22 @@ test("nodesep and ranksep affect spacing", () => {
   expect(loose.height).toBeGreaterThan(tight.height);
 });
 
-test("layout requires positive node sizes", () => {
-  const grf = new dagre.graphlib.Graph();
-  grf.setNode("a");
-  grf.setNode("b");
-  grf.setEdge("a", "b");
-  // unlike dagre, d3-dag needs positive dimensions and errors loudly rather than
-  // laying out zero-sized nodes (documented in the README's notable differences)
-  expect(() => dagre.layout(grf)).toThrow("positive");
+test("layout places nodes without sizes as points, like dagre", () => {
+  for (const algorithm of ["sugiyama", "grid", "zherebko"] as const) {
+    for (const quality of ["fast", "medium", "slow"] as const) {
+      const grf = new dagre.graphlib.Graph();
+      grf.setGraph({ algorithm, quality });
+      grf.setNode("a");
+      grf.setEdge("a", "b");
+      dagre.layout(grf);
+      const a = grf.node("a");
+      const b = grf.node("b");
+      expect(a.width).toBe(0);
+      expect(b.x).toBe(a.x);
+      expect(b.y).toBeGreaterThan(a.y);
+      expect(grf.graph().width).toBe(0);
+    }
+  }
 });
 
 test("setEdge auto-creates unknown endpoints like graphlib", () => {
