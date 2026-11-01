@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed `layeringSimplex` reporting contradictory ranks as an internal error
 - fixed `coordQuad` hiding the solver's error message
 - `decrossTwoLayer` counts crossings much faster on wide layers
+- `decrossOpt` rejects layers too wide to fit in memory before building its
+  model, instead of after
 
 ## [1.2.2] - 2026-07-05
 

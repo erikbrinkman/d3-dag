@@ -238,34 +238,6 @@ function buildOperator(options: {
           };
         }
       }
-
-      // add constraints to enforce triangle inequality, e.g. that if a -> b is 1
-      // and b -> c is 1 then a -> c must also be one
-      for (const [i, n1] of layer.entries()) {
-        const i1 = inds.get(n1)!;
-        for (const [j, n2] of entries(slice(layer, i + 1))) {
-          const i2 = inds.get(n2)!;
-          for (const n3 of layer.slice(i + j + 2)) {
-            const i3 = inds.get(n3)!;
-            const pair1 = pair(i1, i2);
-            const pair2 = pair(i1, i3);
-            const pair3 = pair(i2, i3);
-            const triangle = `tri: ${i1} - ${i2} - ${i3}`;
-            const triangleUp = `${triangle} +`;
-            const triangleDown = `${triangle} -`;
-
-            constraints[triangleUp] = { max: 1 };
-            variables[pair1][triangleUp] = 1;
-            variables[pair2][triangleUp] = -1;
-            variables[pair3][triangleUp] = 1;
-
-            constraints[triangleDown] = { min: 0 };
-            variables[pair1][triangleDown] = 1;
-            variables[pair2][triangleDown] = -1;
-            variables[pair3][triangleDown] = 1;
-          }
-        }
-      }
     }
 
     // add crossing minimization
@@ -379,14 +351,47 @@ function buildOperator(options: {
       }
     }
 
-    // check for large input
-    // NOTE ideally we could compute these offline, but the remapped keys make
-    // this difficult
+    // all variables exist now, so inputs too large for memory are rejected
+    // before the cubic triangle constraints
     const numVari = Object.keys(variables).length;
-    const numCons = Object.keys(constraints).length;
     if (options.check !== "oom" && numVari > 2000) {
       throw err`size of dag to decrossOpt is too large and will likely crash instead of complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOpt().check("oom"))\``;
-    } else if (options.check === "fast" && (numVari > 1000 || numCons > 5000)) {
+    }
+
+    for (const layer of layers) {
+      // add constraints to enforce triangle inequality, e.g. that if a -> b is 1
+      // and b -> c is 1 then a -> c must also be one
+      for (const [i, n1] of layer.entries()) {
+        const i1 = inds.get(n1)!;
+        for (const [j, n2] of entries(slice(layer, i + 1))) {
+          const i2 = inds.get(n2)!;
+          for (const n3 of layer.slice(i + j + 2)) {
+            const i3 = inds.get(n3)!;
+            const pair1 = pair(i1, i2);
+            const pair2 = pair(i1, i3);
+            const pair3 = pair(i2, i3);
+            const triangle = `tri: ${i1} - ${i2} - ${i3}`;
+            const triangleUp = `${triangle} +`;
+            const triangleDown = `${triangle} -`;
+
+            constraints[triangleUp] = { max: 1 };
+            variables[pair1][triangleUp] = 1;
+            variables[pair2][triangleUp] = -1;
+            variables[pair3][triangleUp] = 1;
+
+            constraints[triangleDown] = { min: 0 };
+            variables[pair1][triangleDown] = 1;
+            variables[pair2][triangleDown] = -1;
+            variables[pair3][triangleDown] = 1;
+          }
+        }
+      }
+    }
+
+    // NOTE ideally we could compute these offline, but the remapped keys make
+    // this difficult
+    const numCons = Object.keys(constraints).length;
+    if (options.check === "fast" && (numVari > 1000 || numCons > 5000)) {
       throw err`size of dag to decrossOpt is too large and will likely not complete; you probably want to use a cheaper decrossing strategy for sugiyama like \`sugiyama().decross(decrossTwoLayer())\`, but if you still want to continue you can suppress this check with \`sugiyama().decross(decrossOpt().check("slow"))\``;
     }
 
