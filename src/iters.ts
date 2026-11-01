@@ -90,42 +90,6 @@ export function* filter<T>(
   }
 }
 
-/** iterable some */
-export function some<T>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, boolean>,
-): boolean {
-  for (const [index, element] of entries(iter)) {
-    if (callback(element, index)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/** iterable every */
-export function every<T, R extends T>(
-  iter: Iterable<T>,
-  callback: GuardCallback<T, R>,
-): iter is Iterable<R>;
-export function every<T>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, boolean>,
-): boolean;
-export function every<T>(
-  iter: Iterable<T>,
-  callback: MapCallback<T, boolean>,
-): boolean {
-  return !some(iter, (e, i) => !callback(e, i));
-}
-
-/** iterable length */
-export function length(iter: Iterable<unknown>): number {
-  let count = 0;
-  for (const _ of iter) ++count;
-  return count;
-}
-
 function* slicePos<T>(
   arr: readonly T[],
   frm: number,
@@ -164,11 +128,6 @@ export function slice<T>(
   } else {
     throw err`can't slice with zero stride`;
   }
-}
-
-/** iterable reverse of an array */
-export function reverse<T>(arr: readonly T[]): IterableIterator<T> {
-  return slice(arr, arr.length - 1, -1, -1);
 }
 
 /** chain several iterables */

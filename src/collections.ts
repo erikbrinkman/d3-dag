@@ -18,27 +18,6 @@ export function setEqual<T>(first: Set<T>, second: Set<T>): boolean {
   }
 }
 
-/** determines if two sets intersect */
-export function setIntersect<T>(first: Set<T>, second: Set<T>): boolean {
-  if (second.size < first.size) {
-    [second, first] = [first, second];
-  }
-  for (const element of first) {
-    if (second.has(element)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * returns a single arbitrary element from the Set, or undefined if empty
- */
-export function setNext<T>(elems: Set<T>): T | undefined {
-  for (const elem of elems) return elem;
-  return undefined;
-}
-
 /**
  * removes a single arbitrary element from the Set, or undefined if missing
  *

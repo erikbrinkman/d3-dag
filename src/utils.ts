@@ -10,7 +10,7 @@ import { entries, map } from "./iters.js";
 export type U<O, K extends keyof O, V> = Omit<O, K> & Record<K, V>;
 
 /** a callback for things with children */
-export type ChildrenCallback<T> = (node: T) => Iterable<T>;
+type ChildrenCallback<T> = (node: T) => Iterable<T>;
 
 /** depth first search for arbitrary types */
 export function* dfs<T>(
