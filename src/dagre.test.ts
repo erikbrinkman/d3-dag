@@ -856,3 +856,109 @@ test("custom operator honors rankdir from graph config", () => {
   expect(grf.node("a").x).not.toBe(grf.node("b").x);
   expect(grf.node("a").y).toBe(grf.node("b").y);
 });
+
+test("self-loop edges do not throw and layout succeeds", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
+  grf.setDefaultEdgeLabel(() => ({}));
+  grf.setNode("a", { width: 40, height: 20 });
+  grf.setNode("b", { width: 40, height: 20 });
+  grf.setEdge("a", "b");
+  grf.setEdge("b", "b");
+  grf.setEdge("b", "b"); // idempotent
+
+  dagre.layout(grf);
+
+  expect(grf.node("a").y).toBeLessThan(grf.node("b").y);
+  expect(grf.hasEdge("b", "b")).toBe(true);
+  expect(grf.edgeCount()).toBe(2);
+  expect(grf.edges()).toContainEqual({ v: "b", w: "b" });
+  expect(grf.edge("b", "b")).toBe(grf.edge("b", "b"));
+  expect(grf.edge("b", "b").points).toEqual([]);
+});
+
+test("self-loop edge auto-creates node and updates graph queries", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setNode("a");
+  grf.setEdge("a", "b");
+  grf.setEdge("b", "b");
+  grf.setEdge("solo", "solo");
+
+  expect(grf.hasNode("solo")).toBe(true);
+  expect(grf.predecessors("b")).toEqual(["a", "b"]);
+  expect(grf.successors("b")).toEqual(["b"]);
+  expect(grf.neighbors("b")).toEqual(["a", "b"]);
+  expect(grf.inEdges("b")).toEqual([
+    { v: "a", w: "b" },
+    { v: "b", w: "b" },
+  ]);
+  expect(grf.inEdges("b", "b")).toEqual([{ v: "b", w: "b" }]);
+  expect(grf.outEdges("b")).toEqual([{ v: "b", w: "b" }]);
+  expect(grf.outEdges("b", "b")).toEqual([{ v: "b", w: "b" }]);
+  expect(grf.nodeEdges("b")).toEqual([
+    { v: "a", w: "b" },
+    { v: "b", w: "b" },
+  ]);
+  expect(grf.nodeEdges("b", "b")).toEqual([{ v: "b", w: "b" }]);
+  expect(grf.sources()).toEqual(["a"]);
+  expect(grf.sinks()).toEqual([]);
+
+  const filtered = grf.filterNodes((id) => id !== "solo");
+  expect(filtered.hasEdge("b", "b")).toBe(true);
+  expect(filtered.hasEdge("solo", "solo")).toBe(false);
+
+  grf.removeEdge("b", "b");
+  expect(grf.hasEdge("b", "b")).toBe(false);
+  expect(() => grf.edge("b", "b")).toThrow("unknown edge");
+  expect(grf.sinks()).toEqual(["b"]);
+
+  grf.removeNode("solo");
+  expect(grf.hasEdge("solo", "solo")).toBe(false);
+  expect(grf.edgeCount()).toBe(1);
+});
+
+test("node labels keep caller object identity and custom fields", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
+  const label: {
+    label: string;
+    width: number;
+    height: number;
+    x?: number;
+    y?: number;
+  } = {
+    label: "A",
+    width: 10,
+    height: 10,
+  };
+  grf.setNode("a", label);
+  dagre.layout(grf);
+
+  const node = grf.node("a");
+  expect<unknown>(node).toBe(label);
+  expect(node.label).toBe("A");
+  expect(label.x).toBe(5);
+  expect(label.y).toBe(5);
+  expect("id" in node).toBe(false);
+
+  // setNode without a label keeps the existing object intact
+  grf.setNode("a");
+  expect<unknown>(grf.node("a")).toBe(label);
+
+  // setNode with a new label replaces the stored object
+  const replacement = { label: "A2", width: 20, height: 20 };
+  grf.setNode("a", replacement);
+  expect<unknown>(grf.node("a")).toBe(replacement);
+  expect(grf.node("a").label).toBe("A2");
+});
+
+test("default node labels and filterNodes preserve custom fields", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setDefaultNodeLabel(() => ({ tag: "default", width: 12, height: 8 }));
+  grf.setNode("a");
+
+  expect(grf.node("a").tag).toBe("default");
+  const filtered = grf.filterNodes(() => true);
+  expect(filtered.node("a")).toBe(grf.node("a"));
+  expect(filtered.node("a").tag).toBe("default");
+});

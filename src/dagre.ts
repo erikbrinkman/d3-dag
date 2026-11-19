@@ -20,12 +20,13 @@ import { err } from "./utils.js";
 import { zherebko } from "./zherebko/index.js";
 
 /** @internal */
-interface IdDagreNode extends DagreNode {
+interface DagreNodeEntry {
   id: string;
+  label: DagreNode;
 }
 
-type DagreOperator = Operator<IdDagreNode, DagreEdge>;
-type DagreSugiyama = Sugiyama<SugiyamaOps<IdDagreNode, DagreEdge>>;
+type DagreOperator = Operator<DagreNodeEntry, DagreEdge>;
+type DagreSugiyama = Sugiyama<SugiyamaOps<DagreNodeEntry, DagreEdge>>;
 
 export type { Rankdir } from "./layout.js";
 
@@ -68,6 +69,8 @@ export interface DagreNode {
   width: number;
   /** node height */
   height: number;
+  /** additional caller-provided fields preserved on the node label */
+  [key: string]: unknown;
 }
 
 /** a control point with x and y coordinates */
@@ -113,6 +116,16 @@ function presetSugiyama(
   return base;
 }
 
+function normalizeNodeLabel(label: {
+  readonly width?: number;
+  readonly height?: number;
+}): DagreNode {
+  const node = label as DagreNode;
+  node.width ??= 0;
+  node.height ??= 0;
+  return node;
+}
+
 /**
  * dagre-compatible mutable graph backed by d3-dag
  *
@@ -134,8 +147,9 @@ function presetSugiyama(
  * ```
  */
 export class DagreGraph {
-  #mutGraph = graph<IdDagreNode, DagreEdge>();
-  #graphNodes = new Map<string, MutGraphNode<IdDagreNode, DagreEdge>>();
+  #mutGraph = graph<DagreNodeEntry, DagreEdge>();
+  #graphNodes = new Map<string, MutGraphNode<DagreNodeEntry, DagreEdge>>();
+  #selfLoops = new Map<string, DagreEdge>();
   #defaultNodeLabel: () => {
     readonly width?: number;
     readonly height?: number;
@@ -171,9 +185,9 @@ export class DagreGraph {
   }
 
   /** set default node label factory, used when {@link setNode} is called without a label */
-  setDefaultNodeLabel(
-    fn: () => { readonly width?: number; readonly height?: number },
-  ): this {
+  setDefaultNodeLabel<
+    T extends Readonly<Partial<Pick<DagreNode, "width" | "height">>>,
+  >(fn: () => T): this {
     this.#defaultNodeLabel = fn;
     return this;
   }
@@ -184,15 +198,14 @@ export class DagreGraph {
   }
 
   /** add or update a node */
-  setNode(
+  setNode<T extends Readonly<Partial<Pick<DagreNode, "width" | "height">>>>(
     id: string,
-    label?: { readonly width?: number; readonly height?: number },
+    label?: T,
   ): this {
     const existing = this.#graphNodes.get(id);
     if (existing) {
       if (label !== undefined) {
-        existing.data.width = label.width ?? 0;
-        existing.data.height = label.height ?? 0;
+        existing.data.label = normalizeNodeLabel(label);
       }
     } else {
       const resolved = label ?? this.#defaultNodeLabel();
@@ -200,10 +213,7 @@ export class DagreGraph {
         id,
         this.#mutGraph.node({
           id,
-          width: resolved.width ?? 0,
-          height: resolved.height ?? 0,
-          x: 0,
-          y: 0,
+          label: normalizeNodeLabel(resolved),
         }),
       );
     }
@@ -211,9 +221,9 @@ export class DagreGraph {
   }
 
   /** add or update multiple nodes */
-  setNodes(
+  setNodes<T extends Readonly<Partial<Pick<DagreNode, "width" | "height">>>>(
     ids: string[],
-    label?: { readonly width?: number; readonly height?: number },
+    label?: T,
   ): this {
     for (const id of ids) this.setNode(id, label);
     return this;
@@ -223,11 +233,21 @@ export class DagreGraph {
   setEdge(v: string, w: string, _label?: Record<string, unknown>): this {
     if (!this.#graphNodes.has(v)) this.setNode(v);
     if (!this.#graphNodes.has(w)) this.setNode(w);
+    if (v === w) {
+      if (!this.#selfLoops.has(v)) {
+        this.#selfLoops.set(v, {
+          get points() {
+            return [];
+          },
+        });
+      }
+      return this;
+    }
     const src = this.#graphNodes.get(v)!;
     const tgt = this.#graphNodes.get(w)!;
     if (src.nchildLinksTo(tgt) === 0) {
       // label closes over the link it's stored on
-      let link: MutGraphLink<IdDagreNode, DagreEdge>;
+      let link: MutGraphLink<DagreNodeEntry, DagreEdge>;
       const label: DagreEdge = {
         get points() {
           return link.points.map(([x, y]) => ({ x, y }));
@@ -245,6 +265,7 @@ export class DagreGraph {
 
   /** check if an edge exists */
   hasEdge(v: string, w: string): boolean {
+    if (v === w) return this.#selfLoops.has(v);
     const src = this.#graphNodes.get(v);
     const tgt = this.#graphNodes.get(w);
     if (!src || !tgt) return false;
@@ -257,12 +278,17 @@ export class DagreGraph {
     if (graphNode) {
       graphNode.delete();
       this.#graphNodes.delete(id);
+      this.#selfLoops.delete(id);
     }
     return this;
   }
 
   /** remove an edge */
   removeEdge(v: string, w: string): this {
+    if (v === w) {
+      this.#selfLoops.delete(v);
+      return this;
+    }
     const src = this.#graphNodes.get(v);
     const tgt = this.#graphNodes.get(w);
     if (src && tgt) {
@@ -278,7 +304,7 @@ export class DagreGraph {
   node(id: string): DagreNode {
     const graphNode = this.#graphNodes.get(id);
     if (!graphNode) throw err`unknown node: ${id}`;
-    return graphNode.data;
+    return graphNode.data.label;
   }
 
   /**
@@ -290,6 +316,11 @@ export class DagreGraph {
    * label passed to {@link setEdge} is ignored.
    */
   edge(v: string, w: string): DagreEdge {
+    if (v === w) {
+      const loop = this.#selfLoops.get(v);
+      if (loop) return loop;
+      throw err`unknown edge: ${v} -> ${w}`;
+    }
     const src = this.#graphNodes.get(v);
     const tgt = this.#graphNodes.get(w);
     if (!src || !tgt) throw err`unknown edge: ${v} -> ${w}`;
@@ -306,10 +337,14 @@ export class DagreGraph {
 
   /** get all edges as `{ v, w }` descriptors */
   edges(): DagreEdgeDescriptor[] {
-    return Array.from(this.#mutGraph.links(), (link) => ({
+    const result = Array.from(this.#mutGraph.links(), (link) => ({
       v: link.source.data.id,
       w: link.target.data.id,
     }));
+    for (const id of this.#selfLoops.keys()) {
+      result.push({ v: id, w: id });
+    }
+    return result;
   }
 
   /** number of nodes */
@@ -319,21 +354,25 @@ export class DagreGraph {
 
   /** number of edges */
   edgeCount(): number {
-    return this.#mutGraph.nlinks();
+    return this.#mutGraph.nlinks() + this.#selfLoops.size;
   }
 
   /** get predecessor node ids */
   predecessors(id: string): string[] {
     const node = this.#graphNodes.get(id);
     if (!node) throw err`unknown node: ${id}`;
-    return Array.from(node.parents(), (n) => n.data.id);
+    const result = Array.from(node.parents(), (n) => n.data.id);
+    if (this.#selfLoops.has(id)) result.push(id);
+    return result;
   }
 
   /** get successor node ids */
   successors(id: string): string[] {
     const node = this.#graphNodes.get(id);
     if (!node) throw err`unknown node: ${id}`;
-    return Array.from(node.children(), (n) => n.data.id);
+    const result = Array.from(node.children(), (n) => n.data.id);
+    if (this.#selfLoops.has(id)) result.push(id);
+    return result;
   }
 
   /** get all neighbor node ids (predecessors and successors, deduplicated) */
@@ -343,6 +382,7 @@ export class DagreGraph {
     const seen = new Set<string>();
     for (const n of node.parents()) seen.add(n.data.id);
     for (const n of node.children()) seen.add(n.data.id);
+    if (this.#selfLoops.has(id)) seen.add(id);
     return [...seen];
   }
 
@@ -357,15 +397,20 @@ export class DagreGraph {
     if (w !== undefined) {
       const other = this.#graphNodes.get(w);
       if (!other) throw err`unknown node: ${w}`;
+      if (v === w) {
+        return this.#selfLoops.has(v) ? [{ v, w }] : [];
+      }
       return Array.from(node[linksTo](other), (link) => ({
         v: link.source.data.id,
         w: link.target.data.id,
       }));
     }
-    return Array.from(node[linksAll](), (link) => ({
+    const result = Array.from(node[linksAll](), (link) => ({
       v: link.source.data.id,
       w: link.target.data.id,
     }));
+    if (this.#selfLoops.has(v)) result.push({ v, w: v });
+    return result;
   }
 
   /** get incoming edge descriptors, optionally filtered to edges from `w` */
@@ -393,23 +438,36 @@ export class DagreGraph {
     });
     const result: DagreEdgeDescriptor[] = [];
     if (other) {
-      for (const link of node.parentLinksTo(other)) result.push(toDesc(link));
-      for (const link of node.childLinksTo(other)) result.push(toDesc(link));
+      if (v === w) {
+        if (this.#selfLoops.has(v)) result.push({ v, w });
+      } else {
+        for (const link of node.parentLinksTo(other)) result.push(toDesc(link));
+        for (const link of node.childLinksTo(other)) result.push(toDesc(link));
+      }
     } else {
       for (const link of node.parentLinks()) result.push(toDesc(link));
       for (const link of node.childLinks()) result.push(toDesc(link));
+      if (this.#selfLoops.has(v)) result.push({ v, w: v });
     }
     return result;
   }
 
   /** get source node ids (no parents) */
   sources(): string[] {
-    return Array.from(this.#mutGraph.sources(), (n) => n.data.id);
+    const result: string[] = [];
+    for (const n of this.#mutGraph.sources()) {
+      if (!this.#selfLoops.has(n.data.id)) result.push(n.data.id);
+    }
+    return result;
   }
 
   /** get sink node ids (no children) */
   sinks(): string[] {
-    return Array.from(this.#mutGraph.sinks(), (n) => n.data.id);
+    const result: string[] = [];
+    for (const n of this.#mutGraph.sinks()) {
+      if (!this.#selfLoops.has(n.data.id)) result.push(n.data.id);
+    }
+    return result;
   }
 
   /** always true — dagre graphs are directed */
@@ -442,10 +500,7 @@ export class DagreGraph {
     result.#defaultNodeLabel = this.#defaultNodeLabel;
     for (const [id, graphNode] of this.#graphNodes) {
       if (fn(id)) {
-        result.setNode(id, {
-          width: graphNode.data.width,
-          height: graphNode.data.height,
-        });
+        result.setNode(id, graphNode.data.label);
       }
     }
     for (const link of this.#mutGraph.links()) {
@@ -453,6 +508,11 @@ export class DagreGraph {
       const w = link.target.data.id;
       if (result.hasNode(v) && result.hasNode(w)) {
         result.setEdge(v, w);
+      }
+    }
+    for (const id of this.#selfLoops.keys()) {
+      if (result.hasNode(id)) {
+        result.setEdge(id, id);
       }
     }
     return result;
@@ -475,10 +535,10 @@ export class DagreGraph {
     const isHorizontal = config.rankdir === "LR" || config.rankdir === "RL";
 
     const nodeSizeFn = (
-      graphNode: GraphNode<IdDagreNode, DagreEdge>,
+      graphNode: GraphNode<DagreNodeEntry, DagreEdge>,
     ): readonly [number, number] => {
-      const w = graphNode.data.width;
-      const h = graphNode.data.height;
+      const w = graphNode.data.label.width ?? 0;
+      const h = graphNode.data.label.height ?? 0;
       return isHorizontal ? [h, w] : [w, h];
     };
 
@@ -486,7 +546,7 @@ export class DagreGraph {
       ? [config.ranksep, config.nodesep]
       : [config.nodesep, config.ranksep];
 
-    const extraTweaks: Tweak<IdDagreNode, DagreEdge>[] = [];
+    const extraTweaks: Tweak<DagreNodeEntry, DagreEdge>[] = [];
 
     let op: DagreOperator;
     if (operator) {
@@ -519,8 +579,8 @@ export class DagreGraph {
     config.height = result.height;
 
     for (const graphNode of grf.#mutGraph.nodes()) {
-      graphNode.data.x = graphNode.x;
-      graphNode.data.y = graphNode.y;
+      graphNode.data.label.x = graphNode.x;
+      graphNode.data.label.y = graphNode.y;
     }
   }
 }
