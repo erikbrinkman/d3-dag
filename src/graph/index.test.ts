@@ -547,20 +547,28 @@ test("component info matches the graph through random edits", () => {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  const component = (start: MutGraphNode<number, undefined>) => {
-    const seen = new Set([start]);
-    const queue = [start];
+  const reach = (
+    starts: Iterable<MutGraphNode<number, undefined>>,
+    next: (
+      node: MutGraphNode<number, undefined>,
+    ) => Iterable<MutGraphNode<number, undefined>>,
+  ) => {
+    const seen = new Set(starts);
+    const queue = [...seen];
     let node: MutGraphNode<number, undefined> | undefined;
     while ((node = queue.pop())) {
-      for (const next of [...node.children(), ...node.parents()]) {
-        if (!seen.has(next)) {
-          seen.add(next);
-          queue.push(next);
+      for (const succ of next(node)) {
+        if (!seen.has(succ)) {
+          seen.add(succ);
+          queue.push(succ);
         }
       }
     }
     return seen;
   };
+
+  const component = (start: MutGraphNode<number, undefined>) =>
+    reach([start], (node) => [...node.children(), ...node.parents()]);
 
   for (let trial = 0; trial < 50; trial++) {
     const grf = graph<number, undefined>();
@@ -569,7 +577,17 @@ test("component info matches the graph through random edits", () => {
     );
     const links: MutGraphLink<number, undefined>[] = [];
     for (let step = 0; step < 40; step++) {
-      if (rand() < 0.55 || !links.length) {
+      const action = rand();
+      if (action < 0.05) {
+        const ind = Math.floor(rand() * nodes.length);
+        const removed = nodes[ind];
+        removed.delete();
+        nodes[ind] = grf.node(nodes.length + step);
+        for (let pos = links.length - 1; pos >= 0; pos--) {
+          const { source, target } = links[pos];
+          if (source === removed || target === removed) links.splice(pos, 1);
+        }
+      } else if (action < 0.55 || !links.length) {
         const source = nodes[Math.floor(rand() * nodes.length)];
         const target = nodes[Math.floor(rand() * nodes.length)];
         if (source !== target) links.push(grf.link(source, target));
@@ -585,8 +603,28 @@ test("component info matches the graph through random edits", () => {
           expect(node.nlinks()).toBe(
             members.reduce((total, member) => total + member.nchildLinks(), 0),
           );
-          expect([...node.roots()].length).toBeGreaterThan(0);
+          const memberSet = new Set(members);
+          const sources = new Set(
+            members.filter((member) => !member.nparents()),
+          );
+          const sinks = new Set(
+            members.filter((member) => !member.nchildren()),
+          );
+          expect(reach(node.roots(), (member) => member.children())).toEqual(
+            memberSet,
+          );
+          expect(reach(node.leaves(), (member) => member.parents())).toEqual(
+            memberSet,
+          );
+          if (node.acyclic()) {
+            expect(new Set(node.roots())).toEqual(sources);
+            expect(new Set(node.leaves())).toEqual(sinks);
+          }
+          expect(new Set(node.sources())).toEqual(sources);
+          expect(new Set(node.sinks())).toEqual(sinks);
         }
+        expect(grf.nnodes()).toBe(nodes.length);
+        expect(grf.nlinks()).toBe(links.length);
         const pieces = new Set(
           nodes.map((node) =>
             [...component(node)]
@@ -727,6 +765,42 @@ test("roots leaves cache", () => {
   // b | c
   //   |/
   //   d
+});
+
+test("roots and leaves update after linking inside a component", () => {
+  const grf = graph<undefined, undefined>();
+  const top = grf.node();
+  const bottom = grf.node();
+  const side = grf.node();
+  top.child(bottom);
+  side.child(bottom);
+  expect(new Set(grf.roots())).toEqual(new Set([top, side]));
+  expect([...grf.leaves()]).toEqual([bottom]);
+
+  top.child(side);
+  expect([...grf.roots()]).toEqual([top]);
+  expect([...grf.leaves()]).toEqual([bottom]);
+
+  const back = grf.node();
+  back.child(top);
+  bottom.child(back);
+  expect(grf.acyclic()).toBe(false);
+  expect([...grf.roots()]).toHaveLength(1);
+  expect([...grf.leaves()]).toHaveLength(1);
+});
+
+test("leaves update after linking inside a component", () => {
+  const grf = graph<undefined, undefined>();
+  const root = grf.node();
+  const upper = grf.node();
+  const lower = grf.node();
+  root.child(upper);
+  root.child(lower);
+  expect(new Set(grf.leaves())).toEqual(new Set([upper, lower]));
+
+  upper.child(lower);
+  expect([...grf.leaves()]).toEqual([lower]);
+  expect([...grf.roots()]).toEqual([root]);
 });
 
 test("sources sinks cache", () => {
