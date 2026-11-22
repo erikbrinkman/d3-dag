@@ -240,6 +240,29 @@ test("tweakShape()", () => {
   }
 });
 
+test("tweakShape() ends a link between touching nodes at the point they share", () => {
+  for (const shape of [shapeRect, shapeEllipse, shapeTopBottom]) {
+    const grf = graph<undefined, undefined>();
+    const source = grf.node(undefined);
+    const target = grf.node(undefined);
+    const link = source.child(target);
+    source.x = 0;
+    source.y = 0;
+    target.x = 0;
+    target.y = 2;
+    link.points = [
+      [0, 0],
+      [0, 2],
+    ];
+
+    tweakShape([2, 2], shape)(grf, { width: 2, height: 3 });
+    expect(link.points).toEqual([
+      [0, 1],
+      [0, 1],
+    ]);
+  }
+});
+
 test("shapeRect()", () => {
   // rotations
   expect(shapeRect([0, 0], [2, 2], [0, 0], [0, 2])).toEqual([0, 1]);
@@ -277,8 +300,27 @@ test("shapeRect()", () => {
   // would intersect but late
   expect(shapeRect([0, 0], [2, 2], [3, 3], [2, 2])).toEqual([3, 3]);
 
-  // invalid end
-  expect(() => shapeRect([0, 0], [2, 2], [2, 0], [0, 0])).toThrow(
+  // leave from the border
+  expect(shapeRect([0, 0], [2, 2], [0.5, 1], [0.5, 3])).toEqual([0.5, 1]);
+  expect(shapeRect([0, 0], [2, 2], [-1, 0], [-3, 1])).toEqual([-1, 0]);
+
+  // head in from the border
+  expect(shapeRect([0, 0], [2, 2], [0.5, 1], [-1, 0])).toEqual([0.5, 1]);
+
+  // end on the border
+  expect(shapeRect([0, 0], [2, 2], [0, 0], [0.5, 1])).toEqual([0.5, 1]);
+  expect(shapeRect([0, 0], [2, 2], [0, 0], [1, 1])).toEqual([1, 1]);
+  expect(shapeRect([0.4, 0], [2, 2], [0.4, 0], [-0.3, 1])).toEqual([-0.3, 1]);
+
+  // zero size
+  expect(shapeRect([0, 0], [0, 0], [0, 0], [0, 0])).toEqual([0, 0]);
+  expect(shapeRect([0, 0], [0, 0], [0, 0], [1, 1])).toEqual([0, 0]);
+
+  // end inside
+  expect(() => shapeRect([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toThrow(
+    "ended inside rectangle",
+  );
+  expect(() => shapeRect([0, 0], [2, 2], [-0.5, 0], [0.5, 0.5])).toThrow(
     "ended inside rectangle",
   );
 });
@@ -337,8 +379,29 @@ test("shapeEllipse()", () => {
   // would intersect but late
   expect(shapeEllipse([0, 0], [2, 2], [3, 3], [2, 2])).toEqual([3, 3]);
 
-  // invalid end
-  expect(() => shapeEllipse([0, 0], [2, 2], [2, 0], [0, 0])).toThrow(
+  // leave from the border
+  expect(shapeEllipse([0, 0], [2, 2], [0, 1], [1, 3])).toEqual([0, 1]);
+  expect(shapeEllipse([0, 0], [2, 2], [1, 0], [3, 0])).toEqual([1, 0]);
+
+  // head in from the border
+  expect(shapeEllipse([0, 0], [2, 2], [0, 1], [0, -2])).toEqual([0, 1]);
+
+  // end on the border
+  expect(shapeEllipse([0, 0], [2, 2], [0, 0], [0, 1])).toEqual([0, 1]);
+  expect(shapeEllipse([0, 0], [2, 2], [0.5, 0], [1, 0])).toEqual([1, 0]);
+
+  // flat
+  expect(shapeEllipse([0, 0], [2, 0], [0, 0], [0, 2])).toEqual([0, 0]);
+  expect(shapeEllipse([0, 0], [2, 0], [0, 0], [2, 0])).toEqual([0, 0]);
+
+  // zero size
+  expect(shapeEllipse([0, 0], [0, 0], [0, 0], [0, 0])).toEqual([0, 0]);
+
+  // end inside
+  expect(() => shapeEllipse([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toThrow(
+    "ended inside ellipse",
+  );
+  expect(() => shapeEllipse([0, 0], [2, 2], [0, 0.5], [0.5, 0])).toThrow(
     "ended inside ellipse",
   );
 });
@@ -365,19 +428,39 @@ test("shapeTopBottom()", () => {
   // different centers
   expect(shapeTopBottom([1, 2], [2, 2], [1, 2], [3, 4])).toEqual([1, 3]);
 
-  // non-intersecting
-  expect(shapeTopBottom([0, 0], [2, 2], [2, 3], [2, 2])).toEqual([0, 1]);
+  // leave from the border
+  expect(shapeTopBottom([0, 0], [2, 2], [0.5, 1], [0.5, 3])).toEqual([0.5, 1]);
+  expect(shapeTopBottom([0, 0], [2, 2], [-0.5, -1], [0, -3])).toEqual([
+    -0.5, -1,
+  ]);
 
-  // would intersect but early
-  expect(shapeTopBottom([0, 0], [2, 2], [2, 2], [3, 3])).toEqual([0, 1]);
+  // leave beside the node
+  expect(shapeTopBottom([0, 0], [2, 2], [0, 0], [2, 0.5])).toEqual([0, 1]);
+  expect(shapeTopBottom([0, 0], [2, 2], [0, 0], [-2, -0.5])).toEqual([0, -1]);
 
-  // would intersect but late
-  expect(shapeTopBottom([0, 0], [2, 2], [3, 3], [2, 2])).toEqual([0, 1]);
+  // start outside
+  expect(shapeTopBottom([0, 0], [2, 2], [2, 3], [2, 2])).toEqual([2, 3]);
+  expect(shapeTopBottom([0, 0], [2, 2], [2, 0], [0, 0])).toEqual([2, 0]);
 
-  // invalid end
-  expect(() => shapeTopBottom([0, 0], [2, 2], [2, 0], [0, 0])).toThrow(
-    "ended too close",
+  // leave level
+  expect(() => shapeTopBottom([0, 0], [2, 2], [0, 0], [2, 0])).toThrow(
+    "heading neither up nor down",
   );
+
+  // end inside
+  expect(() => shapeTopBottom([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toThrow(
+    "ended inside the node",
+  );
+  expect(() => shapeTopBottom([0, 0], [2, 2], [0.5, 0], [0, -0.5])).toThrow(
+    "ended inside the node",
+  );
+
+  // end on the border
+  expect(shapeTopBottom([0, 0], [2, 2], [0, 0], [0.5, 1])).toEqual([0, 1]);
+  expect(shapeTopBottom([0, 0], [2, 2], [0, 0], [1, -0.5])).toEqual([0, -1]);
+
+  // zero size
+  expect(shapeTopBottom([0, 0], [0, 0], [0, 0], [0, 1])).toEqual([0, 0]);
 });
 
 test("tweakSugiyama() simple", () => {

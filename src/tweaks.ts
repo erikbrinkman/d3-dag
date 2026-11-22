@@ -206,11 +206,10 @@ export function tweakFlip(
 }
 
 /**
- * a shape callable used to truncate an edge path at a node
+ * a shape callable that ends a link where it leaves a node
  *
- * This represents how to tweak the edge of a link conditioned on the shape of
- * the node. This is useful for adding endings to an link (like arrows) that
- * will align with a node well.
+ * It returns where the segment from `start` to `end` leaves the node; the
+ * border counts as outside.
  */
 export type Shape = (
   center: readonly [number, number],
@@ -219,17 +218,24 @@ export type Shape = (
   end: readonly [number, number],
 ) => [number, number];
 
-const Direction = {
-  Left: 1,
-  Right: 2,
-  Bottom: 4,
-  Top: 8,
-} as const;
+/** check whether a point is inside a node's bounding box, not on its border */
+function insideRect(
+  [cx, cy]: readonly [number, number],
+  [width, height]: readonly [number, number],
+  [x, y]: readonly [number, number],
+): boolean {
+  return (
+    cx - width / 2 < x &&
+    x < cx + width / 2 &&
+    cy - height / 2 < y &&
+    y < cy + height / 2
+  );
+}
 
 /**
  * a bounding box shape for the full rectangle
  *
- * Useful with [`tweakShape`].
+ * Useful with {@link tweakShape}.
  */
 export function shapeRect(
   center: readonly [number, number],
@@ -239,67 +245,39 @@ export function shapeRect(
 ): [number, number] {
   const [cx, cy] = center;
   const [width, height] = nodeSize;
-
-  // variant of Cohen–Sutherland to suit this purposes, we only move the end
-  // point, and slightly modify the returns
   const [sx, sy] = start;
-  let [ex, ey] = end;
+  const [ex, ey] = end;
   const xmin = cx - width / 2;
   const xmax = cx + width / 2;
   const ymin = cy - height / 2;
   const ymax = cy + height / 2;
 
-  function outCode(x: number, y: number): number {
-    let code = 0;
-    if (x < xmin) {
-      code |= Direction.Left;
-    } else if (x > xmax) {
-      code |= Direction.Right;
-    }
-    if (y < ymin) {
-      code |= Direction.Bottom;
-    } else if (y > ymax) {
-      code |= Direction.Top;
-    }
-    return code;
-  }
-
-  const scode = outCode(sx, sy);
-  let ecode = outCode(ex, ey);
-  if (!ecode) {
-    // in this instance there's not a good return and our assumptions were violated, so we just error
+  if (!insideRect(center, nodeSize, start)) {
+    return [sx, sy];
+  } else if (insideRect(center, nodeSize, end)) {
     throw err`line from [${sx}, ${sy}] -> [${ex}, ${ey}] ended inside rectangle centered at [${cx}, ${cy}] with size [${width}, ${height}]`;
-  }
-
-  for (;;) {
-    if (!ecode) {
-      // moved endpoint into the rectangle this is the new point
+  } else {
+    const dx = ex - sx;
+    const dy = ey - sy;
+    const xedge = dx > 0 ? xmax : xmin;
+    const yedge = dy > 0 ? ymax : ymin;
+    const xfrac = dx ? (xedge - sx) / dx : Infinity;
+    const yfrac = dy ? (yedge - sy) / dy : Infinity;
+    if (xfrac >= 1 && yfrac >= 1) {
+      // start + delta can miss end by rounding
       return [ex, ey];
-    } else if (scode & ecode) {
-      // entirely outside return start
-      return [sx, sy];
-    } else if (ecode & Direction.Top) {
-      ex = sx + ((ex - sx) * (ymax - sy)) / (ey - sy);
-      ey = ymax;
-    } else if (ecode & Direction.Bottom) {
-      ex = sx + ((ex - sx) * (ymin - sy)) / (ey - sy);
-      ey = ymin;
-    } else if (ecode & Direction.Right) {
-      ey = sy + ((ey - sy) * (xmax - sx)) / (ex - sx);
-      ex = xmax;
+    } else if (xfrac < yfrac) {
+      return [xedge, sy + xfrac * dy];
     } else {
-      // ecode & Direction.Left
-      ey = sy + ((ey - sy) * (xmin - sx)) / (ex - sx);
-      ex = xmin;
+      return [sx + yfrac * dx, yedge];
     }
-    ecode = outCode(ex, ey);
   }
 }
 
 /**
  * a bounding box shape for an ellipse
  *
- * Useful with [`tweakShape`].
+ * Useful with {@link tweakShape}.
  */
 export function shapeEllipse(
   center: readonly [number, number],
@@ -307,51 +285,45 @@ export function shapeEllipse(
   start: readonly [number, number],
   end: readonly [number, number],
 ): [number, number] {
-  const [cx, cy] = center;
   const [width, height] = nodeSize;
-  const [sx, sy] = start;
-  const [ex, ey] = end;
-
-  const a = width / 2;
-  const b = height / 2;
-  const m = ex - sx;
-  const c = sx - cx;
-  const n = ey - sy;
-  const d = sy - cy;
-
-  const a2 = a * a;
-  const b2 = b * b;
-  const den = a2 * n * n + b2 * m * m;
-  const diff = m * d - n * c;
-  const root = den - diff * diff;
-
-  if (root >= 0) {
-    // intersection
-    const rooted = a * b * Math.sqrt(root);
-    const num = m * c * b2 + n * d * a2;
-    const t1 = (num + rooted) / -den;
-    const t2 = (num - rooted) / -den;
-
-    // check that end point is not inside ellipse
-    if (t1 < 1 && 1 < t2) {
-      throw err`line from [${sx}, ${sy}] -> [${ex}, ${ey}] ended inside ellipse at [${cx}, ${cy}] with size [${width}, ${height}]`;
-    } else if (0 <= t2 && t2 <= 1) {
-      // select closer point to end
-      return [t2 * m + sx, t2 * n + sy];
-    } else {
-      // no intersection
-      return [sx, sy];
-    }
+  if (!width || !height) {
+    // a flat ellipse is its bounding box
+    return shapeRect(center, nodeSize, start, end);
   } else {
-    // no intersection
-    return [sx, sy];
+    const [cx, cy] = center;
+    const [sx, sy] = start;
+    const [ex, ey] = end;
+    const a2 = (width / 2) ** 2;
+    const b2 = (height / 2) ** 2;
+
+    // negative inside the ellipse, zero on its border
+    function level(x: number, y: number): number {
+      return b2 * (x - cx) ** 2 + a2 * (y - cy) ** 2 - a2 * b2;
+    }
+
+    const startLevel = level(sx, sy);
+    if (startLevel >= 0) {
+      return [sx, sy];
+    } else if (level(ex, ey) < 0) {
+      throw err`line from [${sx}, ${sy}] -> [${ex}, ${ey}] ended inside ellipse at [${cx}, ${cy}] with size [${width}, ${height}]`;
+    } else {
+      // the larger root of level along the segment, which is in [0, 1]
+      const dx = ex - sx;
+      const dy = ey - sy;
+      const quad = b2 * dx * dx + a2 * dy * dy;
+      const half = b2 * dx * (sx - cx) + a2 * dy * (sy - cy);
+      const frac = (Math.sqrt(half * half - quad * startLevel) - half) / quad;
+      return [sx + frac * dx, sy + frac * dy];
+    }
   }
 }
 
 /**
  * a shape that aligns edges with the centered top or bottom of a node
  *
- * Useful with [`tweakShape`].
+ * A link leaves from whichever of the two it heads toward.
+ *
+ * Useful with {@link tweakShape}.
  */
 export function shapeTopBottom(
   center: readonly [number, number],
@@ -361,17 +333,21 @@ export function shapeTopBottom(
 ): [number, number] {
   const [cx, cy] = center;
   const [width, height] = nodeSize;
-  const [_, ey] = end;
-
+  const [sx, sy] = start;
+  const [, ey] = end;
   const top = cy - height / 2;
   const bottom = cy + height / 2;
 
-  if (ey < top) {
+  if (!insideRect(center, nodeSize, start)) {
+    return [sx, sy];
+  } else if (insideRect(center, nodeSize, end)) {
+    throw err`line from ${start} -> ${end} ended inside the node at [${cx}, ${cy}] with size [${width}, ${height}]`;
+  } else if (ey < sy) {
     return [cx, top];
-  } else if (ey > bottom) {
+  } else if (ey > sy) {
     return [cx, bottom];
   } else {
-    throw err`line from ${start} -> ${end} ended too close to [${cx}, ${cy}] with size [${width}, ${height}]`;
+    throw err`line from ${start} -> ${end} leaves the side of the node at [${cx}, ${cy}] with size [${width}, ${height}], heading neither up nor down`;
   }
 }
 
