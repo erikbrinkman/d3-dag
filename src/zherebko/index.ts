@@ -3,9 +3,10 @@
  *
  * @packageDocumentation
  */
-import type { Graph, Rank } from "../graph/index.js";
+import type { Graph, GraphLink, GraphNode, Rank } from "../graph/index.js";
 import { bigrams } from "../iters.js";
 import { cachedNodeSize, type LayoutResult, type NodeSize } from "../layout.js";
+import { drawLoop, fitLoops } from "../loops.js";
 import type { Tweak } from "../tweaks.js";
 import { err, type U } from "../utils.js";
 import { greedy } from "./greedy.js";
@@ -125,9 +126,15 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
       // map to coordinates
       let minIndex = 0;
       let maxIndex = 0;
-      for (const index of indices.values()) {
+      const nodeLoops = new Map<GraphNode, [GraphLink, number][]>();
+      for (const [link, index] of indices) {
         minIndex = Math.min(minIndex, index);
         maxIndex = Math.max(maxIndex, index);
+        if (link.source === link.target) {
+          const loops = nodeLoops.get(link.source) ?? [];
+          loops.push([link, index]);
+          nodeLoops.set(link.source, loops);
+        }
       }
 
       // assign node positions
@@ -136,10 +143,31 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
         node.x = nodex;
       }
 
+      // a lane is maxWidth / 2 + |index| * xgap from the node's center, which
+      // is where drawLoop puts a loop at that depth
+      for (const node of ordered) {
+        const loops = nodeLoops.get(node) ?? [];
+        const right = Math.max(0, ...loops.map(([, index]) => index));
+        const left = Math.max(0, ...loops.map(([, index]) => -index));
+        for (const [link, index] of loops) {
+          const onRight = index > 0;
+          drawLoop(
+            link,
+            onRight,
+            Math.abs(index),
+            onRight ? right : left,
+            [maxWidth, nodeSize(node)[1]],
+            xgap,
+            ygap,
+          );
+        }
+      }
+
       // assign link points
       for (const link of inp.links()) {
         const index = indices.get(link) ?? 0;
         const { source, target, points } = link;
+        if (source === target) continue;
         points.splice(0);
 
         points.push([source.x, source.y]);
@@ -161,7 +189,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
 
       res = {
         width: (maxIndex - minIndex) * xgap + maxWidth,
-        height,
+        height: fitLoops(inp, height),
       };
     }
 
@@ -271,6 +299,11 @@ export type DefaultZherebko = Zherebko<{
  * beyond the layout defaults of {@link Zherebko#rank},
  * {@link Zherebko#nodeSize}, {@link Zherebko#gap}, and
  * {@link Zherebko#tweaks}.
+ *
+ * Self loops take lanes like other links, holding them only at their node, so
+ * each of a node's loops gets its own lane. They're drawn like sugiyama's and
+ * grid's: each leaves below its node's center, runs up its lane, and comes
+ * back in above, nested one inside the next.
  *
  * <img alt="zherebko example" src="../../resources/zherebko.png" width="1000">
  *

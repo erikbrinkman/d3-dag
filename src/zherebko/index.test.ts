@@ -1,8 +1,28 @@
 import { expect, test } from "bun:test";
 import { graphConnect } from "../graph/connect.js";
 import { type Graph, type GraphNode, graph } from "../graph/index.js";
+import { bigrams } from "../iters.js";
 import type { LayoutResult } from "../layout.js";
-import { doub, line, oh, single } from "../test-graphs.js";
+import { drawLoops } from "../loops.js";
+import {
+  ccoz,
+  doub,
+  dummy,
+  en,
+  ex,
+  eye,
+  line,
+  loop,
+  loops,
+  multi,
+  oh,
+  single,
+  square,
+  three,
+  trip,
+  zhere,
+} from "../test-graphs.js";
+import { loopCrossings } from "../test-utils.js";
 import { tweakSize } from "../tweaks.js";
 import { zherebko } from "./index.js";
 
@@ -449,3 +469,190 @@ test("zherebko() fails with args", () => {
   // @ts-expect-error no args
   expect(() => zherebko(null)).toThrow("got arguments to zherebko");
 });
+
+test("zherebko() nests a node's self loops in their own lanes", () => {
+  const dag = graphConnect()([
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "b"],
+    ["a", "c"],
+    ["a", "d"],
+    ["a", "e"],
+    ["b", "b"],
+    ["b", "c"],
+    ["b", "d"],
+    ["b", "e"],
+    ["c", "d"],
+    ["c", "e"],
+    ["d", "d"],
+    ["d", "e"],
+    ["b", "c"],
+  ]);
+  for (const [[nodeWidth, nodeHeight], [xgap, ygap]] of [
+    [
+      [1, 1],
+      [1, 1],
+    ],
+    [
+      [2, 1],
+      [1, 2],
+    ],
+    [
+      [0, 0],
+      [2, 1],
+    ],
+  ] as const) {
+    zherebko().nodeSize([nodeWidth, nodeHeight]).gap([xgap, ygap])(dag);
+    const lanes = new Map<unknown, [number, number][]>();
+    for (const { source, target, points } of dag.links()) {
+      if (source === target) {
+        const [start, lower, upper, end] = points;
+        expect(points).toHaveLength(4);
+        expect(start).toEqual([source.x, source.y]);
+        expect(end).toEqual([source.x, source.y]);
+        // out below the center, up the lane, back in above
+        expect(lower[0]).toBeCloseTo(upper[0]);
+        expect(lower[1]).toBeGreaterThan(source.y);
+        expect(upper[1]).toBeLessThan(source.y);
+        const rise = lower[1] - source.y;
+        expect(source.y - upper[1]).toBeCloseTo(rise);
+        const nodeLanes = lanes.get(source) ?? [];
+        nodeLanes.push([lower[0] - source.x, rise]);
+        lanes.set(source, nodeLanes);
+      }
+    }
+    // a loop further out on the same side must climb more steeply, or its
+    // diagonal crosses the inner loop's lane
+    for (const nodeLanes of lanes.values()) {
+      for (const side of [1, -1]) {
+        const slopes = nodeLanes
+          .filter(([dist]) => dist * side > 0)
+          .sort(([first], [second]) => Math.abs(first) - Math.abs(second))
+          .map(([dist, rise]) => rise / Math.abs(dist));
+        for (const [inner, outer] of bigrams(slopes)) {
+          expect(outer).toBeGreaterThan(inner);
+        }
+      }
+    }
+    // lanes give a node's loops the same places sugiyama and grid draw them
+    for (const node of dag.nodes()) {
+      const drawn = [...node.childLinksTo(node)].map(({ points }) => [
+        ...points,
+      ]);
+      drawLoops(node, [nodeWidth, nodeHeight], xgap, ygap);
+      for (const [ind, { points }] of [...node.childLinksTo(node)].entries()) {
+        for (const [pointInd, [pointX, pointY]] of points.entries()) {
+          const [drawnX, drawnY] = drawn[ind][pointInd];
+          expect(drawnX).toBeCloseTo(pointX);
+          expect(drawnY).toBeCloseTo(pointY);
+        }
+      }
+    }
+  }
+});
+
+test("zherebko() keeps self loops on neighboring nodes apart", () => {
+  const dag = graphConnect()([
+    ["a", "b"],
+    ["b", "c"],
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "a"],
+    ["b", "b"],
+    ["b", "b"],
+    ["c", "c"],
+  ]);
+  for (const layout of [zherebko(), zherebko().nodeSize([0, 0]).gap([1, 1])]) {
+    layout(dag);
+    expect(loopCrossings(dag)).toBe(0);
+  }
+});
+
+test("zherebko() fits a self loop on a single node", () => {
+  const dag = graphConnect()([["a", "a"]]);
+  const { width, height } = zherebko().nodeSize([1, 1]).gap([1, 2])(dag);
+  expect(width).toBeCloseTo(2);
+  expect(height).toBeCloseTo(2);
+  const [loop] = dag.links();
+  const [[startX, startY], [lowerX, lowerY], [upperX, upperY], end] =
+    loop.points;
+  expect([startX, startY]).toEqual(end);
+  expect(startX).toBeCloseTo(0.5);
+  expect(startY).toBeCloseTo(1);
+  expect(lowerX).toBeCloseTo(2);
+  expect(upperX).toBeCloseTo(2);
+  expect(lowerY).toBeCloseTo(2);
+  expect(upperY).toBeCloseTo(0);
+});
+
+test("zherebko() reuses inner lanes a link passed over beside loops", () => {
+  const dag = graphConnect()([
+    ["a", "b"],
+    ["b", "c"],
+    ["c", "d"],
+    ["d", "e"],
+    ["e", "f"],
+    ["f", "g"],
+    ["b", "b"],
+    ["b", "b"],
+    ["b", "b"],
+    ["b", "b"],
+    ["a", "c"],
+    ["c", "e"],
+    ["c", "f"],
+    ["c", "g"],
+  ]);
+  zherebko()(dag);
+  const laneXs = new Map(
+    [...dag.links()]
+      .filter(({ source }) => source.data === "c")
+      .map(({ target, points: [, [laneX]] }) => [target.data, laneX]),
+  );
+  // a -> c had to pass b's loops in right lane 3, but right lanes 1 and 2 are
+  // free below b
+  expect(laneXs.get("e")).toBeCloseTo(4);
+  expect(laneXs.get("f")).toBeCloseTo(1);
+  expect(laneXs.get("g")).toBeCloseTo(5);
+});
+
+for (const dat of [
+  single,
+  doub,
+  line,
+  oh,
+  trip,
+  multi,
+  eye,
+  square,
+  dummy,
+  three,
+  en,
+  ex,
+  ccoz,
+  zhere,
+  loop,
+  loops,
+]) {
+  test(`zherebko() keeps ${dat.name} inside its bounds`, () => {
+    const grf = dat();
+    const layout = zherebko().nodeSize([2, 1]).gap([1, 2]);
+    const { width, height } = layout(grf);
+    for (const node of grf.nodes()) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(width);
+      expect(node.y).toBeGreaterThanOrEqual(0);
+      expect(node.y).toBeLessThanOrEqual(height);
+    }
+    for (const { source, target, points } of grf.links()) {
+      if (source === target) expect(points).toHaveLength(4);
+      expect(points.length).toBeGreaterThanOrEqual(2);
+      for (const [x, y] of points) {
+        expect(x).toBeGreaterThanOrEqual(-1e-6);
+        expect(x).toBeLessThanOrEqual(width + 1e-6);
+        expect(y).toBeGreaterThanOrEqual(-1e-6);
+        expect(y).toBeLessThanOrEqual(height + 1e-6);
+      }
+    }
+  });
+}
