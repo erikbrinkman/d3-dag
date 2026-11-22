@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `dagre`'s `setDefaultNodeLabel` and `setDefaultEdgeLabel` accept a plain label
   and pass ids to functions, as dagre does
 - `dagre` no longer swaps `ranksep` and `nodesep` when `rankdir` is `LR` or `RL`
+- `dagre` ends links on the node border, as dagre does
 - `tweakShape` no longer throws after `tweakSugiyama`, for nodes that touch, or
   for zero-size nodes
 - `shapeTopBottom` no longer throws on links that leave beside the node

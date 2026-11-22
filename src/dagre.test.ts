@@ -312,6 +312,95 @@ test("layout places nodes without sizes as points, like dagre", () => {
   }
 });
 
+test("layout ends link points on the node border, like dagre", () => {
+  for (const algorithm of ["sugiyama", "grid", "zherebko"] as const) {
+    for (const rankdir of ["TB", "BT", "LR", "RL"] as const) {
+      const grf = new dagre.graphlib.Graph();
+      grf.setGraph({ algorithm, rankdir });
+      grf.setDefaultEdgeLabel(() => ({}));
+      for (const id of ["a", "b", "c"]) {
+        grf.setNode(id, { width: 40, height: 20 });
+      }
+      grf.setEdge("a", "b");
+      grf.setEdge("a", "c");
+      grf.setEdge("b", "c");
+      dagre.layout(grf);
+
+      for (const { v, w } of grf.edges()) {
+        const { points } = grf.edge(v, w);
+        for (const [id, point] of [
+          [v, points[0]],
+          [w, points[points.length - 1]],
+        ] as const) {
+          const { x, y } = grf.node(id);
+          const dx = Math.abs(point.x - x) / 20;
+          const dy = Math.abs(point.y - y) / 10;
+          expect(Math.max(dx, dy)).toBeCloseTo(1);
+        }
+      }
+    }
+  }
+});
+
+test("layout ends a link through the side of a node, like dagre", () => {
+  // dagre ends this layout's a -> c at [120, 12.5], on the side of a
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ nodesep: 200, ranksep: 10 });
+  grf.setDefaultEdgeLabel(() => ({}));
+  for (const id of ["a", "b", "c"]) {
+    grf.setNode(id, { width: 40, height: 20 });
+  }
+  grf.setEdge("a", "b");
+  grf.setEdge("a", "c");
+  dagre.layout(grf);
+
+  expect(grf.node("a")).toMatchObject({ x: 140, y: 10 });
+  expect(grf.node("b")).toMatchObject({ x: 20, y: 40 });
+  expect(grf.edge("a", "b").points).toEqual([
+    { x: 120, y: 15 },
+    { x: 40, y: 35 },
+  ]);
+});
+
+test("layout ends a link between touching nodes at the point they share", () => {
+  for (const algorithm of ["sugiyama", "grid", "zherebko"] as const) {
+    for (const rankdir of ["TB", "BT", "LR", "RL"] as const) {
+      const grf = new dagre.graphlib.Graph();
+      grf.setGraph({ algorithm, rankdir, ranksep: 0 });
+      grf.setDefaultEdgeLabel(() => ({}));
+      grf.setNode("a", { width: 40, height: 20 });
+      grf.setNode("b", { width: 40, height: 20 });
+      grf.setEdge("a", "b");
+      dagre.layout(grf);
+
+      const { x: ax, y: ay } = grf.node("a");
+      const { x: bx, y: by } = grf.node("b");
+      const shared = { x: (ax + bx) / 2, y: (ay + by) / 2 };
+      expect(grf.edge("a", "b").points).toEqual([shared, shared]);
+    }
+  }
+});
+
+test("layout works with no gap between nodes in a rank", () => {
+  for (const algorithm of ["sugiyama", "grid", "zherebko"] as const) {
+    for (const rankdir of ["TB", "BT", "LR", "RL"] as const) {
+      const grf = new dagre.graphlib.Graph();
+      grf.setGraph({ algorithm, rankdir, nodesep: 0 });
+      grf.setDefaultEdgeLabel(() => ({}));
+      for (const id of ["a", "b", "c"]) {
+        grf.setNode(id, { width: 40, height: 20 });
+      }
+      grf.setEdge("a", "b");
+      grf.setEdge("a", "c");
+      dagre.layout(grf);
+
+      for (const { v, w } of grf.edges()) {
+        expect(grf.edge(v, w).points.length).toBeGreaterThanOrEqual(2);
+      }
+    }
+  }
+});
+
 test("setEdge auto-creates unknown endpoints like graphlib", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setEdge("a", "b");

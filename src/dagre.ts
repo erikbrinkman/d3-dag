@@ -20,7 +20,7 @@ import { sugiyama } from "./sugiyama/index.js";
 import { layeringLongestPath } from "./sugiyama/layering/longest-path.js";
 import { layeringTopological } from "./sugiyama/layering/topological.js";
 import type { Tweak } from "./tweaks.js";
-import { tweakDirection, tweakGridHandles, tweakSugiyama } from "./tweaks.js";
+import { tweakDirection, tweakGridHandles, tweakShape } from "./tweaks.js";
 import { err, ierr } from "./utils.js";
 import { zherebko } from "./zherebko/index.js";
 
@@ -614,8 +614,8 @@ export class DagreGraph<
         extraTweaks.push(tweakGridHandles(nodeSizeFn, gap));
       } else {
         op = presetSugiyama(quality, ranker);
-        extraTweaks.push(tweakSugiyama(nodeSizeFn));
       }
+      extraTweaks.push(tweakShape(nodeSizeFn));
     }
     extraTweaks.push(tweakDirection(rankdir));
 
