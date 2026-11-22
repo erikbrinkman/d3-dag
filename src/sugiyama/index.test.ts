@@ -1,12 +1,36 @@
 import { expect, test } from "bun:test";
+import { graphConnect } from "../graph/connect.js";
 import { type Graph, type GraphNode, graph } from "../graph/index.js";
 import type { LayoutResult, NodeSize } from "../layout.js";
-import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs.js";
+import {
+  ccoz,
+  doub,
+  dummy,
+  en,
+  ex,
+  eye,
+  line,
+  loop,
+  loops,
+  multi,
+  oh,
+  single,
+  square,
+  three,
+  trip,
+  zhere,
+} from "../test-graphs.js";
 import { type Tweak, tweakSize } from "../tweaks.js";
+import { coordCenter } from "./coord/center.js";
+import { coordGreedy } from "./coord/greedy.js";
 import type { Coord } from "./coord/index.js";
 import { coordQuad } from "./coord/quad.js";
 import { coordSimplex } from "./coord/simplex.js";
+import { coordTopological } from "./coord/topological.js";
+import { decrossDfs } from "./decross/dfs.js";
 import type { Decross } from "./decross/index.js";
+import { decrossOpt } from "./decross/opt.js";
+import { decrossTwoLayer } from "./decross/two-layer.js";
 import { sugiyama } from "./index.js";
 import type { Layering } from "./layering/index.js";
 import { layeringTopological } from "./layering/topological.js";
@@ -150,6 +174,60 @@ test("sugiyama() works with cycles", () => {
   expect(root.x).toBeCloseTo(1);
   expect(leaf.x).toBeCloseTo(1);
   expect([root.y, leaf.y].sort()).toEqual([1, 4]);
+});
+
+test("sugiyama() draws self loops beside their node", () => {
+  const dag = graphConnect()([
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "b"],
+    ["b", "b"],
+  ]);
+  const layouts = [
+    ...[decrossTwoLayer(), decrossDfs(), decrossOpt()].flatMap((decross) =>
+      [coordSimplex(), coordQuad(), coordCenter(), coordGreedy()].map((coord) =>
+        sugiyama().decross(decross).coord(coord).nodeSize([2, 2]).gap([2, 2]),
+      ),
+    ),
+    sugiyama()
+      .layering(layeringTopological())
+      .coord(coordTopological())
+      .nodeSize([2, 2])
+      .gap([2, 2]),
+  ];
+  for (const layout of layouts) {
+    const { width, height } = layout(dag);
+    // a needs room for two loops on its right and one on its left
+    expect(width).toBeCloseTo(5);
+    for (const { points } of dag.links()) {
+      for (const [x, y] of points) {
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x).toBeLessThanOrEqual(width);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y).toBeLessThanOrEqual(height);
+      }
+    }
+
+    const [aNode] = dag.topological();
+    const loops = [...aNode.childLinksTo(aNode)].map(({ points }) => {
+      const [start, lower, upper, end] = points;
+      expect(points).toHaveLength(4);
+      expect(start).toEqual([aNode.x, aNode.y]);
+      expect(end).toEqual([aNode.x, aNode.y]);
+      // out below the center, back in above
+      expect(lower[0]).toBeCloseTo(upper[0]);
+      expect(lower[1]).toBeGreaterThan(aNode.y);
+      expect(upper[1]).toBeLessThan(aNode.y);
+      return [lower[0] - aNode.x, lower[1] - aNode.y] as const;
+    });
+    const [[firstX], [secondX], [thirdX, thirdY]] = loops;
+    expect(firstX).toBeCloseTo(2);
+    expect(secondX).toBeCloseTo(-2);
+    expect(thirdX).toBeCloseTo(3);
+    // the outer loop rises more for its distance, so it stays outside
+    expect(thirdY / thirdX).toBeGreaterThan(loops[0][1] / firstX);
+  }
 });
 
 test("sugiyama() allows changing nodeSize and gap", () => {
@@ -398,5 +476,46 @@ for (const [name, coord] of coords) {
       .sort((left, right) => left - right);
     expect(middles[0]).toBeCloseTo(0);
     expect(middles[1]).toBeCloseTo(10);
+  });
+}
+
+for (const dat of [
+  single,
+  doub,
+  line,
+  oh,
+  trip,
+  multi,
+  eye,
+  square,
+  dummy,
+  three,
+  en,
+  ex,
+  ccoz,
+  zhere,
+  loop,
+  loops,
+]) {
+  test(`sugiyama() keeps ${dat.name} inside its bounds`, () => {
+    const grf = dat();
+    const layout = sugiyama().nodeSize([2, 1]).gap([1, 2]);
+    const { width, height } = layout(grf);
+    for (const node of grf.nodes()) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(width);
+      expect(node.y).toBeGreaterThanOrEqual(0);
+      expect(node.y).toBeLessThanOrEqual(height);
+    }
+    for (const { source, target, points } of grf.links()) {
+      if (source === target) expect(points).toHaveLength(4);
+      expect(points.length).toBeGreaterThanOrEqual(2);
+      for (const [x, y] of points) {
+        expect(x).toBeGreaterThanOrEqual(-1e-6);
+        expect(x).toBeLessThanOrEqual(width + 1e-6);
+        expect(y).toBeGreaterThanOrEqual(-1e-6);
+        expect(y).toBeLessThanOrEqual(height + 1e-6);
+      }
+    }
   });
 }

@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { graphConnect } from "../../graph/connect.js";
 import { doub, eye, multi, oh, square } from "../../test-graphs.js";
 import { canonical, getLayers } from "../test-utils.js";
 import { type Layering, layerSeparation } from "./index.js";
@@ -104,4 +105,15 @@ test("layeringTopological() fails passing an arg to constructor", () => {
   expect(() => layeringTopological(null)).toThrow(
     "got arguments to layeringTopological",
   );
+});
+
+test("layeringTopological() ignores self loops", () => {
+  const dag = graphConnect()([
+    ["0", "0"],
+    ["0", "1"],
+    ["1", "1"],
+  ]);
+  const num = layeringTopological()(dag, layerSeparation);
+  expect(num).toBe(1);
+  expect(getLayers(dag, num + 1)).toEqual([[0], [1]]);
 });

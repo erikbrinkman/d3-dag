@@ -399,6 +399,17 @@ test("tweakShape() trims both ends of a self loop", () => {
   ]);
 });
 
+test("tweakShape() ends a self loop on the top and bottom", () => {
+  const dag = graphConnect()([["a", "a"]]);
+  sugiyama()
+    .nodeSize([2, 2])
+    .tweaks([tweakShape<unknown, unknown>([2, 2], shapeTopBottom)])(dag);
+  const [node] = dag.nodes();
+  const [{ points }] = dag.links();
+  expect(points[0]).toEqual([node.x, node.y + 1]);
+  expect(points[points.length - 1]).toEqual([node.x, node.y - 1]);
+});
+
 test("tweakShape() takes a shape that always returns a point", () => {
   const grf = graph<undefined, undefined>();
   const source = grf.node(undefined);

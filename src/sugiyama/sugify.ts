@@ -88,6 +88,7 @@ function addSugiLinks<N, L>(
     // guaranteeing, but that might be overkill
     const initLayer = sourceData.bottomLayer;
     for (const link of node.childLinks()) {
+      if (link.target === node) continue;
       const [targetData, sugiTarget] = nodeMap.get(link.target)!;
       const targetLayer = targetData.topLayer;
       if (targetLayer > initLayer) {
@@ -146,7 +147,7 @@ type MapVal<N, L> = readonly [SugiNodeDatum<N, L>, MutSugiNode<N, L>];
  * convert a layered graph in a sugi graph
  *
  * A sugi-graph is a non-multi dag that is layered, where each node is assigned
- * to a layer, and links only span a single layer.
+ * to a layer, and links only span a single layer. Self loops are left out.
  */
 export function sugifyLayer<N, L>(
   input: Graph<N, L>,
@@ -227,7 +228,7 @@ export function sugifyLayer<N, L>(
  * Convert a layered graph in a sugi graph
  *
  * A sugi-graph is a non-multi dag that is layered, where each node is assigned
- * to a layer, and links only span a single layer.
+ * to a layer, and links only span a single layer. Self loops are left out.
  */
 export function sugifyCompact<N, L>(
   input: Graph<N, L>,
