@@ -76,6 +76,23 @@ export function tweakSize(
   return tweakSize;
 }
 
+/** a point on the way from a corner toward its neighbor */
+function nearCorner(
+  [mx, my]: [number, number],
+  [nx, ny]: [number, number],
+  [xt, yt]: readonly [number, number],
+): [number, number] {
+  // move xt sideways or yt up and down, whichever comes first, but no
+  // farther than halfway, where the neighbor's rounding would meet it
+  const dx = Math.abs(nx - mx);
+  const dy = Math.abs(ny - my);
+  const frac = Math.min(
+    dx > 2 * xt ? xt / dx : 0.5,
+    dy > 2 * yt ? yt / dy : 0.5,
+  );
+  return [mx + frac * (nx - mx), my + frac * (ny - my)];
+}
+
 /**
  * This tweak adds extra control points to the grid layout
  *
@@ -83,12 +100,12 @@ export function tweakSize(
  * control points to edges so that `d3.curveBasis` curves produce nice rounded
  * edges.
  *
- * rounding should be set somewhere between 0 and nodeSize.
+ * rounding should be set somewhere between 0 and nodeSize. No rounding goes
+ * past the middle of a segment, so short segments get less.
  */
 export function tweakGrid(
   rounding: readonly [number, number],
 ): Tweak<unknown, unknown> {
-  const [xt, yt] = rounding;
   function tweakGrid(
     graph: Graph<unknown, unknown>,
     res: Readonly<LayoutResult>,
@@ -98,14 +115,11 @@ export function tweakGrid(
       if (rem !== undefined) {
         throw err`link points had more than three points: ${link.points.length}; tweakGrid can only be applied to grid layouts`;
       } else if (last !== undefined) {
-        const [fx, fy] = first;
-        const [mx, my] = mid;
-        const [lx, ly] = last;
         link.points = [
           first,
-          [mx + xt * Math.sign(fx - mx), my + yt * Math.sign(fy - my)],
+          nearCorner(mid, first, rounding),
           mid,
-          [mx + xt * Math.sign(lx - mx), my + yt * Math.sign(ly - my)],
+          nearCorner(mid, last, rounding),
           last,
         ];
       }
