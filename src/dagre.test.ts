@@ -1,6 +1,11 @@
 import { expect, test } from "bun:test";
-import type { DagreAlgorithm, DagreQuality, Rankdir } from "./dagre.js";
-import { dagre } from "./dagre.js";
+import type {
+  DagreAlgorithm,
+  DagreGraphConfig,
+  DagreQuality,
+  Rankdir,
+} from "./dagre.js";
+import { DagreGraph, dagre } from "./dagre.js";
 import { coordQuad } from "./sugiyama/coord/quad.js";
 import { decrossOpt } from "./sugiyama/decross/opt.js";
 import { sugiyama } from "./sugiyama/index.js";
@@ -139,6 +144,7 @@ test("ranksep separates ranks and nodesep separates siblings like dagre", () => 
 
 test("per-node dimensions preserved", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 100, height: 50 });
   grf.setNode("b", { width: 200, height: 30 });
   grf.setEdge("a", "b");
@@ -152,6 +158,7 @@ test("per-node dimensions preserved", () => {
 
 test("isolated nodes are positioned", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setNode("isolated", { width: 10, height: 10 });
@@ -207,6 +214,7 @@ test("edges() returns descriptors", () => {
 
 test("custom sugiyama operators", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setNode("c", { width: 10, height: 10 });
@@ -227,6 +235,7 @@ test("custom sugiyama operators", () => {
 
 test("layout with zherebko", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setEdge("a", "b");
@@ -252,7 +261,7 @@ test("nodesep and ranksep affect spacing", () => {
   const tight = buildAndLayout(1, 1);
   const loose = buildAndLayout(10, 10);
 
-  expect(loose.height).toBeGreaterThan(tight.height);
+  expect(loose.height).toBeGreaterThan(tight.height ?? 0);
 });
 
 test("layout places nodes without sizes as points, like dagre", () => {
@@ -283,6 +292,7 @@ test("setEdge auto-creates unknown endpoints like graphlib", () => {
 
 test("setEdge auto-creates endpoints with the default node label", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setDefaultNodeLabel(() => ({ width: 10, height: 10 }));
   grf.setEdge("a", "b");
   dagre.layout(grf);
@@ -292,18 +302,87 @@ test("setEdge auto-creates endpoints with the default node label", () => {
 
 test("empty graph", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   dagre.layout(grf);
   expect(grf.graph().width).toBe(0);
   expect(grf.graph().height).toBe(0);
 });
 
-test("graph() returns config", () => {
-  const grf = new dagre.graphlib.Graph();
-  grf.setGraph({ rankdir: "LR", nodesep: 50, ranksep: 100 });
+/** graph label with an extra field */
+interface TitledGraphConfig extends DagreGraphConfig {
+  title: string;
+}
 
-  expect(grf.graph().rankdir).toBe("LR");
-  expect(grf.graph().nodesep).toBe(50);
-  expect(grf.graph().ranksep).toBe(100);
+test("graph() returns the label passed to setGraph", () => {
+  const grf = new dagre.graphlib.Graph();
+  const label: TitledGraphConfig = {
+    ranksep: 100,
+    title: "flow",
+  };
+  grf.setGraph(label);
+  grf.setNode("a", { width: 10, height: 10 });
+  grf.setNode("b", { width: 10, height: 10 });
+  grf.setEdge("a", "b");
+  dagre.layout(grf);
+
+  expect(grf.graph()).toBe(label);
+  expect(label.title).toBe("flow");
+  expect(label.width).toBe(10);
+  expect(label.height).toBe(120);
+});
+
+test("setGraph replaces the earlier label", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ rankdir: "LR", nodesep: 10 });
+  const second = { ranksep: 20 };
+  grf.setGraph(second);
+
+  expect(grf.graph()).toBe(second);
+  expect(grf.graph().rankdir).toBeUndefined();
+  expect(grf.graph().nodesep).toBeUndefined();
+});
+
+test("layout uses defaults for missing options without writing them", () => {
+  const grf = new dagre.graphlib.Graph();
+  const label = {};
+  grf.setGraph(label);
+  grf.setNode("a", { width: 10, height: 10 });
+  grf.setNode("b", { width: 10, height: 10 });
+  grf.setEdge("a", "b");
+  dagre.layout(grf);
+
+  // TB with the default ranksep of 50
+  expect(grf.node("b").y - grf.node("a").y).toBe(60);
+  expect(label).toEqual({ width: 10, height: 70 });
+});
+
+test("graph() returns undefined before setGraph, like graphlib", () => {
+  const grf = new dagre.graphlib.Graph();
+  expect(grf.graph()).toBeUndefined();
+});
+
+test("layout throws before setGraph", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setNode("a", { width: 10, height: 10 });
+  expect(() => dagre.layout(grf)).toThrow(
+    "setGraph must be called before dagre.layout",
+  );
+});
+
+test("setGraph throws on labels that aren't objects", () => {
+  const grf = new dagre.graphlib.Graph();
+  for (const label of ["label", 1, true, null, () => ({})]) {
+    // @ts-expect-error graph labels must be objects
+    expect(() => grf.setGraph(label)).toThrow("graph labels must be objects");
+  }
+  expect(grf.graph()).toBeUndefined();
+});
+
+test("DagreGraph setGraph requires a label", () => {
+  const grf = new DagreGraph();
+  // @ts-expect-error label is required
+  expect(() => grf.setGraph()).toThrow("graph labels must be objects");
+  expect(grf.graph()).toBeUndefined();
 });
 
 test("hasNode and hasEdge", () => {
@@ -344,6 +423,7 @@ test("removeEdge", () => {
 
 test("setNode updates existing node", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("a", { width: 50, height: 50 });
   dagre.layout(grf);
@@ -365,6 +445,7 @@ test("setEdge is idempotent", () => {
 
 test("edge() returns control points after layout", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setEdge("a", "b");
@@ -377,6 +458,7 @@ test("edge() returns control points after layout", () => {
 
 test("edge() label captured before layout reflects points after", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setEdge("a", "b");
@@ -410,6 +492,7 @@ test("setters return this for chaining", () => {
 
 test("graph().width/height set by layout", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 40, height: 40 });
   grf.setNode("b", { width: 40, height: 40 });
   grf.setEdge("a", "b");
@@ -582,8 +665,8 @@ test("filterNodes", () => {
   // a->c survives, a->b and b->c do not
   expect(filtered.edgeCount()).toBe(1);
   expect(filtered.hasEdge("a", "c")).toBe(true);
-  // config is copied
-  expect(filtered.graph().rankdir).toBe("LR");
+  // the graph label is shared, as in graphlib
+  expect(filtered.graph()).toBe(grf.graph());
   // dimensions are copied
   expect(filtered.node("a").width).toBe(10);
   expect(filtered.node("c").width).toBe(30);
@@ -778,6 +861,7 @@ test("algorithm grid with BT direction", () => {
 
 test("single-node graph", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 40, height: 40 });
   dagre.layout(grf);
 
@@ -811,6 +895,7 @@ for (const ranker of [
 
 test("edge().points returns {x, y} objects", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setNode("a", { width: 10, height: 10 });
   grf.setNode("b", { width: 10, height: 10 });
   grf.setEdge("a", "b");
@@ -882,15 +967,6 @@ test("inEdges throws for unknown node", () => {
 test("outEdges throws for unknown node", () => {
   const grf = new dagre.graphlib.Graph();
   expect(() => grf.outEdges("missing")).toThrow("unknown node");
-});
-
-test("graph() returns a copy", () => {
-  const grf = new dagre.graphlib.Graph();
-  grf.setGraph({ rankdir: "LR" });
-  const cfg = grf.graph();
-  cfg.rankdir = "BT";
-  // mutation should not affect internal state
-  expect(grf.graph().rankdir).toBe("LR");
 });
 
 test("custom operator with rankdir LR does not overlap siblings", () => {

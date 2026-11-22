@@ -72,7 +72,7 @@ Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most 
 | **Nodes** | `setNode`, `setNodes`, `removeNode`, `hasNode`, `node`, `nodes`, `nodeCount`, `filterNodes` |
 | **Edges** | `setEdge`, `removeEdge`, `hasEdge`, `edge`, `edges`, `edgeCount`, `setPath` |
 | **Traversal** | `predecessors`, `successors`, `neighbors`, `inEdges`, `outEdges`, `nodeEdges`, `sources`, `sinks` |
-| **Layout** | `dagre.layout(grf)` with optional `Operator` (e.grf. `sugiyama()` or `zherebko()`) |
+| **Layout** | `dagre.layout(grf)` with optional `Operator` (e.g. `sugiyama()` or `zherebko()`) |
 
 ### Unsupported dagre API
 
@@ -84,7 +84,6 @@ Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most 
 
 - `setGraph` accepts additional `quality`, `ranker`, and `algorithm` options
 - `dagre.layout` accepts an optional `Operator` for fine-grained algorithm control
-- `graph()` returns a shallow copy of the config (mutations require `setGraph`)
 - Default `nodesep` and `ranksep` are `50` (same as dagre)
 - `edge(v, w)` returns the same label object each call, and its `points` is recomputed on
   each read, so a label captured before `dagre.layout` reflects the laid-out points
@@ -96,7 +95,7 @@ The dagre-compatible API accepts a `quality` option that controls the layout spe
 
 ```ts
 grf.setGraph({ quality: "fast" }); // faster layout, lower quality
-grf.setGraph();                  // default: "medium", better layout, slower
+grf.setGraph({});                  // default: "medium", better layout, slower
 ```
 
 | preset | description | genealogy (184 nodes) | vs dagre v3 |
@@ -112,7 +111,7 @@ grf.setGraph({ algorithm: "zherebko" }); // linear topological layout
 grf.setGraph({ algorithm: "grid" });     // grid-based topological layout
 ```
 
-The default (`"medium"`) produces better layouts at the cost of being roughly 2x slower on large graphs. Use `"fast"` when layout speed matters more than visual quality, e.grf. for interactive or animated graphs.
+The default (`"medium"`) produces better layouts at the cost of being roughly 2x slower on large graphs. Use `"fast"` when layout speed matters more than visual quality, e.g. for interactive or animated graphs.
 
 dagre v3 added a `customOrder` callback and ordering constraints, allowing users to bring their own node ordering algorithm. d3-dag provides multiple built-in strategies (including ILP-optimal crossing minimization) out of the box, along with multiple coordinate assignment and layering algorithms not available in dagre.
 
