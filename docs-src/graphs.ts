@@ -2,6 +2,7 @@ import dagJson from "../examples/dag.json";
 import exJson from "../examples/ex.json";
 import genealogyJson from "../examples/genealogy.json";
 import grafoJson from "../examples/grafo.json";
+import loopsJson from "../examples/loops.json";
 import materialsJson from "../examples/materials.json";
 import squareJson from "../examples/square.json";
 import zherebkoJson from "../examples/zherebko.json";
@@ -76,4 +77,5 @@ export const exampleGraphs = {
   grafo: fromParentIds(grafoJson),
   materials: fromEdgeList(materialsJson),
   genealogy: fromGenealogy(genealogyJson),
+  loops: fromParentIds(loopsJson),
 } satisfies Record<string, GraphData>;

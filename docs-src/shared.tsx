@@ -41,6 +41,7 @@ export const graphs: Record<string, GraphData> = {
   },
   zherebko: exampleGraphs.zherebko,
   grafo: exampleGraphs.grafo,
+  loops: exampleGraphs.loops,
 };
 
 /** a node's center and size */
@@ -296,7 +297,11 @@ export function toFlowElements(
   const keyOf = edgeKeys();
   for (const e of graphData.edges) {
     const key = keyOf(e.source, e.target);
-    const pts = edgeMode === "routed" ? result.edgePoints.get(key) : undefined;
+    // react flow's own edge types can't draw a self loop
+    const pts =
+      edgeMode === "routed" || e.source === e.target
+        ? result.edgePoints.get(key)
+        : undefined;
     const type = pts
       ? "layout"
       : edgeMode === "curved"
