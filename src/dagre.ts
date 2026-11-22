@@ -321,14 +321,11 @@ export class DagreGraph<
       const label = data ?? this.#defaultEdgeLabel(v, w, undefined);
       if (!isLabel(label)) {
         throw err`edge labels must be objects: ${label}`;
+      } else {
+        if (srcLabel !== undefined) this.#addNode(v, srcLabel);
+        if (tgtLabel !== undefined) this.#addNode(w, tgtLabel);
+        this.#mutGraph.link(this.#node(v), this.#node(w), label);
       }
-      if (srcLabel !== undefined) this.#addNode(v, srcLabel);
-      if (tgtLabel !== undefined) this.#addNode(w, tgtLabel);
-      this.#mutGraph.link(
-        this.#graphNodes.get(v)!,
-        this.#graphNodes.get(w)!,
-        label,
-      );
     }
     return this;
   }
@@ -372,10 +369,8 @@ export class DagreGraph<
 
   /** get the node label passed to {@link setNode} (includes `x` and `y` after layout) */
   node(id: string): NodeLabel & DagreNode {
-    const graphNode = this.#graphNodes.get(id);
-    if (!graphNode) throw err`unknown node: ${id}`;
     // x and y are unset until dagre.layout runs; typed as set to match dagre
-    return graphNode.data as NodeLabel & DagreNode;
+    return this.#node(id).data as NodeLabel & DagreNode;
   }
 
   /** get the edge label passed to {@link setEdge} (includes `points` after layout) */
@@ -415,22 +410,17 @@ export class DagreGraph<
 
   /** get predecessor node ids */
   predecessors(id: string): string[] {
-    const node = this.#graphNodes.get(id);
-    if (!node) throw err`unknown node: ${id}`;
-    return Array.from(node.parents(), (node) => this.#idOf(node));
+    return Array.from(this.#node(id).parents(), (node) => this.#idOf(node));
   }
 
   /** get successor node ids */
   successors(id: string): string[] {
-    const node = this.#graphNodes.get(id);
-    if (!node) throw err`unknown node: ${id}`;
-    return Array.from(node.children(), (node) => this.#idOf(node));
+    return Array.from(this.#node(id).children(), (node) => this.#idOf(node));
   }
 
   /** get all neighbor node ids (predecessors and successors, deduplicated) */
   neighbors(id: string): string[] {
-    const node = this.#graphNodes.get(id);
-    if (!node) throw err`unknown node: ${id}`;
+    const node = this.#node(id);
     const seen = new Set<string>();
     for (const parent of node.parents()) seen.add(this.#idOf(parent));
     for (const child of node.children()) seen.add(this.#idOf(child));
@@ -446,44 +436,41 @@ export class DagreGraph<
     }
   }
 
-  #edgesOf(
-    v: string,
-    w: string | undefined,
-    linksTo: "parentLinksTo" | "childLinksTo",
-    linksAll: "parentLinks" | "childLinks",
-  ): DagreEdgeDescriptor[] {
-    const node = this.#graphNodes.get(v);
-    if (!node) throw err`unknown node: ${v}`;
-    if (w !== undefined) {
-      const other = this.#graphNodes.get(w);
-      if (!other) throw err`unknown node: ${w}`;
-      return Array.from(node[linksTo](other), (link) => ({
-        v: this.#idOf(link.source),
-        w: this.#idOf(link.target),
-      }));
+  #node(id: string): MutGraphNode<StoredNode, StoredEdge> {
+    const node = this.#graphNodes.get(id);
+    if (!node) {
+      throw err`unknown node: ${id}`;
+    } else {
+      return node;
     }
-    return Array.from(node[linksAll](), (link) => ({
+  }
+
+  /** get incoming edge descriptors, optionally filtered to edges from `w` */
+  inEdges(v: string, w?: string): DagreEdgeDescriptor[] {
+    const node = this.#node(v);
+    const links =
+      w === undefined ? node.parentLinks() : node.parentLinksTo(this.#node(w));
+    return Array.from(links, (link) => ({
       v: this.#idOf(link.source),
       w: this.#idOf(link.target),
     }));
   }
 
-  /** get incoming edge descriptors, optionally filtered to edges from `w` */
-  inEdges(v: string, w?: string): DagreEdgeDescriptor[] {
-    return this.#edgesOf(v, w, "parentLinksTo", "parentLinks");
-  }
-
   /** get outgoing edge descriptors, optionally filtered to edges to `w` */
   outEdges(v: string, w?: string): DagreEdgeDescriptor[] {
-    return this.#edgesOf(v, w, "childLinksTo", "childLinks");
+    const node = this.#node(v);
+    const links =
+      w === undefined ? node.childLinks() : node.childLinksTo(this.#node(w));
+    return Array.from(links, (link) => ({
+      v: this.#idOf(link.source),
+      w: this.#idOf(link.target),
+    }));
   }
 
   /** get all edge descriptors incident to `v`, optionally filtered to edges with `w` */
   nodeEdges(v: string, w?: string): DagreEdgeDescriptor[] {
-    const node = this.#graphNodes.get(v);
-    if (!node) throw err`unknown node: ${v}`;
-    const other = w !== undefined ? this.#graphNodes.get(w) : undefined;
-    if (w !== undefined && !other) throw err`unknown node: ${w}`;
+    const node = this.#node(v);
+    const other = w === undefined ? undefined : this.#node(w);
     const toDesc = (
       link: MutGraphLink<StoredNode, StoredEdge>,
     ): DagreEdgeDescriptor => ({
@@ -619,11 +606,10 @@ export class DagreGraph<
     }
     extraTweaks.push(tweakDirection(rankdir));
 
-    const existingTweaks = op.tweaks();
     const configured = op
       .nodeSize(nodeSizeFn)
       .gap(gap)
-      .tweaks([...existingTweaks, ...extraTweaks]);
+      .tweaks([...op.tweaks(), ...extraTweaks]);
 
     fillSizes(mutGraph);
     const result = configured(mutGraph);
