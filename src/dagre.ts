@@ -482,9 +482,9 @@ export class DagreGraph {
       return isHorizontal ? [h, w] : [w, h];
     };
 
-    const gap: readonly [number, number] = isHorizontal
-      ? [config.ranksep, config.nodesep]
-      : [config.nodesep, config.ranksep];
+    // the layout runs top to bottom and tweakDirection rotates it afterwards,
+    // so only the node size is swapped for horizontal layouts, not the gap
+    const gap: readonly [number, number] = [config.nodesep, config.ranksep];
 
     const extraTweaks: Tweak<IdDagreNode, DagreEdge>[] = [];
 

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { DagreAlgorithm, DagreQuality } from "./dagre.js";
+import type { DagreAlgorithm, DagreQuality, Rankdir } from "./dagre.js";
 import { dagre } from "./dagre.js";
 import { coordQuad } from "./sugiyama/coord/quad.js";
 import { decrossOpt } from "./sugiyama/decross/opt.js";
@@ -64,6 +64,77 @@ test("RL direction", () => {
 
   // RL: parent should have higher x
   expect(grf.node("a").x).toBeGreaterThan(grf.node("b").x);
+});
+
+test("ranksep separates ranks and nodesep separates siblings like dagre", () => {
+  // positions and sizes from dagre; siblings b and c may come in either order
+  const expected: Record<
+    Rankdir,
+    {
+      root: [number, number];
+      children: [number, number][];
+      size: [number, number];
+    }
+  > = {
+    TB: {
+      root: [25, 5],
+      children: [
+        [5, 115],
+        [45, 115],
+      ],
+      size: [50, 120],
+    },
+    BT: {
+      root: [25, 115],
+      children: [
+        [5, 5],
+        [45, 5],
+      ],
+      size: [50, 120],
+    },
+    LR: {
+      root: [5, 25],
+      children: [
+        [115, 5],
+        [115, 45],
+      ],
+      size: [120, 50],
+    },
+    RL: {
+      root: [115, 25],
+      children: [
+        [5, 5],
+        [5, 45],
+      ],
+      size: [120, 50],
+    },
+  };
+  for (const rankdir of ["TB", "BT", "LR", "RL"] as const) {
+    const { root, children, size } = expected[rankdir];
+    const grf = new dagre.graphlib.Graph();
+    grf.setGraph({ rankdir, ranksep: 100, nodesep: 30 });
+    for (const id of ["a", "b", "c"]) {
+      grf.setNode(id, { width: 10, height: 10 });
+    }
+    grf.setEdge("a", "b");
+    grf.setEdge("a", "c");
+    dagre.layout(grf);
+
+    const position = (id: string): [number, number] => [
+      grf.node(id).x,
+      grf.node(id).y,
+    ];
+    const childPositions = [position("b"), position("c")].sort(
+      ([leftX, leftY], [rightX, rightY]) => leftX - rightX || leftY - rightY,
+    );
+    const { width, height } = grf.graph();
+    expect({ rankdir, root: position("a") }).toEqual({ rankdir, root });
+    expect({ rankdir, children: childPositions }).toEqual({
+      rankdir,
+      children,
+    });
+    expect({ rankdir, size: [width, height] }).toEqual({ rankdir, size });
+  }
 });
 
 test("per-node dimensions preserved", () => {
