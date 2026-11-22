@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # a new version waits a week, so a bad release is usually pulled before it is offered
+    cooldown:
+      default-days: 7
     ignore:
       - { dependency-name: typescript, versions: ["7.0.x"] }
       # pinned at 3.0.0, since 3.1 and later draw self loops as slanted lines
@@ -12,3 +15,5 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
