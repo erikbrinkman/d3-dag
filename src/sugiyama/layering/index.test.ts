@@ -1,12 +1,22 @@
 import { expect, test } from "bun:test";
-import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs.js";
+import {
+  ccoz,
+  doub,
+  ex,
+  loop,
+  loops,
+  multi,
+  oh,
+  square,
+  zhere,
+} from "../../test-graphs.js";
 import { layerSeparation } from "./index.js";
 import { layeringLongestPath } from "./longest-path.js";
 import { layeringSimplex } from "./simplex.js";
 import { sizedSep } from "./test-utils.js";
 import { layeringTopological } from "./topological.js";
 
-for (const dat of [doub, ex, square, ccoz, multi, oh, zhere]) {
+for (const dat of [doub, ex, square, ccoz, multi, oh, zhere, loop, loops]) {
   for (const [name, layering] of [
     ["simplex", layeringSimplex()],
     ["longest path top down", layeringLongestPath().topDown(true)],

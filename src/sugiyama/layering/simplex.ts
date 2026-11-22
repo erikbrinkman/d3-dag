@@ -175,6 +175,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     const seen = new Set();
     for (const node of dag.topological(options.rank)) {
       for (const [child, count] of node.childCounts()) {
+        if (child === node) continue;
         if (seen.has(child)) {
           before("link", child, node, sep(child, node), count);
         } else {

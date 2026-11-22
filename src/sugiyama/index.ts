@@ -10,6 +10,7 @@ import {
   type NodeSize,
   splitNodeSize,
 } from "../layout.js";
+import { drawLoops, fitLoops, loopsOnSide } from "../loops.js";
 import type { Tweak } from "../tweaks.js";
 import { err, type U } from "../utils.js";
 import type { Coord } from "./coord/index.js";
@@ -25,12 +26,12 @@ import {
   layeringSimplex,
 } from "./layering/simplex.js";
 import {
+  type SugiNode,
+  type SugiSeparation,
   sugifyLayer,
-  sugiNodeLength,
   unsugify,
   validateCoord,
 } from "./sugify.js";
-import { sizedSeparation } from "./utils.js";
 
 /** sugiyama operators */
 export interface SugiyamaOps<in N = never, in L = never> {
@@ -269,14 +270,33 @@ function buildOperator<ON, OL, Ops extends SugiyamaOps<ON, OL>>(
       options.decross(layers);
 
       // assign coordinates
-      const xSep = sizedSeparation(sugiNodeLength(xLen), xGap);
+      const loopStep = xGap / 2;
+      const sideLen = ({ data }: SugiNode<N, L>, onRight: boolean): number => {
+        if (data.role === "node") {
+          const total = data.node.nchildLinksTo(data.node);
+          const numLoops = loopsOnSide(total, onRight);
+          return xLen(data.node) / 2 + numLoops * loopStep;
+        } else {
+          return 0;
+        }
+      };
+      const xSep: SugiSeparation<N, L> = (left, right) => {
+        const base =
+          (left ? sideLen(left, true) : 0) +
+          (right ? sideLen(right, false) : 0);
+        return left && right ? base + xGap : base;
+      };
       const width = options.coord(layers, xSep);
       validateCoord(layers, xSep, width, options.coord);
 
       // assign data back to original graph
       unsugify(layers);
 
-      res = { width, height };
+      for (const node of dag.nodes()) {
+        drawLoops(node, [xLen(node), yLen(node)], loopStep, yGap);
+      }
+
+      res = { width, height: fitLoops(dag, height) };
     }
 
     // apply any tweaks in order
@@ -445,6 +465,11 @@ export type DefaultSugiyama = Sugiyama<{
  * {@link Sugiyama#nodeSize}, {@link Sugiyama#gap}, and
  * {@link Sugiyama#tweaks}. Note that {@link Rank} can be set in some {@link
  * Layering} operators.
+ *
+ * Self loops aren't part of the layering. Each leaves below its node's center,
+ * runs up beside it, and comes back in above. Loops on one node alternate
+ * right and left, nested one inside the next, with room left for them on the
+ * sides they're on.
  *
  * <img alt="Sugiyama example" src="../../resources/sugi-simplex-twolayer-simplex.png" width="400">
  *

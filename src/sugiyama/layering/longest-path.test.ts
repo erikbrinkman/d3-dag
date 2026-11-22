@@ -185,3 +185,14 @@ test("layeringLongestPath() fails passing an arg to constructor", () => {
     "got arguments to layeringLongestPath",
   );
 });
+
+test("layeringLongestPath() ignores self loops", () => {
+  const dag = graphConnect()([
+    ["0", "0"],
+    ["0", "1"],
+    ["1", "1"],
+  ]);
+  const num = layeringLongestPath()(dag, layerSeparation);
+  expect(num).toBe(1);
+  expect(getLayers(dag, num + 1)).toEqual([[0], [1]]);
+});
