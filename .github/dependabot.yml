@@ -6,6 +6,8 @@ updates:
       interval: monthly
     ignore:
       - { dependency-name: typescript, versions: ["7.0.x"] }
+      # pinned at 3.0.0, since 3.1 and later draw self loops as slanted lines
+      - { dependency-name: "@dagrejs/dagre" }
   - package-ecosystem: github-actions
     directory: /
     schedule:
