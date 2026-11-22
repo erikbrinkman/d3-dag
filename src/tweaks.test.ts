@@ -240,6 +240,167 @@ test("tweakShape()", () => {
   }
 });
 
+test("tweakShape() keeps no repeated points after tweakSugiyama()", () => {
+  const expectDistinct = (points: readonly (readonly [number, number])[]) => {
+    for (const [ind, [px, py]] of points.slice(1).entries()) {
+      const [qx, qy] = points[ind];
+      expect(Math.hypot(px - qx, py - qy)).toBeGreaterThan(1e-9);
+    }
+  };
+  for (const shape of [shapeRect, shapeEllipse, shapeTopBottom]) {
+    for (const size of [
+      [2, 2],
+      [0, 0],
+      [0.14113, 2.03659],
+    ] as const) {
+      const grf = zhere();
+      const res = sugiyama().nodeSize(size).gap([1, 1])(grf);
+      tweakShape(size, shape)(grf, tweakSugiyama(size)(grf, res));
+      for (const { points } of grf.links()) {
+        expectDistinct(points);
+      }
+    }
+  }
+
+  const grf = graph<undefined, undefined>();
+  const source = grf.node(undefined);
+  const target = grf.node(undefined);
+  const link = source.child(target);
+  source.x = 0.4;
+  source.y = 0;
+  target.x = 0.4;
+  target.y = 10;
+  link.points = [
+    [0.4, 0],
+    [-0.3, 1],
+    [0.4, 5],
+    [0.4, 10],
+  ];
+  tweakShape([2, 2], shapeRect)(grf, { width: 2, height: 11 });
+  expect(link.points[0]).toEqual([-0.3, 1]);
+  expectDistinct(link.points);
+
+  const wide = graph<undefined, undefined>();
+  const wideSource = wide.node(undefined);
+  const wideTarget = wide.node(undefined);
+  const wideLink = wideSource.child(wideTarget);
+  wideSource.x = 0;
+  wideSource.y = 0;
+  wideTarget.x = 0;
+  wideTarget.y = 10;
+  wideLink.points = [
+    [0, 0],
+    [2900, 0.4],
+    [0, 0.5],
+    [0, 10],
+  ];
+  tweakShape([10000, 1], shapeEllipse)(wide, { width: 10000, height: 11 });
+  expect(wideLink.points[0]).toEqual([0, 0.5]);
+  expectDistinct(wideLink.points);
+});
+
+test("tweakShape() drops segments inside the node", () => {
+  const grf = graph<undefined, undefined>();
+  const source = grf.node(undefined);
+  const target = grf.node(undefined);
+  const link = source.child(target);
+  source.x = 0;
+  source.y = 0;
+  target.x = 0;
+  target.y = 6;
+  link.points = [
+    [0, 0],
+    [0.5, 0.5],
+    [0.5, 1],
+    [1, 3],
+    [0, 5],
+    [-0.5, 5.5],
+    [0, 6],
+  ];
+
+  tweakShape([2, 2])(grf, { width: 2, height: 7 });
+  expect(link.points).toEqual([
+    [0.5, 1],
+    [1, 3],
+    [0, 5],
+  ]);
+
+  link.points = [
+    [0, 0],
+    [0.5, 0.5],
+    [1, 3],
+    [-0.5, 5.5],
+    [0, 6],
+  ];
+  tweakShape([2, 2], shapeTopBottom)(grf, { width: 2, height: 7 });
+  expect(link.points).toEqual([
+    [0, 1],
+    [1, 3],
+    [0, 5],
+  ]);
+
+  link.points = [
+    [1, 2],
+    [1, 3],
+    [1, 4],
+  ];
+  tweakShape([2, 2], shapeTopBottom)(grf, { width: 2, height: 7 });
+  expect(link.points).toEqual([
+    [1, 2],
+    [1, 3],
+    [1, 4],
+  ]);
+});
+
+test("tweakShape() ends a vertical link on the ellipse", () => {
+  const grf = graph<undefined, undefined>();
+  const source = grf.node(undefined);
+  const target = grf.node(undefined);
+  const link = source.child(target);
+  source.x = 0.4867092728614807;
+  source.y = 7.119067478179932;
+  target.x = source.x;
+  target.y = 9;
+  link.points = [
+    [source.x, source.y],
+    [target.x, target.y],
+  ];
+
+  const size = [0.3210141181945801, 0.48797398507595063] as const;
+  tweakShape(size, shapeEllipse)(
+    grf,
+    tweakSugiyama(size)(grf, { width: 1, height: 10 }),
+  );
+  expect(link.points).toEqual([
+    [source.x, source.y + size[1] / 2],
+    [target.x, target.y - size[1] / 2],
+  ]);
+});
+
+test("tweakShape() takes a shape that always returns a point", () => {
+  const grf = graph<undefined, undefined>();
+  const source = grf.node(undefined);
+  const target = grf.node(undefined);
+  const link = source.child(target);
+  source.x = 0;
+  source.y = 0;
+  target.x = 0;
+  target.y = 4;
+  link.points = [
+    [0, 0],
+    [0, 4],
+  ];
+
+  tweakShape([2, 2], ([cx, cy], [, height], [, sy], [, ey]) => [
+    cx,
+    cy + (Math.sign(ey - sy) * height) / 2,
+  ])(grf, { width: 2, height: 4 });
+  expect(link.points).toEqual([
+    [0, 1],
+    [0, 3],
+  ]);
+});
+
 test("tweakShape() ends a link between touching nodes at the point they share", () => {
   for (const shape of [shapeRect, shapeEllipse, shapeTopBottom]) {
     const grf = graph<undefined, undefined>();
@@ -261,6 +422,52 @@ test("tweakShape() ends a link between touching nodes at the point they share", 
       [0, 1],
     ]);
   }
+});
+
+test("tweakShape() leaves links between zero-size nodes alone", () => {
+  for (const shape of [shapeRect, shapeEllipse, shapeTopBottom]) {
+    for (const ty of [0, 2]) {
+      const grf = graph<undefined, undefined>();
+      const source = grf.node(undefined);
+      const target = grf.node(undefined);
+      const link = source.child(target);
+      source.x = 0;
+      source.y = 0;
+      target.x = 0;
+      target.y = ty;
+      link.points = [
+        [0, 0],
+        [1, 1],
+        [0, ty],
+      ];
+
+      tweakShape([0, 0], shape)(grf, { width: 1, height: ty });
+      expect(link.points).toEqual([
+        [0, 0],
+        [1, 1],
+        [0, ty],
+      ]);
+    }
+  }
+});
+
+test("tweakShape() throws for a link inside its node", () => {
+  const grf = graph<undefined, undefined>();
+  const source = grf.node(undefined);
+  const target = grf.node(undefined);
+  const link = source.child(target);
+  source.x = 0;
+  source.y = 0;
+  target.x = 0;
+  target.y = 1;
+  link.points = [
+    [0, 0],
+    [0, 1],
+  ];
+
+  expect(() => tweakShape([2, 2])(grf, { width: 2, height: 2 })).toThrow(
+    "lies entirely inside the node",
+  );
 });
 
 test("shapeRect()", () => {
@@ -317,12 +524,8 @@ test("shapeRect()", () => {
   expect(shapeRect([0, 0], [0, 0], [0, 0], [1, 1])).toEqual([0, 0]);
 
   // end inside
-  expect(() => shapeRect([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toThrow(
-    "ended inside rectangle",
-  );
-  expect(() => shapeRect([0, 0], [2, 2], [-0.5, 0], [0.5, 0.5])).toThrow(
-    "ended inside rectangle",
-  );
+  expect(shapeRect([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toBeUndefined();
+  expect(shapeRect([0, 0], [2, 2], [-0.5, 0], [0.5, 0.5])).toBeUndefined();
 });
 
 const r2 = Math.SQRT1_2; // 1 / Math.sqrt(2);
@@ -398,12 +601,8 @@ test("shapeEllipse()", () => {
   expect(shapeEllipse([0, 0], [0, 0], [0, 0], [0, 0])).toEqual([0, 0]);
 
   // end inside
-  expect(() => shapeEllipse([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toThrow(
-    "ended inside ellipse",
-  );
-  expect(() => shapeEllipse([0, 0], [2, 2], [0, 0.5], [0.5, 0])).toThrow(
-    "ended inside ellipse",
-  );
+  expect(shapeEllipse([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toBeUndefined();
+  expect(shapeEllipse([0, 0], [2, 2], [0, 0.5], [0.5, 0])).toBeUndefined();
 });
 
 test("shapeTopBottom()", () => {
@@ -448,12 +647,8 @@ test("shapeTopBottom()", () => {
   );
 
   // end inside
-  expect(() => shapeTopBottom([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toThrow(
-    "ended inside the node",
-  );
-  expect(() => shapeTopBottom([0, 0], [2, 2], [0.5, 0], [0, -0.5])).toThrow(
-    "ended inside the node",
-  );
+  expect(shapeTopBottom([0, 0], [2, 2], [0, 0], [0.5, 0.5])).toBeUndefined();
+  expect(shapeTopBottom([0, 0], [2, 2], [0.5, 0], [0, -0.5])).toBeUndefined();
 
   // end on the border
   expect(shapeTopBottom([0, 0], [2, 2], [0, 0], [0.5, 1])).toEqual([0, 1]);

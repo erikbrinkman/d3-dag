@@ -208,15 +208,15 @@ export function tweakFlip(
 /**
  * a shape callable that ends a link where it leaves a node
  *
- * It returns where the segment from `start` to `end` leaves the node; the
- * border counts as outside.
+ * It returns where the segment from `start` to `end` leaves the node, or
+ * `undefined` if `end` is inside too; the border counts as outside.
  */
 export type Shape = (
   center: readonly [number, number],
   nodeSize: readonly [number, number],
   start: readonly [number, number],
   end: readonly [number, number],
-) => [number, number];
+) => [number, number] | undefined;
 
 /** check whether a point is inside a node's bounding box, not on its border */
 function insideRect(
@@ -242,7 +242,7 @@ export function shapeRect(
   nodeSize: readonly [number, number],
   start: readonly [number, number],
   end: readonly [number, number],
-): [number, number] {
+): [number, number] | undefined {
   const [cx, cy] = center;
   const [width, height] = nodeSize;
   const [sx, sy] = start;
@@ -255,7 +255,7 @@ export function shapeRect(
   if (!insideRect(center, nodeSize, start)) {
     return [sx, sy];
   } else if (insideRect(center, nodeSize, end)) {
-    throw err`line from [${sx}, ${sy}] -> [${ex}, ${ey}] ended inside rectangle centered at [${cx}, ${cy}] with size [${width}, ${height}]`;
+    return undefined;
   } else {
     const dx = ex - sx;
     const dy = ey - sy;
@@ -284,7 +284,7 @@ export function shapeEllipse(
   nodeSize: readonly [number, number],
   start: readonly [number, number],
   end: readonly [number, number],
-): [number, number] {
+): [number, number] | undefined {
   const [width, height] = nodeSize;
   if (!width || !height) {
     // a flat ellipse is its bounding box
@@ -305,7 +305,7 @@ export function shapeEllipse(
     if (startLevel >= 0) {
       return [sx, sy];
     } else if (level(ex, ey) < 0) {
-      throw err`line from [${sx}, ${sy}] -> [${ex}, ${ey}] ended inside ellipse at [${cx}, ${cy}] with size [${width}, ${height}]`;
+      return undefined;
     } else {
       // the larger root of level along the segment, which is in [0, 1]
       const dx = ex - sx;
@@ -330,7 +330,7 @@ export function shapeTopBottom(
   nodeSize: readonly [number, number],
   start: readonly [number, number],
   end: readonly [number, number],
-): [number, number] {
+): [number, number] | undefined {
   const [cx, cy] = center;
   const [width, height] = nodeSize;
   const [sx, sy] = start;
@@ -341,7 +341,7 @@ export function shapeTopBottom(
   if (!insideRect(center, nodeSize, start)) {
     return [sx, sy];
   } else if (insideRect(center, nodeSize, end)) {
-    throw err`line from ${start} -> ${end} ended inside the node at [${cx}, ${cy}] with size [${width}, ${height}]`;
+    return undefined;
   } else if (ey < sy) {
     return [cx, top];
   } else if (ey > sy) {
@@ -351,17 +351,56 @@ export function shapeTopBottom(
   }
 }
 
+/** whether two points differ by no more than rounding */
+function nearlyEqual(
+  [ax, ay]: readonly [number, number],
+  [bx, by]: readonly [number, number],
+): boolean {
+  const tol =
+    1e-9 * Math.max(Math.abs(ax), Math.abs(ay), Math.abs(bx), Math.abs(by));
+  return Math.abs(ax - bx) <= tol && Math.abs(ay - by) <= tol;
+}
+
+/** remove the points of a link that start in a node up to where it leaves */
+function trimStart(
+  points: [number, number][],
+  center: readonly [number, number],
+  size: readonly [number, number],
+  shape: Shape,
+): void {
+  for (let ind = 1; ind < points.length; ++ind) {
+    const exit = shape(center, size, points[ind - 1], points[ind]);
+    if (exit !== undefined) {
+      // a link keeps two points, so between touching nodes it repeats the point
+      // they share
+      if (ind + 1 < points.length && nearlyEqual(exit, points[ind])) {
+        points.splice(0, ind);
+      } else {
+        points.splice(0, ind, exit);
+      }
+      return;
+    }
+  }
+  const [cx, cy] = center;
+  const [width, height] = size;
+  throw err`link with points ${points} lies entirely inside the node at [${cx}, ${cy}] with size [${width}, ${height}]; do nodes overlap?`;
+}
+
 /**
  * tweak the layout by truncating edges early
  *
- * This tweak truncates edges at the extent of a node shape sized by a bounding
- * box. After applying this tweak, edge endings like arrows can be easily
+ * This tweak ends each link where it leaves the {@link Shape} of each node it
+ * connects, sized by the node's bounding box. It scans the link from each end,
+ * dropping every segment inside the node, and cuts the first segment that
+ * leaves it. After applying this tweak, edge endings like arrows can be easily
  * rendered in the appropriate place.
  *
  * There are three built in {@link Shape}s:
  * - {@link shapeRect} - a simple rectangle
  * - {@link shapeEllipse} - an ellipse (circle for square node sizes)
  * - {@link shapeTopBottom} - to center edges into the top or bottom of a node
+ *
+ * @throws if a link lies entirely inside a node, as when nodes overlap
  */
 export function tweakShape<N, L>(
   nodeSize: NodeSize<N, L>,
@@ -374,15 +413,13 @@ export function tweakShape<N, L>(
     for (const node of graph.nodes()) {
       const center = [node.x, node.y] as const;
       const size = typeof nodeSize === "function" ? nodeSize(node) : nodeSize;
-      for (const { points } of node.parentLinks()) {
-        const [second, first] = points.slice(-2);
-        const trimmed = shape(center, size, first, second);
-        points.splice(-1, 1, trimmed);
-      }
       for (const { points } of node.childLinks()) {
-        const [first, second] = points;
-        const trimmed = shape(center, size, first, second);
-        points.splice(0, 1, trimmed);
+        trimStart(points, center, size, shape);
+      }
+      for (const { points } of node.parentLinks()) {
+        points.reverse();
+        trimStart(points, center, size, shape);
+        points.reverse();
       }
     }
     return res;
@@ -431,8 +468,8 @@ function findClip(
  *
  * @remarks
  *
- * If using in conjunction with {@link tweakShape}, this should occur first,
- * although it shouldn't be strictly necessary.
+ * If using in conjunction with {@link tweakShape}, this should occur first:
+ * applied after, it can add a point where tweakShape already ended a link.
  */
 export function tweakSugiyama<N, L>(nodeSize: NodeSize<N, L>): Tweak<N, L> {
   function tweakSugiyama(

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `layout` writes onto them
 - `dagre`'s `filterNodes` no longer copies the default node label; call
   `setDefaultNodeLabel` on the new graph
+- a `Shape` may return `undefined` for a segment inside the node instead of
+  throwing; check for `undefined` when calling one directly
 - `shapeRect`, `shapeEllipse` and `shapeTopBottom` count a node's border as
   outside it
 - `shapeTopBottom` leaves a link alone when its end is already outside the node
@@ -42,7 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `dagre`'s `setDefaultNodeLabel` and `setDefaultEdgeLabel` accept a plain label
   and pass ids to functions, as dagre does
 - `dagre` no longer swaps `ranksep` and `nodesep` when `rankdir` is `LR` or `RL`
-- `tweakShape` no longer throws for nodes that touch
+- `tweakShape` no longer throws after `tweakSugiyama`, for nodes that touch, or
+  for zero-size nodes
 - `shapeTopBottom` no longer throws on links that leave beside the node
 
 ## [1.3.0] - 2026-11-01
