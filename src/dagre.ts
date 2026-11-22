@@ -187,8 +187,9 @@ export class DagreGraph<
   #mutGraph = graph<StoredNode, StoredEdge>();
   #graphNodes = new Map<string, MutGraphNode<StoredNode, StoredEdge>>();
   #ids = new Map<GraphNode<StoredNode, StoredEdge>, string>();
-  #defaultNodeLabel: () => DagreNodeLabel = () => ({});
-  #defaultEdgeLabel: () => DagreEdgeLabel = () => ({});
+  #defaultNodeLabel: (id: string) => DagreNodeLabel = () => ({});
+  #defaultEdgeLabel: (v: string, w: string, name: undefined) => DagreEdgeLabel =
+    () => ({});
   #label: GraphLabel | undefined;
 
   /**
@@ -212,15 +213,35 @@ export class DagreGraph<
     return this.#label as GraphLabel;
   }
 
-  /** set default node label factory, used when {@link setNode} is called without a label */
-  setDefaultNodeLabel(fn: () => NodeLabel): this {
-    this.#defaultNodeLabel = fn;
+  /**
+   * set the label used when {@link setNode} adds a node without one
+   *
+   * As in dagre, a function is called with the node id for each new node, and
+   * anything else is used as is, so every such node shares the same object.
+   */
+  setDefaultNodeLabel(
+    labelOrFn: NodeLabel | ((id: string) => NodeLabel),
+  ): this {
+    this.#defaultNodeLabel =
+      typeof labelOrFn === "function" ? labelOrFn : () => labelOrFn;
     return this;
   }
 
-  /** set default edge label factory, used when {@link setEdge} is called without a label */
-  setDefaultEdgeLabel(fn: () => EdgeLabel): this {
-    this.#defaultEdgeLabel = fn;
+  /**
+   * set the label used when {@link setEdge} adds an edge without one
+   *
+   * As in dagre, a function is called with the source id, the target id, and
+   * the edge name for each new edge, and anything else is used as is, so every
+   * such edge shares the same object. Edges have no names, so the name is
+   * always `undefined`.
+   */
+  setDefaultEdgeLabel(
+    labelOrFn:
+      | EdgeLabel
+      | ((v: string, w: string, name: undefined) => EdgeLabel),
+  ): this {
+    this.#defaultEdgeLabel =
+      typeof labelOrFn === "function" ? labelOrFn : () => labelOrFn;
     return this;
   }
 
@@ -242,13 +263,13 @@ export class DagreGraph<
     if (existing) {
       if (data !== undefined) existing.data = data;
     } else {
-      this.#addNode(id, data ?? this.#newNodeLabel());
+      this.#addNode(id, data ?? this.#newNodeLabel(id));
     }
     return this;
   }
 
-  #newNodeLabel(): StoredNode {
-    const label = this.#defaultNodeLabel();
+  #newNodeLabel(id: string): StoredNode {
+    const label = this.#defaultNodeLabel(id);
     if (isLabel(label)) {
       return label;
     } else {
@@ -295,9 +316,9 @@ export class DagreGraph<
       if (data !== undefined) existing.data = data;
     } else {
       // every label is made first so a bad one leaves the graph unchanged
-      const srcLabel = src ? undefined : this.#newNodeLabel();
-      const tgtLabel = tgt || v === w ? undefined : this.#newNodeLabel();
-      const label = data ?? this.#defaultEdgeLabel();
+      const srcLabel = src ? undefined : this.#newNodeLabel(v);
+      const tgtLabel = tgt || v === w ? undefined : this.#newNodeLabel(w);
+      const label = data ?? this.#defaultEdgeLabel(v, w, undefined);
       if (!isLabel(label)) {
         throw err`edge labels must be objects: ${label}`;
       }
