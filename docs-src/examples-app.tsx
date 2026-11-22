@@ -21,6 +21,7 @@ import { layeringTopological } from "../src/sugiyama/layering/topological.js";
 import {
   tweakDirection,
   tweakGridHandles,
+  tweakShape,
   tweakSugiyama,
 } from "../src/tweaks.js";
 import { zherebko } from "../src/zherebko/index.js";
@@ -28,13 +29,14 @@ import {
   type AppLayoutResult,
   type Direction,
   type EdgeMode,
-  edgeKey,
+  edgeKeys,
   FlowInner,
   formatMeta,
   type GraphData,
   graphs,
   NODE_H,
   NODE_W,
+  type NodeBox,
   Select,
   Slider,
   toFlowElements,
@@ -73,6 +75,7 @@ function runLayout(
   const tweaks = [];
   if (algorithm === "sugiyama") tweaks.push(tweakSugiyama(nodeSize));
   if (algorithm === "grid") tweaks.push(tweakGridHandles(nodeSize, gap));
+  tweaks.push(tweakShape(nodeSize));
   tweaks.push(tweakDirection(direction));
 
   const op = (() => {
@@ -117,10 +120,7 @@ function runLayout(
   const result = op(grf);
   const elapsed = performance.now() - t0;
 
-  const positions = new Map<
-    string,
-    { x: number; y: number; width: number; height: number }
-  >();
+  const positions = new Map<string, NodeBox>();
   for (const node of grf.nodes()) {
     const id = node.data;
     positions.set(id, {
@@ -132,10 +132,11 @@ function runLayout(
   }
 
   const edgePoints = new Map<string, [number, number][]>();
+  const keyOf = edgeKeys();
   for (const link of grf.links()) {
     const srcId = link.source.data;
     const tgtId = link.target.data;
-    edgePoints.set(edgeKey(srcId, tgtId), link.points);
+    edgePoints.set(keyOf(srcId, tgtId), link.points);
   }
 
   return {

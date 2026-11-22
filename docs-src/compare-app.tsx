@@ -127,13 +127,9 @@ function App() {
 
   const dagreFlow = useMemo(
     () =>
-      toFlowElements(
-        graphData,
-        dagreResult,
-        edgeMode === "routed" ? "straight" : edgeMode,
-        direction,
-        { proportional: true },
-      ),
+      toFlowElements(graphData, dagreResult, edgeMode, direction, {
+        proportional: true,
+      }),
     [graphData, dagreResult, edgeMode, direction],
   );
 
@@ -223,7 +219,7 @@ function App() {
         >
           <option value="straight">straight</option>
           <option value="curved">curved</option>
-          <option value="routed">routed (d3-dag)</option>
+          <option value="routed">routed</option>
         </Select>
       </div>
       <div className="compare-container">
