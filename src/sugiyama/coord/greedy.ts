@@ -66,7 +66,7 @@ function space<N, L>(
   let lastx = last.x;
   const after = [lastx];
   for (const sugi of slice(layer, layer.length - 2, -1, -1)) {
-    const next = Math.min(sugi.x, lastx - sep(last, sugi));
+    const next = Math.min(sugi.x, lastx - sep(sugi, last));
     after.push(next);
     last = sugi;
     lastx = next;
