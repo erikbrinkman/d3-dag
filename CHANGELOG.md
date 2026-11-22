@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `shapeRect`, `shapeEllipse` and `shapeTopBottom` count a node's border as
   outside it
 - `shapeTopBottom` leaves a link alone when its end is already outside the node
+- `dagre` throws on node ids that aren't strings; pass `String(id)` where you
+  passed a number
 
 ### Fixed
 
