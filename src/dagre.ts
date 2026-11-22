@@ -60,6 +60,14 @@ export interface DagreGraphConfig {
   height?: number;
 }
 
+/** node label passed to {@link DagreGraph.setNode} */
+export interface DagreNodeLabel {
+  /** node width (default: `0`) */
+  readonly width?: number;
+  /** node height (default: `0`) */
+  readonly height?: number;
+}
+
 /** node label with position (`x` and `y` set by {@link dagre.layout}) */
 export interface DagreNode {
   /** center x coordinate */
@@ -79,6 +87,9 @@ export interface DagrePoint {
   /** y coordinate */
   y: number;
 }
+
+/** edge label passed to {@link DagreGraph.setEdge} */
+export type DagreEdgeLabel = object;
 
 /** edge label with control points (`points` set by {@link dagre.layout}) */
 export interface DagreEdge {
@@ -148,7 +159,10 @@ function presetSugiyama(
 /**
  * dagre-compatible mutable graph backed by d3-dag
  *
- * Accessed as `dagre.graphlib.Graph`. Use with {@link dagre.layout}.
+ * Accessed as `dagre.graphlib.Graph`. Use with {@link dagre.layout}. Like dagre's
+ * `Graph`, it takes the graph, node and edge label types as parameters, so {@link
+ * node} returns the node label with `x` and `y`, and {@link edge} returns the edge
+ * label with `points`.
  *
  * @example
  *
@@ -165,15 +179,16 @@ function presetSugiyama(
  * const pos = grf.node("a"); // the label passed to setNode, with x and y
  * ```
  */
-export class DagreGraph {
+export class DagreGraph<
+  GraphLabel extends DagreGraphConfig = DagreGraphConfig,
+  NodeLabel extends DagreNodeLabel = DagreNodeLabel,
+  EdgeLabel extends DagreEdgeLabel = DagreEdgeLabel,
+> {
   #mutGraph = graph<StoredNode, StoredEdge>();
   #graphNodes = new Map<string, MutGraphNode<StoredNode, StoredEdge>>();
   #ids = new Map<GraphNode<StoredNode, StoredEdge>, string>();
-  #defaultNodeLabel: () => {
-    readonly width?: number;
-    readonly height?: number;
-  } = () => ({});
-  #label: DagreGraphConfig | undefined;
+  #defaultNodeLabel: () => DagreNodeLabel = () => ({});
+  #label: GraphLabel | undefined;
 
   /**
    * set the graph label, replacing any earlier one
@@ -181,7 +196,7 @@ export class DagreGraph {
    * The object is kept as is: {@link dagre.layout} reads its options, using defaults
    * for missing ones without writing them, and writes `width` and `height` onto it.
    */
-  setGraph(label: DagreGraphConfig): this {
+  setGraph(label: GraphLabel): this {
     if (!isLabel(label)) {
       throw err`graph labels must be objects: ${label}`;
     } else {
@@ -191,21 +206,19 @@ export class DagreGraph {
   }
 
   /** get the graph label passed to {@link setGraph} (includes `width` and `height` after layout) */
-  graph(): DagreGraphConfig {
+  graph(): GraphLabel {
     // undefined until setGraph runs; typed as set to match dagre
-    return this.#label as DagreGraphConfig;
+    return this.#label as GraphLabel;
   }
 
   /** set default node label factory, used when {@link setNode} is called without a label */
-  setDefaultNodeLabel(
-    fn: () => { readonly width?: number; readonly height?: number },
-  ): this {
+  setDefaultNodeLabel(fn: () => NodeLabel): this {
     this.#defaultNodeLabel = fn;
     return this;
   }
 
   /** set default edge label factory (accepted for compatibility, not used) */
-  setDefaultEdgeLabel(_fn: () => Record<string, unknown>): this {
+  setDefaultEdgeLabel(_fn: () => EdgeLabel): this {
     return this;
   }
 
@@ -214,10 +227,7 @@ export class DagreGraph {
    *
    * The label object is kept as is, and {@link dagre.layout} writes `x` and `y` onto it.
    */
-  setNode(
-    id: string,
-    label?: { readonly width?: number; readonly height?: number },
-  ): this {
+  setNode(id: string, label?: NodeLabel): this {
     if (label !== undefined && !isLabel(label)) {
       throw err`node labels must be objects: ${label}`;
     } else {
@@ -242,10 +252,7 @@ export class DagreGraph {
   }
 
   /** add or update multiple nodes */
-  setNodes(
-    ids: string[],
-    label?: { readonly width?: number; readonly height?: number },
-  ): this {
+  setNodes(ids: string[], label?: NodeLabel): this {
     for (const id of ids) this.setNode(id, label);
     return this;
   }
@@ -256,7 +263,7 @@ export class DagreGraph {
    * The label object is kept as is, and {@link dagre.layout} writes `points` onto it.
    * Fields such as `minlen` or `weight` are kept but don't affect layout.
    */
-  setEdge(v: string, w: string, label?: object): this {
+  setEdge(v: string, w: string, label?: EdgeLabel): this {
     if (label !== undefined && !isLabel(label)) {
       throw err`edge labels must be objects: ${label}`;
     }
@@ -319,21 +326,21 @@ export class DagreGraph {
   }
 
   /** get the node label passed to {@link setNode} (includes `x` and `y` after layout) */
-  node(id: string): DagreNode {
+  node(id: string): NodeLabel & DagreNode {
     const graphNode = this.#graphNodes.get(id);
     if (!graphNode) throw err`unknown node: ${id}`;
     // x and y are unset until dagre.layout runs; typed as set to match dagre
-    return graphNode.data as DagreNode;
+    return graphNode.data as NodeLabel & DagreNode;
   }
 
   /** get the edge label passed to {@link setEdge} (includes `points` after layout) */
-  edge(v: string, w: string): DagreEdge {
+  edge(v: string, w: string): EdgeLabel & DagreEdge {
     const src = this.#graphNodes.get(v);
     const tgt = this.#graphNodes.get(w);
     if (!src || !tgt) throw err`unknown edge: ${v} -> ${w}`;
     for (const link of src.childLinksTo(tgt)) {
       // points is unset until dagre.layout runs; typed as set to match dagre
-      return link.data as DagreEdge;
+      return link.data as EdgeLabel & DagreEdge;
     }
     throw err`unknown edge: ${v} -> ${w}`;
   }
@@ -483,8 +490,10 @@ export class DagreGraph {
   }
 
   /** create a new graph containing only nodes that pass the filter, sharing the graph label */
-  filterNodes(fn: (id: string) => boolean): DagreGraph {
-    const result = new DagreGraph();
+  filterNodes(
+    fn: (id: string) => boolean,
+  ): DagreGraph<GraphLabel, NodeLabel, EdgeLabel> {
+    const result = new DagreGraph<GraphLabel, NodeLabel, EdgeLabel>();
     result.#label = this.#label;
     result.#defaultNodeLabel = this.#defaultNodeLabel;
     for (const [id, graphNode] of this.#graphNodes) {
@@ -505,8 +514,15 @@ export class DagreGraph {
    *
    * @internal
    */
-  static layout(grf: DagreGraph, operator?: DagreOperator): void {
-    const label = grf.#label;
+  static layout<
+    GraphLabel extends DagreGraphConfig,
+    NodeLabel extends DagreNodeLabel,
+    EdgeLabel extends DagreEdgeLabel,
+  >(
+    grf: DagreGraph<GraphLabel, NodeLabel, EdgeLabel>,
+    operator?: DagreOperator,
+  ): void {
+    const label: DagreGraphConfig | undefined = grf.#label;
     if (label === undefined) {
       throw err`setGraph must be called before dagre.layout`;
     }
@@ -582,6 +598,18 @@ export class DagreGraph {
   }
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: dagre's own Graph defaults its label types to any
+type AnyLabel = any;
+
+const graphlibGraph: {
+  /** create an empty graph */
+  new <
+    GraphLabel extends DagreGraphConfig = AnyLabel,
+    NodeLabel extends DagreNodeLabel = AnyLabel,
+    EdgeLabel extends DagreEdgeLabel = AnyLabel,
+  >(): DagreGraph<GraphLabel, NodeLabel, EdgeLabel>;
+} = DagreGraph;
+
 /**
  * dagre-compatible namespace backed by d3-dag
  *
@@ -607,8 +635,8 @@ export class DagreGraph {
 export const dagre = {
   /** graph constructors */
   graphlib: {
-    /** dagre-compatible graph class */
-    Graph: DagreGraph,
+    /** dagre-compatible graph class; label types default to `any`, as in dagre */
+    Graph: graphlibGraph,
   },
   /**
    * run layout on a graph, mutating it in-place

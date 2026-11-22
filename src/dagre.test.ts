@@ -398,16 +398,23 @@ test("layout throws before setGraph", () => {
   );
 });
 
-test("dagre graph throws on labels that aren't objects", () => {
+test("untyped DagreGraph checks known label fields", () => {
+  const grf = new DagreGraph();
+  // @ts-expect-error width must be a number
+  grf.setNode("a", { width: "40" });
+  // @ts-expect-error label is not a known field
+  grf.setNode("b", { label: "B", width: 40 });
+  // @ts-expect-error edge labels must be objects
+  expect(() => grf.setEdge("a", "b", "AB")).toThrow("must be objects");
+});
+
+test("untyped dagre graph throws on labels that aren't objects", () => {
   const grf = new dagre.graphlib.Graph();
   for (const label of ["label", 1, true, null, () => ({})]) {
-    // @ts-expect-error graph labels must be objects
     expect(() => grf.setGraph(label)).toThrow("graph labels must be objects");
-    // @ts-expect-error node labels must be objects
     expect(() => grf.setNode("a", label)).toThrow(
       "node labels must be objects",
     );
-    // @ts-expect-error edge labels must be objects
     expect(() => grf.setEdge("a", "b", label)).toThrow(
       "edge labels must be objects",
     );
@@ -419,7 +426,6 @@ test("dagre graph throws on labels that aren't objects", () => {
 
 test("default node labels that aren't objects throw", () => {
   const grf = new dagre.graphlib.Graph();
-  // @ts-expect-error node labels must be objects
   grf.setDefaultNodeLabel(() => "label");
   expect(() => grf.setNode("a")).toThrow("node labels must be objects");
   expect(() => grf.setEdge("a", "b", {})).toThrow(
@@ -427,7 +433,7 @@ test("default node labels that aren't objects throw", () => {
   );
   expect(grf.nodeCount()).toBe(0);
   grf.setNode("a", {});
-  expect<object>(grf.node("a")).toEqual({});
+  expect(grf.node("a")).toEqual({});
 });
 
 test("DagreGraph setGraph requires a label", () => {
@@ -435,6 +441,21 @@ test("DagreGraph setGraph requires a label", () => {
   // @ts-expect-error label is required
   expect(() => grf.setGraph()).toThrow("graph labels must be objects");
   expect(grf.graph()).toBeUndefined();
+});
+
+test("untyped dagre graph accepts extra label fields like dagre", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ rankdir: "LR", title: "flow" });
+  grf.setNode("a", { label: "A", width: 40 });
+  grf.setNode("b", { label: "B", width: 40 });
+  grf.setEdge("a", "b", { label: "AB" });
+  dagre.layout(grf);
+
+  expect(grf.graph().title).toBe("flow");
+  expect(grf.node("a").label).toBe("A");
+  const width: number = grf.node("a").width;
+  expect(width).toBe(40);
+  expect(grf.edge("a", "b").label).toBe("AB");
 });
 
 test("hasNode and hasEdge", () => {
@@ -495,6 +516,45 @@ test("node returns the label passed to setNode", () => {
   const node: object = grf.node("a");
   expect(node).toBe(label);
   expect(node).toEqual({ label: "A", width: 10, height: 10, x: 5, y: 5 });
+});
+
+test("graph takes the graph, node and edge label types", () => {
+  interface NamedNode {
+    width: number;
+    height: number;
+    name: string;
+  }
+  interface NamedEdge {
+    name: string;
+  }
+  const grf = new dagre.graphlib.Graph<
+    DagreGraphConfig,
+    NamedNode,
+    NamedEdge
+  >();
+  grf.setGraph({ rankdir: "LR" });
+  grf.setNode("a", { width: 10, height: 10, name: "A" });
+  grf.setNode("b", { width: 10, height: 10, name: "B" });
+  grf.setEdge("a", "b", { name: "AB" });
+  // @ts-expect-error name is required
+  grf.setNode("c", { width: 10, height: 10 });
+  // @ts-expect-error name is required
+  grf.setEdge("a", "c", {});
+  dagre.layout(grf);
+
+  const name: string = grf.node("a").name;
+  const x: number = grf.node("a").x;
+  expect(name).toBe("A");
+  expect(x).toBe(5);
+  const edgeName: string = grf.edge("a", "b").name;
+  const points: { x: number; y: number }[] = grf.edge("a", "b").points;
+  expect(edgeName).toBe("AB");
+  expect(points.length).toBeGreaterThan(0);
+
+  const filtered: DagreGraph<DagreGraphConfig, NamedNode, NamedEdge> =
+    grf.filterNodes((id) => id !== "c");
+  expect(filtered.node("a")).toBe(grf.node("a"));
+  expect(filtered.edge("a", "b")).toBe(grf.edge("a", "b"));
 });
 
 test("setNode replaces the label of an existing node", () => {
@@ -651,7 +711,7 @@ test("setDefaultEdgeLabel accepted for compatibility", () => {
   grf.setNode("a");
   grf.setNode("b");
   grf.setEdge("a", "b");
-  expect<object>(grf.edge("a", "b")).toEqual({});
+  expect(grf.edge("a", "b")).toEqual({});
 });
 
 test("isCompound", () => {

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `DagreGraph` takes graph, node and edge label types, as in dagre
+
 ### Changed
 
 - `dagre`'s `setGraph` replaces the graph label instead of merging into it; to
