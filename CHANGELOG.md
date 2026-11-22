@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `graph`'s `roots` and `leaves` no longer go stale after linking two nodes that
+  were already connected
+
 ## [1.3.0] - 2026-11-01
 
 ### Removed

@@ -1154,6 +1154,8 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
       } else if (info && tinfo && sroot === troot) {
         info.nlinks += 1;
         if (info.acyclic === true) info.acyclic = null;
+        info.roots = null;
+        info.leaves = null;
         info.sources?.delete(target);
         info.sinks?.delete(source);
       } else if (info && tinfo) {
