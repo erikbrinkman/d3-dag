@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `DagreLayoutEdge` instead of `DagreNode` and `DagreEdge`
 - `dagre` throws on graph, node and edge labels that aren't objects, since
   `layout` writes onto them
+- `dagre`'s `filterNodes` no longer copies the default node label; call
+  `setDefaultNodeLabel` on the new graph
 
 ### Fixed
 
