@@ -5,7 +5,7 @@
  */
 import type { Graph, Rank } from "../graph/index.js";
 import { bigrams } from "../iters.js";
-import type { CallableNodeSize, LayoutResult, NodeSize } from "../layout.js";
+import { cachedNodeSize, type LayoutResult, type NodeSize } from "../layout.js";
 import type { Tweak } from "../tweaks.js";
 import { err, type U } from "../utils.js";
 import { greedy } from "./greedy.js";
@@ -77,14 +77,6 @@ export interface Zherebko<Ops extends ZherebkoOps = ZherebkoOps> {
   gap(): readonly [number, number];
 }
 
-function normalize<N, L>(inp: NodeSize<N, L>): CallableNodeSize<N, L> {
-  if (typeof inp === "function") {
-    return inp;
-  } else {
-    return () => inp;
-  }
-}
-
 /** @internal */
 function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
   ops: O & ZherebkoOps<ND, LD>,
@@ -102,7 +94,7 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
       res = { width: 0, height: 0 };
     } else {
       const { xgap, ygap } = sizes;
-      const nodeSize = normalize(ops.nodeSize);
+      const nodeSize = cachedNodeSize(ops.nodeSize);
 
       // topological-ish sort
       const ordered = [...inp.topological(ops.rank)];
@@ -110,9 +102,6 @@ function buildOperator<ND, LD, O extends ZherebkoOps<ND, LD>>(
       let maxWidth = 0;
       for (const node of ordered) {
         const [width, height] = nodeSize(node);
-        if (!(width >= 0 && height >= 0)) {
-          throw err`nodeSize can't be negative, but got: [${width}, ${height}]`;
-        }
         maxWidth = Math.max(maxWidth, width);
         y += ygap;
         node.y = y + height / 2;

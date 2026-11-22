@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import type { Graph, Rank } from "../graph/index.js";
-import type { LayoutResult, NodeSize } from "../layout.js";
+import { cachedNodeSize, type LayoutResult, type NodeSize } from "../layout.js";
 import type { Tweak } from "../tweaks.js";
 import { err, type U } from "../utils.js";
 import { type LaneGreedy, laneGreedy } from "./lane/greedy.js";
@@ -150,41 +150,27 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
 
       // adjust x and y by nodeSize
       const { xgap, ygap } = sizes;
-      let width: number, height: number;
-      if (typeof options.nodeSize === "function") {
-        // assign ys and compute widths
-        const laneWidths = Array<number>(numLanes).fill(0);
-        height = -ygap;
-        for (const node of ordered) {
-          const [nodeWidth, nodeHeight] = options.nodeSize(node);
-          if (!(nodeWidth >= 0 && nodeHeight >= 0)) {
-            throw err`nodeSize can't be negative, but got: [${nodeWidth}, ${nodeHeight}]`;
-          }
-          laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
-          height += ygap;
-          node.y = height + nodeHeight / 2;
-          height += nodeHeight;
-        }
-        // compute width and xs
-        width = -xgap;
-        for (const [i, laneWidth] of laneWidths.entries()) {
-          width += xgap;
-          laneWidths[i] = width + laneWidth / 2;
-          width += laneWidth;
-        }
-        // assign xs
-        for (const node of ordered) {
-          node.x = laneWidths[node.x];
-        }
-      } else {
-        // constant, so assign simply
-        const [nodeWidth, nodeHeight] = options.nodeSize;
-        for (const node of ordered) {
-          node.x = (node.x + 0.5) * nodeWidth + node.x * xgap;
-          node.y = (node.y + 0.5) * nodeHeight + node.y * ygap;
-        }
-        width = numLanes * (nodeWidth + xgap) - xgap;
-        height = ordered.length * (nodeHeight + ygap) - ygap;
+      const nodeSize = cachedNodeSize(options.nodeSize);
+      // assign ys and compute widths
+      const laneWidths = Array<number>(numLanes).fill(0);
+      let height = -ygap;
+      for (const node of ordered) {
+        const [nodeWidth, nodeHeight] = nodeSize(node);
+        laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
+        height += ygap;
+        node.y = height + nodeHeight / 2;
+        height += nodeHeight;
+      }
+      // compute width and xs
+      let width = -xgap;
+      for (const [lane, laneWidth] of laneWidths.entries()) {
+        width += xgap;
+        laneWidths[lane] = width + laneWidth / 2;
+        width += laneWidth;
+      }
+      // assign xs
+      for (const node of ordered) {
+        node.x = laneWidths[node.x];
       }
 
       // assign link points
