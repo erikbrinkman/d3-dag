@@ -122,3 +122,17 @@ test("topological().straight(false) allows zero width", () => {
   const coord = topological().straight(false);
   expect(coord(layers, () => 0)).toBe(0);
 });
+
+test("topological().straight(false) keeps links with no height short", () => {
+  const layers = createLayers([[[0, 1]], [0, [1]], [0, [0]], [[]]]);
+  const [[one], [high, two], [low, three], [four]] = layers;
+  low.y = high.y;
+  const width = topological().straight(false)(layers, nodeSep);
+
+  expect(width).toBeCloseTo(27 / 13);
+  for (const node of [one, two, three, four]) {
+    expect(node.x).toBeCloseTo(41 / 26);
+  }
+  expect(high.x).toBeCloseTo(15 / 26);
+  expect(low.x).toBeCloseTo(0.5);
+});

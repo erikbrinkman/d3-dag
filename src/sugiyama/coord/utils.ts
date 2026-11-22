@@ -4,7 +4,7 @@
  * @internal
  * @packageDocumentation
  */
-import { max } from "d3-array";
+import { max, min } from "d3-array";
 import { solveQP } from "quadprog";
 import type { GraphNode } from "../../graph/index.js";
 import { bigrams } from "../../iters.js";
@@ -201,11 +201,22 @@ export function layout<N, L>(
   return normalize(layers, sep);
 }
 
-export function avgHeight(nodes: Iterable<GraphNode>): number {
+/**
+ * get the height of a link from `top` to `bottom` relative to the average
+ *
+ * A link with no height counts as the shortest one with a height, and with no
+ * heights at all, a link counts as average.
+ */
+export function relativeHeight(
+  nodes: Iterable<GraphNode>,
+): (top: GraphNode, bottom: GraphNode) => number {
   // NOTE graph is guaranteed not to be multi
-  return aggMean(
-    Iterator.from(nodes).flatMap((node) =>
+  const heights = [
+    ...Iterator.from(nodes).flatMap((node) =>
       Iterator.from(node.children()).map((child) => child.y - node.y),
     ),
-  )!;
+  ];
+  const average = aggMean(heights) || 1;
+  const shortest = min(heights.filter((height) => height > 0)) ?? 1;
+  return (top, bottom) => (bottom.y - top.y || shortest) / average;
 }

@@ -215,3 +215,27 @@ test("coordQuad() allows zero width", () => {
   const layers = createLayers([[[]]]);
   expect(coordQuad()(layers, () => 0)).toBe(0);
 });
+
+test("coordQuad() keeps links with no height short", () => {
+  const layers = createLayers([[[0, 1]], [0, 0], [[]]]);
+  const [[head], [left, right], [tail]] = layers;
+  left.y = right.y = head.y;
+  const width = coordQuad()(layers, nodeSep);
+
+  expect(width).toBeCloseTo(2);
+  expect(left.x).toBeCloseTo(0.5);
+  expect(right.x).toBeCloseTo(1.5);
+  expect(head.x).toBeCloseTo(1);
+  expect(tail.x).toBeCloseTo(1);
+});
+
+test("coordQuad() works when no link has height", () => {
+  const layers = createLayers([[[0]], [[]]]);
+  const [[head], [tail]] = layers;
+  tail.y = head.y;
+  const width = coordQuad()(layers, nodeSep);
+
+  expect(width).toBeCloseTo(1);
+  expect(head.x).toBeCloseTo(0.5);
+  expect(tail.x).toBeCloseTo(0.5);
+});

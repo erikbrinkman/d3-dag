@@ -15,11 +15,11 @@ import { err, ierr } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
 import {
-  avgHeight,
   init,
   layout,
   minBend,
   normalize,
+  relativeHeight,
   solve as solveQuad,
 } from "./utils.js";
 
@@ -104,7 +104,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
         }
       }
 
-      const heightNorm = avgHeight(ids.keys());
+      const relHeight = relativeHeight(ids.keys());
 
       // minimize weighted difference
       for (const layer of layers) {
@@ -128,7 +128,7 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
                 variables[cid][pcons] = cflip ? 1 : -1;
                 variables[cid][ccons] = cflip ? -1 : 1;
 
-                const height = (child.y - par.y) / heightNorm;
+                const height = relHeight(par, child);
                 variables[slack] = { opt: 1 / height, [pcons]: 1, [ccons]: 1 };
               }
             }
@@ -179,17 +179,17 @@ function buildOperator(opts: { simp: boolean }): CoordTopological {
       }
       const [Q, c, A, b] = init(layers, inds, sep);
 
-      const heightNorm = avgHeight(inds.keys());
+      const relHeight = relativeHeight(inds.keys());
 
       for (const par of inds.keys()) {
         const pind = inds.get(par)!;
         for (const node of par.children()) {
           const nind = inds.get(node)!;
-          const parh = (node.y - par.y) / heightNorm;
+          const parh = relHeight(par, node);
           if (node.data.role === "link") {
             for (const child of node.children()) {
               const cind = inds.get(child)!;
-              const chih = (child.y - node.y) / heightNorm;
+              const chih = relHeight(node, child);
               minBend(Q, pind, nind, cind, 1 / parh, 1 / chih);
             }
           }
