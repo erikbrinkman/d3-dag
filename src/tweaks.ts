@@ -98,7 +98,7 @@ function nearCorner(
  *
  * The grid layout often looks best with rounded corners. This tweak adds extra
  * control points to edges so that `d3.curveBasis` curves produce nice rounded
- * edges.
+ * edges, including on self loops.
  *
  * rounding should be set somewhere between 0 and nodeSize. No rounding goes
  * past the middle of a segment, so short segments get less.
@@ -111,17 +111,21 @@ export function tweakGrid(
     res: Readonly<LayoutResult>,
   ): LayoutResult {
     for (const link of graph.links()) {
-      const [first, mid, last, rem] = link.points;
-      if (rem !== undefined) {
-        throw err`link points had more than three points: ${link.points.length}; tweakGrid can only be applied to grid layouts`;
-      } else if (last !== undefined) {
-        link.points = [
-          first,
-          nearCorner(mid, first, rounding),
-          mid,
-          nearCorner(mid, last, rounding),
-          last,
-        ];
+      const { points } = link;
+      if (link.source !== link.target && points.length > 3) {
+        throw err`link points had more than three points: ${points.length}; tweakGrid can only be applied to grid layouts`;
+      } else {
+        const rounded = points.slice(0, 1);
+        for (let ind = 1; ind < points.length - 1; ++ind) {
+          const corner = points[ind];
+          rounded.push(
+            nearCorner(corner, points[ind - 1], rounding),
+            corner,
+            nearCorner(corner, points[ind + 1], rounding),
+          );
+        }
+        if (points.length > 1) rounded.push(points[points.length - 1]);
+        link.points = rounded;
       }
     }
     return res;
