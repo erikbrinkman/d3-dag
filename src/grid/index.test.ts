@@ -1,7 +1,26 @@
 import { expect, test } from "bun:test";
+import { graphConnect } from "../graph/connect.js";
 import { type Graph, type GraphNode, graph } from "../graph/index.js";
 import type { LayoutResult } from "../layout.js";
-import { dummy, en, multi, oh, single, zhere } from "../test-graphs.js";
+import {
+  ccoz,
+  doub,
+  dummy,
+  en,
+  ex,
+  eye,
+  line,
+  loop,
+  loops,
+  multi,
+  oh,
+  single,
+  square,
+  three,
+  trip,
+  zhere,
+} from "../test-graphs.js";
+import { loopCrossings } from "../test-utils.js";
 import { tweakSize } from "../tweaks.js";
 import { grid } from "./index.js";
 import { laneGreedy } from "./lane/greedy.js";
@@ -305,3 +324,164 @@ test("grid() throws for arguments", () => {
   // @ts-expect-error no args
   expect(() => grid(null)).toThrow("grid");
 });
+
+test("grid() draws self loops beside their node", () => {
+  const dag = graphConnect()([
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "b"],
+    ["a", "c"],
+    ["b", "d"],
+    ["c", "c"],
+    ["c", "d"],
+    ["c", "e"],
+    ["d", "d"],
+    ["e", "e"],
+  ]);
+  for (const layout of [
+    grid(),
+    grid().nodeSize([2, 1]).gap([1, 2]),
+    grid().nodeSize(({ data }: { data: string }) =>
+      data === "c" ? [3, 2] : [1, 1],
+    ),
+  ]) {
+    const { width, height } = layout(dag);
+    for (const { points } of dag.links()) {
+      for (const [x, y] of points) {
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x).toBeLessThanOrEqual(width);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y).toBeLessThanOrEqual(height);
+      }
+    }
+    for (const { source, target, points } of dag.links()) {
+      if (source === target) {
+        const [start, lower, upper, end] = points;
+        expect(points).toHaveLength(4);
+        expect(start).toEqual([source.x, source.y]);
+        expect(end).toEqual([source.x, source.y]);
+        expect(lower[0]).toBeCloseTo(upper[0]);
+        expect(lower[1]).toBeGreaterThan(source.y);
+        expect(upper[1]).toBeLessThan(source.y);
+      }
+    }
+    expect(loopCrossings(dag)).toBe(0);
+  }
+});
+
+test("grid() puts self loops on the side fewer links leave from", () => {
+  const dag = graphConnect()([
+    ["a", "c"],
+    ["b", "c"],
+    ["a", "a"],
+    ["b", "b"],
+  ]);
+  const { width, height } = grid().nodeSize([1, 1]).gap([1, 1])(dag);
+  expect(width).toBeCloseTo(4);
+  expect(height).toBeCloseTo(5.25);
+  const [bNode, aNode, cNode] = dag.topological();
+  expect([aNode.data, bNode.data, cNode.data]).toEqual(["a", "b", "c"]);
+  // a's link to c leaves to the left, so its loop goes right
+  expect(cNode.x).toBeLessThan(aNode.x);
+  const [aLoop] = aNode.childLinksTo(aNode);
+  expect(aLoop.points[1][0]).toBeCloseTo(aNode.x + 1);
+  const [bLoop] = bNode.childLinksTo(bNode);
+  expect(bLoop.points[1][0]).toBeCloseTo(bNode.x + 1);
+  expect(loopCrossings(dag)).toBe(0);
+});
+
+test("grid() counts links back up from below when placing self loops", () => {
+  const lanes: Record<string, number> = { a: 1, b: 0, c: 2, d: 2 };
+  const order = ["a", "b", "c", "d"];
+  const dag = graphConnect()([
+    ["a", "b"],
+    ["c", "a"],
+    ["d", "a"],
+    ["a", "a"],
+  ]);
+  grid()
+    .rank(({ data }: GraphNode<string>) => order.indexOf(data))
+    .lane((ordered: readonly GraphNode<string>[]) => {
+      for (const node of ordered) node.x = lanes[node.data];
+    })
+    .nodeSize([1, 1])
+    .gap([1, 1])(dag);
+  const [aNode] = [...dag.nodes()].filter(({ data }) => data === "a");
+  // one link leaves left, but two links up from below arrive from the right
+  const [loop] = aNode.childLinksTo(aNode);
+  expect(loop.points[1][0]).toBeLessThan(aNode.x);
+});
+
+test("grid() makes room for a self loop on a single node", () => {
+  const dag = graphConnect()([["a", "a"]]);
+  const { width, height } = grid().nodeSize([1, 1]).gap([1, 1])(dag);
+  expect(width).toBeCloseTo(1.5);
+  expect(height).toBeCloseTo(1.5);
+  const [loop] = dag.links();
+  const [[startX, startY], [lowerX, lowerY], [upperX, upperY], end] =
+    loop.points;
+  expect([startX, startY]).toEqual(end);
+  expect(startX).toBeCloseTo(0.5);
+  expect(startY).toBeCloseTo(0.75);
+  expect(lowerX).toBeCloseTo(1.5);
+  expect(upperX).toBeCloseTo(1.5);
+  expect(lowerY).toBeCloseTo(1.5);
+  expect(upperY).toBeCloseTo(0);
+});
+
+test("grid() puts tied self loops on the right", () => {
+  const dag = graphConnect()([
+    ["a", "a"],
+    ["a", "a"],
+    ["a", "a"],
+  ]);
+  const { width } = grid().nodeSize([1, 1]).gap([1, 1])(dag);
+  expect(width).toBeCloseTo(2.5);
+  const [node] = dag.nodes();
+  expect(node.x).toBeCloseTo(0.5);
+  const loopXs = [...dag.links()].map(({ points }) => points[1][0]);
+  expect(loopXs[0]).toBeCloseTo(1.5);
+  expect(loopXs[1]).toBeCloseTo(2);
+  expect(loopXs[2]).toBeCloseTo(2.5);
+});
+
+for (const dat of [
+  single,
+  doub,
+  line,
+  oh,
+  trip,
+  multi,
+  eye,
+  square,
+  dummy,
+  three,
+  en,
+  ex,
+  ccoz,
+  zhere,
+  loop,
+  loops,
+]) {
+  test(`grid() keeps ${dat.name} inside its bounds`, () => {
+    const grf = dat();
+    const layout = grid().nodeSize([2, 1]).gap([1, 2]);
+    const { width, height } = layout(grf);
+    for (const node of grf.nodes()) {
+      expect(node.x).toBeGreaterThanOrEqual(0);
+      expect(node.x).toBeLessThanOrEqual(width);
+      expect(node.y).toBeGreaterThanOrEqual(0);
+      expect(node.y).toBeLessThanOrEqual(height);
+    }
+    for (const { source, target, points } of grf.links()) {
+      if (source === target) expect(points).toHaveLength(4);
+      expect(points.length).toBeGreaterThanOrEqual(2);
+      for (const [x, y] of points) {
+        expect(x).toBeGreaterThanOrEqual(-1e-6);
+        expect(x).toBeLessThanOrEqual(width + 1e-6);
+        expect(y).toBeGreaterThanOrEqual(-1e-6);
+        expect(y).toBeLessThanOrEqual(height + 1e-6);
+      }
+    }
+  });
+}

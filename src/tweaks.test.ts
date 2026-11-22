@@ -146,6 +146,55 @@ test("tweakGrid() rounds a straight segment without NaN", () => {
   }
 });
 
+test("tweakGrid() rounds the corners of self loops", () => {
+  const dag = graphConnect()([["a", "a"]]);
+  const layout = grid().tweaks([tweakGrid([0.25, 0.25])]);
+  layout(dag);
+  const [loop] = dag.links();
+  expect(loop.points).toEqual([
+    [0.5, 0.75],
+    [1.25, 1.3125],
+    [1.5, 1.5],
+    [1.5, 1.25],
+    [1.5, 0.25],
+    [1.5, 0],
+    [1.25, 0.1875],
+    [0.5, 0.75],
+  ]);
+});
+
+for (const rounding of [0.5, 1]) {
+  test(`tweakGrid([${rounding}, ${rounding}]) doesn't zigzag several self loops`, () => {
+    const dag = graphConnect()([
+      ["a", "a"],
+      ["a", "a"],
+      ["a", "a"],
+    ]);
+    const { width, height } = grid()
+      .nodeSize([1, 1])
+      .gap([1, 1])
+      .tweaks([tweakGrid([rounding, rounding])])(dag);
+
+    for (const { points } of dag.links()) {
+      for (const [x, y] of points) {
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x).toBeLessThanOrEqual(width);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y).toBeLessThanOrEqual(height);
+      }
+      for (const [[ax, ay], [bx, by], [cx, cy]] of points
+        .slice(2)
+        .map((point, ind) => [points[ind], points[ind + 1], point])) {
+        const cross = (bx - ax) * (cy - by) - (by - ay) * (cx - bx);
+        if (Math.abs(cross) < 1e-9) {
+          const dot = (bx - ax) * (cx - bx) + (by - ay) * (cy - by);
+          expect(dot).toBeGreaterThanOrEqual(0);
+        }
+      }
+    }
+  });
+}
+
 test("tweakGrid() throws for non-grid", () => {
   const builder = graphConnect();
   const grf = builder([

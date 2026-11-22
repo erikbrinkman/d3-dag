@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - graphs accept self loops
-- `sugiyama` and `zherebko` lay out self loops
+- `sugiyama`, `zherebko` and `grid` lay out self loops
 - `DagreGraph` takes graph, node and edge label types, as in dagre
 
 ### Changed

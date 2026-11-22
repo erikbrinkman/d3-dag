@@ -3,8 +3,10 @@
  *
  * @packageDocumentation
  */
-import type { Graph, Rank } from "../graph/index.js";
+import type { Graph, GraphNode, Rank } from "../graph/index.js";
+import { chain, entries } from "../iters.js";
 import { cachedNodeSize, type LayoutResult, type NodeSize } from "../layout.js";
+import { drawLoop, fitLoops } from "../loops.js";
 import type { Tweak } from "../tweaks.js";
 import { err, type U } from "../utils.js";
 import { type LaneGreedy, laneGreedy } from "./lane/greedy.js";
@@ -148,34 +150,73 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
       options.lane(ordered);
       const numLanes = verifyLanes(ordered, options.lane);
 
+      // self loops go on the side of their node fewer other links leave from,
+      // since each of those crosses them, or the right when tied
+      const loopsOnRight = new Map<GraphNode<N, L>, boolean>();
+      for (const node of ordered) {
+        if (node.nchildLinksTo(node)) {
+          let balance = 0;
+          for (const { source, target } of chain(
+            node.parentLinks(),
+            node.childLinks(),
+          )) {
+            const other = source === node ? target : source;
+            if (other.y > node.y) {
+              balance += Math.sign(other.x - node.x);
+            }
+          }
+          loopsOnRight.set(node, balance <= 0);
+        }
+      }
+
       // adjust x and y by nodeSize
       const { xgap, ygap } = sizes;
       const nodeSize = cachedNodeSize(options.nodeSize);
-      // assign ys and compute widths
-      const laneWidths = Array<number>(numLanes).fill(0);
+      const loopStep = xgap / 2;
+      const lefts = Array<number>(numLanes).fill(0);
+      const rights = Array<number>(numLanes).fill(0);
       let height = -ygap;
       for (const node of ordered) {
         const [nodeWidth, nodeHeight] = nodeSize(node);
-        laneWidths[node.x] = Math.max(laneWidths[node.x], nodeWidth);
+        const loopRoom = node.nchildLinksTo(node) * loopStep;
+        const onRight = loopsOnRight.get(node);
+        const lane = node.x;
+        lefts[lane] = Math.max(
+          lefts[lane],
+          nodeWidth / 2 + (onRight ? 0 : loopRoom),
+        );
+        rights[lane] = Math.max(
+          rights[lane],
+          nodeWidth / 2 + (onRight ? loopRoom : 0),
+        );
         height += ygap;
         node.y = height + nodeHeight / 2;
         height += nodeHeight;
       }
       // compute width and xs
+      const centers = Array<number>(numLanes).fill(0);
       let width = -xgap;
-      for (const [lane, laneWidth] of laneWidths.entries()) {
+      for (const [lane, left] of lefts.entries()) {
         width += xgap;
-        laneWidths[lane] = width + laneWidth / 2;
-        width += laneWidth;
+        centers[lane] = width + left;
+        width += left + rights[lane];
       }
-      // assign xs
       for (const node of ordered) {
-        node.x = laneWidths[node.x];
+        node.x = centers[node.x];
+      }
+
+      for (const [node, onRight] of loopsOnRight) {
+        const size = nodeSize(node);
+        const num = node.nchildLinksTo(node);
+        for (const [ind, link] of entries(node.childLinksTo(node))) {
+          drawLoop(link, onRight, ind + 1, num, size, loopStep, ygap);
+        }
       }
 
       // assign link points
       for (const link of grf.links()) {
         const { source, target, points } = link;
+        if (source === target) continue;
         points.splice(0);
         if (source.x === target.x) {
           points.push([source.x, source.y], [target.x, target.y]);
@@ -191,7 +232,7 @@ function buildOperator<ND, LD, Ops extends GridOps<ND, LD>>(
         }
       }
 
-      res = { width, height };
+      res = { width, height: fitLoops(grf, height) };
     }
 
     // apply tweaks
@@ -326,6 +367,10 @@ export type DefaultGrid = Grid<{
  *
  * The current implementation doesn't render multi-dags any differently, so
  * multiple edges going to the same node will be rendered as a single edge.
+ * Self loops are the exception: each leaves below its node's center, runs up
+ * one side, and comes back in above, nested one inside the next. Loops go on
+ * whichever side fewer other links leave the node from, or on the right when
+ * tied.
  *
  * @example
  *

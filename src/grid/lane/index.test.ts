@@ -1,10 +1,20 @@
 import { expect, test } from "bun:test";
-import { ccoz, doub, ex, multi, oh, square, zhere } from "../../test-graphs.js";
+import {
+  ccoz,
+  doub,
+  ex,
+  loop,
+  loops,
+  multi,
+  oh,
+  square,
+  zhere,
+} from "../../test-graphs.js";
 import { laneGreedy } from "./greedy.js";
 import { laneOpt } from "./opt.js";
 import { verifyLanes } from "./utils.js";
 
-for (const dat of [doub, ex, square, ccoz, multi, oh, zhere]) {
+for (const dat of [doub, ex, square, ccoz, multi, oh, zhere, loop, loops]) {
   for (const [name, lane] of [
     ["opt", laneOpt().compressed(false).dist(false)],
     ["opt comp dist", laneOpt().compressed(true).dist(true)],
