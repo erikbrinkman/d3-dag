@@ -35,7 +35,14 @@ function firstAvailable(inds: number[], target: number) {
 }
 
 /**
- * @returns the lane of each link that doesn't connect adjacent nodes
+ * assign lanes to links
+ *
+ * A self loop holds its lane only at its node, so each of a node's loops gets
+ * its own lane.
+ *
+ * @param gap - the space a lane leaves free after a link before the next one
+ * @returns the lane of each self loop and link that doesn't connect adjacent
+ * nodes
  */
 export function greedy(
   nodes: readonly GraphNode[],
@@ -44,7 +51,12 @@ export function greedy(
   // We first create an array of every link we want to render, with the layer
   // of their source and target node so that we can sort first by target layer
   // then by source layer to greedily assign lanes so they don't intersect
-  const links = [];
+  const links: [GraphNode, GraphNode, GraphLink][] = [];
+  for (const node of nodes) {
+    for (const link of node.childLinksTo(node)) {
+      links.push([node, node, link]);
+    }
+  }
   for (const [last, node] of bigrams(nodes)) {
     let seen = false;
     for (const info of zhereParentLinks(node)) {
@@ -64,6 +76,7 @@ export function greedy(
 
   const indices = new Map<GraphLink, number>();
   for (const [source, target, link] of links) {
+    const end = source === target ? target.y : target.y - gap;
     // we can technically put the gap both in the query and the save, but this
     // allows a little floating point tolerance.
     const negIndex = firstAvailable(neg, source.y);
@@ -74,10 +87,10 @@ export function greedy(
       // to be an operator if we can solve this aspect.
       // tie-break right
       indices.set(link, -negIndex - 1);
-      neg[negIndex] = target.y - gap;
+      neg[negIndex] = end;
     } else {
       indices.set(link, posIndex + 1);
-      pos[posIndex] = target.y - gap;
+      pos[posIndex] = end;
     }
   }
   return indices;
