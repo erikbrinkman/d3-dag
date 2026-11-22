@@ -1,6 +1,12 @@
 import { expect, test } from "bun:test";
 import { bigrams } from "../../iters.js";
-import { createLayers, nodeSep } from "../test-utils.js";
+import type { SugiNode } from "../sugify.js";
+import {
+  createLayers,
+  getIndex,
+  nodeSep,
+  type TestDatum,
+} from "../test-utils.js";
 import { coordGreedy } from "./greedy.js";
 
 test("coordGreedy() works for N", () => {
@@ -112,4 +118,24 @@ test("coordGreedy() fails passing an arg to constructor", () => {
 test("coordGreedy() allows zero width", () => {
   const layers = createLayers([[[]]]);
   expect(coordGreedy()(layers, () => 0)).toBe(0);
+});
+
+test("coordGreedy() passes nodes to the separation left to right", () => {
+  const layers = createLayers([[[], []]]);
+  const [[left, right]] = layers;
+  const sep = (
+    first: SugiNode<TestDatum, undefined> | undefined,
+    second: SugiNode<TestDatum, undefined> | undefined,
+  ): number => {
+    if (first && second) {
+      return getIndex(first) === 0 ? 1 : 3;
+    } else {
+      return 0.5;
+    }
+  };
+  const width = coordGreedy()(layers, sep);
+
+  expect(width).toBeCloseTo(2);
+  expect(left.x).toBeCloseTo(0.5);
+  expect(right.x).toBeCloseTo(1.5);
 });
