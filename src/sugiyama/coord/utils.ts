@@ -213,7 +213,7 @@ export function relativeHeight(
   // NOTE graph is guaranteed not to be multi
   const heights = [
     ...Iterator.from(nodes).flatMap((node) =>
-      Iterator.from(node.children()).map((child) => child.y - node.y),
+      node.children().map((child) => child.y - node.y),
     ),
   ];
   const average = aggMean(heights) || 1;

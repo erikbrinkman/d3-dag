@@ -210,17 +210,19 @@ test("sugiyama() draws self loops beside their node", () => {
     }
 
     const [aNode] = dag.topological();
-    const loops = [...aNode.childLinksTo(aNode)].map(({ points }) => {
-      const [start, lower, upper, end] = points;
-      expect(points).toHaveLength(4);
-      expect(start).toEqual([aNode.x, aNode.y]);
-      expect(end).toEqual([aNode.x, aNode.y]);
-      // out below the center, back in above
-      expect(lower[0]).toBeCloseTo(upper[0]);
-      expect(lower[1]).toBeGreaterThan(aNode.y);
-      expect(upper[1]).toBeLessThan(aNode.y);
-      return [lower[0] - aNode.x, lower[1] - aNode.y] as const;
-    });
+    const loops = [
+      ...aNode.childLinksTo(aNode).map(({ points }) => {
+        const [start, lower, upper, end] = points;
+        expect(points).toHaveLength(4);
+        expect(start).toEqual([aNode.x, aNode.y]);
+        expect(end).toEqual([aNode.x, aNode.y]);
+        // out below the center, back in above
+        expect(lower[0]).toBeCloseTo(upper[0]);
+        expect(lower[1]).toBeGreaterThan(aNode.y);
+        expect(upper[1]).toBeLessThan(aNode.y);
+        return [lower[0] - aNode.x, lower[1] - aNode.y] as const;
+      }),
+    ];
     const [[firstX], [secondX], [thirdX, thirdY]] = loops;
     expect(firstX).toBeCloseTo(2);
     expect(secondX).toBeCloseTo(-2);
@@ -471,9 +473,9 @@ for (const [name, coord] of coords) {
     expect(height).toBeCloseTo(1);
     expect(root.x).toBeCloseTo(5);
     expect(leaf.x).toBeCloseTo(5);
-    const middles = [...dag.links()]
-      .map(({ points: [, [x]] }) => x)
-      .sort((left, right) => left - right);
+    const middles = [...dag.links().map(({ points: [, [x]] }) => x)].sort(
+      (left, right) => left - right,
+    );
     expect(middles[0]).toBeCloseTo(0);
     expect(middles[1]).toBeCloseTo(10);
   });

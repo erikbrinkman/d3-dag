@@ -92,7 +92,7 @@ function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
     for (const node of nodes) {
       const val = Math.max(
         sep(undefined, node),
-        ...Iterator.from(chain(node.parents(), node.children())).map(
+        ...chain(node.parents(), node.children()).map(
           (c) => (c.uy ?? -Infinity) + sep(c, node),
         ),
       );
@@ -103,11 +103,9 @@ function buildOperator<ND, LD, O extends LayeringLongestPathOps<ND, LD>>(
     // go in reverse an update y in case we can shrink long edges
     for (const node of nodes.reverse()) {
       const val = Math.min(
-        ...Iterator.from(
-          Iterator.from(chain(node.parents(), node.children())).filter(
-            (c) => node.y < c.y,
-          ),
-        ).map((c) => c.y - sep(c, node)),
+        ...chain(node.parents(), node.children())
+          .filter((c) => node.y < c.y)
+          .map((c) => c.y - sep(c, node)),
       );
 
       // don't update position if node has no "children" on this pass

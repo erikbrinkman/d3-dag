@@ -210,9 +210,7 @@ function buildOperator<Agg extends Aggregator>({
     const aggs = new Map(
       reordered.map((node) => {
         const ind = inds.get(node);
-        const agg =
-          ind ??
-          aggregate(Iterator.from(ancestors(node)).map((c) => inds.get(c)!));
+        const agg = ind ?? aggregate(ancestors(node).map((c) => inds.get(c)!));
         return [node, agg] as const;
       }),
     );

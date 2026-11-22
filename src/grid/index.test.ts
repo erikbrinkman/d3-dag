@@ -243,9 +243,7 @@ test("grid() handles inverted long edges correctly", () => {
     [1, 7],
   ]);
 
-  const [three] = Iterator.from(head.parentLinks()).filter(
-    (link) => link !== one,
-  );
+  const [three] = head.parentLinks().filter((link) => link !== one);
   expect(three.points).toEqual([
     [4, 4],
     [4, 1],
@@ -406,7 +404,7 @@ test("grid() counts links back up from below when placing self loops", () => {
     })
     .nodeSize([1, 1])
     .gap([1, 1])(dag);
-  const [aNode] = [...dag.nodes()].filter(({ data }) => data === "a");
+  const [aNode] = dag.nodes().filter(({ data }) => data === "a");
   // one link leaves left, but two links up from below arrive from the right
   const [loop] = aNode.childLinksTo(aNode);
   expect(loop.points[1][0]).toBeLessThan(aNode.x);
@@ -439,7 +437,7 @@ test("grid() puts tied self loops on the right", () => {
   expect(width).toBeCloseTo(2.5);
   const [node] = dag.nodes();
   expect(node.x).toBeCloseTo(0.5);
-  const loopXs = [...dag.links()].map(({ points }) => points[1][0]);
+  const loopXs = [...dag.links().map(({ points }) => points[1][0])];
   expect(loopXs[0]).toBeCloseTo(1.5);
   expect(loopXs[1]).toBeCloseTo(2);
   expect(loopXs[2]).toBeCloseTo(2.5);

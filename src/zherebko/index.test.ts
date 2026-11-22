@@ -129,9 +129,9 @@ test("zherebko() works for a multidag line", () => {
   expect(tail.x).toBeCloseTo(1);
   expect(tail.y).toBeCloseTo(4);
 
-  const [small, big] = [
-    ...Iterator.from(grf.links()).map(({ points }) => points),
-  ].sort((a, b) => a.length - b.length);
+  const [small, big] = [...grf.links().map(({ points }) => points)].sort(
+    (a, b) => a.length - b.length,
+  );
   expect(small).toHaveLength(2);
   expect(big).toHaveLength(3);
   const [, [x, y]] = big;
@@ -270,9 +270,7 @@ test("zherebko() works on disconnected dag", () => {
   const grf = doub();
   const layout = zherebko().nodeSize([2, 2]);
   layout(grf);
-  expect([...Iterator.from(grf.nodes()).map((node) => node.y)].sort()).toEqual([
-    1, 4,
-  ]);
+  expect([...grf.nodes().map((node) => node.y)].sort()).toEqual([1, 4]);
   for (const node of grf.nodes()) {
     expect(node.x).toEqual(1);
   }
@@ -438,9 +436,7 @@ test("zherebko() works with variable node sizes", () => {
   expect(tail.x).toBe(1.5);
   expect(tail.y).toBe(6.5);
 
-  const [{ points }] = Iterator.from(grf.links()).filter(
-    ({ points }) => points.length > 2,
-  );
+  const [{ points }] = grf.links().filter(({ points }) => points.length > 2);
   expect(points).toHaveLength(4);
   const [, [fx, fy], [sx, sy]] = points;
   expect(fx).toBeCloseTo(4);
@@ -537,9 +533,9 @@ test("zherebko() nests a node's self loops in their own lanes", () => {
     }
     // lanes give a node's loops the same places sugiyama and grid draw them
     for (const node of dag.nodes()) {
-      const drawn = [...node.childLinksTo(node)].map(({ points }) => [
-        ...points,
-      ]);
+      const drawn = [
+        ...node.childLinksTo(node).map(({ points }) => [...points]),
+      ];
       drawLoops(node, [nodeWidth, nodeHeight], xgap, ygap);
       for (const [ind, { points }] of [...node.childLinksTo(node)].entries()) {
         for (const [pointInd, [pointX, pointY]] of points.entries()) {
@@ -605,7 +601,8 @@ test("zherebko() reuses inner lanes a link passed over beside loops", () => {
   ]);
   zherebko()(dag);
   const laneXs = new Map(
-    [...dag.links()]
+    dag
+      .links()
       .filter(({ source }) => source.data === "c")
       .map(({ target, points: [, [laneX]] }) => [target.data, laneX]),
   );

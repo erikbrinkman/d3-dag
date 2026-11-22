@@ -480,7 +480,7 @@ export class DagreGraph<
 
   /** get all edges as `{ v, w }` descriptors */
   edges(): DagreEdgeDescriptor[] {
-    return Array.from(this.#mutGraph.links(), (link) => this.#describe(link));
+    return [...this.#mutGraph.links().map((link) => this.#describe(link))];
   }
 
   /** number of nodes */
@@ -495,12 +495,20 @@ export class DagreGraph<
 
   /** get predecessor node ids */
   predecessors(id: string): string[] {
-    return Array.from(this.#node(id).parents(), (node) => this.#idOf(node));
+    return [
+      ...this.#node(id)
+        .parents()
+        .map((node) => this.#idOf(node)),
+    ];
   }
 
   /** get successor node ids */
   successors(id: string): string[] {
-    return Array.from(this.#node(id).children(), (node) => this.#idOf(node));
+    return [
+      ...this.#node(id)
+        .children()
+        .map((node) => this.#idOf(node)),
+    ];
   }
 
   /** get all neighbor node ids (predecessors and successors, deduplicated) */
@@ -540,7 +548,7 @@ export class DagreGraph<
     const node = this.#node(v);
     const links =
       w === undefined ? node.parentLinks() : node.parentLinksTo(this.#node(w));
-    return Array.from(links, (link) => this.#describe(link));
+    return [...links.map((link) => this.#describe(link))];
   }
 
   /** get outgoing edge descriptors, optionally filtered to edges to `w` */
@@ -548,7 +556,7 @@ export class DagreGraph<
     const node = this.#node(v);
     const links =
       w === undefined ? node.childLinks() : node.childLinksTo(this.#node(w));
-    return Array.from(links, (link) => this.#describe(link));
+    return [...links.map((link) => this.#describe(link))];
   }
 
   /** get all edge descriptors incident to `v`, optionally filtered to edges with `w` */
@@ -558,22 +566,22 @@ export class DagreGraph<
     const parentLinks =
       other === undefined ? node.parentLinks() : node.parentLinksTo(other);
     // a self loop is the only link in both, so it's only taken from the parents
-    const childLinks = Iterator.from(
-      other === undefined ? node.childLinks() : node.childLinksTo(other),
+    const childLinks = (
+      other === undefined ? node.childLinks() : node.childLinksTo(other)
     ).filter((link) => link.target !== link.source);
-    return Array.from(chain(parentLinks, childLinks), (link) =>
-      this.#describe(link),
-    );
+    return [
+      ...chain(parentLinks, childLinks).map((link) => this.#describe(link)),
+    ];
   }
 
   /** get source node ids (no parents) */
   sources(): string[] {
-    return Array.from(this.#mutGraph.sources(), (node) => this.#idOf(node));
+    return [...this.#mutGraph.sources().map((node) => this.#idOf(node))];
   }
 
   /** get sink node ids (no children) */
   sinks(): string[] {
-    return Array.from(this.#mutGraph.sinks(), (node) => this.#idOf(node));
+    return [...this.#mutGraph.sinks().map((node) => this.#idOf(node))];
   }
 
   /** always true — dagre graphs are directed */

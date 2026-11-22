@@ -10,7 +10,7 @@ import { bigrams } from "../iters.js";
 
 function* zhereParentLinks(
   node: GraphNode,
-): IterableIterator<[GraphNode, GraphNode, GraphLink]> {
+): IteratorObject<[GraphNode, GraphNode, GraphLink], undefined> {
   for (const link of node.parentLinks()) {
     const { source } = link;
     if (source.y < node.y) {

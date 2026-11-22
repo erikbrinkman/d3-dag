@@ -524,8 +524,8 @@ test("splitting a component keeps both halves accurate", () => {
 
   expect(a.nnodes()).toBe(4);
   expect(f.nnodes()).toBe(2);
-  expect([...a.roots()].map((node) => node.data)).toEqual(["a"]);
-  expect([...f.roots()].map((node) => node.data)).toEqual(["e"]);
+  expect([...a.roots().map((node) => node.data)]).toEqual(["a"]);
+  expect([...f.roots().map((node) => node.data)]).toEqual(["e"]);
   expect([...grf.split()]).toHaveLength(2);
 });
 
@@ -1022,7 +1022,7 @@ class FakeNode implements GraphNode<null, null> {
     // noop
   }
 
-  *nodes(): IterableIterator<GraphNode<null, null>> {
+  *nodes(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
@@ -1030,7 +1030,7 @@ class FakeNode implements GraphNode<null, null> {
     return [];
   }
 
-  *links(): IterableIterator<GraphLink<null, null>> {
+  *links(): IteratorObject<GraphLink<null, null>, undefined> {
     // noop
   }
 
@@ -1042,7 +1042,7 @@ class FakeNode implements GraphNode<null, null> {
     return 0;
   }
 
-  *split(): IterableIterator<GraphNode<null, null>> {
+  *split(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
@@ -1078,7 +1078,7 @@ class FakeNode implements GraphNode<null, null> {
     return 0;
   }
 
-  *parentLinksTo(): IterableIterator<GraphLink<null, null>> {
+  *parentLinksTo(): IteratorObject<GraphLink<null, null>, undefined> {
     // noop
   }
 
@@ -1086,55 +1086,55 @@ class FakeNode implements GraphNode<null, null> {
     return 0;
   }
 
-  *childLinksTo(): IterableIterator<GraphLink<null, null>> {
+  *childLinksTo(): IteratorObject<GraphLink<null, null>, undefined> {
     // noop
   }
 
-  *parents(): IterableIterator<FakeNode> {
+  *parents(): IteratorObject<FakeNode, undefined> {
     // noop
   }
 
-  *children(): IterableIterator<FakeNode> {
+  *children(): IteratorObject<FakeNode, undefined> {
     // noop
   }
 
-  *parentCounts(): IterableIterator<[FakeNode, number]> {
+  *parentCounts(): IteratorObject<[FakeNode, number], undefined> {
     // noop
   }
 
-  *childCounts(): IterableIterator<[FakeNode, number]> {
+  *childCounts(): IteratorObject<[FakeNode, number], undefined> {
     // noop
   }
 
-  *parentLinks(): IterableIterator<GraphLink<null, null>> {
+  *parentLinks(): IteratorObject<GraphLink<null, null>, undefined> {
     // noop
   }
 
-  *childLinks(): IterableIterator<GraphLink<null, null>> {
+  *childLinks(): IteratorObject<GraphLink<null, null>, undefined> {
     // noop
   }
 
-  *descendants(): IterableIterator<GraphNode<null, null>> {
+  *descendants(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
-  *ancestors(): IterableIterator<GraphNode<null, null>> {
+  *ancestors(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
-  *roots(): IterableIterator<GraphNode<null, null>> {
+  *roots(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
-  *leaves(): IterableIterator<GraphNode<null, null>> {
+  *leaves(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
-  *sources(): IterableIterator<GraphNode<null, null>> {
+  *sources(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
-  *sinks(): IterableIterator<GraphNode<null, null>> {
+  *sinks(): IteratorObject<GraphNode<null, null>, undefined> {
     // noop
   }
 
@@ -1170,9 +1170,7 @@ test("topological edge case", () => {
   three.child(five);
   seven.child(one);
 
-  const ordered = [
-    ...Iterator.from(grf.topological()).map((node) => node.data),
-  ];
+  const ordered = [...grf.topological().map((node) => node.data)];
   expect(ordered).toEqual([3, 7, 1, 5]);
 });
 
@@ -1187,20 +1185,18 @@ test("random modifications", () => {
     expect(grf.nlinks()).toBe(links.length);
     expect(grf.nnodes()).toBe([...grf.nodes()].length);
     expect(grf.nlinks()).toBe(
-      Iterator.from(grf.nodes()).reduce((t, n) => t + n.nchildLinks(), 0),
+      grf.nodes().reduce((t, n) => t + n.nchildLinks(), 0),
     );
     expect(grf.nlinks()).toBe(
-      Iterator.from(grf.nodes()).reduce((t, n) => t + n.nparentLinks(), 0),
+      grf.nodes().reduce((t, n) => t + n.nparentLinks(), 0),
     );
     const [first] = grf.nodes();
     expect(grf.connected()).toBe((first?.nnodes() ?? 0) === grf.nnodes());
     expect(grf.multi()).toBe(
-      [...grf.nodes()].some((n) => [...n.childCounts()].some(([, c]) => c > 1)),
+      grf.nodes().some((n) => n.childCounts().some(([, c]) => c > 1)),
     );
     expect(grf.multi()).toBe(
-      [...grf.nodes()].some((n) =>
-        [...n.parentCounts()].some(([, c]) => c > 1),
-      ),
+      grf.nodes().some((n) => n.parentCounts().some(([, c]) => c > 1)),
     );
     const expected = acyclic(grf.topological());
     expect(grf.acyclic()).toBe(expected);
@@ -1212,20 +1208,16 @@ test("random modifications", () => {
     for (const comp of grf.split()) {
       expect(comp.nnodes()).toBe([...comp.nodes()].length);
       expect(comp.nlinks()).toBe(
-        Iterator.from(comp.nodes()).reduce((t, n) => t + n.nchildLinks(), 0),
+        comp.nodes().reduce((t, n) => t + n.nchildLinks(), 0),
       );
       expect(comp.nlinks()).toBe(
-        Iterator.from(comp.nodes()).reduce((t, n) => t + n.nparentLinks(), 0),
+        comp.nodes().reduce((t, n) => t + n.nparentLinks(), 0),
       );
       expect(comp.multi()).toBe(
-        [...comp.nodes()].some((n) =>
-          [...n.childCounts()].some(([, c]) => c > 1),
-        ),
+        comp.nodes().some((n) => n.childCounts().some(([, c]) => c > 1)),
       );
       expect(comp.multi()).toBe(
-        [...comp.nodes()].some((n) =>
-          [...n.parentCounts()].some(([, c]) => c > 1),
-        ),
+        comp.nodes().some((n) => n.parentCounts().some(([, c]) => c > 1)),
       );
       expect(comp.acyclic()).toBe(acyclic(comp.topological()));
       tnodes += comp.nnodes();

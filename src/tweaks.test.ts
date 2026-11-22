@@ -118,9 +118,9 @@ test("tweakGrid() keeps a corner that meets its neighbor", () => {
     .nodeSize([1, 0])
     .gap([1, 0])
     .tweaks([tweakGrid([0.2, 0.2])])(dag);
-  const [bent] = [...dag.links()].filter(
-    ({ source, target }) => source.x !== target.x,
-  );
+  const [bent] = dag
+    .links()
+    .filter(({ source, target }) => source.x !== target.x);
   expect(bent.points).toEqual([
     [0.5, 0],
     [0.5, 0],
@@ -216,12 +216,8 @@ test("tweakFlip()", () => {
   const grf = zhere();
   const old = layout(grf);
 
-  const xs = new Map([
-    ...Iterator.from(grf.nodes()).map((node) => [node, node.x] as const),
-  ]);
-  const ys = new Map([
-    ...Iterator.from(grf.nodes()).map((node) => [node, node.y] as const),
-  ]);
+  const xs = new Map([...grf.nodes().map((node) => [node, node.x] as const)]);
+  const ys = new Map([...grf.nodes().map((node) => [node, node.y] as const)]);
 
   const diag = tweakFlip();
   const res = diag(grf, old);

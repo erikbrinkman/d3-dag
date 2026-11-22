@@ -7,7 +7,9 @@
 import { err } from "./utils.js";
 
 /** elements with their zero based index */
-export function* entries<T>(iter: Iterable<T>): IterableIterator<[number, T]> {
+export function* entries<T>(
+  iter: Iterable<T>,
+): IteratorObject<[number, T], undefined> {
   let index = 0;
   for (const element of iter) {
     yield [index++, element];
@@ -19,7 +21,7 @@ function* slicePos<T>(
   frm: number,
   to: number,
   stride: number,
-): IterableIterator<T> {
+): IteratorObject<T, undefined> {
   const limit = Math.min(to, arr.length);
   for (let i = frm; i < limit; i += stride) {
     yield arr[i];
@@ -31,7 +33,7 @@ function* sliceNeg<T>(
   frm: number,
   to: number,
   stride: number,
-): IterableIterator<T> {
+): IteratorObject<T, undefined> {
   const limit = Math.max(to, -1);
   for (let i = frm; i > limit; i += stride) {
     yield arr[i];
@@ -44,7 +46,7 @@ export function slice<T>(
   frm: number = 0,
   to: number = arr.length,
   stride: number = 1,
-): IterableIterator<T> {
+): IteratorObject<T, undefined> {
   if (stride > 0) {
     return slicePos(arr, frm, to, stride);
   } else if (stride < 0) {
@@ -55,14 +57,18 @@ export function slice<T>(
 }
 
 /** chain several iterables */
-export function* chain<T>(...iters: Iterable<T>[]): IterableIterator<T> {
+export function* chain<T>(
+  ...iters: Iterable<T>[]
+): IteratorObject<T, undefined> {
   for (const iter of iters) {
     yield* iter;
   }
 }
 
 /** iterate over bigrams of an iterable */
-export function* bigrams<T>(iterable: Iterable<T>): IterableIterator<[T, T]> {
+export function* bigrams<T>(
+  iterable: Iterable<T>,
+): IteratorObject<[T, T], undefined> {
   const iter: Iterator<T, unknown> = iterable[Symbol.iterator]();
   const first = iter.next();
   if (!first.done) {

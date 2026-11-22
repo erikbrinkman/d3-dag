@@ -48,9 +48,11 @@ export function crossings(layers: readonly (readonly GraphNode[])[]): number {
     const tree = new Array<number>(bottomLayer.length + 1).fill(0);
     let total = 0;
     for (const node of topLayer) {
-      const links = [...node.childCounts()].map(
-        ([child, count]) => [inds.get(child)! + 1, count] as const,
-      );
+      const links = [
+        ...node
+          .childCounts()
+          .map(([child, count]) => [inds.get(child)! + 1, count] as const),
+      ];
       // links sharing a parent never cross, so all are counted before any is added
       for (const [ind, count] of links) {
         let atMost = 0;
