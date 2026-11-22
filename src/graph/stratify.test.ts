@@ -240,7 +240,7 @@ test("graphStratify() fails with missing id", () => {
   expect(() => graphStratify()(data)).toThrow("missing id");
 });
 
-test("graphStratify() fails with self loop", () => {
+test("graphStratify() parses a self loop", () => {
   const data = [
     {
       id: "1",
@@ -250,8 +250,10 @@ test("graphStratify() fails with self loop", () => {
       parentIds: ["1", "2"],
     },
   ];
-  const build = graphStratify();
-  expect(() => build(data)).toThrow("self loop");
+  const graph = graphStratify()(data);
+  expect(graph.nnodes()).toBe(2);
+  expect(graph.nlinks()).toBe(2);
+  expect(graph.acyclic()).toBe(false);
 });
 
 test("graphStratify() works with a cycle", () => {

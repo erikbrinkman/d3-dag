@@ -15,6 +15,16 @@ test("graphJson() works for empty", () => {
   expect(copy.nlinks()).toBe(0);
 });
 
+test("graphJson() keeps self loops", () => {
+  const grf = graph<unknown, unknown>();
+  const node = grf.node(0);
+  node.child(node, 1);
+  const copy = graphJson()(JSON.parse(JSON.stringify(grf)));
+  const [copied] = copy.nodes();
+  expect(copy.nlinks()).toBe(1);
+  expect(copied.nchildLinksTo(copied)).toBe(1);
+});
+
 test("graphJson() works for simple graph", () => {
   const builder = graphJson();
   const grf = graph<unknown, unknown>();

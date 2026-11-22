@@ -73,11 +73,14 @@ test("graphConnect() parses a cycle", () => {
   expect(graph.connected()).toBe(true);
 });
 
-test("graphConnect() parses a single node", () => {
-  const error = graphConnect();
-  expect(() => error([["a", "a"]])).toThrow("self loop");
+test("graphConnect() parses a self loop", () => {
+  const graph = graphConnect()([["a", "a"]]);
+  expect(graph.nnodes()).toBe(1);
+  expect(graph.nlinks()).toBe(1);
+});
 
-  const build = error.single(true);
+test("graphConnect() parses a single node", () => {
+  const build = graphConnect().single(true);
   expect(build.single()).toBe(true);
 
   const graph = build([["a", "a"]]);

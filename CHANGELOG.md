@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- graphs accept self loops
 - `DagreGraph` takes graph, node and edge label types, as in dagre
 
 ### Changed

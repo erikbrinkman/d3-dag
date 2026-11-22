@@ -590,7 +590,7 @@ test("component info matches the graph through random edits", () => {
       } else if (action < 0.55 || !links.length) {
         const source = nodes[Math.floor(rand() * nodes.length)];
         const target = nodes[Math.floor(rand() * nodes.length)];
-        if (source !== target) links.push(grf.link(source, target));
+        links.push(grf.link(source, target));
       } else {
         links.splice(Math.floor(rand() * links.length), 1)[0].delete();
       }
@@ -893,10 +893,107 @@ test("typescript errors", () => {
   expect(grf.nlinks()).toBe(5);
 });
 
-test("link() throws on self loops", () => {
-  const grf = graph<undefined, undefined>();
-  const node = grf.node();
-  expect(() => grf.link(node, node)).toThrow("self loops");
+test("topological() ignores self loops", () => {
+  const grf = graph<number, undefined>();
+  const child = grf.node(1);
+  const parent = grf.node(2);
+  grf.link(parent, parent);
+  grf.link(parent, child);
+  grf.link(child, child);
+  expect(grf.topological()).toEqual([parent, child]);
+});
+
+test("link() creates self loops", () => {
+  const grf = graph<string, string>();
+  const par = grf.node("par");
+  const node = grf.node("node");
+  const child = grf.node("child");
+  const solo = grf.node("solo");
+  const parLink = grf.link(par, node, "in");
+  const first = grf.link(node, node, "first");
+  const second = grf.link(node, node, "second");
+  const childLink = grf.link(node, child, "out");
+  const soloLoop = grf.link(solo, solo, "solo");
+
+  expect(grf.nnodes()).toBe(4);
+  expect(grf.nlinks()).toBe(5);
+  expect([...grf.links()]).toHaveLength(5);
+  expect(grf.multi()).toBe(true);
+  expect(grf.acyclic()).toBe(false);
+  expect(node.nlinks()).toBe(4);
+  expect(new Set(node.links())).toEqual(
+    new Set([parLink, first, second, childLink]),
+  );
+  expect(node.nparents()).toBe(2);
+  expect(node.nchildren()).toBe(2);
+  expect(node.nparentLinks()).toBe(3);
+  expect(node.nchildLinks()).toBe(3);
+  expect(node.nparentLinksTo(node)).toBe(2);
+  expect(new Set(node.parents())).toEqual(new Set([par, node]));
+  expect(new Set(node.children())).toEqual(new Set([node, child]));
+  expect(new Map(node.parentCounts())).toEqual(
+    new Map([
+      [par, 1],
+      [node, 2],
+    ]),
+  );
+  expect(new Map(node.childCounts())).toEqual(
+    new Map([
+      [node, 2],
+      [child, 1],
+    ]),
+  );
+  expect(new Set(node.parentLinks())).toEqual(
+    new Set([parLink, first, second]),
+  );
+  expect([...node.parentLinks()]).toHaveLength(3);
+  expect(new Set(node.childLinks())).toEqual(
+    new Set([first, second, childLink]),
+  );
+  expect([...node.childLinks()]).toHaveLength(3);
+  expect([...node.ancestors()]).toEqual([node, par]);
+  expect([...node.descendants()]).toEqual([node, child]);
+
+  // a node whose only link is a loop is its own root and leaf, but neither a
+  // source nor a sink
+  expect(solo.nparents()).toBe(1);
+  expect(solo.nchildren()).toBe(1);
+  expect([...solo.parentLinks()]).toEqual([soloLoop]);
+  expect([...solo.childLinks()]).toEqual([soloLoop]);
+  expect([...solo.roots()]).toEqual([solo]);
+  expect([...solo.leaves()]).toEqual([solo]);
+  expect([...solo.sources()]).toEqual([]);
+  expect([...solo.sinks()]).toEqual([]);
+  expect(new Set(grf.roots())).toEqual(new Set([par, solo]));
+  expect(new Set(grf.leaves())).toEqual(new Set([child, solo]));
+  expect([...grf.sources()]).toEqual([par]);
+  expect([...grf.sinks()]).toEqual([child]);
+
+  first.delete();
+  expect(grf.multi()).toBe(false);
+  expect(grf.nlinks()).toBe(4);
+  expect(node.nlinks()).toBe(3);
+  expect(node.nparents()).toBe(2);
+  expect(node.nparentLinks()).toBe(2);
+  expect(node.nchildLinks()).toBe(2);
+
+  soloLoop.delete();
+  expect([...grf.sources()]).toContain(solo);
+  expect([...grf.sinks()]).toContain(solo);
+  expect(grf.acyclic()).toBe(false);
+
+  second.delete();
+  expect(grf.acyclic()).toBe(true);
+  grf.link(node, node, "third");
+  grf.link(node, node, "fourth");
+
+  node.delete();
+  expect(grf.nnodes()).toBe(3);
+  expect(grf.nlinks()).toBe(0);
+  expect(par.nchildren()).toBe(0);
+  expect(child.nparents()).toBe(0);
+  expect(grf.multi()).toBe(false);
+  expect(grf.acyclic()).toBe(true);
 });
 
 test("node() throws on deleted nodes", () => {
