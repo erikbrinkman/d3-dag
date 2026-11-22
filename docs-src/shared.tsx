@@ -7,7 +7,9 @@ import {
   type NodeChange,
   Position,
   ReactFlow,
+  useInternalNode,
   useReactFlow,
+  type XYPosition,
 } from "@xyflow/react";
 import {
   type FC,
@@ -41,19 +43,36 @@ export const graphs: Record<string, GraphData> = {
   grafo: exampleGraphs.grafo,
 };
 
+/** a node's center and size */
+export interface NodeBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface AppLayoutResult {
-  positions: Map<
-    string,
-    { x: number; y: number; width: number; height: number }
-  >;
+  positions: Map<string, NodeBox>;
   edgePoints: Map<string, [number, number][]>;
   width: number;
   height: number;
   elapsed: number;
 }
 
-export function edgeKey(source: string, target: string): string {
-  return `${source}\0${target}`;
+/**
+ * create a function that keys repeated edges by how many came before
+ *
+ * Keys from two such functions match only when both are given repeated edges
+ * in the same order.
+ */
+export function edgeKeys(): (source: string, target: string) => string {
+  const counts = new Map<string, number>();
+  return (source, target) => {
+    const pair = `${source}\0${target}`;
+    const occurrence = counts.get(pair) ?? 0;
+    counts.set(pair, occurrence + 1);
+    return `${pair}\0${occurrence}`;
+  };
 }
 
 export function formatMeta(result: AppLayoutResult): string {
@@ -70,19 +89,17 @@ export function extractDagreLayout(
   },
   elapsed: number,
 ): AppLayoutResult {
-  const positions = new Map<
-    string,
-    { x: number; y: number; width: number; height: number }
-  >();
+  const positions = new Map<string, NodeBox>();
   for (const n of graphData.nodes) {
     const pos = grf.node(n.id);
     positions.set(n.id, { x: pos.x, y: pos.y, width: NODE_W, height: NODE_H });
   }
   const edgePoints = new Map<string, [number, number][]>();
+  const keyOf = edgeKeys();
   for (const e of graphData.edges) {
     const pts = grf.edge(e.source, e.target).points;
     edgePoints.set(
-      edgeKey(e.source, e.target),
+      keyOf(e.source, e.target),
       pts.map((p): [number, number] => [p.x, p.y]),
     );
   }
@@ -96,59 +113,126 @@ export function extractDagreLayout(
   };
 }
 
-/** smooth curve from handle → layout control points → handle */
+/** move a link's layout points to follow its nodes after they're dragged */
+function followNodes(
+  points: readonly (readonly [number, number])[],
+  [sourceDx, sourceDy]: readonly [number, number],
+  [targetDx, targetDy]: readonly [number, number],
+  proportional: boolean,
+): (readonly [number, number])[] {
+  const [sx, sy] = points[0];
+  const [tx, ty] = points[points.length - 1];
+  const [startX, startY] = [sx + sourceDx, sy + sourceDy];
+  const [endX, endY] = [tx + targetDx, ty + targetDy];
+  const interior = points.slice(1, -1);
+  if (proportional) {
+    // keep each interior point's place along the line between the ends, and
+    // its offset from that line
+    const dx = tx - sx;
+    const dy = ty - sy;
+    const len2 = dx * dx + dy * dy;
+    const moved = interior.map(([px, py]): [number, number] => {
+      const frac = len2 > 0 ? ((px - sx) * dx + (py - sy) * dy) / len2 : 0.5;
+      const perpX = px - (sx + frac * dx);
+      const perpY = py - (sy + frac * dy);
+      return [
+        startX + frac * (endX - startX) + perpX,
+        startY + frac * (endY - startY) + perpY,
+      ];
+    });
+    return [[startX, startY], ...moved, [endX, endY]];
+  } else {
+    return [[startX, startY], ...interior, [endX, endY]];
+  }
+}
+
+/** smooth svg path through points, curving at each interior point */
+function smoothPath(points: readonly (readonly [number, number])[]): string {
+  const [[fx, fy]] = points;
+  const [lx, ly] = points[points.length - 1];
+  if (points.length === 2) {
+    return `M ${fx},${fy} L ${lx},${ly}`;
+  } else {
+    const [nx, ny] = points[1];
+    let path = `M ${fx},${fy} L ${(fx + nx) / 2},${(fy + ny) / 2}`;
+    for (const [ind, [cx, cy]] of points.slice(1, -1).entries()) {
+      const [px, py] = points[ind + 2];
+      path += ` Q ${cx},${cy} ${(cx + px) / 2},${(cy + py) / 2}`;
+    }
+    return `${path} L ${lx},${ly}`;
+  }
+}
+
+/** how far a node has been dragged from where the layout put it */
+function useNodeShift(
+  id: string,
+  origin: XYPosition | undefined,
+): [number, number] {
+  const node = useInternalNode(id);
+  if (node && origin) {
+    const { x, y } = node.internals.positionAbsolute;
+    return [x - origin.x, y - origin.y];
+  } else {
+    return [0, 0];
+  }
+}
+
+/** data a layout edge carries */
+interface LayoutEdgeData extends Record<string, unknown> {
+  /** the link's layout points */
+  points: [number, number][] | undefined;
+  /** whether interior points move with the ends when nodes are dragged */
+  proportional: boolean;
+  /** the source node's top left corner from the layout */
+  sourceOrigin: XYPosition | undefined;
+  /** the target node's top left corner from the layout */
+  targetOrigin: XYPosition | undefined;
+}
+
+/** an edge drawn through its layout points */
+type LayoutFlowEdge = Edge<LayoutEdgeData, "layout">;
+
+/** smooth curve through a link's layout points, its ends following its nodes */
 export function LayoutEdge({
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
+  id,
+  source,
+  target,
   data,
-  ...rest
-}: EdgeProps) {
-  const layoutPoints = data?.points as [number, number][] | undefined;
-  const proportional = data?.proportional as boolean | undefined;
+  style,
+  markerStart,
+  markerEnd,
+  interactionWidth,
+}: EdgeProps<LayoutFlowEdge>) {
+  const layoutPoints = data?.points;
+  const proportional = data?.proportional ?? false;
+  const [sourceDx, sourceDy] = useNodeShift(source, data?.sourceOrigin);
+  const [targetDx, targetDy] = useNodeShift(target, data?.targetOrigin);
 
-  const d = useMemo(() => {
-    const pts: [number, number][] = [[sourceX, sourceY]];
-    if (layoutPoints && layoutPoints.length > 2) {
-      if (proportional) {
-        // proportional: decompose each interior point into t + perpendicular offset
-        const [[sx, sy]] = layoutPoints;
-        const [tx, ty] = layoutPoints[layoutPoints.length - 1];
-        const dx = tx - sx;
-        const dy = ty - sy;
-        const len2 = dx * dx + dy * dy;
-        for (const [px, py] of layoutPoints.slice(1, -1)) {
-          const t = len2 > 0 ? ((px - sx) * dx + (py - sy) * dy) / len2 : 0.5;
-          const perpX = px - (sx + t * dx);
-          const perpY = py - (sy + t * dy);
-          const rx = sourceX + t * (targetX - sourceX) + perpX;
-          const ry = sourceY + t * (targetY - sourceY) + perpY;
-          pts.push([rx, ry]);
-        }
-      } else {
-        pts.push(...layoutPoints.slice(1, -1));
-      }
-    }
-    pts.push([targetX, targetY]);
+  const path = useMemo(
+    () =>
+      layoutPoints
+        ? smoothPath(
+            followNodes(
+              layoutPoints,
+              [sourceDx, sourceDy],
+              [targetDx, targetDy],
+              proportional,
+            ),
+          )
+        : "",
+    [layoutPoints, proportional, sourceDx, sourceDy, targetDx, targetDy],
+  );
 
-    if (pts.length === 2) {
-      return `M ${pts[0][0]},${pts[0][1]} L ${pts[1][0]},${pts[1][1]}`;
-    }
-    let path = `M ${pts[0][0]},${pts[0][1]}`;
-    const mx = (pts[0][0] + pts[1][0]) / 2;
-    const my = (pts[0][1] + pts[1][1]) / 2;
-    path += ` L ${mx},${my}`;
-    for (let i = 1; i < pts.length - 1; i++) {
-      const nx = (pts[i][0] + pts[i + 1][0]) / 2;
-      const ny = (pts[i][1] + pts[i + 1][1]) / 2;
-      path += ` Q ${pts[i][0]},${pts[i][1]} ${nx},${ny}`;
-    }
-    path += ` L ${pts[pts.length - 1][0]},${pts[pts.length - 1][1]}`;
-    return path;
-  }, [layoutPoints, proportional, sourceX, sourceY, targetX, targetY]);
-
-  return <BaseEdge {...rest} path={d} />;
+  return (
+    <BaseEdge
+      id={id}
+      path={path}
+      style={style}
+      markerStart={markerStart}
+      markerEnd={markerEnd}
+      interactionWidth={interactionWidth}
+    />
+  );
 }
 
 export const edgeTypes = { layout: LayoutEdge };
@@ -172,13 +256,18 @@ export function handlePositions(dir: Direction): {
   }
 }
 
+/** top left corner of a node centered at its layout position */
+function origin({ x, y, width, height }: NodeBox): XYPosition {
+  return { x: x - width / 2, y: y - height / 2 };
+}
+
 export function toFlowElements(
   graphData: GraphData,
   result: AppLayoutResult,
   edgeMode: EdgeMode,
   direction: Direction,
   opts?: { proportional?: boolean },
-): { nodes: Node[]; edges: Edge[] } {
+): { nodes: Node[]; edges: Edge<LayoutEdgeData>[] } {
   const { source: sourcePosition, target: targetPosition } =
     handlePositions(direction);
   const nodes: Node[] = [];
@@ -187,7 +276,7 @@ export function toFlowElements(
     if (!pos) continue;
     nodes.push({
       id: n.id,
-      position: { x: pos.x - pos.width / 2, y: pos.y - pos.height / 2 },
+      position: origin(pos),
       data: { label: n.id },
       sourcePosition,
       targetPosition,
@@ -203,21 +292,29 @@ export function toFlowElements(
     });
   }
 
-  const edges: Edge[] = [];
+  const edges: Edge<LayoutEdgeData>[] = [];
+  const keyOf = edgeKeys();
   for (const e of graphData.edges) {
-    const key = edgeKey(e.source, e.target);
+    const key = keyOf(e.source, e.target);
     const pts = edgeMode === "routed" ? result.edgePoints.get(key) : undefined;
     const type = pts
       ? "layout"
       : edgeMode === "curved"
         ? "default"
         : "straight";
+    const sourcePos = result.positions.get(e.source);
+    const targetPos = result.positions.get(e.target);
     edges.push({
-      id: `${e.source}-${e.target}`,
+      id: key,
       source: e.source,
       target: e.target,
       type,
-      data: { points: pts, proportional: opts?.proportional ?? false },
+      data: {
+        points: pts,
+        proportional: opts?.proportional ?? false,
+        sourceOrigin: sourcePos && origin(sourcePos),
+        targetOrigin: targetPos && origin(targetPos),
+      },
       markerEnd: { type: "arrowclosed" as const },
     });
   }
