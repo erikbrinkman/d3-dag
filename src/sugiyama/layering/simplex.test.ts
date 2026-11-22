@@ -213,3 +213,14 @@ test("simplex() fails with ill-defined group", () => {
     "could not find a feasible simplex layout",
   );
 });
+
+test("simplex() ignores self loops", () => {
+  const dag = graphConnect()([
+    ["0", "0"],
+    ["0", "1"],
+    ["1", "1"],
+  ]);
+  const num = simplex()(dag, layerSeparation);
+  expect(num).toBe(1);
+  expect(getLayers(dag, num + 1)).toEqual([[0], [1]]);
+});

@@ -260,6 +260,22 @@ test("sugifyLayer() / unsugify() works for adjacent two-cycle", () => {
   expect(up.points.length).toBeGreaterThan(1);
 });
 
+test("sugifyLayer() leaves out self loops", () => {
+  const grf = graph<undefined, undefined>();
+  const above = grf.node();
+  const below = grf.node();
+  grf.link(above, below);
+  grf.link(above, above);
+  grf.link(above, above);
+  above.y = 0;
+  below.y = 1;
+  const [layers] = sugifyLayer(grf, nodeHeight, 1, 2, noopLayering);
+  expectLayersToSatisfyInvariants(layers, 5);
+  const [[topSugi], [bottomSugi]] = layers;
+  expect(layers.flat()).toHaveLength(2);
+  expect([...topSugi.children()]).toEqual([bottomSugi]);
+});
+
 test("sugifyLayer() throws for missing layer", () => {
   const grf = graph<undefined, undefined>();
   grf.node();
