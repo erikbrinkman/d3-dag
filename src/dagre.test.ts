@@ -1356,3 +1356,127 @@ test("custom operator honors rankdir from graph config", () => {
   expect(grf.node("a").x).not.toBe(grf.node("b").x);
   expect(grf.node("a").y).toBe(grf.node("b").y);
 });
+
+test("layout handles self loops", () => {
+  for (const algorithm of ["sugiyama", "zherebko", "grid"] as const) {
+    const grf = new dagre.graphlib.Graph();
+    grf.setGraph({ algorithm });
+    grf.setDefaultEdgeLabel(() => ({}));
+    grf.setNode("a", { width: 40, height: 20 });
+    grf.setNode("b", { width: 40, height: 20 });
+    grf.setEdge("a", "b");
+    grf.setEdge("b", "b");
+    dagre.layout(grf);
+
+    expect(grf.hasEdge("b", "b")).toBe(true);
+    expect(grf.edgeCount()).toBe(2);
+    expect(grf.node("b").y).toBeGreaterThan(grf.node("a").y);
+    const { points } = grf.edge("b", "b");
+    expect(points.length).toBeGreaterThan(2);
+    const { width = 0, height = 0 } = grf.graph();
+    for (const { x, y } of points) {
+      expect(x).toBeGreaterThanOrEqual(0);
+      expect(x).toBeLessThanOrEqual(width);
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThanOrEqual(height);
+    }
+  }
+});
+
+function loopGraph() {
+  const grf = new dagre.graphlib.Graph();
+  grf.setNode("a");
+  grf.setEdge("a", "b");
+  grf.setEdge("b", "b");
+  grf.setEdge("b", "b");
+  grf.setEdge("b", "c");
+  grf.setEdge("solo", "solo");
+  return grf;
+}
+
+test("self loop queries match graphlib", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+  for (const grf of [ours, theirs]) {
+    grf.setEdge("b", "c");
+    grf.setEdge("a", "b");
+    grf.setEdge("b", "b");
+    grf.setEdge("c", "b");
+    grf.setEdge("solo", "solo");
+  }
+
+  expect(ours.nodeCount()).toBe(theirs.nodeCount());
+  expect(ours.edgeCount()).toBe(theirs.edgeCount());
+  // graphlib lists edges in a different order
+  const byEnds = ({ v, w }: { v: string; w: string }) => `${v}\0${w}`;
+  expect(ours.edges().map(byEnds).sort()).toEqual(
+    theirs.edges().map(byEnds).sort(),
+  );
+  expect(ours.sources()).toEqual(theirs.sources());
+  expect(ours.sinks()).toEqual(theirs.sinks());
+  for (const id of ["a", "b", "c", "solo"]) {
+    expect(theirs.predecessors(id)).toEqual(ours.predecessors(id));
+    expect(theirs.successors(id)).toEqual(ours.successors(id));
+    expect(theirs.neighbors(id)).toEqual(ours.neighbors(id));
+    expect(theirs.inEdges(id)).toEqual(ours.inEdges(id));
+    expect(theirs.outEdges(id)).toEqual(ours.outEdges(id));
+    expect(theirs.nodeEdges(id)).toEqual(ours.nodeEdges(id));
+    for (const other of ["a", "b", "c", "solo"]) {
+      expect(theirs.inEdges(id, other)).toEqual(ours.inEdges(id, other));
+      expect(theirs.outEdges(id, other)).toEqual(ours.outEdges(id, other));
+      expect(theirs.nodeEdges(id, other)).toEqual(ours.nodeEdges(id, other));
+    }
+  }
+});
+
+test("setPath through the same node adds a self loop", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setPath(["x", "x", "y"]);
+
+  expect(grf.edgeCount()).toBe(2);
+  expect(grf.hasEdge("x", "x")).toBe(true);
+  expect(grf.nodeEdges("x")).toEqual([
+    { v: "x", w: "x" },
+    { v: "x", w: "y" },
+  ]);
+  expect(grf.sources()).toEqual([]);
+  expect(grf.sinks()).toEqual(["y"]);
+});
+
+test("filterNodes keeps self loops only on kept nodes", () => {
+  const kept = loopGraph().filterNodes((id) => id !== "solo");
+  expect(kept.edgeCount()).toBe(3);
+  expect(kept.hasEdge("b", "b")).toBe(true);
+  expect(kept.hasEdge("solo", "solo")).toBe(false);
+  expect(kept.nodeEdges("b")).toHaveLength(3);
+
+  const dropped = loopGraph().filterNodes((id) => id !== "b");
+  expect(dropped.edgeCount()).toBe(1);
+  expect(dropped.hasEdge("solo", "solo")).toBe(true);
+  expect(dropped.sources()).toEqual(["a", "c"]);
+});
+
+test("removeEdge and removeNode drop self loops", () => {
+  const grf = loopGraph();
+  grf.removeEdge("b", "b");
+  expect(grf.hasEdge("b", "b")).toBe(false);
+  expect(() => grf.edge("b", "b")).toThrow("unknown edge");
+  expect(grf.edgeCount()).toBe(3);
+  expect(grf.predecessors("b")).toEqual(["a"]);
+  expect(grf.successors("b")).toEqual(["c"]);
+  expect(grf.nodeEdges("b")).toEqual([
+    { v: "a", w: "b" },
+    { v: "b", w: "c" },
+  ]);
+
+  grf.removeNode("solo");
+  expect(grf.nodeCount()).toBe(3);
+  expect(grf.edgeCount()).toBe(2);
+
+  const looped = loopGraph();
+  looped.removeNode("b");
+  expect(looped.nodeCount()).toBe(3);
+  expect(looped.edgeCount()).toBe(1);
+  expect(looped.successors("a")).toEqual([]);
+  expect(looped.predecessors("c")).toEqual([]);
+});
