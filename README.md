@@ -88,6 +88,11 @@ Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most 
 - `edge(v, w)` returns the label passed to `setEdge`, and `dagre.layout` writes `points`
   onto it. Fields such as `minlen` and `weight` are kept but don't affect layout.
 - `layout` sets a missing `width` or `height` on a node label to `0`
+- A node or edge added without a label, when no default label is set, gets `{}`
+  instead of `undefined`
+- Passing `undefined` as the label to `setNode` or `setEdge` is the same as passing
+  no label: a new node or edge gets the default label, and an existing one keeps
+  its label instead of having it set to `undefined`
 
 ## Quality Presets
 

@@ -436,6 +436,13 @@ test("default node labels that aren't objects throw", () => {
   expect(grf.node("a")).toEqual({});
 });
 
+test("setEdge adds nothing when a default label isn't an object", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setDefaultEdgeLabel(() => "label");
+  expect(() => grf.setEdge("a", "b")).toThrow("edge labels must be objects");
+  expect(grf.nodeCount()).toBe(0);
+});
+
 test("DagreGraph setGraph requires a label", () => {
   const grf = new DagreGraph();
   // @ts-expect-error label is required
@@ -703,15 +710,22 @@ test("setDefaultNodeLabel", () => {
   expect(grf.node("b").height).toBe(0);
 });
 
-test("setDefaultEdgeLabel accepted for compatibility", () => {
+test("setDefaultEdgeLabel", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   const result = grf.setDefaultEdgeLabel(() => ({ custom: "value" }));
   expect(result).toBe(grf);
 
   grf.setNode("a");
   grf.setNode("b");
+  grf.setNode("c");
   grf.setEdge("a", "b");
-  expect(grf.edge("a", "b")).toEqual({});
+  grf.setEdge("b", "c", { custom: "explicit" });
+  dagre.layout(grf);
+
+  expect(grf.edge("a", "b")).toMatchObject({ custom: "value" });
+  expect(grf.edge("b", "c")).toMatchObject({ custom: "explicit" });
+  expect(grf.edge("a", "b").points.length).toBeGreaterThan(0);
 });
 
 test("isCompound", () => {
