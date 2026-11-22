@@ -104,9 +104,9 @@ export interface Connect<NodeDatum, Ops extends ConnectOps<NodeDatum>> {
    *
    * Sets the allowance for single nodes. If enabled and the source id equals
    * the target id, then a single node with no parents will be created.
-   * Otherwise a self loop will be created which will result in an error. Note
-   * only single nodes without parents or children need to be specified this
-   * way, otherwise any other connection to a node will create it.
+   * Otherwise a self loop will be created. Note only single nodes without
+   * parents or children need to be specified this way, otherwise any other
+   * connection to a node will create it.
    *
    * (default: `false`)
    */

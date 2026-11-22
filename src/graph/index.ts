@@ -242,6 +242,10 @@ export interface MutGraph<in out NodeDatum, in out LinkDatum>
   /**
    * add a new link from source to target
    *
+   * Source and target can be the same node, creating a self loop. A self loop
+   * makes its node both a parent and a child of itself, so the node is neither a
+   * source nor a sink, and the graph isn't acyclic.
+   *
    * If `undefined` extends LinkDatum, datum can be elided and simply called as
    * ```ts
    * grf.link(source, target);
@@ -528,8 +532,10 @@ function topological<N, L>(
   }
 
   for (const node of nodes) {
-    const indeg = node.nparentLinks();
-    const outdeg = node.nchildLinks();
+    // self loops can't be satisfied by any order, so they don't count
+    const loops = node.nchildLinksTo(node);
+    const indeg = node.nparentLinks() - loops;
+    const outdeg = node.nchildLinks() - loops;
     const aug = new AugmentedNode(node, indeg, outdeg);
     const rank = ranker(node);
     augmented.set(node, aug);
@@ -591,6 +597,7 @@ function topological<N, L>(
 
     // process parents
     for (const [par, num] of node.parentCounts()) {
+      if (par === node) continue;
       const paug = augmented.get(par)!;
       getBucket(paug.bucket()).delete(paug);
       paug.outdeg -= num;
@@ -601,6 +608,7 @@ function topological<N, L>(
 
     // process children
     for (const [child, num] of node.childCounts()) {
+      if (child === node) continue;
       const caug = augmented.get(child)!;
       getBucket(caug.bucket()).delete(caug);
       caug.indeg -= num;
@@ -1125,8 +1133,6 @@ class DirectedNode<N, L> implements MutGraphNode<N, L> {
   ): MutGraphLink<N, L> {
     if (!this.#graph) {
       throw err`can't add a link from a deleted node`;
-    } else if (source === target) {
-      throw err`tried to create a link between the same node, but self loops are not supported`;
     } else if (
       isDirectedNode(source) &&
       isDirectedNode(target) &&
