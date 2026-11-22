@@ -2,10 +2,12 @@ import { expect, test } from "bun:test";
 import type {
   DagreAlgorithm,
   DagreGraphConfig,
+  DagreLayoutNode,
   DagreQuality,
   Rankdir,
 } from "./dagre.js";
 import { DagreGraph, dagre } from "./dagre.js";
+import type { GraphNode } from "./graph/index.js";
 import { coordQuad } from "./sugiyama/coord/quad.js";
 import { decrossOpt } from "./sugiyama/decross/opt.js";
 import { sugiyama } from "./sugiyama/index.js";
@@ -233,6 +235,33 @@ test("custom sugiyama operators", () => {
   expect(grf.graph().height).toBeGreaterThan(0);
 });
 
+test("custom operator node size accessor", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
+  grf.setNode("a", { width: 10, height: 20 });
+  grf.setNode("b");
+  grf.setEdge("a", "b");
+
+  dagre.layout(
+    grf,
+    sugiyama().nodeSize((node: GraphNode<DagreLayoutNode>) => [
+      node.data.width,
+      node.data.height,
+    ]),
+  );
+
+  expect(grf.node("b").width).toBe(0);
+  expect(grf.node("a").y).toBeLessThan(grf.node("b").y);
+});
+
+test("custom operator accessor can't read an unset position", () => {
+  sugiyama().nodeSize((node: GraphNode<DagreLayoutNode>) => {
+    // @ts-expect-error x is unset while the operator runs
+    const xpos: number = node.data.x;
+    return [xpos, node.data.height];
+  });
+});
+
 test("layout with zherebko", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setGraph({});
@@ -369,13 +398,36 @@ test("layout throws before setGraph", () => {
   );
 });
 
-test("setGraph throws on labels that aren't objects", () => {
+test("dagre graph throws on labels that aren't objects", () => {
   const grf = new dagre.graphlib.Graph();
   for (const label of ["label", 1, true, null, () => ({})]) {
     // @ts-expect-error graph labels must be objects
     expect(() => grf.setGraph(label)).toThrow("graph labels must be objects");
+    // @ts-expect-error node labels must be objects
+    expect(() => grf.setNode("a", label)).toThrow(
+      "node labels must be objects",
+    );
+    // @ts-expect-error edge labels must be objects
+    expect(() => grf.setEdge("a", "b", label)).toThrow(
+      "edge labels must be objects",
+    );
   }
   expect(grf.graph()).toBeUndefined();
+  expect(grf.nodeCount()).toBe(0);
+  expect(grf.edgeCount()).toBe(0);
+});
+
+test("default node labels that aren't objects throw", () => {
+  const grf = new dagre.graphlib.Graph();
+  // @ts-expect-error node labels must be objects
+  grf.setDefaultNodeLabel(() => "label");
+  expect(() => grf.setNode("a")).toThrow("node labels must be objects");
+  expect(() => grf.setEdge("a", "b", {})).toThrow(
+    "node labels must be objects",
+  );
+  expect(grf.nodeCount()).toBe(0);
+  grf.setNode("a", {});
+  expect<object>(grf.node("a")).toEqual({});
 });
 
 test("DagreGraph setGraph requires a label", () => {
@@ -433,6 +485,64 @@ test("setNode updates existing node", () => {
   expect(grf.node("a").height).toBe(50);
 });
 
+test("node returns the label passed to setNode", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
+  const label = { label: "A", width: 10, height: 10 };
+  grf.setNode("a", label);
+  dagre.layout(grf);
+
+  const node: object = grf.node("a");
+  expect(node).toBe(label);
+  expect(node).toEqual({ label: "A", width: 10, height: 10, x: 5, y: 5 });
+});
+
+test("setNode replaces the label of an existing node", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
+  grf.setNode("a", { width: 10, height: 10 });
+  const label = { width: 20, height: 20 };
+  grf.setNode("a", label);
+  grf.setNode("a");
+  dagre.layout(grf);
+
+  const node: object = grf.node("a");
+  expect(node).toBe(label);
+  expect(grf.node("a")).toEqual({ width: 20, height: 20, x: 10, y: 10 });
+});
+
+test("edge returns the label passed to setEdge", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
+  const label = { label: "AB", minlen: 2 };
+  grf.setNode("a", { width: 10, height: 10 });
+  grf.setNode("b", { width: 10, height: 10 });
+  grf.setEdge("a", "b", label);
+
+  const edge: object = grf.edge("a", "b");
+  expect(edge).toBe(label);
+  expect(edge).toEqual({ label: "AB", minlen: 2 });
+  dagre.layout(grf);
+  expect(edge).toEqual({
+    label: "AB",
+    minlen: 2,
+    points: grf.edge("a", "b").points,
+  });
+  expect(grf.edge("a", "b").points.length).toBeGreaterThan(0);
+});
+
+test("setEdge replaces the label of an existing edge", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setEdge("a", "b", { label: "first" });
+  const label = { label: "second" };
+  grf.setEdge("a", "b", label);
+  grf.setEdge("a", "b");
+
+  expect(grf.edgeCount()).toBe(1);
+  const edge: object = grf.edge("a", "b");
+  expect(edge).toBe(label);
+});
+
 test("setEdge is idempotent", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setNode("a");
@@ -453,20 +563,6 @@ test("edge() returns control points after layout", () => {
 
   const e = grf.edge("a", "b");
   expect(e.points).toBeDefined();
-  expect(e.points.length).toBeGreaterThan(0);
-});
-
-test("edge() label captured before layout reflects points after", () => {
-  const grf = new dagre.graphlib.Graph();
-  grf.setGraph({});
-  grf.setNode("a", { width: 10, height: 10 });
-  grf.setNode("b", { width: 10, height: 10 });
-  grf.setEdge("a", "b");
-
-  const e = grf.edge("a", "b");
-  expect(grf.edge("a", "b")).toBe(e); // same label object across calls
-  expect(e.points).toHaveLength(0);
-  dagre.layout(grf);
   expect(e.points.length).toBeGreaterThan(0);
 });
 
@@ -534,9 +630,11 @@ for (const quality of [
 
 test("setDefaultNodeLabel", () => {
   const grf = new dagre.graphlib.Graph();
+  grf.setGraph({});
   grf.setDefaultNodeLabel(() => ({ width: 42, height: 24 }));
   grf.setNode("a");
   grf.setNode("b", { width: 10 });
+  dagre.layout(grf);
 
   expect(grf.node("a").width).toBe(42);
   expect(grf.node("a").height).toBe(24);
@@ -553,7 +651,7 @@ test("setDefaultEdgeLabel accepted for compatibility", () => {
   grf.setNode("a");
   grf.setNode("b");
   grf.setEdge("a", "b");
-  expect(grf.edge("a", "b").points).toEqual([]);
+  expect<object>(grf.edge("a", "b")).toEqual({});
 });
 
 test("isCompound", () => {
@@ -667,7 +765,7 @@ test("filterNodes", () => {
   expect(filtered.hasEdge("a", "c")).toBe(true);
   // the graph label is shared, as in graphlib
   expect(filtered.graph()).toBe(grf.graph());
-  // dimensions are copied
+  // node labels are shared, as in graphlib
   expect(filtered.node("a").width).toBe(10);
   expect(filtered.node("c").width).toBe(30);
 });
@@ -909,12 +1007,13 @@ test("edge().points returns {x, y} objects", () => {
   }
 });
 
-test("setEdge accepts and ignores label", () => {
+test("setEdge keeps weight without using it", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setNode("a");
   grf.setNode("b");
   grf.setEdge("a", "b", { weight: 2 });
   expect(grf.edgeCount()).toBe(1);
+  expect(grf.edge("a", "b")).toMatchObject({ weight: 2 });
 });
 
 test("removeNode on nonexistent is a no-op", () => {

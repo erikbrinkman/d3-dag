@@ -15,8 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `layout` throws until it's called; call `setGraph({})` where you called
   `setGraph()` or skipped it
 - `dagre`'s `graph()` returns only the options passed to `setGraph`
-- `dagre` throws on a graph label that isn't an object, since `layout` writes
-  onto it
+- an operator passed to `dagre.layout` should be typed with `DagreLayoutNode`
+  and `DagreLayoutEdge` instead of `DagreNode` and `DagreEdge`
+- `dagre` throws on graph, node and edge labels that aren't objects, since
+  `layout` writes onto them
 
 ### Fixed
 
@@ -25,8 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `coordSimplex`, `coordQuad` and `coordTopological().straight(false)` no
   longer fail when part of a link has no height
 - `tweakGrid` no longer puts points past the ends of short segments
-- `dagre` keeps the label passed to `setGraph` and writes `width` and `height`
-  onto it
+- `dagre` keeps the labels passed to `setGraph`, `setNode` and `setEdge` and
+  writes the layout onto them
 - `dagre` no longer swaps `ranksep` and `nodesep` when `rankdir` is `LR` or `RL`
 
 ## [1.3.0] - 2026-11-01

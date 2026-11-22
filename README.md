@@ -85,9 +85,9 @@ Replace `import dagre from "dagre"` with `import { dagre } from "d3-dag"`. Most 
 - `setGraph` accepts additional `quality`, `ranker`, and `algorithm` options
 - `dagre.layout` accepts an optional `Operator` for fine-grained algorithm control
 - Default `nodesep` and `ranksep` are `50` (same as dagre)
-- `edge(v, w)` returns the same label object each call, and its `points` is recomputed on
-  each read, so a label captured before `dagre.layout` reflects the laid-out points
-  afterward. The array is a fresh copy, and any label passed to `setEdge` is ignored.
+- `edge(v, w)` returns the label passed to `setEdge`, and `dagre.layout` writes `points`
+  onto it. Fields such as `minlen` and `weight` are kept but don't affect layout.
+- `layout` sets a missing `width` or `height` on a node label to `0`
 
 ## Quality Presets
 
