@@ -540,7 +540,6 @@ export class DagreGraph<
   ): DagreGraph<GraphLabel, NodeLabel, EdgeLabel> {
     const result = new DagreGraph<GraphLabel, NodeLabel, EdgeLabel>();
     result.#label = this.#label;
-    result.#defaultNodeLabel = this.#defaultNodeLabel;
     for (const [id, graphNode] of this.#graphNodes) {
       if (fn(id)) result.#setNode(id, graphNode.data);
     }
