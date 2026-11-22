@@ -11,6 +11,7 @@ import type {
 } from "./graph/index.js";
 import { graph } from "./graph/index.js";
 import { grid } from "./grid/index.js";
+import { chain } from "./iters.js";
 import type { Operator, Rankdir } from "./layout.js";
 import { coordGreedy } from "./sugiyama/coord/greedy.js";
 import { decrossDfs } from "./sugiyama/decross/dfs.js";
@@ -392,10 +393,7 @@ export class DagreGraph<
 
   /** get all edges as `{ v, w }` descriptors */
   edges(): DagreEdgeDescriptor[] {
-    return Array.from(this.#mutGraph.links(), (link) => ({
-      v: this.#idOf(link.source),
-      w: this.#idOf(link.target),
-    }));
+    return Array.from(this.#mutGraph.links(), (link) => this.#describe(link));
   }
 
   /** number of nodes */
@@ -445,15 +443,16 @@ export class DagreGraph<
     }
   }
 
+  #describe(link: MutGraphLink<StoredNode, StoredEdge>): DagreEdgeDescriptor {
+    return { v: this.#idOf(link.source), w: this.#idOf(link.target) };
+  }
+
   /** get incoming edge descriptors, optionally filtered to edges from `w` */
   inEdges(v: string, w?: string): DagreEdgeDescriptor[] {
     const node = this.#node(v);
     const links =
       w === undefined ? node.parentLinks() : node.parentLinksTo(this.#node(w));
-    return Array.from(links, (link) => ({
-      v: this.#idOf(link.source),
-      w: this.#idOf(link.target),
-    }));
+    return Array.from(links, (link) => this.#describe(link));
   }
 
   /** get outgoing edge descriptors, optionally filtered to edges to `w` */
@@ -461,31 +460,22 @@ export class DagreGraph<
     const node = this.#node(v);
     const links =
       w === undefined ? node.childLinks() : node.childLinksTo(this.#node(w));
-    return Array.from(links, (link) => ({
-      v: this.#idOf(link.source),
-      w: this.#idOf(link.target),
-    }));
+    return Array.from(links, (link) => this.#describe(link));
   }
 
   /** get all edge descriptors incident to `v`, optionally filtered to edges with `w` */
   nodeEdges(v: string, w?: string): DagreEdgeDescriptor[] {
     const node = this.#node(v);
     const other = w === undefined ? undefined : this.#node(w);
-    const toDesc = (
-      link: MutGraphLink<StoredNode, StoredEdge>,
-    ): DagreEdgeDescriptor => ({
-      v: this.#idOf(link.source),
-      w: this.#idOf(link.target),
-    });
-    const result: DagreEdgeDescriptor[] = [];
-    if (other) {
-      for (const link of node.parentLinksTo(other)) result.push(toDesc(link));
-      for (const link of node.childLinksTo(other)) result.push(toDesc(link));
-    } else {
-      for (const link of node.parentLinks()) result.push(toDesc(link));
-      for (const link of node.childLinks()) result.push(toDesc(link));
-    }
-    return result;
+    const parentLinks =
+      other === undefined ? node.parentLinks() : node.parentLinksTo(other);
+    // a self loop is the only link in both, so it's only taken from the parents
+    const childLinks = Iterator.from(
+      other === undefined ? node.childLinks() : node.childLinksTo(other),
+    ).filter((link) => link.target !== link.source);
+    return Array.from(chain(parentLinks, childLinks), (link) =>
+      this.#describe(link),
+    );
   }
 
   /** get source node ids (no parents) */
