@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `dagre`'s `setGraph` replaces the graph label instead of merging into it; to
+  change one option use `grf.setGraph({ ...grf.graph(), ranksep: 20 })`
+- `dagre`'s `setGraph` requires a label, and `graph()` returns `undefined` and
+  `layout` throws until it's called; call `setGraph({})` where you called
+  `setGraph()` or skipped it
+- `dagre`'s `graph()` returns only the options passed to `setGraph`
+- `dagre` throws on a graph label that isn't an object, since `layout` writes
+  onto it
+
 ### Fixed
 
 - `graph`'s `roots` and `leaves` no longer go stale after linking two nodes that
@@ -14,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `coordSimplex`, `coordQuad` and `coordTopological().straight(false)` no
   longer fail when part of a link has no height
 - `tweakGrid` no longer puts points past the ends of short segments
+- `dagre` keeps the label passed to `setGraph` and writes `width` and `height`
+  onto it
 - `dagre` no longer swaps `ranksep` and `nodesep` when `rankdir` is `LR` or `RL`
 
 ## [1.3.0] - 2026-11-01

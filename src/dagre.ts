@@ -92,9 +92,14 @@ export interface DagreEdgeDescriptor {
   w: string;
 }
 
+/** check whether a label is an object for dagre.layout to write onto */
+function isLabel(label: unknown): label is object {
+  return typeof label === "object" && label !== null;
+}
+
 function presetSugiyama(
   quality: DagreQuality,
-  ranker: DagreRanker | undefined,
+  ranker: DagreRanker,
 ): DagreSugiyama {
   let base: DagreSugiyama;
   if (quality === "fast") {
@@ -104,7 +109,7 @@ function presetSugiyama(
   } else {
     base = sugiyama();
   }
-  // "network-simplex" and undefined both use the default (layeringSimplex)
+  // "network-simplex" is sugiyama's default layering
   if (ranker === "longest-path") {
     base = base.layering(layeringLongestPath());
   } else if (ranker === "topological") {
@@ -140,34 +145,27 @@ export class DagreGraph {
     readonly width?: number;
     readonly height?: number;
   } = () => ({});
-  #config: Required<DagreGraphConfig> = {
-    rankdir: "TB",
-    nodesep: 50,
-    ranksep: 50,
-    quality: "medium",
-    ranker: "network-simplex",
-    algorithm: "sugiyama",
-    width: 0,
-    height: 0,
-  };
+  #label: DagreGraphConfig | undefined;
 
-  /** set graph configuration */
-  setGraph(config?: DagreGraphConfig): this {
-    if (config) {
-      if (config.rankdir !== undefined) this.#config.rankdir = config.rankdir;
-      if (config.nodesep !== undefined) this.#config.nodesep = config.nodesep;
-      if (config.ranksep !== undefined) this.#config.ranksep = config.ranksep;
-      if (config.quality !== undefined) this.#config.quality = config.quality;
-      if (config.ranker !== undefined) this.#config.ranker = config.ranker;
-      if (config.algorithm !== undefined)
-        this.#config.algorithm = config.algorithm;
+  /**
+   * set the graph label, replacing any earlier one
+   *
+   * The object is kept as is: {@link dagre.layout} reads its options, using defaults
+   * for missing ones without writing them, and writes `width` and `height` onto it.
+   */
+  setGraph(label: DagreGraphConfig): this {
+    if (!isLabel(label)) {
+      throw err`graph labels must be objects: ${label}`;
+    } else {
+      this.#label = label;
+      return this;
     }
-    return this;
   }
 
-  /** get graph configuration (includes width/height after layout) */
-  graph(): Required<DagreGraphConfig> {
-    return { ...this.#config };
+  /** get the graph label passed to {@link setGraph} (includes `width` and `height` after layout) */
+  graph(): DagreGraphConfig {
+    // undefined until setGraph runs; typed as set to match dagre
+    return this.#label as DagreGraphConfig;
   }
 
   /** set default node label factory, used when {@link setNode} is called without a label */
@@ -435,10 +433,10 @@ export class DagreGraph {
     return this;
   }
 
-  /** create a new graph containing only nodes that pass the filter */
+  /** create a new graph containing only nodes that pass the filter, sharing the graph label */
   filterNodes(fn: (id: string) => boolean): DagreGraph {
     const result = new DagreGraph();
-    result.#config = { ...this.#config };
+    result.#label = this.#label;
     result.#defaultNodeLabel = this.#defaultNodeLabel;
     for (const [id, graphNode] of this.#graphNodes) {
       if (fn(id)) {
@@ -464,15 +462,26 @@ export class DagreGraph {
    * @internal
    */
   static layout(grf: DagreGraph, operator?: DagreOperator): void {
-    const config = grf.#config;
+    const label = grf.#label;
+    if (label === undefined) {
+      throw err`setGraph must be called before dagre.layout`;
+    }
+    const {
+      rankdir = "TB",
+      nodesep = 50,
+      ranksep = 50,
+      quality = "medium",
+      ranker = "network-simplex",
+      algorithm = "sugiyama",
+    } = label;
 
     if (grf.#mutGraph.nnodes() === 0) {
-      config.width = 0;
-      config.height = 0;
+      label.width = 0;
+      label.height = 0;
       return;
     }
 
-    const isHorizontal = config.rankdir === "LR" || config.rankdir === "RL";
+    const isHorizontal = rankdir === "LR" || rankdir === "RL";
 
     const nodeSizeFn = (
       graphNode: GraphNode<IdDagreNode, DagreEdge>,
@@ -484,7 +493,7 @@ export class DagreGraph {
 
     // the layout runs top to bottom and tweakDirection rotates it afterwards,
     // so only the node size is swapped for horizontal layouts, not the gap
-    const gap: readonly [number, number] = [config.nodesep, config.ranksep];
+    const gap: readonly [number, number] = [nodesep, ranksep];
 
     const extraTweaks: Tweak<IdDagreNode, DagreEdge>[] = [];
 
@@ -494,17 +503,17 @@ export class DagreGraph {
       // applies on top, with rankdir handled uniformly by tweakDirection below
       op = operator;
     } else {
-      if (config.algorithm === "zherebko") {
+      if (algorithm === "zherebko") {
         op = zherebko();
-      } else if (config.algorithm === "grid") {
+      } else if (algorithm === "grid") {
         op = grid();
         extraTweaks.push(tweakGridHandles(nodeSizeFn, gap));
       } else {
-        op = presetSugiyama(config.quality, config.ranker);
+        op = presetSugiyama(quality, ranker);
         extraTweaks.push(tweakSugiyama(nodeSizeFn));
       }
     }
-    extraTweaks.push(tweakDirection(config.rankdir));
+    extraTweaks.push(tweakDirection(rankdir));
 
     const existingTweaks = op.tweaks();
     const configured = op
@@ -515,8 +524,8 @@ export class DagreGraph {
     const result = configured(grf.#mutGraph);
 
     // write results back
-    config.width = result.width;
-    config.height = result.height;
+    label.width = result.width;
+    label.height = result.height;
 
     for (const graphNode of grf.#mutGraph.nodes()) {
       graphNode.data.x = graphNode.x;
@@ -556,7 +565,7 @@ export const dagre = {
   /**
    * run layout on a graph, mutating it in-place
    *
-   * Sets `x`/`y` on node labels and `width`/`height` on the graph config. Edge
+   * Sets `x`/`y` on node labels and `width`/`height` on the graph label. Edge
    * control points are read via {@link DagreGraph.edge} *after* layout — unlike
    * dagre, they are not written onto a persistent edge label.
    *
