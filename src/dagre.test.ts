@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import originalDagre from "@dagrejs/dagre";
 import type {
   DagreAlgorithm,
   DagreGraphConfig,
@@ -436,11 +437,32 @@ test("default node labels that aren't objects throw", () => {
   expect(grf.node("a")).toEqual({});
 });
 
+test("default labels that aren't objects throw when used", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setDefaultNodeLabel("label").setDefaultEdgeLabel(null);
+  expect(() => grf.setNode("a")).toThrow("node labels must be objects");
+  grf.setNode("a", {}).setNode("b", {});
+  expect(() => grf.setEdge("a", "b")).toThrow("edge labels must be objects");
+  grf.setDefaultEdgeLabel(() => 1);
+  expect(() => grf.setEdge("a", "b")).toThrow("edge labels must be objects");
+  expect(grf.edgeCount()).toBe(0);
+  grf.setDefaultEdgeLabel(undefined);
+  expect(() => grf.setEdge("a", "b")).toThrow("edge labels must be objects");
+  grf.setEdge("a", "b", {});
+  expect(grf.edge("a", "b")).toEqual({});
+});
+
 test("setEdge adds nothing when a default label isn't an object", () => {
   const grf = new dagre.graphlib.Graph();
-  grf.setDefaultEdgeLabel(() => "label");
+  grf.setDefaultEdgeLabel("label");
   expect(() => grf.setEdge("a", "b")).toThrow("edge labels must be objects");
   expect(grf.nodeCount()).toBe(0);
+
+  grf.setDefaultEdgeLabel({});
+  grf.setDefaultNodeLabel((id: string) => (id === "b" ? "label" : {}));
+  expect(() => grf.setEdge("a", "b")).toThrow("node labels must be objects");
+  expect(grf.nodeCount()).toBe(0);
+  expect(grf.edgeCount()).toBe(0);
 });
 
 test("DagreGraph setGraph requires a label", () => {
@@ -708,6 +730,73 @@ test("setDefaultNodeLabel", () => {
   // explicit label overrides default
   expect(grf.node("b").width).toBe(10);
   expect(grf.node("b").height).toBe(0);
+});
+
+test("setDefaultNodeLabel and setDefaultEdgeLabel call factories like dagre", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+  const calls: { ours: unknown[][]; theirs: unknown[][] } = {
+    ours: [],
+    theirs: [],
+  };
+  ours
+    .setDefaultNodeLabel((...args: unknown[]) => {
+      calls.ours.push(["node", ...args]);
+      return {};
+    })
+    .setDefaultEdgeLabel((...args: unknown[]) => {
+      calls.ours.push(["edge", ...args]);
+      return {};
+    });
+  theirs
+    .setDefaultNodeLabel((...args: unknown[]) => {
+      calls.theirs.push(["node", ...args]);
+      return {};
+    })
+    .setDefaultEdgeLabel((...args: unknown[]) => {
+      calls.theirs.push(["edge", ...args]);
+      return {};
+    });
+  for (const grf of [ours, theirs]) {
+    grf.setNode("a");
+    grf.setNode("a");
+    grf.setNode("b", {});
+    grf.setEdge("a", "c");
+    grf.setEdge("a", "c");
+    grf.setEdge("c", "b", {});
+    grf.setPath(["b", "d", "e"]);
+  }
+
+  expect(calls.ours).toEqual(calls.theirs);
+  expect(calls.ours).toContainEqual(["edge", "a", "c", undefined]);
+  expect(calls.ours.find(([kind]) => kind === "edge")).toHaveLength(4);
+});
+
+test("setDefaultNodeLabel and setDefaultEdgeLabel share a plain label like dagre", () => {
+  const nodeLabel = { width: 5, height: 5 };
+  const edgeLabel = {};
+  const ours = new dagre.graphlib.Graph()
+    .setDefaultNodeLabel(nodeLabel)
+    .setDefaultEdgeLabel(edgeLabel);
+  const theirs = new originalDagre.graphlib.Graph()
+    .setDefaultNodeLabel(nodeLabel)
+    .setDefaultEdgeLabel(edgeLabel);
+  for (const grf of [ours, theirs]) {
+    grf.setEdge("a", "b");
+    grf.setEdge("b", "c");
+  }
+
+  for (const grf of [ours, theirs]) {
+    expect(grf.node("a")).toBe(nodeLabel);
+    expect(grf.node("c")).toBe(nodeLabel);
+    expect(grf.edge("a", "b")).toBe(edgeLabel);
+    expect(grf.edge("b", "c")).toBe(edgeLabel);
+  }
+
+  ours.setGraph({});
+  dagre.layout(ours);
+  expect(ours.node("a")).toBe(nodeLabel);
+  expect(nodeLabel.width).toBe(5);
 });
 
 test("setDefaultEdgeLabel", () => {
