@@ -188,6 +188,7 @@ export class DagreGraph<
   #graphNodes = new Map<string, MutGraphNode<StoredNode, StoredEdge>>();
   #ids = new Map<GraphNode<StoredNode, StoredEdge>, string>();
   #defaultNodeLabel: () => DagreNodeLabel = () => ({});
+  #defaultEdgeLabel: () => DagreEdgeLabel = () => ({});
   #label: GraphLabel | undefined;
 
   /**
@@ -217,8 +218,9 @@ export class DagreGraph<
     return this;
   }
 
-  /** set default edge label factory (accepted for compatibility, not used) */
-  setDefaultEdgeLabel(_fn: () => EdgeLabel): this {
+  /** set default edge label factory, used when {@link setEdge} is called without a label */
+  setDefaultEdgeLabel(fn: () => EdgeLabel): this {
+    this.#defaultEdgeLabel = fn;
     return this;
   }
 
@@ -240,15 +242,24 @@ export class DagreGraph<
     if (existing) {
       if (data !== undefined) existing.data = data;
     } else {
-      const label = data ?? this.#defaultNodeLabel();
-      if (!isLabel(label)) {
-        throw err`node labels must be objects: ${label}`;
-      }
-      const node = this.#mutGraph.node(label);
-      this.#graphNodes.set(id, node);
-      this.#ids.set(node, id);
+      this.#addNode(id, data ?? this.#newNodeLabel());
     }
     return this;
+  }
+
+  #newNodeLabel(): StoredNode {
+    const label = this.#defaultNodeLabel();
+    if (isLabel(label)) {
+      return label;
+    } else {
+      throw err`node labels must be objects: ${label}`;
+    }
+  }
+
+  #addNode(id: string, label: StoredNode): void {
+    const node = this.#mutGraph.node(label);
+    this.#graphNodes.set(id, node);
+    this.#ids.set(node, id);
   }
 
   /** add or update multiple nodes */
@@ -271,19 +282,32 @@ export class DagreGraph<
   }
 
   #setEdge(v: string, w: string, data: StoredEdge | undefined): this {
-    if (!this.#graphNodes.has(v)) this.setNode(v);
-    if (!this.#graphNodes.has(w)) this.setNode(w);
-    const src = this.#graphNodes.get(v)!;
-    const tgt = this.#graphNodes.get(w)!;
+    const src = this.#graphNodes.get(v);
+    const tgt = this.#graphNodes.get(w);
     let existing: MutGraphLink<StoredNode, StoredEdge> | undefined;
-    for (const link of src.childLinksTo(tgt)) {
-      existing = link;
-      break;
+    if (src && tgt) {
+      for (const link of src.childLinksTo(tgt)) {
+        existing = link;
+        break;
+      }
     }
     if (existing) {
       if (data !== undefined) existing.data = data;
     } else {
-      this.#mutGraph.link(src, tgt, data ?? {});
+      // every label is made first so a bad one leaves the graph unchanged
+      const srcLabel = src ? undefined : this.#newNodeLabel();
+      const tgtLabel = tgt || v === w ? undefined : this.#newNodeLabel();
+      const label = data ?? this.#defaultEdgeLabel();
+      if (!isLabel(label)) {
+        throw err`edge labels must be objects: ${label}`;
+      }
+      if (srcLabel !== undefined) this.#addNode(v, srcLabel);
+      if (tgtLabel !== undefined) this.#addNode(w, tgtLabel);
+      this.#mutGraph.link(
+        this.#graphNodes.get(v)!,
+        this.#graphNodes.get(w)!,
+        label,
+      );
     }
     return this;
   }

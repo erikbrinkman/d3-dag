@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tweakGrid` no longer puts points past the ends of short segments
 - `dagre` keeps the labels passed to `setGraph`, `setNode` and `setEdge` and
   writes the layout onto them
+- `dagre` no longer ignores `setDefaultEdgeLabel`
 - `dagre` no longer swaps `ranksep` and `nodesep` when `rankdir` is `LR` or `RL`
 
 ## [1.3.0] - 2026-11-01
