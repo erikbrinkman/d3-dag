@@ -377,6 +377,28 @@ test("tweakShape() ends a vertical link on the ellipse", () => {
   ]);
 });
 
+test("tweakShape() trims both ends of a self loop", () => {
+  const grf = graph<undefined, undefined>();
+  const node = grf.node(undefined);
+  const link = node.child(node);
+  node.x = 0;
+  node.y = 0;
+  link.points = [
+    [0, 0],
+    [2, 1],
+    [2, -1],
+    [0, 0],
+  ];
+
+  tweakShape([2, 2])(grf, { width: 3, height: 2 });
+  expect(link.points).toEqual([
+    [1, 0.5],
+    [2, 1],
+    [2, -1],
+    [1, -0.5],
+  ]);
+});
+
 test("tweakShape() takes a shape that always returns a point", () => {
   const grf = graph<undefined, undefined>();
   const source = grf.node(undefined);

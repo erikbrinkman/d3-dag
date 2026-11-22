@@ -11,6 +11,7 @@ import type { Graph } from "./graph/index.js";
 export type ConnectGraph = Graph<string, [string, string]>;
 
 const connect = graphConnect().single(true);
+const connectLoops = graphConnect();
 
 // single node
 // 0
@@ -203,5 +204,31 @@ export function zhere(): ConnectGraph {
     ["6", "7"],
     ["8", "9"],
     ["8", "10"],
+  ]);
+}
+
+// single node with a self loop
+// 0 (loop)
+export function loop(): ConnectGraph {
+  return connectLoops([["0", "0"]]);
+}
+
+// self loops on the first node, twice on a middle node, and on the last node
+//  0 (loop)
+//  |\
+//  1 (2 loops)
+//  | 2
+//  |/
+//  3 (loop)
+export function loops(): ConnectGraph {
+  return connectLoops([
+    ["0", "0"],
+    ["0", "1"],
+    ["0", "2"],
+    ["1", "1"],
+    ["1", "1"],
+    ["1", "3"],
+    ["2", "3"],
+    ["3", "3"],
   ]);
 }

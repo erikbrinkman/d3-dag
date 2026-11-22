@@ -138,15 +138,17 @@ test("graphHierarchy() works for multi-graph", () => {
   expect([...graph.links()]).toHaveLength(2);
 });
 
-test("graphHierarchy() fails with self loop", () => {
+test("graphHierarchy() parses a self loop", () => {
   const selfLoop: Datum = { id: "2", children: [] };
   selfLoop.children!.push(selfLoop);
   const line = {
     id: "1",
     children: [selfLoop],
   };
-  const build = graphHierarchy();
-  expect(() => build(line)).toThrow("self loop");
+  const graph = graphHierarchy()(line);
+  expect(graph.nnodes()).toBe(2);
+  expect(graph.nlinks()).toBe(2);
+  expect(graph.acyclic()).toBe(false);
 });
 
 test("graphHierarchy() throws for nonempty input", () => {
