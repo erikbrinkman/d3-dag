@@ -1056,16 +1056,18 @@ test("setNodes uses default label", () => {
   expect(grf.node("b").height).toBe(24);
 });
 
-test("filterNodes preserves default labels", () => {
+test("filterNodes leaves out default labels, like graphlib", () => {
   const grf = new dagre.graphlib.Graph();
-  grf.setDefaultNodeLabel(() => ({ width: 99, height: 99 }));
+  grf.setDefaultNodeLabel({ width: 99, height: 99 });
+  grf.setDefaultEdgeLabel({ minlen: 2 });
   grf.setNode("a");
-  grf.setNode("b");
 
   const filtered = grf.filterNodes(() => true);
-  filtered.setNode("c");
+  filtered.setEdge("b", "c");
 
-  expect(filtered.node("c").width).toBe(99);
+  expect(filtered.node("a")).toBe(grf.node("a"));
+  expect(filtered.node("b")).toEqual({});
+  expect(filtered.edge("b", "c")).toEqual({});
 });
 
 for (const algorithm of [
