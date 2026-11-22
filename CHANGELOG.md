@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `shapeTopBottom` no longer throws on links that leave beside the node
 - `grid` and `zherebko` name the node whose size is negative, as `sugiyama`
   does
+- `coordGreedy` spaces nodes correctly when the separation depends on which
+  node is on the left
 
 ## [1.3.0] - 2026-11-01
 

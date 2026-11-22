@@ -3,12 +3,14 @@ import { bigrams } from "../iters.js";
 import type { NodeLength } from "../layout.js";
 
 /**
- * A separation function that indicates how far apart nodes should be the layering / height assignment.
+ * A separation function that indicates how far apart two adjacent nodes should be
  *
+ * The first node is the one on the left (or above, when layering) and the
+ * second the one on the right (or below); `undefined` stands for the edge of
+ * the layout.
  *
- * @remarks upper and lower are historic, since arbitrary graphs are handled,
- * there is no longer a notion of upper or lower and separation should return
- * the correct separation independent of nodes relations in the graph.
+ * @remarks separation should not depend on how the nodes are related in the
+ * graph.
  */
 export type Separation<in NodeDatum = never, in LinkDatum = never> = (
   first: GraphNode<NodeDatum, LinkDatum> | undefined,
