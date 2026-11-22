@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `graph`'s `roots` and `leaves` no longer go stale after linking two nodes that
   were already connected
+- `coordSimplex`, `coordQuad` and `coordTopological().straight(false)` no
+  longer fail when part of a link has no height
 
 ## [1.3.0] - 2026-11-01
 

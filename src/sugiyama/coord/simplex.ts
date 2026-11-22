@@ -15,7 +15,7 @@ import { bigrams } from "../../iters.js";
 import { err, ierr } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
-import { avgHeight, normalize } from "./utils.js";
+import { normalize, relativeHeight } from "./utils.js";
 
 /**
  * a strictly callable {@link SimplexWeight}
@@ -213,7 +213,7 @@ function buildOperator<
       }
     }
 
-    const heightNorm = avgHeight(ids.keys());
+    const relHeight = relativeHeight(ids.keys());
 
     // minimize weighted difference and collect counts for tie-breaking
     let minPrimaryCoeff = Infinity;
@@ -242,7 +242,7 @@ function buildOperator<
         variables[cid][ccons] = 1;
 
         const weight = cachedWeight(node, child);
-        const height = (child.y - node.y) / heightNorm;
+        const height = relHeight(node, child);
         const coef = weight / height;
         minPrimaryCoeff = Math.min(minPrimaryCoeff, coef);
         variables[slack] = { opt: coef, [pcons]: 1, [ccons]: 1 };

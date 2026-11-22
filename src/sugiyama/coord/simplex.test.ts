@@ -218,3 +218,28 @@ test("coordSimplex() allows zero width", () => {
   const layout = coordSimplex();
   expect(layout(layers, () => 0)).toBe(0);
 });
+
+test("coordSimplex() keeps links with no height short", () => {
+  const layers = createLayers([[[0, 1]], [0, 0], [[]]]);
+  const [[head], [left, right], [tail]] = layers;
+  left.y = right.y = head.y;
+  const width = coordSimplex()(layers, nodeSep);
+
+  expect(width).toBeCloseTo(2);
+  expect(left.x).toBeCloseTo(0.5);
+  expect(right.x).toBeCloseTo(1.5);
+  expect(head.x).toBeCloseTo(1);
+  expect(tail.x).toBeCloseTo(1);
+});
+
+test("coordSimplex() works when no link has height", () => {
+  const layers = createLayers([[[0, 1]], [[], []]]);
+  const [[head], [left, right]] = layers;
+  left.y = right.y = head.y;
+  const width = coordSimplex()(layers, nodeSep);
+
+  expect(width).toBeCloseTo(2);
+  expect(head.x).toBeCloseTo(1);
+  expect(left.x).toBeCloseTo(0.5);
+  expect(right.x).toBeCloseTo(1.5);
+});

@@ -10,12 +10,12 @@ import { err, ierr, type U } from "../../utils.js";
 import type { SugiNode, SugiSeparation } from "../sugify.js";
 import type { Coord } from "./index.js";
 import {
-  avgHeight,
   indices,
   init,
   layout,
   minBend,
   minDist,
+  relativeHeight,
   solve,
 } from "./utils.js";
 
@@ -274,8 +274,7 @@ function buildOperator<
       "nodeCurve",
     );
 
-    // normalization factor for height difference
-    const heightNorm = avgHeight(inds.keys());
+    const relHeight = relativeHeight(inds.keys());
 
     // add loss for nearby nodes and for curve of nodes
     for (const [par, pind] of inds) {
@@ -312,11 +311,11 @@ function buildOperator<
           ndata.role === "node"
             ? cachedNodeCurve(ndata.node)
             : cachedLinkCurve(ndata.link);
-        const parh = (node.y - par.y) / heightNorm;
+        const parh = relHeight(par, node);
         minDist(Q, pind, nind, (wpdist + wndist) / parh);
         for (const child of node.children()) {
           const cind = inds.get(child)!;
-          const chih = (child.y - node.y) / heightNorm;
+          const chih = relHeight(node, child);
           minBend(Q, pind, nind, cind, wcurve / parh, wcurve / chih);
         }
       }

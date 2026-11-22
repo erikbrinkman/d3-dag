@@ -4,6 +4,8 @@ import type { LayoutResult, NodeSize } from "../layout.js";
 import { doub, dummy, multi, oh, single, three, trip } from "../test-graphs.js";
 import { type Tweak, tweakSize } from "../tweaks.js";
 import type { Coord } from "./coord/index.js";
+import { coordQuad } from "./coord/quad.js";
+import { coordSimplex } from "./coord/simplex.js";
 import type { Decross } from "./decross/index.js";
 import { sugiyama } from "./index.js";
 import type { Layering } from "./layering/index.js";
@@ -372,3 +374,29 @@ test("sugiyama() fails passing an arg to constructor", () => {
   // @ts-expect-error no args
   expect(() => sugiyama(null)).toThrow("got arguments to sugiyama");
 });
+
+const coords: [string, Coord<unknown, unknown>][] = [
+  ["coordSimplex", coordSimplex()],
+  ["coordQuad", coordQuad()],
+];
+for (const [name, coord] of coords) {
+  test(`sugiyama() with ${name} lays out a multi link from a node with no height`, () => {
+    const dag = multi();
+    const [root, leaf] = dag.topological();
+    const layout = sugiyama()
+      .coord(coord)
+      .nodeSize((node: GraphNode) => (node === root ? [1, 0] : [1, 1]))
+      .gap([10, 0]);
+    const { width, height } = layout(dag);
+
+    expect(width).toBeCloseTo(10);
+    expect(height).toBeCloseTo(1);
+    expect(root.x).toBeCloseTo(5);
+    expect(leaf.x).toBeCloseTo(5);
+    const middles = [...dag.links()]
+      .map(({ points: [, [x]] }) => x)
+      .sort((left, right) => left - right);
+    expect(middles[0]).toBeCloseTo(0);
+    expect(middles[1]).toBeCloseTo(10);
+  });
+}
