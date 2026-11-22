@@ -880,6 +880,45 @@ test("edge methods throw on ids that aren't strings", () => {
   expect(grf.edgeCount()).toBe(1);
 });
 
+test("node methods throw on ids that aren't strings", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setEdge("1", "2", {});
+  const message = "node ids must be strings";
+
+  // @ts-expect-error ids must be strings
+  expect(() => grf.setNode(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.setNodes(["1", 2])).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.hasNode(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.removeNode(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.node(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.predecessors(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.successors(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.neighbors(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.inEdges(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.outEdges(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.nodeEdges(1)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.inEdges("1", 2)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.outEdges("1", 2)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.nodeEdges("1", 2)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.setPath(["1", 2])).toThrow(message);
+  expect(grf.nodes()).toEqual(["1", "2"]);
+  expect(grf.edgeCount()).toBe(1);
+});
+
 test("hasEdge() and removeEdge() take an edge descriptor like dagre", () => {
   const ours = new dagre.graphlib.Graph();
   const theirs = new originalDagre.graphlib.Graph();

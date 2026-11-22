@@ -292,6 +292,7 @@ export class DagreGraph<
    * The label object is kept as is, and {@link dagre.layout} writes `x` and `y` onto it.
    */
   setNode(id: string, label?: NodeLabel): this {
+    assertId(id);
     if (label !== undefined && !isLabel(label)) {
       throw err`node labels must be objects: ${label}`;
     } else {
@@ -401,6 +402,7 @@ export class DagreGraph<
 
   /** check if a node exists */
   hasNode(id: string): boolean {
+    assertId(id);
     return this.#graphNodes.has(id);
   }
 
@@ -418,6 +420,7 @@ export class DagreGraph<
 
   /** remove a node and all its edges */
   removeNode(id: string): this {
+    assertId(id);
     const graphNode = this.#graphNodes.get(id);
     if (graphNode) {
       graphNode.delete();
@@ -519,6 +522,7 @@ export class DagreGraph<
   }
 
   #node(id: string): MutGraphNode<StoredNode, StoredEdge> {
+    assertId(id);
     const node = this.#graphNodes.get(id);
     if (!node) {
       throw err`unknown node: ${id}`;
