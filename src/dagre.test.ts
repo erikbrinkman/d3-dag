@@ -751,6 +751,164 @@ test("edge() throws for missing edge", () => {
   expect(() => grf.edge("a", "b")).toThrow("unknown edge");
 });
 
+test("edge() takes an edge descriptor like dagre", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+  for (const grf of [ours, theirs]) {
+    grf.setEdge("a", "b", { label: "AB" });
+    grf.setEdge("b", "b", { label: "BB" });
+  }
+
+  for (const edge of ours.edges()) {
+    expect(ours.edge(edge)).toBe(ours.edge(edge.v, edge.w));
+  }
+  for (const edge of theirs.edges()) {
+    expect(ours.edge(edge)).toEqual(theirs.edge(edge));
+  }
+  expect(ours.edge({ v: "a", w: "b", name: undefined })).toEqual({
+    label: "AB",
+  });
+  expect(() => ours.edge({ v: "b", w: "a" })).toThrow("unknown edge");
+  // @ts-expect-error a target is required
+  expect(() => ours.edge("a")).toThrow("needs a target id");
+});
+
+test("edge() finds no edge with a name, like dagre", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+  for (const grf of [ours, theirs]) {
+    grf.setEdge("a", "b", {});
+  }
+
+  expect(theirs.edge("a", "b", "x")).toBeUndefined();
+  expect(theirs.edge({ v: "a", w: "b", name: "x" })).toBeUndefined();
+  expect(() => ours.edge("a", "b", "x")).toThrow("unknown edge");
+  expect(() => ours.edge({ v: "a", w: "b", name: "x" })).toThrow(
+    "unknown edge",
+  );
+  expect(ours.edge("a", "b", undefined)).toEqual({});
+});
+
+test("setEdge() takes an edge descriptor like dagre", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+  for (const grf of [ours, theirs]) {
+    grf.setDefaultEdgeLabel(() => ({}));
+    grf.setEdge({ v: "a", w: "b" }, { label: "AB" });
+    grf.setEdge({ v: "b", w: "b", name: undefined });
+    grf.setEdge({ v: "a", w: "b" });
+  }
+
+  expect(ours.edgeCount()).toBe(theirs.edgeCount());
+  for (const edge of theirs.edges()) {
+    expect(ours.edge(edge)).toEqual(theirs.edge(edge));
+  }
+});
+
+test("setEdge() throws on an edge with a name, like dagre", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+
+  expect(() => theirs.setEdge("a", "b", {}, "x")).toThrow();
+  expect(() => theirs.setEdge({ v: "a", w: "b", name: "x" })).toThrow();
+  expect(() => ours.setEdge("a", "b", {}, "x")).toThrow("no names");
+  expect(() => ours.setEdge({ v: "a", w: "b", name: "x" }, {})).toThrow(
+    "no names",
+  );
+  expect(ours.edgeCount()).toBe(0);
+  ours.setEdge("a", "b", { label: "AB" }, undefined);
+  expect(ours.edge("a", "b")).toEqual({ label: "AB" });
+});
+
+test("setEdge() throws on a label that isn't an object with an edge descriptor", () => {
+  const grf = new dagre.graphlib.Graph();
+
+  for (const label of ["label", 1, null]) {
+    expect(() => grf.setEdge({ v: "a", w: "b" }, label)).toThrow(
+      "edge labels must be objects",
+    );
+  }
+  expect(grf.nodeCount()).toBe(0);
+  expect(grf.edgeCount()).toBe(0);
+});
+
+test("typed DagreGraph rejects a string edge label", () => {
+  const grf = new DagreGraph();
+
+  // @ts-expect-error edge labels must be objects
+  expect(() => grf.setEdge({ v: "a", w: "b" }, "label")).toThrow(
+    "must be objects",
+  );
+});
+
+test("edge methods throw on a lone id", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setEdge("a", "b");
+
+  // @ts-expect-error a target is required
+  expect(() => grf.setEdge("a")).toThrow("needs a target id");
+  // @ts-expect-error a target is required
+  expect(() => grf.setEdge("a", {})).toThrow("needs a target id");
+  // @ts-expect-error a target is required
+  expect(() => grf.hasEdge("a")).toThrow("needs a target id");
+  // @ts-expect-error a target is required
+  expect(() => grf.removeEdge("a")).toThrow("needs a target id");
+  expect(grf.nodeCount()).toBe(2);
+  expect(grf.edgeCount()).toBe(1);
+});
+
+test("edge methods throw on ids that aren't strings", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setEdge("1", "2", {});
+  const message = "node ids must be strings";
+
+  // @ts-expect-error ids must be strings
+  expect(() => grf.setEdge(1, 2)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.setEdge("1", 2, {})).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.setEdge({ v: 1, w: "2" })).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.hasEdge(1, 2)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.edge(1, 2)).toThrow(message);
+  // @ts-expect-error ids must be strings
+  expect(() => grf.removeEdge(1, 2)).toThrow(message);
+  // @ts-expect-error names must be strings
+  expect(() => grf.hasEdge("1", "2", 3)).toThrow("edge names must be strings");
+  expect(grf.nodes()).toEqual(["1", "2"]);
+  expect(grf.edgeCount()).toBe(1);
+});
+
+test("hasEdge() and removeEdge() take an edge descriptor like dagre", () => {
+  const ours = new dagre.graphlib.Graph();
+  const theirs = new originalDagre.graphlib.Graph();
+  for (const grf of [ours, theirs]) {
+    grf.setEdge("a", "b", {});
+    grf.setEdge("b", "c", {});
+  }
+
+  for (const edge of [
+    { v: "a", w: "b" },
+    { v: "b", w: "a" },
+    { v: "a", w: "b", name: "x" },
+  ]) {
+    expect(ours.hasEdge(edge)).toBe(theirs.hasEdge(edge));
+  }
+  expect(ours.hasEdge("a", "b", "x")).toBe(theirs.hasEdge("a", "b", "x"));
+  expect(ours.hasEdge("a", "b", undefined)).toBe(true);
+
+  for (const grf of [ours, theirs]) {
+    grf.removeEdge("b", "c", "x");
+    grf.removeEdge({ v: "a", w: "b", name: "x" });
+    expect(grf.edgeCount()).toBe(2);
+    const [first, second] = grf.edges();
+    grf.removeEdge(first);
+    grf.removeEdge({ ...second, name: undefined });
+    expect(grf.edgeCount()).toBe(0);
+  }
+});
+
 test("setters return this for chaining", () => {
   const grf = new dagre.graphlib.Graph();
   const result = grf

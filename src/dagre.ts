@@ -121,6 +121,46 @@ export interface DagreEdgeDescriptor {
   w: string;
 }
 
+/**
+ * edge given to the edge methods, as in dagre
+ *
+ * @inline
+ */
+interface EdgeRef extends DagreEdgeDescriptor {
+  /** edge name */
+  name?: string;
+}
+
+/** check that a node id is a string, since JavaScript callers can pass anything */
+function assertId(id: unknown): asserts id is string {
+  if (typeof id !== "string") {
+    throw err`node ids must be strings: ${id}`;
+  }
+}
+
+/** check whether the first argument of an edge method is a descriptor */
+function isEdgeRef(vOrEdge: string | EdgeRef): vOrEdge is EdgeRef {
+  return typeof vOrEdge === "object" && vOrEdge !== null;
+}
+
+/** get the edge named by ids or a descriptor */
+function edgeRef(
+  vOrEdge: string | EdgeRef,
+  w?: string,
+  name?: string,
+): EdgeRef {
+  const ref = isEdgeRef(vOrEdge) ? vOrEdge : { v: vOrEdge, w, name };
+  if (ref.w === undefined) {
+    throw err`edge needs a target id: ${ref.v}`;
+  } else if (ref.name !== undefined && typeof ref.name !== "string") {
+    throw err`edge names must be strings: ${ref.name}`;
+  } else {
+    assertId(ref.v);
+    assertId(ref.w);
+    return { v: ref.v, w: ref.w, name: ref.name };
+  }
+}
+
 /** check whether a label is an object for dagre.layout to write onto */
 function isLabel(label: unknown): label is object {
   return typeof label === "object" && label !== null;
@@ -291,34 +331,48 @@ export class DagreGraph<
   }
 
   /**
-   * add or update an edge
+   * add or update the edge from `v` to `w`
    *
    * The label object is kept as is, and {@link dagre.layout} writes `points` onto it.
    * Fields such as `minlen` or `weight` are kept but don't affect layout.
+   *
+   * Edges have no names, so setting one with a name throws, as dagre does for a
+   * graph that isn't a multigraph.
    */
-  setEdge(v: string, w: string, label?: EdgeLabel): this {
-    if (label !== undefined && !isLabel(label)) {
-      throw err`edge labels must be objects: ${label}`;
+  setEdge(v: string, w: string, label?: EdgeLabel, name?: string): this;
+  /** add or update an edge given by a descriptor like those {@link edges} returns */
+  setEdge(edge: EdgeRef, label?: EdgeLabel): this;
+  setEdge(
+    vOrEdge: string | EdgeRef,
+    wOrLabel?: string | EdgeLabel,
+    label?: EdgeLabel,
+    name?: string,
+  ): this {
+    const data = isEdgeRef(vOrEdge) ? wOrLabel : label;
+    if (data !== undefined && !isLabel(data)) {
+      throw err`edge labels must be objects: ${data}`;
     }
-    return this.#setEdge(v, w, label);
+    // an object where the target id goes is a label passed without a target
+    const target = isLabel(wOrLabel) ? undefined : wOrLabel;
+    const ref = edgeRef(vOrEdge, target, name);
+    if (ref.name !== undefined) {
+      throw err`edges have no names, so can't set edge ${ref.v} -> ${ref.w} named ${ref.name}`;
+    } else {
+      return this.#setEdge(ref.v, ref.w, data);
+    }
   }
 
   #setEdge(v: string, w: string, data: StoredEdge | undefined): this {
-    const src = this.#graphNodes.get(v);
-    const tgt = this.#graphNodes.get(w);
-    let existing: MutGraphLink<StoredNode, StoredEdge> | undefined;
-    if (src && tgt) {
-      for (const link of src.childLinksTo(tgt)) {
-        existing = link;
-        break;
-      }
-    }
+    const existing = this.#link({ v, w });
     if (existing) {
       if (data !== undefined) existing.data = data;
     } else {
       // every label is made first so a bad one leaves the graph unchanged
-      const srcLabel = src ? undefined : this.#newNodeLabel(v);
-      const tgtLabel = tgt || v === w ? undefined : this.#newNodeLabel(w);
+      const srcLabel = this.#graphNodes.has(v)
+        ? undefined
+        : this.#newNodeLabel(v);
+      const tgtLabel =
+        this.#graphNodes.has(w) || v === w ? undefined : this.#newNodeLabel(w);
       const label = data ?? this.#defaultEdgeLabel(v, w, undefined);
       if (!isLabel(label)) {
         throw err`edge labels must be objects: ${label}`;
@@ -331,17 +385,35 @@ export class DagreGraph<
     return this;
   }
 
+  #link({
+    v,
+    w,
+    name,
+  }: EdgeRef): MutGraphLink<StoredNode, StoredEdge> | undefined {
+    const src = this.#graphNodes.get(v);
+    const tgt = this.#graphNodes.get(w);
+    if (!src || !tgt || name !== undefined) {
+      return undefined;
+    } else {
+      return src.childLinksTo(tgt).next().value;
+    }
+  }
+
   /** check if a node exists */
   hasNode(id: string): boolean {
     return this.#graphNodes.has(id);
   }
 
-  /** check if an edge exists */
-  hasEdge(v: string, w: string): boolean {
-    const src = this.#graphNodes.get(v);
-    const tgt = this.#graphNodes.get(w);
-    if (!src || !tgt) return false;
-    return src.nchildLinksTo(tgt) > 0;
+  /**
+   * check if the edge from `v` to `w` exists
+   *
+   * An edge with a name is never found, since edges have no names.
+   */
+  hasEdge(v: string, w: string, name?: string): boolean;
+  /** check if an edge given by a descriptor exists */
+  hasEdge(edge: EdgeRef): boolean;
+  hasEdge(vOrEdge: string | EdgeRef, w?: string, name?: string): boolean {
+    return this.#link(edgeRef(vOrEdge, w, name)) !== undefined;
   }
 
   /** remove a node and all its edges */
@@ -355,16 +427,16 @@ export class DagreGraph<
     return this;
   }
 
-  /** remove an edge */
-  removeEdge(v: string, w: string): this {
-    const src = this.#graphNodes.get(v);
-    const tgt = this.#graphNodes.get(w);
-    if (src && tgt) {
-      for (const link of src.childLinksTo(tgt)) {
-        link.delete();
-        break;
-      }
-    }
+  /**
+   * remove the edge from `v` to `w`
+   *
+   * An edge with a name is never found, since edges have no names.
+   */
+  removeEdge(v: string, w: string, name?: string): this;
+  /** remove an edge given by a descriptor */
+  removeEdge(edge: EdgeRef): this;
+  removeEdge(vOrEdge: string | EdgeRef, w?: string, name?: string): this {
+    this.#link(edgeRef(vOrEdge, w, name))?.delete();
     return this;
   }
 
@@ -374,16 +446,28 @@ export class DagreGraph<
     return this.#node(id).data as NodeLabel & DagreNode;
   }
 
-  /** get the edge label passed to {@link setEdge} (includes `points` after layout) */
-  edge(v: string, w: string): EdgeLabel & DagreEdge {
-    const src = this.#graphNodes.get(v);
-    const tgt = this.#graphNodes.get(w);
-    if (!src || !tgt) throw err`unknown edge: ${v} -> ${w}`;
-    for (const link of src.childLinksTo(tgt)) {
+  /**
+   * get the label of the edge from `v` to `w`
+   *
+   * This is the label passed to {@link setEdge}, with `points` after layout. An
+   * edge with a name is never found, since edges have no names.
+   */
+  edge(v: string, w: string, name?: string): EdgeLabel & DagreEdge;
+  /** get the label of an edge given by a descriptor */
+  edge(edge: EdgeRef): EdgeLabel & DagreEdge;
+  edge(
+    vOrEdge: string | EdgeRef,
+    w?: string,
+    name?: string,
+  ): EdgeLabel & DagreEdge {
+    const ref = edgeRef(vOrEdge, w, name);
+    const link = this.#link(ref);
+    if (!link) {
+      throw err`unknown edge: ${ref.v} -> ${ref.w}`;
+    } else {
       // points is unset until dagre.layout runs; typed as set to match dagre
       return link.data as EdgeLabel & DagreEdge;
     }
-    throw err`unknown edge: ${v} -> ${w}`;
   }
 
   /** get all node ids */
