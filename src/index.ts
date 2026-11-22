@@ -150,6 +150,8 @@ export {
   type DagreEdgeDescriptor,
   type DagreGraph,
   type DagreGraphConfig,
+  type DagreLayoutEdge,
+  type DagreLayoutNode,
   type DagreNode,
   type DagrePoint,
   type DagreQuality,
