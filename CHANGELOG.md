@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   were already connected
 - `coordSimplex`, `coordQuad` and `coordTopological().straight(false)` no
   longer fail when part of a link has no height
+- `tweakGrid` no longer puts points past the ends of short segments
 
 ## [1.3.0] - 2026-11-01
 

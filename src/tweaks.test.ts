@@ -77,6 +77,75 @@ test("tweakGrid()", () => {
   expect([...newLens].sort((a, b) => a - b)).toEqual([2, 5]);
 });
 
+test("tweakGrid() keeps rounding within half of each segment", () => {
+  const grf = zhere();
+  const old = grid().nodeSize([1, 1]).gap([1, 1])(grf);
+  const { width, height } = tweakGrid([5, 5])(grf, old);
+
+  for (const { points } of grf.links()) {
+    for (const [x, y] of points) {
+      expect(x).toBeGreaterThanOrEqual(0);
+      expect(x).toBeLessThanOrEqual(width);
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThanOrEqual(height);
+    }
+    if (points.length === 5) {
+      const [first, before, mid, after, last] = points;
+      for (const [end, round] of [
+        [first, before],
+        [last, after],
+      ]) {
+        for (const axis of [0, 1]) {
+          const half = (end[axis] + mid[axis]) / 2;
+          expect(Math.abs(round[axis] - mid[axis])).toBeLessThanOrEqual(
+            Math.abs(half - mid[axis]) + 1e-9,
+          );
+          expect(Math.sign(round[axis] - mid[axis])).toBe(
+            Math.sign(end[axis] - mid[axis]),
+          );
+        }
+      }
+    }
+  }
+});
+
+test("tweakGrid() keeps a corner that meets its neighbor", () => {
+  const dag = graphConnect()([
+    ["a", "b"],
+    ["a", "c"],
+  ]);
+  grid()
+    .nodeSize([1, 0])
+    .gap([1, 0])
+    .tweaks([tweakGrid([0.2, 0.2])])(dag);
+  const [bent] = [...dag.links()].filter(
+    ({ source, target }) => source.x !== target.x,
+  );
+  expect(bent.points).toEqual([
+    [0.5, 0],
+    [0.5, 0],
+    [0.5, 0],
+    [0.7, 0],
+    [2.5, 0],
+  ]);
+});
+
+test("tweakGrid() rounds a straight segment without NaN", () => {
+  const dag = graphConnect()([
+    ["a", "b"],
+    ["a", "c"],
+  ]);
+  grid()
+    .nodeSize([1, 1])
+    .tweaks([tweakGrid([0, 1])])(dag);
+  for (const { points } of dag.links()) {
+    for (const [x, y] of points) {
+      expect(x).not.toBeNaN();
+      expect(y).not.toBeNaN();
+    }
+  }
+});
+
 test("tweakGrid() throws for non-grid", () => {
   const builder = graphConnect();
   const grf = builder([
