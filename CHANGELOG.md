@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   iterator objects with helper methods (`IteratorObject`), so `.map`, `.filter`,
   `.take` and `.toArray` work on them directly, as in
   `grf.nodes().map((node) => node.data)`
+- `dagre` throws on a `rankdir` other than `TB`, `BT`, `LR` or `RL`, such as
+  `lr`, instead of laying out right to left
+- `tweakDirection` throws on a direction other than `TB`, `BT`, `LR` or `RL`
+  instead of treating it as `RL`
 
 ### Fixed
 
