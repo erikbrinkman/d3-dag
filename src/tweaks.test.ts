@@ -1072,3 +1072,8 @@ test("tweakDirection() RL flips diagonal then horizontal", () => {
   expect(b.x).toBe(1);
   expect(b.y).toBe(1);
 });
+
+test("tweakDirection() throws on an unknown direction", () => {
+  // @ts-expect-error direction must be a rankdir
+  expect(() => tweakDirection("lr")).toThrow('unknown direction: "lr"');
+});

@@ -651,6 +651,14 @@ export class DagreGraph<
       ranker = "network-simplex",
       algorithm = "sugiyama",
     } = label;
+    let isHorizontal: boolean;
+    if (rankdir === "TB" || rankdir === "BT") {
+      isHorizontal = false;
+    } else if (rankdir === "LR" || rankdir === "RL") {
+      isHorizontal = true;
+    } else {
+      throw err`unknown rankdir: ${rankdir}; use "TB", "BT", "LR" or "RL"`;
+    }
 
     const mutGraph = grf.#mutGraph;
     if (mutGraph.nnodes() === 0) {
@@ -658,8 +666,6 @@ export class DagreGraph<
       label.height = 0;
       return;
     }
-
-    const isHorizontal = rankdir === "LR" || rankdir === "RL";
 
     const nodeSizeFn = (
       graphNode: GraphNode<DagreLayoutNode, DagreLayoutEdge>,
