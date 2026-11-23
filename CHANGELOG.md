@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-23
+
 ### Added
 
 - graphs accept self loops
@@ -430,7 +432,8 @@ Most of the breaking changes are in the backend, so if you've only been using th
 
 - `coordSpread` was removed in favor of `coordCenter` which produces a slightly better layout in the same amount of time.
 
-[unreleased]: https://github.com/erikbrinkman/d3-dag/compare/v1.3.0...HEAD
+[unreleased]: https://github.com/erikbrinkman/d3-dag/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/erikbrinkman/d3-dag/compare/v1.3.0...v2.0.0
 [1.3.0]: https://github.com/erikbrinkman/d3-dag/compare/v1.2.2...v1.3.0
 [1.2.2]: https://github.com/erikbrinkman/d3-dag/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/erikbrinkman/d3-dag/compare/v1.2.0...v1.2.1
