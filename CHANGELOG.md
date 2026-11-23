@@ -62,6 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   node is on the left
 - `dagre`'s `edge`, `setEdge`, `hasEdge` and `removeEdge` accept an edge from
   `edges()` instead of treating it as a node id, as dagre does
+- a link that points up no longer bends outside the drawing in
+  `tweakGridHandles` or in `dagre` with `algorithm: "grid"`
 
 ## [1.3.0] - 2026-11-01
 

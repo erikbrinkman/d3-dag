@@ -937,6 +937,35 @@ test("tweakGridHandles() shifts bend points", () => {
   expect(link.points[1]).toEqual([3, 2]);
 });
 
+test("tweakGridHandles() moves bend points of upward links between the rows", () => {
+  const grf = graph<boolean, undefined>();
+  const below = grf.node(true);
+  const above = grf.node(false);
+  const fromSource = below.child(above);
+  const toTarget = below.child(above);
+
+  below.x = 1;
+  below.y = 4;
+  above.x = 3;
+  above.y = 0;
+  fromSource.points = [
+    [1, 4],
+    [3, 4],
+    [3, 0],
+  ];
+  toTarget.points = [
+    [1, 4],
+    [1, 0],
+    [3, 0],
+  ];
+
+  const tweak = tweakGridHandles([2, 2], [1, 2]);
+  tweak(grf, { width: 4, height: 6 });
+
+  expect(fromSource.points[1]).toEqual([3, 2]);
+  expect(toTarget.points[1]).toEqual([1, 2]);
+});
+
 test("tweakGridHandles() skips two-point edges", () => {
   const grf = graph<boolean, undefined>();
   const a = grf.node(true);
