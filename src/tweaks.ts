@@ -520,7 +520,8 @@ export function tweakSugiyama<N, L>(nodeSize: NodeSize<N, L>): Tweak<N, L> {
  * Grid layouts place bend points at source or target y-levels, which can
  * cause edges to kink when rendered with handle-based frameworks like React
  * Flow. This tweak moves interior bend points to the midpoint of the gap
- * between rows (bottom of node + half of y gap), producing smoother edges.
+ * between rows, toward the link's other node (half the node's height plus
+ * half of y gap from its center), producing smoother edges.
  *
  * @remarks
  *
@@ -543,12 +544,13 @@ export function tweakGridHandles<N, L>(
       if (last === undefined) continue; // vertical
       const [, srcH] = cachedSize(source);
       const [, tgtH] = cachedSize(target);
-      // shift interior bend points to midpoint of the gap between rows
+      // a link points up only in a graph with a cycle
+      const toward = target.y < source.y ? -1 : 1;
       const [, my] = middle;
       if (my === source.y) {
-        middle[1] += srcH / 2 + ygap / 2;
+        middle[1] += toward * (srcH / 2 + ygap / 2);
       } else if (my === target.y) {
-        middle[1] -= tgtH / 2 + ygap / 2;
+        middle[1] -= toward * (tgtH / 2 + ygap / 2);
       }
     }
     return res;
