@@ -922,7 +922,7 @@ test("tweakGridHandles() shifts bend points", () => {
   a.y = 0;
   b.x = 3;
   b.y = 4;
-  // three-point edge: source → bend at source.y → target
+  // three-point edge: source -> bend at source.y -> target
   link.points = [
     [1, 0],
     [3, 0],
@@ -1036,10 +1036,10 @@ test("tweakDirection() RL flips diagonal then horizontal", () => {
   const tweak = tweakDirection("RL");
   const res = tweak(grf, { width: 2, height: 3 });
   expect(res).toEqual({ width: 3, height: 2 });
-  // diagonal: (1,0) → (0,1), then horizontal flip: (0,1) → (3,1)
+  // diagonal: (1,0) -> (0,1), then horizontal flip: (0,1) -> (3,1)
   expect(a.x).toBe(3);
   expect(a.y).toBe(1);
-  // diagonal: (1,2) → (2,1), then horizontal flip: (2,1) → (1,1)
+  // diagonal: (1,2) -> (2,1), then horizontal flip: (2,1) -> (1,1)
   expect(b.x).toBe(1);
   expect(b.y).toBe(1);
 });
