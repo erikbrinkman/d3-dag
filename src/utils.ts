@@ -16,7 +16,7 @@ type ChildrenCallback<T> = (node: T) => Iterable<T>;
 export function* dfs<T>(
   children: ChildrenCallback<T>,
   ...queue: T[]
-): IterableIterator<T> {
+): IteratorObject<T, undefined> {
   const seen = new Set<T>();
   let node: T | undefined;
   while ((node = queue.pop()) !== undefined) {

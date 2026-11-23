@@ -99,9 +99,7 @@ function buildOperator<ND, LD, Ops extends LayeringSimplexOps<ND, LD>>(
     const constraints: Record<string, ConstraintBound> = {};
 
     const ids = new Map(
-      Iterator.from(dag.nodes()).map(
-        (node, i) => [node, i.toString()] as const,
-      ),
+      dag.nodes().map((node, i) => [node, i.toString()] as const),
     );
 
     /** get node id */

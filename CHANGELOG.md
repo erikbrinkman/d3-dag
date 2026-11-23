@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `shapeTopBottom` leaves a link alone when its end is already outside the node
 - `dagre` throws on node ids that aren't strings; pass `String(id)` where you
   passed a number
+- graph methods such as `nodes`, `links` and `children` are typed as returning
+  iterator objects with helper methods (`IteratorObject`), so `.map`, `.filter`,
+  `.take` and `.toArray` work on them directly, as in
+  `grf.nodes().map((node) => node.data)`
 
 ### Fixed
 

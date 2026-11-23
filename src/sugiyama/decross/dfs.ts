@@ -55,11 +55,10 @@ function buildOperator(options: { topDown: boolean }): DecrossDfs {
     } else {
       iter = depthFirstSearch(
         (n) => [...n.parents()].sort((a, b) => b.nparents() - a.nparents()),
-        ...Iterator.from(slice(layers, layers.length - 1, -1, -1)).flatMap(
-          (layer) =>
-            [...Iterator.from(layer).filter((n) => !n.nchildren())].sort(
-              (a, b) => b.nparents() - a.nparents(),
-            ),
+        ...slice(layers, layers.length - 1, -1, -1).flatMap((layer) =>
+          [...Iterator.from(layer).filter((n) => !n.nchildren())].sort(
+            (a, b) => b.nparents() - a.nparents(),
+          ),
         ),
       );
     }

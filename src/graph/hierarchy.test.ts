@@ -49,7 +49,7 @@ test("graphHierarchy() parses minimal graph", () => {
   expect([...(build.childrenData()(single, 0) ?? [])]).toHaveLength(0);
   const graph = build(single);
   expect(graph.nnodes()).toBe(1);
-  const ids = [...Iterator.from(graph.nodes()).map(({ data }) => data.id)];
+  const ids = [...graph.nodes().map(({ data }) => data.id)];
   expect(ids).toEqual(["a"]);
 });
 

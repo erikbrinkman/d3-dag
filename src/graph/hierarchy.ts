@@ -241,7 +241,10 @@ function buildHierarchy<
 function wrapChildren<N, C extends Children<N>>(
   children: C,
 ): WrappedChildren<N, C> {
-  function wrapped(datum: N, index: number): IterableIterator<[N, undefined]> {
+  function wrapped(
+    datum: N,
+    index: number,
+  ): IteratorObject<[N, undefined], undefined> {
     return Iterator.from(children(datum, index) ?? []).map((child) => [
       child,
       undefined,
@@ -254,7 +257,7 @@ function wrapChildren<N, C extends Children<N>>(
 function wrapChildrenData<N, C extends ChildrenData<N>>(
   childrenData: C,
 ): WrappedChildrenData<N, C> {
-  function wrapped(datum: N, index: number): IterableIterator<N> {
+  function wrapped(datum: N, index: number): IteratorObject<N, undefined> {
     return Iterator.from(childrenData(datum, index) ?? []).map(
       ([child]) => child,
     );

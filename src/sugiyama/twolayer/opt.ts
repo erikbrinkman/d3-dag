@@ -65,7 +65,9 @@ function minCrossings(
   reordered: SugiNode[],
   inds: Map<SugiNode, number>,
   oinds: Map<SugiNode, number>,
-  counts: (node: SugiNode) => IterableIterator<readonly [SugiNode, number]>,
+  counts: (
+    node: SugiNode,
+  ) => IteratorObject<readonly [SugiNode, number], undefined>,
   { dist, check }: { dist: boolean; check: OptChecking },
 ): Record<string, number> {
   // compute unconstrained nodes for distance minimization
@@ -83,10 +85,9 @@ function minCrossings(
   const numVars = Math.max((reordered.length * (reordered.length - 1)) / 2, 0);
   // NOTE distance cost for an unconstrained node in a group can't violate
   // all pairs at once, the cost is ~(n/2)^2 not n(n-1)/2
-  const groupSize = Iterator.from(groups.values()).reduce(
-    (t, c) => t + c.length * c.length,
-    0,
-  );
+  const groupSize = groups
+    .values()
+    .reduce((t, c) => t + c.length * c.length, 0);
   const maxDistCons = (groupSize * unconstrained.length) / 4;
 
   const variables: Record<string, VariableCoefficients> = {};
