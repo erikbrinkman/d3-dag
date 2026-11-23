@@ -1280,7 +1280,7 @@ test("neighbors deduplicates", () => {
   grf.setEdge("a", "b");
   grf.setEdge("b", "a");
 
-  // b is both predecessor and successor of a — should appear once
+  // b is both predecessor and successor of a - should appear once
   const nbrs = grf.neighbors("a");
   expect(nbrs).toEqual(["b"]);
 });

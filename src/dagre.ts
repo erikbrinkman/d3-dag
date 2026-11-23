@@ -584,12 +584,12 @@ export class DagreGraph<
     return [...this.#mutGraph.sinks().map((node) => this.#idOf(node))];
   }
 
-  /** always true — dagre graphs are directed */
+  /** always true, since dagre graphs are directed */
   isDirected(): true {
     return true;
   }
 
-  /** always false — compound graphs are not supported */
+  /** always false, since compound graphs are not supported */
   isCompound(): false {
     return false;
   }
@@ -627,7 +627,7 @@ export class DagreGraph<
   }
 
   /**
-   * run layout — called by {@link dagre.layout}
+   * run layout, called by {@link dagre.layout}
    *
    * @internal
    */

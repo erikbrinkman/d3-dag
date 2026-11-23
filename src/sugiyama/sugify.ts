@@ -170,8 +170,8 @@ export function sugifyLayer<N, L>(
       throw berr`layering ${layering} assigned node an invalid layer: ${layer}`;
     } else {
       if (!layerBoosts[layer]) {
-        // a neighbor on the layer above with more than one link to this node —
-        // counting both directions, so a 2-cycle counts as two — collapses onto
+        // a neighbor on the layer above with more than one link to this node
+        // (counting both directions, so a 2-cycle counts as two) collapses onto
         // a single sugi edge unless we insert a separating dummy layer
         for (const neighbor of chain(node.parents(), node.children())) {
           if (
