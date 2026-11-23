@@ -74,6 +74,28 @@ test("RL direction", () => {
   expect(grf.node("a").x).toBeGreaterThan(grf.node("b").x);
 });
 
+test("unknown rankdir throws", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ rankdir: "XY" });
+  grf.setNode("a", { width: 10, height: 10 });
+  expect(() => dagre.layout(grf)).toThrow('unknown rankdir: "XY"');
+
+  const lower = new dagre.graphlib.Graph();
+  lower.setGraph({ rankdir: "lr" });
+  lower.setNode("a", { width: 10, height: 10 });
+  expect(() => dagre.layout(lower)).toThrow('unknown rankdir: "lr"');
+
+  for (const rankdir of [null, 1, { toString: () => "LR" }]) {
+    const other = new dagre.graphlib.Graph();
+    other.setGraph({ rankdir });
+    expect(() => dagre.layout(other)).toThrow("unknown rankdir");
+  }
+
+  const empty = new dagre.graphlib.Graph();
+  empty.setGraph({ rankdir: "XY" });
+  expect(() => dagre.layout(empty)).toThrow("unknown rankdir");
+});
+
 test("ranksep separates ranks and nodesep separates siblings like dagre", () => {
   // positions and sizes from dagre; siblings b and c may come in either order
   const expected: Record<

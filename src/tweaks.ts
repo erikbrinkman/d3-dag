@@ -568,6 +568,8 @@ export function tweakGridHandles<N, L>(
  * @remarks
  *
  * This should be applied after all other tweaks.
+ *
+ * @throws if the direction isn't one of the four {@link Rankdir}s
  */
 export function tweakDirection(direction: Rankdir): Tweak<unknown, unknown> {
   if (direction === "TB") {
@@ -576,9 +578,11 @@ export function tweakDirection(direction: Rankdir): Tweak<unknown, unknown> {
     return tweakFlip("vertical");
   } else if (direction === "LR") {
     return tweakFlip("diagonal");
-  } else {
+  } else if (direction === "RL") {
     const diag = tweakFlip("diagonal");
     const horiz = tweakFlip("horizontal");
     return (graph, res) => horiz(graph, diag(graph, res));
+  } else {
+    throw err`unknown direction: ${direction}; use "TB", "BT", "LR" or "RL"`;
   }
 }
