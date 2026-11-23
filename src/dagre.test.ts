@@ -1408,6 +1408,31 @@ test("algorithm grid with BT direction", () => {
   expect(grf.node("a").y).toBeGreaterThan(grf.node("b").y);
 });
 
+test("algorithm grid bends a link pointing up inside the drawing", () => {
+  const grf = new dagre.graphlib.Graph();
+  grf.setGraph({ algorithm: "grid", nodesep: 10, ranksep: 50 });
+  grf.setDefaultEdgeLabel(() => ({}));
+  for (const id of ["0", "1", "2"]) {
+    grf.setNode(id, { width: 30, height: 10 });
+  }
+  grf.setEdge("0", "2");
+  grf.setEdge("0", "1");
+  grf.setEdge("1", "0");
+  grf.setEdge("1", "2");
+  dagre.layout(grf);
+
+  const { height } = grf.graph();
+  const source = grf.node("1");
+  const target = grf.node("0");
+  for (const { y } of grf.edge("1", "0").points) {
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(y).toBeLessThanOrEqual(height);
+  }
+  const [, bend] = grf.edge("1", "0").points;
+  expect(bend.y).toBeGreaterThan(target.y);
+  expect(bend.y).toBeLessThan(source.y);
+});
+
 test("single-node graph", () => {
   const grf = new dagre.graphlib.Graph();
   grf.setGraph({});
